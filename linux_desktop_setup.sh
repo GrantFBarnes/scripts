@@ -198,6 +198,7 @@ snap_manager install hello-world
 if [ $(confirm "Used for development?") ]; then
     package_manager install git
     package_manager install meld
+    package_manager install net-tools
     package_manager install nodejs
     package_manager install npm
 
@@ -212,31 +213,33 @@ if [ $(confirm "Used for home?") ]; then
     package_manager install gnome-calendar
     package_manager install gnome-clocks
     package_manager install gnome-weather
+    package_manager install libreoffice
     package_manager install simple-scan
     package_manager install thunderbird
     package_manager install transmission-gtk
 
-    snap_manager install chromium
-    snap_manager install libreoffice
     snap_manager install slack --classic
 
     if [ "$distro" == "fedora" ]; then
+        package_manager install chromium
         package_manager install fedora-icon-theme
-    elif [ "$distro" == "ubuntu" ]; then
+    else
+        snap_manager install chromium
+    fi
+
+    if [ "$distro" == "ubuntu" ]; then
         package_manager install usb-creator-gtk
         package_manager install virtualbox
     fi
 fi
 
 if [ $(confirm "Used for multi media?") ]; then
+    package_manager install blender
+    package_manager install gimp
     package_manager install ffmpeg
     package_manager install gnome-photos
+    package_manager install vlc
     package_manager install youtube-dl
-
-    snap_manager install blender --classic
-    snap_manager install gimp
-    snap_manager install shotcut --classic
-    snap_manager install vlc
 fi
 
 if [ $(confirm "Used for gaming?") ]; then
@@ -266,7 +269,6 @@ elif [ "$distro" == "ubuntu" ]; then
 fi
 
 package_manager remove cheese
-package_manager remove libreoffice*
 package_manager remove rhythmbox
 package_manager remove totem
 
