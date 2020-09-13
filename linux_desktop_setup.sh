@@ -4,21 +4,18 @@
 
 function confirm() {
     read -p "$1 (y/N) " ans
-    if [ "$ans" == "y" ]
-    then
+    if [ "$ans" == "y" ]; then
         echo "confirmed"
     fi
     echo ""
 }
 
 function check_exit_status() {
-    if [ $? -eq 0 ]
-    then
+    if [ $? -eq 0 ]; then
         echo "Success"
     else
         echo "[ERROR] Process Failed!"
-        if [ $(confirm "Exit script?") ]
-        then
+        if [ $(confirm "Exit script?") ]; then
             exit 1
         fi
     fi
@@ -29,7 +26,7 @@ function update() {
     echo "Update"
     echo "---------------------------------------------------------------------"
     if [ "$pm" == "dnf" ]; then
-        sudo dnf upgrade -y
+        sudo dnf upgrade --refresh -y
     elif [ "$pm" == "apt" ]; then
         sudo apt update && sudo apt full-upgrade -y
     fi
@@ -38,45 +35,40 @@ function update() {
 
 function package_manager() {
     local method=$1
-    local package=$2
     echo "---------------------------------------------------------------------"
-    echo "sudo $pm $method $package -y"
+    echo "sudo $pm $method ${@:2} -y"
     echo "---------------------------------------------------------------------"
     if [ "$method" == "remove" ] && [ "$pm" == "apt" ]; then
-        sudo apt-get remove --purge $package -y
+        sudo apt-get remove --purge ${@:2} -y
     else
-        sudo $pm $method $package -y
+        sudo $pm $method ${@:2} -y
     fi
     check_exit_status
 }
 
 function snap_manager() {
     local method=$1
-    local package=$2
-    local param=$3
     echo "---------------------------------------------------------------------"
-    echo "sudo snap $method $package $param"
+    echo "sudo snap $method ${@:2} --classic"
     echo "---------------------------------------------------------------------"
-    sudo snap $method $package $param
+    if [ "$method" == "install" ]; then
+        sudo snap $method ${@:2} --classic
+    else
+        sudo snap $method ${@:2}
+    fi
     check_exit_status
 }
 
 function flatpak_manager() {
     local method=$1
-    local location=$2
-    local package=$3
     echo "---------------------------------------------------------------------"
-    echo "sudo flatpak $method $location $package -y"
+    echo "sudo flatpak $method flathub ${@:2} -y"
     echo "---------------------------------------------------------------------"
-    sudo flatpak $method $location $package -y
-    check_exit_status
-}
-
-function add_rpm_fusion() {
-    echo "---------------------------------------------------------------------"
-    echo "Add RPM Fusion Repos"
-    echo "---------------------------------------------------------------------"
-    sudo dnf install https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm -y
+    if [ "$method" == "install" ]; then
+        sudo flatpak $method flathub ${@:2} -y
+    else
+        sudo flatpak $method ${@:2} -y
+    fi
     check_exit_status
 }
 
@@ -86,65 +78,41 @@ clear
 
 # Determine distrobution
 
+osName=$(head -n 1 /etc/os-release)
 distro=""
 pm=""
 de=""
-grep -q Fedora /etc/os-release
-if [ $? -eq 0 ]; then
+
+if [[ $osName == *"Fedora"* ]]; then
     distro="fedora"
     pm="dnf"
     de="gnome"
-    echo "---------------------------------------------------------------------"
-    echo "Distrobution Found: Fedora"
-    echo "---------------------------------------------------------------------"
-fi
-
-grep -q LMDE /etc/os-release
-if [ $? -eq 0 ]; then
+elif [[ $osName == *"LMDE"* ]]; then
     distro="lmde"
     pm="apt"
     de="cinnamon"
-    echo "---------------------------------------------------------------------"
-    echo "Distrobution Found: LMDE"
-    echo "---------------------------------------------------------------------"
-fi
-
-grep -q Mint /etc/os-release
-if [ $? -eq 0 ]; then
+elif [[ $osName == *"Mint"* ]]; then
     distro="mint"
     pm="apt"
     de="cinnamon"
-    echo "---------------------------------------------------------------------"
-    echo "Distrobution Found: Linux Mint"
-    echo "---------------------------------------------------------------------"
-fi
-
-grep -q Pop!_OS /etc/os-release
-if [ $? -eq 0 ]; then
+elif [[ $osName == *"Pop!_OS"* ]]; then
     distro="pop"
     pm="apt"
     de="gnome"
-    echo "---------------------------------------------------------------------"
-    echo "Distrobution Found: Pop OS"
-    echo "---------------------------------------------------------------------"
-fi
-
-grep -q Ubuntu /etc/os-release
-if [ $? -eq 0 ]; then
+elif [[ $osName == *"Ubuntu"* ]]; then
     distro="ubuntu"
     pm="apt"
     de="gnome"
-    echo "---------------------------------------------------------------------"
-    echo "Distrobution Found: Ubuntu"
-    echo "---------------------------------------------------------------------"
-fi
-
-if [ -z "$distro" ]; then
+else
     echo "---------------------------------------------------------------------"
     echo "Distrobution not recognized"
     echo "---------------------------------------------------------------------"
     exit 1
 fi
+
+echo "---------------------------------------------------------------------"
+echo "Distrobution Found: $distro"
+echo "---------------------------------------------------------------------"
 
 ################################################################################
 
@@ -153,135 +121,218 @@ fi
 update
 
 if [ "$distro" == "fedora" ]; then
-    add_rpm_fusion
-    update
+    grep -q max_parallel_downloads /etc/dnf/dnf.conf
+    if [ $? -eq 1 ]; then
+        sudo sh -c 'echo max_parallel_downloads=10 >> /etc/dnf/dnf.conf'
+        sudo sh -c 'echo fastestmirror=true >> /etc/dnf/dnf.conf'
+        sudo dnf install https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm -y
+        update
+    fi
 elif [ "$distro" == "mint" ]; then
-    sudo rm /etc/apt/preferences.d/nosnap.pref
-    update
+    nosnap=/etc/apt/preferences.d/nosnap.pref
+    if [ -f "$nosnap" ]; then
+        sudo rm $nosnap
+        update
+    fi
+fi
+
+################################################################################
+
+# Determine Packages to install
+
+declare -a packages
+declare -a snaps
+declare -a flatpaks
+
+packages+=(baobab)
+packages+=(exfat-utils)
+packages+=(firefox)
+packages+=(flatpak)
+packages+=(gedit)
+packages+=(gnome-system-monitor)
+packages+=(gnome-terminal)
+packages+=(gnome-tweaks)
+packages+=(nano)
+packages+=(neofetch)
+packages+=(snapd)
+
+if [ "$pm" == "apt" ]; then
+    packages+=(exfat-fuse)
+elif [ "$pm" == "dnf" ]; then
+    packages+=(fuse-exfat)
+fi
+
+snaps+=(hello-world)
+
+if [ $(confirm "Used for development?") ]; then
+    packages+=(git)
+    packages+=(meld)
+    packages+=(net-tools)
+    packages+=(nodejs)
+    packages+=(npm)
+
+    snaps+=(code)
+fi
+
+if [ $(confirm "Used for home?") ]; then
+    packages+=(deja-dup)
+    packages+=(gnome-books)
+    packages+=(gnome-boxes)
+    packages+=(gnome-calculator)
+    packages+=(gnome-calendar)
+    packages+=(gnome-clocks)
+    packages+=(gnome-weather)
+    packages+=(libreoffice)
+    packages+=(simple-scan)
+    packages+=(thunderbird)
+    packages+=(transmission-gtk)
+
+    snaps+=(slack)
+
+    if [ "$distro" == "fedora" ]; then
+        packages+=(chromium)
+        packages+=(fedora-icon-theme)
+    else
+        snaps+=(chromium)
+    fi
+
+    if [ "$distro" == "ubuntu" ]; then
+        packages+=(usb-creator-gtk)
+        packages+=(virtualbox)
+    fi
+fi
+
+if [ $(confirm "Used for multi media?") ]; then
+    packages+=(blender)
+    packages+=(gimp)
+    packages+=(ffmpeg)
+    packages+=(gnome-photos)
+    packages+=(vlc)
+    packages+=(youtube-dl)
+fi
+
+if [ $(confirm "Used for gaming?") ]; then
+    flatpaks+=(com.valvesoftware.Steam)
+fi
+
+################################################################################
+
+individual=false
+if [ $(confirm "Would you like to install packages individually?") ]; then
+    individual=true
 fi
 
 ################################################################################
 
 # Install Packages
 
-package_manager install baobab
-package_manager install exfat-utils
-package_manager install firefox
-package_manager install gedit
-package_manager install gnome-system-monitor
-package_manager install gnome-terminal
-package_manager install gnome-tweaks
-package_manager install nano
-package_manager install neofetch
+# Package manager
 
-if [ "$pm" == "apt" ]; then
-    package_manager install exfat-fuse
-elif [ "$pm" == "dnf" ]; then
-    package_manager install fuse-exfat
+if [ ${#packages[@]} -gt 0 ]; then
+    if [ "$individual" == true ]; then
+        for i in "${packages[@]}"; do 
+            package_manager install $i
+        done
+    else
+        package_manager install ${packages[*]}
+    fi
 fi
 
-# Install Flatpak
+# Flatpaks
 
-package_manager install flatpak
 sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
 
-# Install Snap
+if [ ${#flatpaks[@]} -gt 0 ]; then
+    for i in "${flatpaks[@]}"; do 
+        flatpak_manager install $i
+    done
+fi
 
-package_manager install snapd
+# Snaps
+
 if [ "$distro" == "fedora" ]; then
     sudo ln -s /var/lib/snapd/snap /snap
 fi
-snap_manager install hello-world
 
-# Install based on purpose
-
-if [ $(confirm "Used for development?") ]; then
-    package_manager install git
-    package_manager install meld
-    package_manager install net-tools
-    package_manager install nodejs
-    package_manager install npm
-
-    snap_manager install code --classic
+if [ ${#snaps[@]} -gt 0 ]; then
+    for i in "${snaps[@]}"; do 
+        snap_manager install $i
+    done
 fi
 
-if [ $(confirm "Used for home?") ]; then
-    package_manager install deja-dup
-    package_manager install gnome-books
-    package_manager install gnome-boxes
-    package_manager install gnome-calculator
-    package_manager install gnome-calendar
-    package_manager install gnome-clocks
-    package_manager install gnome-weather
-    package_manager install libreoffice
-    package_manager install simple-scan
-    package_manager install thunderbird
-    package_manager install transmission-gtk
+################################################################################
 
-    snap_manager install slack --classic
+# Determine Packages to Remove
 
-    if [ "$distro" == "fedora" ]; then
-        package_manager install chromium
-        package_manager install fedora-icon-theme
-    else
-        snap_manager install chromium
-    fi
+packages=()
+snaps=()
+flatpaks=()
 
-    if [ "$distro" == "ubuntu" ]; then
-        package_manager install usb-creator-gtk
-        package_manager install virtualbox
-    fi
+packages+=(cheese)
+packages+=(rhythmbox)
+packages+=(totem)
+
+snaps+=(hello-world)
+snaps+=(snap-store)
+
+if [ "$distro" == "mint" ] || [ "$distro" == "lmde" ]; then
+    packages+=(celluloid)
+    packages+=(drawing)
+    packages+=(hexchat*)
+    packages+=(mintbackup)
+    packages+=(pix*)
+    packages+=(warpinator)
+    packages+=(xed)
+elif [ "$distro" == "ubuntu" ]; then
+    packages+=(aisleriot)
+    packages+=(gnome-mahjongg)
+    packages+=(gnome-mines)
+    packages+=(gnome-sudoku)
+    packages+=(gnome-todo)
+    packages+=(remmina*)
+    packages+=(seahorse)
+    packages+=(shotwell*)
 fi
 
-if [ $(confirm "Used for multi media?") ]; then
-    package_manager install blender
-    package_manager install gimp
-    package_manager install ffmpeg
-    package_manager install gnome-photos
-    package_manager install vlc
-    package_manager install youtube-dl
-fi
-
-if [ $(confirm "Used for gaming?") ]; then
-    flatpak_manager install flathub com.valvesoftware.Steam
+if [ "$de" == "gnome" ]; then
+    packages+=(gnome-contacts)
+    packages+=(gnome-maps)
+    packages+=(gnome-software)
 fi
 
 ################################################################################
 
 # Remove Packages
 
-if [ "$distro" == "mint" ] || [ "$distro" == "lmde" ]; then
-    package_manager remove celluloid
-    package_manager remove drawing
-    package_manager remove hexchat*
-    package_manager remove mintbackup
-    package_manager remove pix*
-    package_manager remove warpinator
-elif [ "$distro" == "ubuntu" ]; then
-    package_manager remove aisleriot
-    package_manager remove gnome-mahjongg
-    package_manager remove gnome-mines
-    package_manager remove gnome-sudoku
-    package_manager remove gnome-todo
-    package_manager remove remmina*
-    package_manager remove seahorse
-    package_manager remove shotwell*
-fi
+# Package manager
 
-package_manager remove cheese
-package_manager remove rhythmbox
-package_manager remove totem
-
-if [ "$de" == "gnome" ]; then
-    package_manager remove gnome-contacts
-    package_manager remove gnome-maps
-    package_manager remove gnome-software
+if [ ${#packages[@]} -gt 0 ]; then
+    if [ "$individual" == true ]; then
+        for i in "${packages[@]}"; do 
+            package_manager remove $i
+        done
+    else
+        package_manager remove ${packages[*]}
+    fi
 fi
 
 package_manager autoremove
 
-snap_manager remove hello-world
-snap_manager remove snap-store
+# Flatpaks
+
+if [ ${#flatpaks[@]} -gt 0 ]; then
+    for i in "${flatpaks[@]}"; do 
+        flatpak_manager remove $i
+    done
+fi
+
+# Snaps
+
+if [ ${#snaps[@]} -gt 0 ]; then
+    for i in "${snaps[@]}"; do 
+        snap_manager remove $i
+    done
+fi
 
 ################################################################################
 
