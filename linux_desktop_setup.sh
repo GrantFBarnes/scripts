@@ -206,7 +206,7 @@ if [ $(confirm "Used for home?") ]; then
 
     if [ "$srcPref" == "snap" ]; then
         snapsInstall+=(libreoffice)
-        packagesRemove+=(libreoffice)
+        packagesRemove+=(libreoffice*)
     else
         packagesInstall+=(libreoffice)
         snapsRemove+=(libreoffice)
@@ -303,6 +303,7 @@ fi
 # Determine Packages to Remove
 
 packagesRemove+=(cheese)
+packagesRemove+=(mpv)
 packagesRemove+=(rhythmbox)
 packagesRemove+=(totem)
 
