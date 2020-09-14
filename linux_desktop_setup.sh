@@ -1,5 +1,5 @@
 #!/bin/bash
-# Purpose: Setup fresh install of Linux Desktop (Fedora/CentOS/Mint/Ubuntu)
+# Purpose: Setup fresh install of Linux Desktop (Fedora/Mint/Ubuntu)
 ################################################################################
 
 function confirm() {
@@ -49,13 +49,9 @@ function package_manager() {
 function snap_manager() {
     local method=$1
     echo "---------------------------------------------------------------------"
-    echo "sudo snap $method ${@:2} --classic"
+    echo "sudo snap $method ${@:2}"
     echo "---------------------------------------------------------------------"
-    if [ "$method" == "install" ]; then
-        sudo snap $method ${@:2} --classic
-    else
-        sudo snap $method ${@:2}
-    fi
+    sudo snap $method ${@:2}
     check_exit_status
 }
 
@@ -85,10 +81,6 @@ de=""
 
 if [[ $osName == *"Fedora"* ]]; then
     distro="fedora"
-    pm="dnf"
-    de="gnome"
-elif [[ $osName == *"CentOs"* ]]; then
-    distro="centos"
     pm="dnf"
     de="gnome"
 elif [[ $osName == *"LMDE"* ]]; then
@@ -132,9 +124,6 @@ if [ "$pm" == "dnf" ]; then
 
         if [ "$distro" == "fedora" ]; then
             sudo dnf install https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm -y
-        elif [ "$distro" == "centos" ]; then
-            sudo dnf install --nogpgcheck https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm -y
-            sudo dnf install --nogpgcheck https://download1.rpmfusion.org/free/el/rpmfusion-free-release-8.noarch.rpm https://download1.rpmfusion.org/nonfree/el/rpmfusion-nonfree-release-8.noarch.rpm -y
         fi
 
         update
@@ -149,90 +138,123 @@ fi
 
 ################################################################################
 
-# Determine Packages to install
-
-declare -a packages
-declare -a snaps
-declare -a flatpaks
-
-packages+=(baobab)
-packages+=(exfat-utils)
-packages+=(firefox)
-packages+=(flatpak)
-packages+=(gedit)
-packages+=(gnome-system-monitor)
-packages+=(gnome-terminal)
-packages+=(gnome-tweaks)
-packages+=(nano)
-packages+=(neofetch)
-packages+=(snapd)
-
-if [ "$pm" == "apt" ]; then
-    packages+=(exfat-fuse)
-elif [ "$pm" == "dnf" ]; then
-    packages+=(fuse-exfat)
+individual=false
+if [ $(confirm "Would you like to install packages individually?") ]; then
+    individual=true
 fi
 
-snaps+=(hello-world)
-
-if [ $(confirm "Used for development?") ]; then
-    packages+=(git)
-    packages+=(meld)
-    packages+=(net-tools)
-    packages+=(nodejs)
-    packages+=(npm)
-
-    snaps+=(code)
-fi
-
-if [ $(confirm "Used for home?") ]; then
-    packages+=(deja-dup)
-    packages+=(gnome-books)
-    packages+=(gnome-boxes)
-    packages+=(gnome-calculator)
-    packages+=(gnome-calendar)
-    packages+=(gnome-clocks)
-    packages+=(gnome-weather)
-    packages+=(libreoffice)
-    packages+=(simple-scan)
-    packages+=(thunderbird)
-    packages+=(transmission-gtk)
-
-    snaps+=(slack)
-
-    if [ "$pm" == "dnf" ]; then
-        packages+=(chromium)
-        if [ "$distro" == "fedora" ]; then
-            packages+=(fedora-icon-theme)
-        fi
-    else
-        snaps+=(chromium)
-    fi
-
-    if [ "$distro" == "ubuntu" ]; then
-        packages+=(usb-creator-gtk)
-        packages+=(virtualbox)
-    fi
-fi
-
-if [ $(confirm "Used for multi media?") ]; then
-    packages+=(blender)
-    packages+=(gimp)
-    packages+=(ffmpeg)
-    packages+=(gnome-photos)
-    packages+=(vlc)
-    packages+=(youtube-dl)
-fi
-
-if [ $(confirm "Used for gaming?") ]; then
-    flatpaks+=(com.valvesoftware.Steam)
+srcPref="repo"
+if [ $(confirm "Do you favor/prefer snap packages?") ]; then
+    srcPref="snap"
 fi
 
 ################################################################################
 
-individual=false
-if [ $(confirm "Would you like to install packages individually?") ]; then
-    individual=true
+# Determine Packages to install and remove
+
+declare -a packagesInstall
+declare -a snapsInstall
+declare -a flatpaksInstall
+
+declare -a packagesRemove
+declare -a snapsRemove
+declare -a flatpaksRemove
+
+packagesInstall+=(baobab)
+packagesInstall+=(exfat-utils)
+packagesInstall+=(firefox)
+packagesInstall+=(flatpak)
+packagesInstall+=(gedit)
+packagesInstall+=(gnome-system-monitor)
+packagesInstall+=(gnome-terminal)
+packagesInstall+=(gnome-tweaks)
+packagesInstall+=(nano)
+packagesInstall+=(neofetch)
+packagesInstall+=(snapd)
+
+if [ "$pm" == "apt" ]; then
+    packagesInstall+=(exfat-fuse)
+elif [ "$pm" == "dnf" ]; then
+    packagesInstall+=(fuse-exfat)
+fi
+
+snapsInstall+=(hello-world)
+
+if [ $(confirm "Used for development?") ]; then
+    packagesInstall+=(git)
+    packagesInstall+=(meld)
+    packagesInstall+=(net-tools)
+    packagesInstall+=(nodejs)
+    packagesInstall+=(npm)
+
+    snapsInstall+=("code --classic")
+fi
+
+if [ $(confirm "Used for home?") ]; then
+    packagesInstall+=(deja-dup)
+    packagesInstall+=(gnome-books)
+    packagesInstall+=(gnome-boxes)
+    packagesInstall+=(gnome-calculator)
+    packagesInstall+=(gnome-calendar)
+    packagesInstall+=(gnome-clocks)
+    packagesInstall+=(gnome-weather)
+    packagesInstall+=(simple-scan)
+    packagesInstall+=(thunderbird)
+    packagesInstall+=(transmission-gtk)
+
+    snapsInstall+=("slack --classic")
+
+    if [ "$srcPref" == "snap" ]; then
+        snapsInstall+=(libreoffice)
+        packagesRemove+=(libreoffice)
+    else
+        packagesInstall+=(libreoffice)
+        snapsRemove+=(libreoffice)
+    fi
+
+    if [ "$pm" == "dnf" ]; then
+        if [ "$srcPref" == "snap" ]; then
+            snapsInstall+=(chromium)
+            packagesRemove+=(chromium)
+        else
+            packagesInstall+=(chromium)
+            snapsRemove+=(chromium)
+        fi
+
+        if [ "$distro" == "fedora" ]; then
+            packagesInstall+=(fedora-icon-theme)
+        fi
+    else
+        snapsInstall+=(chromium)
+    fi
+
+    if [ "$distro" == "ubuntu" ]; then
+        packagesInstall+=(usb-creator-gtk)
+        packagesInstall+=(virtualbox)
+    fi
+fi
+
+if [ $(confirm "Used for multi media?") ]; then
+    packagesInstall+=(gimp)
+    packagesInstall+=(ffmpeg)
+    packagesInstall+=(gnome-photos)
+    packagesInstall+=(youtube-dl)
+
+    if [ "$srcPref" == "snap" ]; then
+        snapsInstall+=("blender --classic")
+        snapsInstall+=(vlc)
+        packagesRemove+=(blender)
+        packagesRemove+=(vlc)
+    else
+        packagesInstall+=(blender)
+        packagesInstall+=(vlc)
+        snapsRemove+=(blender)
+        snapsRemove+=(vlc)
+    fi
+fi
+
+if [ $(confirm "Used for gaming?") ]; then
+    flatpaksInstall+=(com.valvesoftware.Steam)
 fi
 
 ################################################################################
@@ -241,13 +263,13 @@ fi
 
 # Package manager
 
-if [ ${#packages[@]} -gt 0 ]; then
+if [ ${#packagesInstall[@]} -gt 0 ]; then
     if [ "$individual" == true ]; then
-        for i in "${packages[@]}"; do 
+        for i in "${packagesInstall[@]}"; do 
             package_manager install $i
         done
     else
-        package_manager install ${packages[*]}
+        package_manager install ${packagesInstall[*]}
     fi
 fi
 
@@ -255,8 +277,8 @@ fi
 
 sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
 
-if [ ${#flatpaks[@]} -gt 0 ]; then
-    for i in "${flatpaks[@]}"; do 
+if [ ${#flatpaksInstall[@]} -gt 0 ]; then
+    for i in "${flatpaksInstall[@]}"; do 
         flatpak_manager install $i
     done
 fi
@@ -270,8 +292,8 @@ if [ "$pm" == "dnf" ]; then
     sudo ln -s /var/lib/snapd/snap /snap
 fi
 
-if [ ${#snaps[@]} -gt 0 ]; then
-    for i in "${snaps[@]}"; do 
+if [ ${#snapsInstall[@]} -gt 0 ]; then
+    for i in "${snapsInstall[@]}"; do 
         snap_manager install $i
     done
 fi
@@ -280,43 +302,39 @@ fi
 
 # Determine Packages to Remove
 
-packages=()
-snaps=()
-flatpaks=()
+packagesRemove+=(cheese)
+packagesRemove+=(rhythmbox)
+packagesRemove+=(totem)
 
-packages+=(cheese)
-packages+=(rhythmbox)
-packages+=(totem)
-
-snaps+=(hello-world)
-snaps+=(snap-store)
+snapsRemove+=(hello-world)
+snapsRemove+=(snap-store)
 
 if [ "$distro" == "mint" ] || [ "$distro" == "lmde" ]; then
-    packages+=(celluloid)
-    packages+=(drawing)
-    packages+=(hexchat*)
-    packages+=(mintbackup)
-    packages+=(pix*)
-    packages+=(warpinator)
-    packages+=(xed)
+    packagesRemove+=(celluloid)
+    packagesRemove+=(drawing)
+    packagesRemove+=(hexchat*)
+    packagesRemove+=(mintbackup)
+    packagesRemove+=(pix*)
+    packagesRemove+=(warpinator)
+    packagesRemove+=(xed)
 elif [ "$distro" == "ubuntu" ]; then
-    packages+=(aisleriot)
-    packages+=(gnome-mahjongg)
-    packages+=(gnome-mines)
-    packages+=(gnome-sudoku)
-    packages+=(gnome-todo)
-    packages+=(remmina*)
-    packages+=(seahorse)
-    packages+=(shotwell*)
+    packagesRemove+=(aisleriot)
+    packagesRemove+=(gnome-mahjongg)
+    packagesRemove+=(gnome-mines)
+    packagesRemove+=(gnome-sudoku)
+    packagesRemove+=(gnome-todo)
+    packagesRemove+=(remmina*)
+    packagesRemove+=(seahorse)
+    packagesRemove+=(shotwell*)
 elif [ "$distro" == "pop" ]; then
-    packages+=(geary)
-    packages+=(popsicle)
+    packagesRemove+=(geary)
+    packagesRemove+=(popsicle)
 fi
 
 if [ "$de" == "gnome" ]; then
-    packages+=(gnome-contacts)
-    packages+=(gnome-maps)
-    packages+=(gnome-software)
+    packagesRemove+=(gnome-contacts)
+    packagesRemove+=(gnome-maps)
+    packagesRemove+=(gnome-software)
 fi
 
 ################################################################################
@@ -325,13 +343,13 @@ fi
 
 # Package manager
 
-if [ ${#packages[@]} -gt 0 ]; then
+if [ ${#packagesRemove[@]} -gt 0 ]; then
     if [ "$individual" == true ]; then
-        for i in "${packages[@]}"; do 
+        for i in "${packagesRemove[@]}"; do 
             package_manager remove $i
         done
     else
-        package_manager remove ${packages[*]}
+        package_manager remove ${packagesRemove[*]}
     fi
 fi
 
@@ -339,16 +357,16 @@ package_manager autoremove
 
 # Flatpaks
 
-if [ ${#flatpaks[@]} -gt 0 ]; then
-    for i in "${flatpaks[@]}"; do 
+if [ ${#flatpaksRemove[@]} -gt 0 ]; then
+    for i in "${flatpaksRemove[@]}"; do 
         flatpak_manager remove $i
     done
 fi
 
 # Snaps
 
-if [ ${#snaps[@]} -gt 0 ]; then
-    for i in "${snaps[@]}"; do 
+if [ ${#snapsRemove[@]} -gt 0 ]; then
+    for i in "${snapsRemove[@]}"; do 
         snap_manager remove $i
     done
 fi
