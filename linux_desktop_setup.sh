@@ -1,5 +1,5 @@
 #!/bin/bash
-# Purpose: Setup fresh install of Linux Desktop (Fedora/Mint/Ubuntu)
+# Purpose: Setup fresh install of Linux Desktop (Fedora/CentOS/Mint/Ubuntu)
 ################################################################################
 
 function confirm() {
@@ -87,6 +87,10 @@ if [[ $osName == *"Fedora"* ]]; then
     distro="fedora"
     pm="dnf"
     de="gnome"
+elif [[ $osName == *"CentOs"* ]]; then
+    distro="centos"
+    pm="dnf"
+    de="gnome"
 elif [[ $osName == *"LMDE"* ]]; then
     distro="lmde"
     pm="apt"
@@ -120,12 +124,19 @@ echo "---------------------------------------------------------------------"
 
 update
 
-if [ "$distro" == "fedora" ]; then
+if [ "$pm" == "dnf" ]; then
     grep -q max_parallel_downloads /etc/dnf/dnf.conf
     if [ $? -eq 1 ]; then
         sudo sh -c 'echo max_parallel_downloads=10 >> /etc/dnf/dnf.conf'
         sudo sh -c 'echo fastestmirror=true >> /etc/dnf/dnf.conf'
-        sudo dnf install https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm -y
+
+        if [ "$distro" == "fedora" ]; then
+            sudo dnf install https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm -y
+        elif [ "$distro" == "centos" ]; then
+            sudo dnf install --nogpgcheck https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm -y
+            sudo dnf install --nogpgcheck https://download1.rpmfusion.org/free/el/rpmfusion-free-release-8.noarch.rpm https://download1.rpmfusion.org/nonfree/el/rpmfusion-nonfree-release-8.noarch.rpm -y
+        fi
+
         update
     fi
 elif [ "$distro" == "mint" ]; then
@@ -189,9 +200,11 @@ if [ $(confirm "Used for home?") ]; then
 
     snaps+=(slack)
 
-    if [ "$distro" == "fedora" ]; then
+    if [ "$pm" == "dnf" ]; then
         packages+=(chromium)
-        packages+=(fedora-icon-theme)
+        if [ "$distro" == "fedora" ]; then
+            packages+=(fedora-icon-theme)
+        fi
     else
         snaps+=(chromium)
     fi
@@ -250,7 +263,10 @@ fi
 
 # Snaps
 
-if [ "$distro" == "fedora" ]; then
+if [ "$pm" == "dnf" ]; then
+    if [ "$distro" == "centos" ]; then
+        sudo systemctl enable --now snapd.socket
+    fi
     sudo ln -s /var/lib/snapd/snap /snap
 fi
 
@@ -292,6 +308,9 @@ elif [ "$distro" == "ubuntu" ]; then
     packages+=(remmina*)
     packages+=(seahorse)
     packages+=(shotwell*)
+elif [ "$distro" == "pop" ]; then
+    packages+=(geary)
+    packages+=(popsicle)
 fi
 
 if [ "$de" == "gnome" ]; then
