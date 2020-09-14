@@ -203,6 +203,7 @@ if [ $(confirm "Used for home?") ]; then
     packagesInstall+=(transmission-gtk)
 
     snapsInstall+=("slack --classic")
+    snapsInstall+=(spotify)
 
     if [ "$srcPref" == "snap" ]; then
         snapsInstall+=(libreoffice)
