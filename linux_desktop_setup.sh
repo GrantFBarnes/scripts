@@ -155,9 +155,9 @@ else
         individual=true
     fi
 
-    if [ $(confirm "Do you prefer flatpaks?") ]; then
+    if [ $(confirm "Do you prefer flatpaks over repo?") ]; then
         srcPref="flatpak"
-    elif [ $(confirm "Do you prefer snaps?") ]; then
+    elif [ $(confirm "Do you prefer snaps over repo?") ]; then
         srcPref="snap"
     fi
 fi
@@ -224,12 +224,12 @@ if [ $(confirm "Used for development?") ]; then
 
     snapsInstall+=("code --classic")
 
-    if [ "$srcPref" == "flatpak" ]; then
-        flatpaksInstall+=(org.gnome.meld)
-        packagesRemove+=(meld)
-    else
+    if [ "$srcPref" == "repo" ]; then
         packagesInstall+=(meld)
         flatpaksRemove+=(org.gnome.meld)
+    else
+        flatpaksInstall+=(org.gnome.meld)
+        packagesRemove+=(meld)
     fi
 fi
 
@@ -241,25 +241,7 @@ if [ $(confirm "Used for home?") ]; then
     snapsInstall+=("slack --classic")
     snapsInstall+=(spotify)
 
-    if [ "$srcPref" == "flatpak" ]; then
-        flatpaksInstall+=(org.gnome.DejaDup)
-        flatpaksInstall+=(org.gnome.Books)
-        flatpaksInstall+=(org.gnome.Boxes)
-        flatpaksInstall+=(org.gnome.Calculator)
-        flatpaksInstall+=(org.gnome.Calendar)
-        flatpaksInstall+=(org.gnome.clocks)
-        flatpaksInstall+=(org.gnome.Photos)
-        flatpaksInstall+=(org.gnome.Weather)
-
-        packagesRemove+=(deja-dup)
-        packagesRemove+=(gnome-books)
-        packagesRemove+=(gnome-boxes)
-        packagesRemove+=(gnome-calculator)
-        packagesRemove+=(gnome-calendar)
-        packagesRemove+=(gnome-clocks)
-        packagesRemove+=(gnome-photos)
-        packagesRemove+=(gnome-weather)
-    else
+    if [ "$srcPref" == "repo" ]; then
         packagesInstall+=(deja-dup)
         packagesInstall+=(gnome-books)
         packagesInstall+=(gnome-boxes)
@@ -277,16 +259,34 @@ if [ $(confirm "Used for home?") ]; then
         flatpaksRemove+=(org.gnome.clocks)
         flatpaksRemove+=(org.gnome.Photos)
         flatpaksRemove+=(org.gnome.Weather)
+    else
+        flatpaksInstall+=(org.gnome.DejaDup)
+        flatpaksInstall+=(org.gnome.Books)
+        flatpaksInstall+=(org.gnome.Boxes)
+        flatpaksInstall+=(org.gnome.Calculator)
+        flatpaksInstall+=(org.gnome.Calendar)
+        flatpaksInstall+=(org.gnome.clocks)
+        flatpaksInstall+=(org.gnome.Photos)
+        flatpaksInstall+=(org.gnome.Weather)
+
+        packagesRemove+=(deja-dup)
+        packagesRemove+=(gnome-books)
+        packagesRemove+=(gnome-boxes)
+        packagesRemove+=(gnome-calculator)
+        packagesRemove+=(gnome-calendar)
+        packagesRemove+=(gnome-clocks)
+        packagesRemove+=(gnome-photos)
+        packagesRemove+=(gnome-weather)
     fi
 
     # handle chromium
     if [ "$pm" == "dnf" ]; then
-        if [ "$srcPref" == "snap" ]; then
-            snapsInstall+=(chromium)
-            packagesRemove+=(chromium)
-        else
+        if [ "$srcPref" == "repo" ]; then
             packagesInstall+=(chromium)
             snapsRemove+=(chromium)
+        else
+            snapsInstall+=(chromium)
+            packagesRemove+=(chromium)
         fi
     else
         snapsInstall+=(chromium)
@@ -298,21 +298,21 @@ if [ $(confirm "Used for multi media?") ]; then
     packagesInstall+=(youtube-dl)
 
     # handle blender
-    if [ "$srcPref" == "snap" ]; then
-        snapsInstall+=("blender --classic")
-        packagesRemove+=(blender)
-    else
+    if [ "$srcPref" == "repo" ]; then
         packagesInstall+=(blender)
         snapsRemove+=(blender)
+    else
+        snapsInstall+=("blender --classic")
+        packagesRemove+=(blender)
     fi
 
     # handle gimp
-    if [ "$srcPref" == "flatpak" ]; then
-        flatpaksInstall+=(org.gimp.GIMP)
-        packagesRemove+=(gimp)
-    else
+    if [ "$srcPref" == "repo" ]; then
         packagesInstall+=(gimp)
         flatpaksRemove+=(org.gimp.GIMP)
+    else
+        flatpaksInstall+=(org.gimp.GIMP)
+        packagesRemove+=(gimp)
     fi
 
     # handle VLC
