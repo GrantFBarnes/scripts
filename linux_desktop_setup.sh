@@ -83,6 +83,10 @@ if [[ $osName == *"Fedora"* ]]; then
     distro="fedora"
     pm="dnf"
     de="gnome"
+elif [[ $osName == *"CentOS"* ]]; then
+    distro="centos"
+    pm="dnf"
+    de="gnome"
 elif [[ $osName == *"LMDE"* ]]; then
     distro="lmde"
     pm="apt"
@@ -124,6 +128,9 @@ if [ "$pm" == "dnf" ]; then
 
         if [ "$distro" == "fedora" ]; then
             sudo dnf install https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm -y
+        elif [ "$distro" == "centos" ]; then
+            sudo dnf install --nogpgcheck https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm -y
+            sudo dnf install --nogpgcheck https://download1.rpmfusion.org/free/el/rpmfusion-free-release-8.noarch.rpm https://download1.rpmfusion.org/nonfree/el/rpmfusion-nonfree-release-8.noarch.rpm -y
         fi
 
         update
@@ -139,13 +146,20 @@ fi
 ################################################################################
 
 individual=false
-if [ $(confirm "Would you like to install packages individually?") ]; then
-    individual=true
-fi
-
 srcPref="repo"
-if [ $(confirm "Do you favor/prefer snap packages?") ]; then
-    srcPref="snap"
+if [ "$distro" == "centos" ]; then
+    individual=true
+    srcPref="flatpak"
+else
+    if [ $(confirm "Would you like to install packages individually?") ]; then
+        individual=true
+    fi
+
+    if [ $(confirm "Do you prefer flatpaks?") ]; then
+        srcPref="flatpak"
+    elif [ $(confirm "Do you prefer snaps?") ]; then
+        srcPref="snap"
+    fi
 fi
 
 ################################################################################
@@ -178,26 +192,48 @@ elif [ "$pm" == "dnf" ]; then
     packagesInstall+=(fuse-exfat)
 fi
 
+if [ "$distro" == "fedora" ]; then
+    packagesInstall+=(fedora-icon-theme)
+fi
+
+# handle libreoffice (availbe as any package)
+if [ "$srcPref" == "snap" ]; then
+    snapsInstall+=(libreoffice)
+
+    flatpaksRemove+=(org.libreoffice.LibreOffice)
+    packagesRemove+=(libreoffice*)
+elif [ "$srcPref" == "flatpak" ]; then
+    flatpaksInstall+=(org.libreoffice.LibreOffice)
+
+    snapsRemove+=(libreoffice)
+    packagesRemove+=(libreoffice*)
+else
+    packagesInstall+=(libreoffice)
+
+    flatpaksRemove+=(org.libreoffice.LibreOffice)
+    snapsRemove+=(libreoffice)
+fi
+
 snapsInstall+=(hello-world)
 
 if [ $(confirm "Used for development?") ]; then
     packagesInstall+=(git)
-    packagesInstall+=(meld)
     packagesInstall+=(net-tools)
     packagesInstall+=(nodejs)
     packagesInstall+=(npm)
 
     snapsInstall+=("code --classic")
+
+    if [ "$srcPref" == "flatpak" ]; then
+        flatpaksInstall+=(org.gnome.meld)
+        packagesRemove+=(meld)
+    else
+        packagesInstall+=(meld)
+        flatpaksRemove+=(org.gnome.meld)
+    fi
 fi
 
 if [ $(confirm "Used for home?") ]; then
-    packagesInstall+=(deja-dup)
-    packagesInstall+=(gnome-books)
-    packagesInstall+=(gnome-boxes)
-    packagesInstall+=(gnome-calculator)
-    packagesInstall+=(gnome-calendar)
-    packagesInstall+=(gnome-clocks)
-    packagesInstall+=(gnome-weather)
     packagesInstall+=(simple-scan)
     packagesInstall+=(thunderbird)
     packagesInstall+=(transmission-gtk)
@@ -205,14 +241,45 @@ if [ $(confirm "Used for home?") ]; then
     snapsInstall+=("slack --classic")
     snapsInstall+=(spotify)
 
-    if [ "$srcPref" == "snap" ]; then
-        snapsInstall+=(libreoffice)
-        packagesRemove+=(libreoffice*)
+    if [ "$srcPref" == "flatpak" ]; then
+        flatpaksInstall+=(org.gnome.DejaDup)
+        flatpaksInstall+=(org.gnome.Books)
+        flatpaksInstall+=(org.gnome.Boxes)
+        flatpaksInstall+=(org.gnome.Calculator)
+        flatpaksInstall+=(org.gnome.Calendar)
+        flatpaksInstall+=(org.gnome.clocks)
+        flatpaksInstall+=(org.gnome.Photos)
+        flatpaksInstall+=(org.gnome.Weather)
+
+        packagesRemove+=(deja-dup)
+        packagesRemove+=(gnome-books)
+        packagesRemove+=(gnome-boxes)
+        packagesRemove+=(gnome-calculator)
+        packagesRemove+=(gnome-calendar)
+        packagesRemove+=(gnome-clocks)
+        packagesRemove+=(gnome-photos)
+        packagesRemove+=(gnome-weather)
     else
-        packagesInstall+=(libreoffice)
-        snapsRemove+=(libreoffice)
+        packagesInstall+=(deja-dup)
+        packagesInstall+=(gnome-books)
+        packagesInstall+=(gnome-boxes)
+        packagesInstall+=(gnome-calculator)
+        packagesInstall+=(gnome-calendar)
+        packagesInstall+=(gnome-clocks)
+        packagesInstall+=(gnome-photos)
+        packagesInstall+=(gnome-weather)
+
+        flatpaksRemove+=(org.gnome.DejaDup)
+        flatpaksRemove+=(org.gnome.Books)
+        flatpaksRemove+=(org.gnome.Boxes)
+        flatpaksRemove+=(org.gnome.Calculator)
+        flatpaksRemove+=(org.gnome.Calendar)
+        flatpaksRemove+=(org.gnome.clocks)
+        flatpaksRemove+=(org.gnome.Photos)
+        flatpaksRemove+=(org.gnome.Weather)
     fi
 
+    # handle chromium
     if [ "$pm" == "dnf" ]; then
         if [ "$srcPref" == "snap" ]; then
             snapsInstall+=(chromium)
@@ -221,35 +288,48 @@ if [ $(confirm "Used for home?") ]; then
             packagesInstall+=(chromium)
             snapsRemove+=(chromium)
         fi
-
-        if [ "$distro" == "fedora" ]; then
-            packagesInstall+=(fedora-icon-theme)
-        fi
     else
         snapsInstall+=(chromium)
-    fi
-
-    if [ "$distro" == "ubuntu" ]; then
-        packagesInstall+=(usb-creator-gtk)
-        packagesInstall+=(virtualbox)
     fi
 fi
 
 if [ $(confirm "Used for multi media?") ]; then
-    packagesInstall+=(gimp)
     packagesInstall+=(ffmpeg)
-    packagesInstall+=(gnome-photos)
     packagesInstall+=(youtube-dl)
 
+    # handle blender
     if [ "$srcPref" == "snap" ]; then
         snapsInstall+=("blender --classic")
-        snapsInstall+=(vlc)
         packagesRemove+=(blender)
-        packagesRemove+=(vlc)
     else
         packagesInstall+=(blender)
-        packagesInstall+=(vlc)
         snapsRemove+=(blender)
+    fi
+
+    # handle gimp
+    if [ "$srcPref" == "flatpak" ]; then
+        flatpaksInstall+=(org.gimp.GIMP)
+        packagesRemove+=(gimp)
+    else
+        packagesInstall+=(gimp)
+        flatpaksRemove+=(org.gimp.GIMP)
+    fi
+
+    # handle VLC
+    if [ "$srcPref" == "snap" ]; then
+        snapsInstall+=(vlc)
+
+        flatpaksRemove+=(org.videolan.VLC)
+        packagesRemove+=(vlc)
+    elif [ "$srcPref" == "flatpak" ]; then
+        flatpaksInstall+=(org.videolan.VLC)
+
+        snapsRemove+=(vlc)
+        packagesRemove+=(vlc)
+    else
+        packagesInstall+=(vlc)
+
+        flatpaksRemove+=(org.videolan.VLC)
         snapsRemove+=(vlc)
     fi
 fi
@@ -266,7 +346,7 @@ fi
 
 if [ ${#packagesInstall[@]} -gt 0 ]; then
     if [ "$individual" == true ]; then
-        for i in "${packagesInstall[@]}"; do 
+        for i in "${packagesInstall[@]}"; do
             package_manager install $i
         done
     else
@@ -279,7 +359,7 @@ fi
 sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
 
 if [ ${#flatpaksInstall[@]} -gt 0 ]; then
-    for i in "${flatpaksInstall[@]}"; do 
+    for i in "${flatpaksInstall[@]}"; do
         flatpak_manager install $i
     done
 fi
@@ -294,7 +374,7 @@ if [ "$pm" == "dnf" ]; then
 fi
 
 if [ ${#snapsInstall[@]} -gt 0 ]; then
-    for i in "${snapsInstall[@]}"; do 
+    for i in "${snapsInstall[@]}"; do
         snap_manager install $i
     done
 fi
@@ -347,7 +427,7 @@ fi
 
 if [ ${#packagesRemove[@]} -gt 0 ]; then
     if [ "$individual" == true ]; then
-        for i in "${packagesRemove[@]}"; do 
+        for i in "${packagesRemove[@]}"; do
             package_manager remove $i
         done
     else
@@ -360,7 +440,7 @@ package_manager autoremove
 # Flatpaks
 
 if [ ${#flatpaksRemove[@]} -gt 0 ]; then
-    for i in "${flatpaksRemove[@]}"; do 
+    for i in "${flatpaksRemove[@]}"; do
         flatpak_manager remove $i
     done
 fi
@@ -368,7 +448,7 @@ fi
 # Snaps
 
 if [ ${#snapsRemove[@]} -gt 0 ]; then
-    for i in "${snapsRemove[@]}"; do 
+    for i in "${snapsRemove[@]}"; do
         snap_manager remove $i
     done
 fi
@@ -380,13 +460,13 @@ if [ "$de" == "gnome" ]; then
         # Install Themes
         gsettings set org.gnome.desktop.interface gtk-theme "Adwaita-dark"
         gsettings set org.gnome.desktop.interface icon-theme "Fedora"
-
-        # Add WM Buttons
-        gsettings set org.gnome.desktop.wm.preferences button-layout ":minimize,maximize,close"
     elif [ "$distro" == "ubuntu" ]; then
         # Install Themes
         gsettings set org.gnome.desktop.interface gtk-theme "Yaru-dark"
     fi
+
+    # Add WM Buttons
+    gsettings set org.gnome.desktop.wm.preferences button-layout ":minimize,maximize,close"
 
     # Set Favorites
     # gsettings get org.gnome.shell favorite-apps
