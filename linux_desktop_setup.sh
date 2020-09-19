@@ -174,17 +174,16 @@ declare -a packagesRemove
 declare -a snapsRemove
 declare -a flatpaksRemove
 
-packagesInstall+=(baobab)
 packagesInstall+=(exfat-utils)
-packagesInstall+=(firefox)
 packagesInstall+=(flatpak)
 packagesInstall+=(gedit)
-packagesInstall+=(gnome-system-monitor)
 packagesInstall+=(gnome-terminal)
 packagesInstall+=(gnome-tweaks)
 packagesInstall+=(nano)
 packagesInstall+=(neofetch)
 packagesInstall+=(snapd)
+
+snapsInstall+=(hello-world)
 
 if [ "$pm" == "apt" ]; then
     packagesInstall+=(exfat-fuse)
@@ -196,25 +195,45 @@ if [ "$distro" == "fedora" ]; then
     packagesInstall+=(fedora-icon-theme)
 fi
 
-# handle libreoffice (availbe as any package)
-if [ "$srcPref" == "snap" ]; then
-    snapsInstall+=(libreoffice)
+if [ "$srcPref" == "repo" ]; then
+    packagesInstall+=(baobab)
+    packagesInstall+=(gnome-system-monitor)
 
-    flatpaksRemove+=(org.libreoffice.LibreOffice)
-    packagesRemove+=(libreoffice*)
-elif [ "$srcPref" == "flatpak" ]; then
-    flatpaksInstall+=(org.libreoffice.LibreOffice)
-
-    snapsRemove+=(libreoffice)
-    packagesRemove+=(libreoffice*)
+    flatpaksRemove+=(org.gnome.baobab)
+    snapsRemove+=(gnome-system-monitor)
 else
-    packagesInstall+=(libreoffice)
+    flatpaksInstall+=(org.gnome.baobab)
+    snapsInstall+=(gnome-system-monitor)
 
-    flatpaksRemove+=(org.libreoffice.LibreOffice)
-    snapsRemove+=(libreoffice)
+    packagesRemove+=(baobab)
+    packagesRemove+=(gnome-system-monitor)
 fi
 
-snapsInstall+=(hello-world)
+if [ "$srcPref" == "snap" ]; then
+    snapsInstall+=(firefox)
+    snapsInstall+=(libreoffice)
+
+    flatpaksRemove+=(org.mozilla.firefox)
+    flatpaksRemove+=(org.libreoffice.LibreOffice)
+    packagesRemove+=(firefox)
+    packagesRemove+=(libreoffice*)
+elif [ "$srcPref" == "flatpak" ]; then
+    flatpaksInstall+=(org.mozilla.firefox)
+    flatpaksInstall+=(org.libreoffice.LibreOffice)
+
+    snapsRemove+=(firefox)
+    snapsRemove+=(libreoffice)
+    packagesRemove+=(firefox)
+    packagesRemove+=(libreoffice*)
+else
+    packagesInstall+=(firefox)
+    packagesInstall+=(libreoffice)
+
+    flatpaksRemove+=(org.mozilla.firefox)
+    flatpaksRemove+=(org.libreoffice.LibreOffice)
+    snapsRemove+=(firefox)
+    snapsRemove+=(libreoffice)
+fi
 
 if [ $(confirm "Used for development?") ]; then
     packagesInstall+=(git)
@@ -222,7 +241,13 @@ if [ $(confirm "Used for development?") ]; then
     packagesInstall+=(nodejs)
     packagesInstall+=(npm)
 
-    snapsInstall+=("code --classic")
+    if [ "$srcPref" == "snap" ]; then
+        snapsInstall+=(codium)
+        flatpaksRemove+=(com.vscodium.codium)
+    else
+        flatpaksInstall+=(com.vscodium.codium)
+        snapsRemove+=(codium)
+    fi
 
     if [ "$srcPref" == "repo" ]; then
         packagesInstall+=(meld)
@@ -235,11 +260,37 @@ fi
 
 if [ $(confirm "Used for home?") ]; then
     packagesInstall+=(simple-scan)
-    packagesInstall+=(thunderbird)
-    packagesInstall+=(transmission-gtk)
 
-    snapsInstall+=("slack --classic")
-    snapsInstall+=(spotify)
+    if [ "$srcPref" == "snap" ]; then
+        snapsInstall+=("slack --classic")
+        snapsInstall+=(spotify)
+
+        flatpaksRemove+=(com.slack.Slack)
+        flatpaksRemove+=(com.spotify.Client)
+    else
+        flatpaksInstall+=(com.slack.Slack)
+        flatpaksInstall+=(com.spotify.Client)
+
+        snapsRemove+=(slack)
+        snapsRemove+=(spotify)
+    fi
+
+    if [ "$srcPref" == "snap" ]; then
+        snapsInstall+=(thunderbird)
+
+        flatpaksRemove+=(org.mozilla.Thunderbird)
+        packagesRemove+=(thunderbird)
+    elif [ "$srcPref" == "flatpak" ]; then
+        flatpaksInstall+=(org.mozilla.Thunderbird)
+
+        snapsRemove+=(thunderbird)
+        packagesRemove+=(thunderbird)
+    else
+        packagesInstall+=(thunderbird)
+
+        flatpaksRemove+=(org.mozilla.Thunderbird)
+        snapsRemove+=(thunderbird)
+    fi
 
     if [ "$srcPref" == "repo" ]; then
         packagesInstall+=(deja-dup)
@@ -250,6 +301,7 @@ if [ $(confirm "Used for home?") ]; then
         packagesInstall+=(gnome-clocks)
         packagesInstall+=(gnome-photos)
         packagesInstall+=(gnome-weather)
+        packagesInstall+=(transmission-gtk)
 
         flatpaksRemove+=(org.gnome.DejaDup)
         flatpaksRemove+=(org.gnome.Books)
@@ -259,6 +311,7 @@ if [ $(confirm "Used for home?") ]; then
         flatpaksRemove+=(org.gnome.clocks)
         flatpaksRemove+=(org.gnome.Photos)
         flatpaksRemove+=(org.gnome.Weather)
+        flatpaksRemove+=(com.transmissionbt.Transmission)
     else
         flatpaksInstall+=(org.gnome.DejaDup)
         flatpaksInstall+=(org.gnome.Books)
@@ -268,6 +321,7 @@ if [ $(confirm "Used for home?") ]; then
         flatpaksInstall+=(org.gnome.clocks)
         flatpaksInstall+=(org.gnome.Photos)
         flatpaksInstall+=(org.gnome.Weather)
+        flatpaksInstall+=(com.transmissionbt.Transmission)
 
         packagesRemove+=(deja-dup)
         packagesRemove+=(gnome-books)
@@ -277,10 +331,10 @@ if [ $(confirm "Used for home?") ]; then
         packagesRemove+=(gnome-clocks)
         packagesRemove+=(gnome-photos)
         packagesRemove+=(gnome-weather)
+        packagesRemove+=(transmission-gtk)
     fi
 
-    # handle chromium
-    if [ "$pm" == "dnf" ]; then
+    if [ "$distro" == "fedora" ]; then
         if [ "$srcPref" == "repo" ]; then
             packagesInstall+=(chromium)
             snapsRemove+=(chromium)
@@ -297,39 +351,38 @@ if [ $(confirm "Used for multi media?") ]; then
     packagesInstall+=(ffmpeg)
     packagesInstall+=(youtube-dl)
 
-    # handle blender
-    if [ "$srcPref" == "repo" ]; then
-        packagesInstall+=(blender)
-        snapsRemove+=(blender)
-    else
-        snapsInstall+=("blender --classic")
-        packagesRemove+=(blender)
-    fi
-
-    # handle gimp
-    if [ "$srcPref" == "repo" ]; then
-        packagesInstall+=(gimp)
-        flatpaksRemove+=(org.gimp.GIMP)
-    else
-        flatpaksInstall+=(org.gimp.GIMP)
-        packagesRemove+=(gimp)
-    fi
-
-    # handle VLC
     if [ "$srcPref" == "snap" ]; then
+        snapsInstall+=("blender --classic")
+        snapsInstall+=(gimp)
         snapsInstall+=(vlc)
 
+        flatpaksRemove+=(org.blender.Blender)
+        flatpaksRemove+=(org.gimp.GIMP)
         flatpaksRemove+=(org.videolan.VLC)
+        packagesRemove+=(blender)
+        packagesRemove+=(gimp)
         packagesRemove+=(vlc)
     elif [ "$srcPref" == "flatpak" ]; then
+        flatpaksInstall+=(org.blender.Blender)
+        flatpaksInstall+=(org.gimp.GIMP)
         flatpaksInstall+=(org.videolan.VLC)
 
+        snapsRemove+=(blender)
+        snapsRemove+=(gimp)
         snapsRemove+=(vlc)
+        packagesRemove+=(blender)
+        packagesRemove+=(gimp)
         packagesRemove+=(vlc)
     else
+        packagesInstall+=(blender)
+        packagesInstall+=(gimp)
         packagesInstall+=(vlc)
 
+        flatpaksRemove+=(org.blender.Blender)
+        flatpaksRemove+=(org.gimp.GIMP)
         flatpaksRemove+=(org.videolan.VLC)
+        snapsRemove+=(blender)
+        snapsRemove+=(gimp)
         snapsRemove+=(vlc)
     fi
 fi
@@ -470,7 +523,7 @@ if [ "$de" == "gnome" ]; then
 
     # Set Favorites
     # gsettings get org.gnome.shell favorite-apps
-    gsettings set org.gnome.shell favorite-apps "['org.gnome.Nautilus.desktop', 'firefox.desktop', 'org.gnome.gedit.desktop', 'org.gnome.Terminal.desktop']"
+    gsettings set org.gnome.shell favorite-apps "['org.gnome.Nautilus.desktop', 'org.gnome.gedit.desktop', 'org.gnome.Terminal.desktop']"
 fi
 
 # Display neofetch to finish
