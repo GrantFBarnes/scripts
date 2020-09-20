@@ -215,6 +215,7 @@ declare -a flatpaksRemove
 
 packagesInstall+=(baobab)
 packagesInstall+=(exfat-utils)
+packagesInstall+=(firefox)
 packagesInstall+=(flatpak)
 packagesInstall+=(gedit)
 packagesInstall+=(gnome-system-monitor)
@@ -237,28 +238,19 @@ if [ "$distro" == "fedora" ]; then
 fi
 
 if [ "$srcPref" == "snap" ]; then
-    snapsInstall+=(firefox)
     snapsInstall+=(libreoffice)
 
-    flatpaksRemove+=(org.mozilla.firefox)
     flatpaksRemove+=(org.libreoffice.LibreOffice)
-    packagesRemove+=(firefox)
     packagesRemove+=(libreoffice*)
 elif [ "$srcPref" == "flatpak" ]; then
-    flatpaksInstall+=(org.mozilla.firefox)
     flatpaksInstall+=(org.libreoffice.LibreOffice)
 
-    snapsRemove+=(firefox)
     snapsRemove+=(libreoffice)
-    packagesRemove+=(firefox)
     packagesRemove+=(libreoffice*)
 else
-    packagesInstall+=(firefox)
     packagesInstall+=(libreoffice)
 
-    flatpaksRemove+=(org.mozilla.firefox)
     flatpaksRemove+=(org.libreoffice.LibreOffice)
-    snapsRemove+=(firefox)
     snapsRemove+=(libreoffice)
 fi
 
@@ -340,6 +332,7 @@ if [ $(confirm "Used for home?") ]; then
     fi
 
     if [ "$distro" == "ubuntu" ]; then
+        packagesInstall+=(virtualbox)
         packagesInstall+=(usb-creator-gtk)
     fi
 
