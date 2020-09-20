@@ -147,18 +147,57 @@ fi
 
 individual=false
 srcPref="repo"
+repoOverSnap=true
+repoOverFlatpak=true
+snapOverFlatpak=true
 if [ "$distro" == "centos" ]; then
     individual=true
     srcPref="flatpak"
+    repoOverSnap=false
+    repoOverFlatpak=false
+    snapOverFlatpak=false
 else
     if [ $(confirm "Would you like to install packages individually?") ]; then
         individual=true
     fi
 
-    if [ $(confirm "Do you prefer flatpaks over repo?") ]; then
+    if [ $(confirm "Do you prefer snap over repo?") ]; then
+        repoOverSnap=false
+    else
+        repoOverSnap=true
+    fi
+
+    if [ $(confirm "Do you prefer flatpak over repo?") ]; then
+        repoOverFlatpak=false
+    else
+        repoOverFlatpak=true
+    fi
+
+    if [ "$repoOverSnap" == true ] && [ "$repoOverFlatpak" == true ]; then
+        # Prefer repo over both snaps and flatpaks
+        srcPref="repo"
+        if [ $(confirm "Do you prefer flatpak over snap?") ]; then
+            snapOverFlatpak=false
+        else
+            snapOverFlatpak=true
+        fi
+    elif [ "$repoOverSnap" == true ]; then
+        # Prefer repo over snap, but flatpak over repo
         srcPref="flatpak"
-    elif [ $(confirm "Do you prefer snaps over repo?") ]; then
+        snapOverFlatpak=false
+    elif [ "$repoOverFlatpak" == true ]; then
+        # Prefer repo over flatpak, but snap over repo
         srcPref="snap"
+        snapOverFlatpak=true
+    else 
+        # Prefer both snap and flatpak over repo
+        if [ $(confirm "Do you prefer flatpak over snap?") ]; then
+            srcPref="flatpak"
+            snapOverFlatpak=false
+        else
+            srcPref="snap"
+            snapOverFlatpak=true
+        fi
     fi
 fi
 
@@ -174,9 +213,11 @@ declare -a packagesRemove
 declare -a snapsRemove
 declare -a flatpaksRemove
 
+packagesInstall+=(baobab)
 packagesInstall+=(exfat-utils)
 packagesInstall+=(flatpak)
 packagesInstall+=(gedit)
+packagesInstall+=(gnome-system-monitor)
 packagesInstall+=(gnome-terminal)
 packagesInstall+=(gnome-tweaks)
 packagesInstall+=(nano)
@@ -193,20 +234,6 @@ fi
 
 if [ "$distro" == "fedora" ]; then
     packagesInstall+=(fedora-icon-theme)
-fi
-
-if [ "$srcPref" == "repo" ]; then
-    packagesInstall+=(baobab)
-    packagesInstall+=(gnome-system-monitor)
-
-    flatpaksRemove+=(org.gnome.baobab)
-    snapsRemove+=(gnome-system-monitor)
-else
-    flatpaksInstall+=(org.gnome.baobab)
-    snapsInstall+=(gnome-system-monitor)
-
-    packagesRemove+=(baobab)
-    packagesRemove+=(gnome-system-monitor)
 fi
 
 if [ "$srcPref" == "snap" ]; then
@@ -241,15 +268,9 @@ if [ $(confirm "Used for development?") ]; then
     packagesInstall+=(nodejs)
     packagesInstall+=(npm)
 
-    if [ "$srcPref" == "snap" ]; then
-        snapsInstall+=(codium)
-        flatpaksRemove+=(com.vscodium.codium)
-    else
-        flatpaksInstall+=(com.vscodium.codium)
-        snapsRemove+=(codium)
-    fi
+    snapsInstall+=("code --classic")
 
-    if [ "$srcPref" == "repo" ]; then
+    if [ "$repoOverFlatpak" == true ]; then
         packagesInstall+=(meld)
         flatpaksRemove+=(org.gnome.meld)
     else
@@ -260,8 +281,9 @@ fi
 
 if [ $(confirm "Used for home?") ]; then
     packagesInstall+=(simple-scan)
+    packagesInstall+=(transmission-gtk)
 
-    if [ "$srcPref" == "snap" ]; then
+    if [ "$snapOverFlatpak" == true ]; then
         snapsInstall+=("slack --classic")
         snapsInstall+=(spotify)
 
@@ -275,24 +297,7 @@ if [ $(confirm "Used for home?") ]; then
         snapsRemove+=(spotify)
     fi
 
-    if [ "$srcPref" == "snap" ]; then
-        snapsInstall+=(thunderbird)
-
-        flatpaksRemove+=(org.mozilla.Thunderbird)
-        packagesRemove+=(thunderbird)
-    elif [ "$srcPref" == "flatpak" ]; then
-        flatpaksInstall+=(org.mozilla.Thunderbird)
-
-        snapsRemove+=(thunderbird)
-        packagesRemove+=(thunderbird)
-    else
-        packagesInstall+=(thunderbird)
-
-        flatpaksRemove+=(org.mozilla.Thunderbird)
-        snapsRemove+=(thunderbird)
-    fi
-
-    if [ "$srcPref" == "repo" ]; then
+    if [ "$repoOverFlatpak" == true ]; then
         packagesInstall+=(deja-dup)
         packagesInstall+=(gnome-books)
         packagesInstall+=(gnome-boxes)
@@ -301,7 +306,7 @@ if [ $(confirm "Used for home?") ]; then
         packagesInstall+=(gnome-clocks)
         packagesInstall+=(gnome-photos)
         packagesInstall+=(gnome-weather)
-        packagesInstall+=(transmission-gtk)
+        packagesInstall+=(thunderbird)
 
         flatpaksRemove+=(org.gnome.DejaDup)
         flatpaksRemove+=(org.gnome.Books)
@@ -311,7 +316,7 @@ if [ $(confirm "Used for home?") ]; then
         flatpaksRemove+=(org.gnome.clocks)
         flatpaksRemove+=(org.gnome.Photos)
         flatpaksRemove+=(org.gnome.Weather)
-        flatpaksRemove+=(com.transmissionbt.Transmission)
+        flatpaksRemove+=(org.mozilla.Thunderbird)
     else
         flatpaksInstall+=(org.gnome.DejaDup)
         flatpaksInstall+=(org.gnome.Books)
@@ -321,7 +326,7 @@ if [ $(confirm "Used for home?") ]; then
         flatpaksInstall+=(org.gnome.clocks)
         flatpaksInstall+=(org.gnome.Photos)
         flatpaksInstall+=(org.gnome.Weather)
-        flatpaksInstall+=(com.transmissionbt.Transmission)
+        flatpaksInstall+=(org.mozilla.Thunderbird)
 
         packagesRemove+=(deja-dup)
         packagesRemove+=(gnome-books)
@@ -331,11 +336,15 @@ if [ $(confirm "Used for home?") ]; then
         packagesRemove+=(gnome-clocks)
         packagesRemove+=(gnome-photos)
         packagesRemove+=(gnome-weather)
-        packagesRemove+=(transmission-gtk)
+        packagesRemove+=(thunderbird)
+    fi
+
+    if [ "$distro" == "ubuntu" ]; then
+        packagesInstall+=(usb-creator-gtk)
     fi
 
     if [ "$distro" == "fedora" ]; then
-        if [ "$srcPref" == "repo" ]; then
+        if [ "$repoOverSnap" == true ]; then
             packagesInstall+=(chromium)
             snapsRemove+=(chromium)
         else
@@ -351,38 +360,37 @@ if [ $(confirm "Used for multi media?") ]; then
     packagesInstall+=(ffmpeg)
     packagesInstall+=(youtube-dl)
 
+    if [ "$repoOverFlatpak" == true ]; then
+        packagesInstall+=(gimp)
+        flatpaksRemove+=(org.gimp.GIMP)
+    else
+        flatpaksInstall+=(org.gimp.GIMP)
+        packagesRemove+=(gimp)
+    fi
+
     if [ "$srcPref" == "snap" ]; then
         snapsInstall+=("blender --classic")
-        snapsInstall+=(gimp)
         snapsInstall+=(vlc)
 
         flatpaksRemove+=(org.blender.Blender)
-        flatpaksRemove+=(org.gimp.GIMP)
         flatpaksRemove+=(org.videolan.VLC)
         packagesRemove+=(blender)
-        packagesRemove+=(gimp)
         packagesRemove+=(vlc)
     elif [ "$srcPref" == "flatpak" ]; then
         flatpaksInstall+=(org.blender.Blender)
-        flatpaksInstall+=(org.gimp.GIMP)
         flatpaksInstall+=(org.videolan.VLC)
 
         snapsRemove+=(blender)
-        snapsRemove+=(gimp)
         snapsRemove+=(vlc)
         packagesRemove+=(blender)
-        packagesRemove+=(gimp)
         packagesRemove+=(vlc)
     else
         packagesInstall+=(blender)
-        packagesInstall+=(gimp)
         packagesInstall+=(vlc)
 
         flatpaksRemove+=(org.blender.Blender)
-        flatpaksRemove+=(org.gimp.GIMP)
         flatpaksRemove+=(org.videolan.VLC)
         snapsRemove+=(blender)
-        snapsRemove+=(gimp)
         snapsRemove+=(vlc)
     fi
 fi
