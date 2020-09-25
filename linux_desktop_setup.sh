@@ -226,6 +226,12 @@ packagesInstall+=(neofetch)
 packagesInstall+=(snapd)
 
 snapsInstall+=(hello-world)
+snapsInstall+=(snap-store)
+
+if [ "$de" == "gnome" ]; then
+    packagesInstall+=(gnome-software)
+    packagesInstall+=(gnome-software-plugin-flatpak)
+fi
 
 if [ "$pm" == "apt" ]; then
     packagesInstall+=(exfat-fuse)
@@ -336,7 +342,7 @@ if [ $(confirm "Used for home?") ]; then
         packagesInstall+=(usb-creator-gtk)
     fi
 
-    if [ "$distro" == "fedora" ]; then
+    if [ "$pm" == "dnf" ]; then
         if [ "$repoOverSnap" == true ]; then
             packagesInstall+=(chromium)
             snapsRemove+=(chromium)
@@ -390,6 +396,7 @@ fi
 
 if [ $(confirm "Used for gaming?") ]; then
     flatpaksInstall+=(com.valvesoftware.Steam)
+    snapsInstall+=(xonotic)
 fi
 
 ################################################################################
@@ -438,12 +445,12 @@ fi
 # Determine Packages to Remove
 
 packagesRemove+=(cheese)
+packagesRemove+=(evolution)
 packagesRemove+=(mpv)
 packagesRemove+=(rhythmbox)
 packagesRemove+=(totem)
 
 snapsRemove+=(hello-world)
-snapsRemove+=(snap-store)
 
 if [ "$distro" == "mint" ] || [ "$distro" == "lmde" ]; then
     packagesRemove+=(celluloid)
@@ -465,12 +472,14 @@ elif [ "$distro" == "ubuntu" ]; then
 elif [ "$distro" == "pop" ]; then
     packagesRemove+=(geary)
     packagesRemove+=(popsicle)
+elif [ "$distro" == "centos" ]; then
+    packagesRemove+=(pidgin)
 fi
 
 if [ "$de" == "gnome" ]; then
     packagesRemove+=(gnome-contacts)
     packagesRemove+=(gnome-maps)
-    packagesRemove+=(gnome-software)
+    packagesRemove+=(gnome-software-plugin-snap)
 fi
 
 ################################################################################
