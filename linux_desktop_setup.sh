@@ -224,6 +224,7 @@ packagesInstall+=(gnome-tweaks)
 packagesInstall+=(nano)
 packagesInstall+=(neofetch)
 packagesInstall+=(snapd)
+packagesInstall+=(thunderbird)
 
 snapsInstall+=(hello-world)
 snapsInstall+=(snap-store)
@@ -304,7 +305,6 @@ if [ $(confirm "Used for home?") ]; then
         packagesInstall+=(gnome-clocks)
         packagesInstall+=(gnome-photos)
         packagesInstall+=(gnome-weather)
-        packagesInstall+=(thunderbird)
 
         flatpaksRemove+=(org.gnome.DejaDup)
         flatpaksRemove+=(org.gnome.Books)
@@ -314,7 +314,6 @@ if [ $(confirm "Used for home?") ]; then
         flatpaksRemove+=(org.gnome.clocks)
         flatpaksRemove+=(org.gnome.Photos)
         flatpaksRemove+=(org.gnome.Weather)
-        flatpaksRemove+=(org.mozilla.Thunderbird)
     else
         flatpaksInstall+=(org.gnome.DejaDup)
         flatpaksInstall+=(org.gnome.Books)
@@ -324,7 +323,6 @@ if [ $(confirm "Used for home?") ]; then
         flatpaksInstall+=(org.gnome.clocks)
         flatpaksInstall+=(org.gnome.Photos)
         flatpaksInstall+=(org.gnome.Weather)
-        flatpaksInstall+=(org.mozilla.Thunderbird)
 
         packagesRemove+=(deja-dup)
         packagesRemove+=(gnome-books)
@@ -334,7 +332,6 @@ if [ $(confirm "Used for home?") ]; then
         packagesRemove+=(gnome-clocks)
         packagesRemove+=(gnome-photos)
         packagesRemove+=(gnome-weather)
-        packagesRemove+=(thunderbird)
     fi
 
     if [ "$distro" == "ubuntu" ]; then
