@@ -224,14 +224,12 @@ packagesInstall+=(gnome-tweaks)
 packagesInstall+=(nano)
 packagesInstall+=(neofetch)
 packagesInstall+=(snapd)
-packagesInstall+=(thunderbird)
 
 snapsInstall+=(hello-world)
 snapsInstall+=(snap-store)
 
 if [ "$de" == "gnome" ]; then
     packagesInstall+=(gnome-software)
-    packagesInstall+=(gnome-software-plugin-flatpak)
 fi
 
 if [ "$pm" == "apt" ]; then
@@ -242,6 +240,8 @@ fi
 
 if [ "$distro" == "fedora" ]; then
     packagesInstall+=(fedora-icon-theme)
+elif [ "$distro" == "ubuntu" ]; then
+    packagesInstall+=(gnome-software-plugin-flatpak)
 fi
 
 if [ "$srcPref" == "snap" ]; then
@@ -280,6 +280,7 @@ fi
 
 if [ $(confirm "Used for home?") ]; then
     packagesInstall+=(simple-scan)
+    packagesInstall+=(thunderbird)
     packagesInstall+=(transmission-gtk)
 
     if [ "$snapOverFlatpak" == true ]; then
