@@ -279,6 +279,8 @@ if [ $(confirm "Used for development?") ]; then
 fi
 
 if [ $(confirm "Used for home?") ]; then
+    flatpaksInstall+=(org.gnome.Epiphany)
+    packagesInstall+=(texstudio)
     packagesInstall+=(simple-scan)
     packagesInstall+=(thunderbird)
     packagesInstall+=(transmission-gtk)
