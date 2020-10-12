@@ -1,5 +1,5 @@
 #!/bin/bash
-# Purpose: Setup fresh install of Linux Desktop (Fedora/Mint/Ubuntu)
+# Purpose: Setup fresh install of Linux Desktop (Fedora/Ubuntu)
 ################################################################################
 
 function confirm() {
@@ -352,6 +352,12 @@ if [ $(confirm "Used for home?") ]; then
         fi
     else
         snapsInstall+=(chromium)
+    fi
+
+    if [ "$pm" == "dnf" ]; then
+        packagesInstall+=(imagemagick)
+    elif [ "$pm" == "apt" ]; then
+        packagesInstall+=(ImageMagick)
     fi
 fi
 
