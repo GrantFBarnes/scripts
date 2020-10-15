@@ -87,6 +87,10 @@ elif [[ $osName == *"CentOS"* ]]; then
     distro="centos"
     pm="dnf"
     de="gnome"
+elif [[ $osName == *"Debian"* ]]; then
+    distro="debian"
+    pm="apt"
+    de="gnome"
 elif [[ $osName == *"LMDE"* ]]; then
     distro="lmde"
     pm="apt"
@@ -150,17 +154,17 @@ srcPref="repo"
 repoOverSnap=true
 repoOverFlatpak=true
 snapOverFlatpak=true
-if [ "$distro" == "centos" ]; then
+
+if [ $(confirm "Would you like to install packages individually?") ]; then
     individual=true
+fi
+
+if [ "$distro" == "centos" ]; then
     srcPref="flatpak"
     repoOverSnap=false
     repoOverFlatpak=false
     snapOverFlatpak=false
 else
-    if [ $(confirm "Would you like to install packages individually?") ]; then
-        individual=true
-    fi
-
     if [ $(confirm "Do you prefer snap over repo?") ]; then
         repoOverSnap=false
     else
@@ -215,7 +219,6 @@ declare -a flatpaksRemove
 
 packagesInstall+=(baobab)
 packagesInstall+=(exfat-utils)
-packagesInstall+=(firefox)
 packagesInstall+=(flatpak)
 packagesInstall+=(gedit)
 packagesInstall+=(gnome-system-monitor)
@@ -227,6 +230,12 @@ packagesInstall+=(snapd)
 
 snapsInstall+=(hello-world)
 snapsInstall+=(snap-store)
+
+if [ "$distro" == "debian" ]; then
+    packagesInstall+=(firefox-esr)
+else
+    packagesInstall+=(firefox)
+fi
 
 if [ "$de" == "gnome" ]; then
     packagesInstall+=(gnome-software)
@@ -280,7 +289,6 @@ fi
 
 if [ $(confirm "Used for home?") ]; then
     flatpaksInstall+=(org.gnome.Epiphany)
-    packagesInstall+=(texstudio)
     packagesInstall+=(simple-scan)
     packagesInstall+=(thunderbird)
     packagesInstall+=(transmission-gtk)
@@ -355,15 +363,18 @@ if [ $(confirm "Used for home?") ]; then
     fi
 
     if [ "$pm" == "dnf" ]; then
-        packagesInstall+=(imagemagick)
-    elif [ "$pm" == "apt" ]; then
         packagesInstall+=(ImageMagick)
+    elif [ "$pm" == "apt" ]; then
+        packagesInstall+=(imagemagick)
     fi
 fi
 
 if [ $(confirm "Used for multi media?") ]; then
-    packagesInstall+=(ffmpeg)
     packagesInstall+=(youtube-dl)
+
+    if [ "$distro" != "centos" ]; then
+        packagesInstall+=(ffmpeg)
+    fi
 
     if [ "$repoOverFlatpak" == true ]; then
         packagesInstall+=(gimp)
@@ -466,15 +477,33 @@ if [ "$distro" == "mint" ] || [ "$distro" == "lmde" ]; then
     packagesRemove+=(pix*)
     packagesRemove+=(warpinator)
     packagesRemove+=(xed)
-elif [ "$distro" == "ubuntu" ]; then
+elif [ "$distro" == "ubuntu" ] || [ "$distro" == "debian" ]; then
     packagesRemove+=(aisleriot)
+    packagesRemove+=(five-or-more)
+    packagesRemove+=(four-in-a-row)
+    packagesRemove+=(gnome-chess)
+    packagesRemove+=(gnome-klotski)
     packagesRemove+=(gnome-mahjongg)
     packagesRemove+=(gnome-mines)
+    packagesRemove+=(gnome-music)
+    packagesRemove+=(gnome-nibbles)
+    packagesRemove+=(gnome-robots)
     packagesRemove+=(gnome-sudoku)
+    packagesRemove+=(gnome-tetravex)
     packagesRemove+=(gnome-todo)
     packagesRemove+=(remmina*)
     packagesRemove+=(seahorse)
     packagesRemove+=(shotwell*)
+
+    if [ "$distro" == "debian" ]; then
+        packagesRemove+=(anthy*)
+        packagesRemove+=(fcitx*)
+        packagesRemove+=(goldendict)
+        packagesRemove+=(hitori)
+        packagesRemove+=(tali)
+        packagesRemove+=(quadrapassel)
+        packagesRemove+=(xterm)
+    fi
 elif [ "$distro" == "pop" ]; then
     packagesRemove+=(geary)
     packagesRemove+=(popsicle)
