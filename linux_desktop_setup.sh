@@ -544,6 +544,8 @@ if [ ${#flatpaksRemove[@]} -gt 0 ]; then
     done
 fi
 
+sudo flatpak remove --unused
+
 # Snaps
 
 if [ ${#snapsRemove[@]} -gt 0 ]; then
@@ -551,6 +553,11 @@ if [ ${#snapsRemove[@]} -gt 0 ]; then
         snap_manager remove $i
     done
 fi
+
+LANG=en_US.UTF-8 snap list --all | awk '/disabled/{print $1, $3}' |
+    while read snapname revision; do
+        sudo snap remove "$snapname" --revision="$revision"
+    done
 
 ################################################################################
 
