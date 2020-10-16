@@ -223,7 +223,6 @@ packagesInstall+=(flatpak)
 packagesInstall+=(gedit)
 packagesInstall+=(gnome-system-monitor)
 packagesInstall+=(gnome-terminal)
-packagesInstall+=(gnome-tweaks)
 packagesInstall+=(nano)
 packagesInstall+=(neofetch)
 packagesInstall+=(snapd)
@@ -238,7 +237,10 @@ else
 fi
 
 if [ "$de" == "gnome" ]; then
-    packagesInstall+=(gnome-software)
+    packagesInstall+=(gnome-tweaks)
+    if [ "$distro" != "pop" ]; then
+        packagesInstall+=(gnome-software)
+    fi
 fi
 
 if [ "$pm" == "apt" ]; then
