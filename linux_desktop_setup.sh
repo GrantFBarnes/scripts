@@ -1,13 +1,13 @@
 #!/bin/bash
-# Purpose: Setup fresh install of Linux Desktop (Fedora/Ubuntu)
+# Purpose: Setup fresh install of GNU/Linux Desktop
 ################################################################################
 
 function confirm() {
-    read -p "$1 (y/N) " ans
-    if [ "$ans" == "y" ]; then
-        echo "confirmed"
+    local height=7
+    if [ -n "$2" ]; then
+        height=$2
     fi
-    echo ""
+    whiptail --title "Set up GNU/Linux Desktop" --yesno --defaultno "$1" $height 50
 }
 
 function check_exit_status() {
@@ -15,7 +15,8 @@ function check_exit_status() {
         echo "Success"
     else
         echo "[ERROR] Process Failed!"
-        if [ $(confirm "Exit script?") ]; then
+        read -p "Exit? (y/N) " ans
+        if [ "$ans" == "y" ]; then
             exit 1
         fi
     fi
@@ -114,9 +115,10 @@ else
     exit 1
 fi
 
-echo "---------------------------------------------------------------------"
-echo "Distrobution Found: $distro"
-echo "---------------------------------------------------------------------"
+confirm "   Distrobution: $distro\n    Desktop Env: $de\nPackage Manager: $pm\n\nWould you like to continue?" 11
+if [ $? -eq 1 ]; then
+    exit 0
+fi
 
 ################################################################################
 
@@ -149,14 +151,15 @@ fi
 
 ################################################################################
 
-individual=false
+individual=true
 srcPref="repo"
 repoOverSnap=true
 repoOverFlatpak=true
 snapOverFlatpak=true
 
-if [ $(confirm "Would you like to install packages individually?") ]; then
-    individual=true
+confirm "Would you like to bulk install packages?"
+if [ $? -eq 0 ]; then
+    individual=false
 fi
 
 if [ "$distro" == "centos" ]; then
@@ -165,13 +168,15 @@ if [ "$distro" == "centos" ]; then
     repoOverFlatpak=false
     snapOverFlatpak=false
 else
-    if [ $(confirm "Do you prefer snap over repo?") ]; then
+    confirm "Do you prefer snap over repository?"
+    if [ $? -eq 0 ]; then
         repoOverSnap=false
     else
         repoOverSnap=true
     fi
 
-    if [ $(confirm "Do you prefer flatpak over repo?") ]; then
+    confirm "Do you prefer flatpak over repository?"
+    if [ $? -eq 0 ]; then
         repoOverFlatpak=false
     else
         repoOverFlatpak=true
@@ -180,7 +185,8 @@ else
     if [ "$repoOverSnap" == true ] && [ "$repoOverFlatpak" == true ]; then
         # Prefer repo over both snaps and flatpaks
         srcPref="repo"
-        if [ $(confirm "Do you prefer flatpak over snap?") ]; then
+        confirm "Do you prefer flatpak over snap?"
+        if [ $? -eq 0 ]; then
             snapOverFlatpak=false
         else
             snapOverFlatpak=true
@@ -193,9 +199,10 @@ else
         # Prefer repo over flatpak, but snap over repo
         srcPref="snap"
         snapOverFlatpak=true
-    else 
+    else
         # Prefer both snap and flatpak over repo
-        if [ $(confirm "Do you prefer flatpak over snap?") ]; then
+        confirm "Do you prefer flatpak over snap?"
+        if [ $? -eq 0 ]; then
             srcPref="flatpak"
             snapOverFlatpak=false
         else
@@ -272,7 +279,8 @@ else
     snapsRemove+=(libreoffice)
 fi
 
-if [ $(confirm "Used for development?") ]; then
+confirm "Will this desktop be used for development?"
+if [ $? -eq 0 ]; then
     packagesInstall+=(git)
     packagesInstall+=(net-tools)
     packagesInstall+=(nodejs)
@@ -289,7 +297,8 @@ if [ $(confirm "Used for development?") ]; then
     fi
 fi
 
-if [ $(confirm "Used for home?") ]; then
+confirm "Will this desktop be used for home?"
+if [ $? -eq 0 ]; then
     flatpaksInstall+=(org.gnome.Epiphany)
     flatpaksInstall+=(org.tug.texworks)
     packagesInstall+=(simple-scan)
@@ -372,7 +381,8 @@ if [ $(confirm "Used for home?") ]; then
     fi
 fi
 
-if [ $(confirm "Used for multi media?") ]; then
+confirm "Will this desktop be used for multi media?"
+if [ $? -eq 0 ]; then
     packagesInstall+=(youtube-dl)
 
     if [ "$distro" != "centos" ]; then
@@ -414,7 +424,8 @@ if [ $(confirm "Used for multi media?") ]; then
     fi
 fi
 
-if [ $(confirm "Used for gaming?") ]; then
+confirm "Will this desktop be used for gaming?" 7 41
+if [ $? -eq 0 ]; then
     flatpaksInstall+=(com.valvesoftware.Steam)
     snapsInstall+=(xonotic)
 fi
