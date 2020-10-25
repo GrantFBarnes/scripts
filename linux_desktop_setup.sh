@@ -140,6 +140,7 @@ if [ "$pm" == "dnf" ]; then
         fi
 
         update
+        package_manager install newt
     fi
 elif [ "$distro" == "mint" ]; then
     nosnap=/etc/apt/preferences.d/nosnap.pref
@@ -309,12 +310,12 @@ function basePackages() {
 
 function developmentPackages() {
     options=()
-    options+=("code" "Visual Studio Code" on)
-    options+=("git" "Git" on)
-    options+=("meld" "Gnome Meld File Comparitor" on)
-    options+=("net-tools" "Network Packages" on)
-    options+=("nodejs" "NodeJS" on)
-    options+=("npm" "Node Package Manager" on)
+    options+=("code" "Visual Studio Code" off)
+    options+=("git" "Git" off)
+    options+=("meld" "Gnome Meld File Comparitor" off)
+    options+=("net-tools" "Network Packages" off)
+    options+=("nodejs" "NodeJS" off)
+    options+=("npm" "Node Package Manager" off)
 
     selection=$(whiptail --title "Set up GNU/Linux Desktop" --checklist "Select Packages to Install:" --cancel-button "Cancel" --default-item "." 0 0 0 "${options[@]}" 3>&1 1>&2 2>&3)
     if [ $? -eq 1 ]; then
@@ -345,27 +346,27 @@ function developmentPackages() {
 
 function homePackages() {
     options=()
-    options+=("chromium" "Chromium Web Browser" on)
-    options+=("epiphany" "Gnome Web Browser" on)
-    options+=("deja-dup" "Backup Tool" on)
-    options+=("gnome-books" "Gnome Books" on)
-    options+=("gnome-boxes" "Gnome Boxes VM Manager" on)
-    options+=("gnome-calculator" "Gnome Calculator" on)
-    options+=("gnome-calendar" "Gnome Calendar" on)
-    options+=("gnome-clocks" "Gnome Clocks" on)
-    options+=("gnome-photos" "Gnome Photos" on)
-    options+=("gnome-weather" "Gnome Weather" on)
-    options+=("imagemagick" "Image Magick" on)
-    options+=("slack" "Slack" on)
-    options+=("simple-scan" "Scanner Application" on)
-    options+=("spotify" "Spotify" on)
-    options+=("texworks" "LaTeX Editor" on)
-    options+=("thunderbird" "Thunderbird Email Client" on)
-    options+=("transmission-gtk" "Transmission Torrent" on)
+    options+=("chromium" "Chromium Web Browser" off)
+    options+=("epiphany" "Gnome Web Browser" off)
+    options+=("deja-dup" "Backup Tool" off)
+    options+=("gnome-books" "Gnome Books" off)
+    options+=("gnome-boxes" "Gnome Boxes VM Manager" off)
+    options+=("gnome-calculator" "Gnome Calculator" off)
+    options+=("gnome-calendar" "Gnome Calendar" off)
+    options+=("gnome-clocks" "Gnome Clocks" off)
+    options+=("gnome-photos" "Gnome Photos" off)
+    options+=("gnome-weather" "Gnome Weather" off)
+    options+=("imagemagick" "Image Magick" off)
+    options+=("slack" "Slack" off)
+    options+=("simple-scan" "Scanner Application" off)
+    options+=("spotify" "Spotify" off)
+    options+=("texworks" "LaTeX Editor" off)
+    options+=("thunderbird" "Thunderbird Email Client" off)
+    options+=("transmission-gtk" "Transmission Torrent" off)
 
     if [ "$distro" == "ubuntu" ]; then
-        options+=("virtualbox" "Virtual Box VM Manager" on)
-        options+=("usb-creator-gtk" "USB Creator" on)
+        options+=("virtualbox" "Virtual Box VM Manager" off)
+        options+=("usb-creator-gtk" "USB Creator" off)
     fi
 
     selection=$(whiptail --title "Set up GNU/Linux Desktop" --checklist "Select Packages to Install:" --cancel-button "Cancel" --default-item "." 0 0 0 "${options[@]}" 3>&1 1>&2 2>&3)
@@ -495,12 +496,12 @@ function homePackages() {
 
 function mediaPackages() {
     options=()
-    options+=("blender" "3D Modleler and Video Editor" on)
-    options+=("gimp" "GNU Image Manipulation Program" on)
-    options+=("vlc" "Media Player" on)
+    options+=("blender" "3D Modleler and Video Editor" off)
+    options+=("gimp" "GNU Image Manipulation Program" off)
+    options+=("vlc" "Media Player" off)
 
     if [ "$distro" != "centos" ]; then
-        options+=("ffmpeg" "ffmpeg to watch videos" on)
+        options+=("ffmpeg" "ffmpeg to watch videos" off)
     fi
 
     selection=$(whiptail --title "Set up GNU/Linux Desktop" --checklist "Select Packages to Install:" --cancel-button "Cancel" --default-item "." 0 0 0 "${options[@]}" 3>&1 1>&2 2>&3)
@@ -565,8 +566,8 @@ function mediaPackages() {
 
 function gamingPackages() {
     options=()
-    options+=("steam" "Steam" on)
-    options+=("xonotic" "Open Source FPS" on)
+    options+=("steam" "Steam" off)
+    options+=("xonotic" "Open Source FPS" off)
 
     selection=$(whiptail --title "Set up GNU/Linux Desktop" --checklist "Select Packages to Install:" --cancel-button "Cancel" --default-item "." 0 0 0 "${options[@]}" 3>&1 1>&2 2>&3)
     if [ $? -eq 1 ]; then
@@ -607,7 +608,7 @@ function chooseUsage() {
     packageCount=$((${#packagesInstall[@]} + ${#snapsInstall[@]} + ${#flatpaksInstall[@]}))
     selection=$(whiptail --backtitle "Packages Selected to Install: ${packageCount}" --title "Set up GNU/Linux Desktop" --menu "Find Packages to Install by Category:" --cancel-button "Cancel" --default-item "." 0 0 0 "${options[@]}" 3>&1 1>&2 2>&3)
     if [ $? -eq 1 ]; then
-		return
+		return 1
 	fi
 
     case ${selection} in
@@ -634,6 +635,9 @@ function chooseUsage() {
 }
 
 chooseUsage
+if [ $? -eq 1 ]; then
+    exit 0
+fi
 
 ################################################################################
 
