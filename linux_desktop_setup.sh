@@ -228,12 +228,6 @@ declare -a flatpaksRemove
 function basePackages() {
     options=()
     options+=("baobab" "Disk Usage" on)
-    options+=("exfat" "ExFat Format Support" on)
-
-    if [ "$distro" == "fedora" ]; then
-        options+=("fedora-icon-theme" "Fedora Icon Theme" on)
-    fi
-
     options+=("firefox" "Firefox Broswer" on)
     options+=("flatpak" "Flatpak Manager" on)
     options+=("gedit" "GUI Text Editor" on)
@@ -251,7 +245,6 @@ function basePackages() {
         options+=("gnome-software-plugin-flatpak" "Flatpak Support Gnome Software" on)
     fi
 
-    options+=("libreoffice" "LibreOffice Suite" on)
     options+=("nano" "Terminal Text Editor" on)
     options+=("neofetch" "Displays System Info" on)
     options+=("snapd" "Snap Daemon" on)
@@ -264,37 +257,11 @@ function basePackages() {
     for pkg in $selection; do
         pkg=$(echo $pkg | sed 's/"//g')
         case ${pkg} in
-            "exfat")
-                packagesInstall+=(exfat-utils)
-                if [ "$pm" == "apt" ]; then
-                    packagesInstall+=(exfat-fuse)
-                elif [ "$pm" == "dnf" ]; then
-                    packagesInstall+=(fuse-exfat)
-                fi
-            ;;
             "firefox")
                 if [ "$distro" == "debian" ]; then
                     packagesInstall+=(firefox-esr)
                 else
                     packagesInstall+=(firefox)
-                fi
-            ;;
-            "libreoffice")
-                if [ "$srcPref" == "snap" ]; then
-                    snapsInstall+=(libreoffice)
-
-                    flatpaksRemove+=(org.libreoffice.LibreOffice)
-                    packagesRemove+=(libreoffice*)
-                elif [ "$srcPref" == "flatpak" ]; then
-                    flatpaksInstall+=(org.libreoffice.LibreOffice)
-
-                    snapsRemove+=(libreoffice)
-                    packagesRemove+=(libreoffice*)
-                else
-                    packagesInstall+=(libreoffice)
-
-                    flatpaksRemove+=(org.libreoffice.LibreOffice)
-                    snapsRemove+=(libreoffice)
                 fi
             ;;
             "snapd")
@@ -349,6 +316,7 @@ function homePackages() {
     options+=("chromium" "Chromium Web Browser" off)
     options+=("epiphany" "Gnome Web Browser" off)
     options+=("deja-dup" "Backup Tool" off)
+    options+=("exfat" "ExFat Format Support" off)
     options+=("gnome-books" "Gnome Books" off)
     options+=("gnome-boxes" "Gnome Boxes VM Manager" off)
     options+=("gnome-calculator" "Gnome Calculator" off)
@@ -357,6 +325,7 @@ function homePackages() {
     options+=("gnome-photos" "Gnome Photos" off)
     options+=("gnome-weather" "Gnome Weather" off)
     options+=("imagemagick" "Image Magick" off)
+    options+=("libreoffice" "LibreOffice Suite" off)
     options+=("slack" "Slack" off)
     options+=("simple-scan" "Scanner Application" off)
     options+=("spotify" "Spotify" off)
@@ -404,6 +373,14 @@ function homePackages() {
                 else
                     flatpaksInstall+=(org.gnome.DejaDup)
                     packagesRemove+=(deja-dup)
+                fi
+            ;;
+            "exfat")
+                packagesInstall+=(exfat-utils)
+                if [ "$pm" == "apt" ]; then
+                    packagesInstall+=(exfat-fuse)
+                elif [ "$pm" == "dnf" ]; then
+                    packagesInstall+=(fuse-exfat)
                 fi
             ;;
             "gnome-books")
@@ -467,6 +444,24 @@ function homePackages() {
                 else
                     flatpaksInstall+=(org.gnome.Weather)
                     packagesRemove+=(gnome-weather)
+                fi
+            ;;
+            "libreoffice")
+                if [ "$srcPref" == "snap" ]; then
+                    snapsInstall+=(libreoffice)
+
+                    flatpaksRemove+=(org.libreoffice.LibreOffice)
+                    packagesRemove+=(libreoffice*)
+                elif [ "$srcPref" == "flatpak" ]; then
+                    flatpaksInstall+=(org.libreoffice.LibreOffice)
+
+                    snapsRemove+=(libreoffice)
+                    packagesRemove+=(libreoffice*)
+                else
+                    packagesInstall+=(libreoffice)
+
+                    flatpaksRemove+=(org.libreoffice.LibreOffice)
+                    snapsRemove+=(libreoffice)
                 fi
             ;;
             "slack")
@@ -785,7 +780,6 @@ if [ "$de" == "gnome" ]; then
     if [ "$distro" == "fedora" ]; then
         # Install Themes
         gsettings set org.gnome.desktop.interface gtk-theme "Adwaita-dark"
-        gsettings set org.gnome.desktop.interface icon-theme "Fedora"
     elif [ "$distro" == "ubuntu" ]; then
         # Install Themes
         gsettings set org.gnome.desktop.interface gtk-theme "Yaru-dark"
