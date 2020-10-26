@@ -331,6 +331,7 @@ function homePackages() {
     options+=("spotify" "Spotify" off)
     options+=("texworks" "LaTeX Editor" off)
     options+=("thunderbird" "Thunderbird Email Client" off)
+    options+=("torbrowser-launcher" "TOR Browser" off)
     options+=("transmission-gtk" "Transmission Torrent" off)
 
     if [ "$distro" == "ubuntu" ]; then
