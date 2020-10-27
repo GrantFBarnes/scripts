@@ -347,7 +347,11 @@ function homePackages() {
     packageOptions+=("spotify" "Spotify" off)
     packageOptions+=("texworks" "LaTeX Editor" off)
     packageOptions+=("thunderbird" "Thunderbird Email Client" off)
-    packageOptions+=("torbrowser-launcher" "TOR Browser" off)
+
+    if [ "$distro" != "centos" ]; then
+        packageOptions+=("torbrowser-launcher" "TOR Browser" off)
+    fi
+
     packageOptions+=("transmission-gtk" "Transmission Torrent" off)
 
     if [ "$distro" == "ubuntu" ]; then
