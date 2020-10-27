@@ -330,8 +330,9 @@ function developmentPackages() {
 function homePackages() {
     packageOptions=()
     packageOptions+=("chromium" "Chromium Web Browser" off)
-    packageOptions+=("epiphany" "Gnome Web Browser" off)
     packageOptions+=("deja-dup" "Backup Tool" off)
+    packageOptions+=("discord" "Discord" off)
+    packageOptions+=("epiphany" "Gnome Web Browser" off)
     packageOptions+=("exfat" "ExFat Format Support" off)
     packageOptions+=("gnome-books" "Gnome Books" off)
     packageOptions+=("gnome-boxes" "Gnome Boxes VM Manager" off)
@@ -380,6 +381,24 @@ function homePackages() {
                     snapsToInstall+=(chromium)
                 fi
             ;;
+            "discord")
+                if [ "$preferSnapOverFlatpak" == true ]; then
+                    snapsToInstall+=(discord)
+                    flatpaksToRemove+=(com.discordapp.Discord)
+                else
+                    flatpaksToInstall+=(com.discordapp.Discord)
+                    snapsToRemove+=(discord)
+                fi
+            ;;
+            "deja-dup")
+                if [ "$preferRepoOverFlatpak" == true ]; then
+                    packagesToInstall+=(deja-dup)
+                    flatpaksToRemove+=(org.gnome.DejaDup)
+                else
+                    flatpaksToInstall+=(org.gnome.DejaDup)
+                    packagesToRemove+=(deja-dup)
+                fi
+            ;;
             "epiphany")
                 if [ "$preferRepoOverFlatpak" == true ]; then
                     if [ "$pm" == "dnf" ]; then
@@ -395,22 +414,6 @@ function homePackages() {
                     else
                         packagesToRemove+=(epiphany-browser)
                     fi
-                fi
-            ;;
-            "imagemagick")
-                if [ "$pm" == "dnf" ]; then
-                    packagesToInstall+=(ImageMagick)
-                elif [ "$pm" == "apt" ]; then
-                    packagesToInstall+=(imagemagick)
-                fi
-            ;;
-            "deja-dup")
-                if [ "$preferRepoOverFlatpak" == true ]; then
-                    packagesToInstall+=(deja-dup)
-                    flatpaksToRemove+=(org.gnome.DejaDup)
-                else
-                    flatpaksToInstall+=(org.gnome.DejaDup)
-                    packagesToRemove+=(deja-dup)
                 fi
             ;;
             "exfat")
@@ -482,6 +485,13 @@ function homePackages() {
                 else
                     flatpaksToInstall+=(org.gnome.Weather)
                     packagesToRemove+=(gnome-weather)
+                fi
+            ;;
+            "imagemagick")
+                if [ "$pm" == "dnf" ]; then
+                    packagesToInstall+=(ImageMagick)
+                elif [ "$pm" == "apt" ]; then
+                    packagesToInstall+=(imagemagick)
                 fi
             ;;
             "libreoffice")
