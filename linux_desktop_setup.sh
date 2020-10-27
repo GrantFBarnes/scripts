@@ -2,7 +2,7 @@
 # Purpose: Setup fresh install of GNU/Linux Desktop
 ################################################################################
 
-function confirm() {
+function confirmWhiptail() {
     local height=7
     if [ -n "$2" ]; then
         height=$2
@@ -10,7 +10,17 @@ function confirm() {
     whiptail --title "Set up GNU/Linux Desktop" --yesno --defaultno "$1" $height 50
 }
 
-function check_exit_status() {
+function choosePackagesWhiptail() {
+    packageSelections=$(whiptail --title "Set up GNU/Linux Desktop" --checklist "Select Packages to Install:" --cancel-button "Cancel" 0 0 0 "${packageOptions[@]}" 3>&1 1>&2 2>&3)
+    return $?
+}
+
+function chooseCategoryWhiptail() {
+    categorySelection=$(whiptail --title "Set up GNU/Linux Desktop" --menu "Select a Category to Find Packages:" --cancel-button "Cancel" --default-item "." 0 0 0 "${categoryOptions[@]}" 3>&1 1>&2 2>&3)
+    return $?
+}
+
+function checkExitStatus() {
     if [ $? -eq 0 ]; then
         echo "Success"
     else
@@ -31,10 +41,10 @@ function update() {
     elif [ "$pm" == "apt" ]; then
         sudo apt update && sudo apt full-upgrade -y
     fi
-    check_exit_status
+    checkExitStatus
 }
 
-function package_manager() {
+function packageManager() {
     local method=$1
     echo "---------------------------------------------------------------------"
     echo "sudo $pm $method ${@:2} -y"
@@ -44,19 +54,19 @@ function package_manager() {
     else
         sudo $pm $method ${@:2} -y
     fi
-    check_exit_status
+    checkExitStatus
 }
 
-function snap_manager() {
+function snapManager() {
     local method=$1
     echo "---------------------------------------------------------------------"
     echo "sudo snap $method ${@:2}"
     echo "---------------------------------------------------------------------"
     sudo snap $method ${@:2}
-    check_exit_status
+    checkExitStatus
 }
 
-function flatpak_manager() {
+function flatpakManager() {
     local method=$1
     echo "---------------------------------------------------------------------"
     echo "sudo flatpak $method flathub ${@:2} -y"
@@ -66,7 +76,7 @@ function flatpak_manager() {
     else
         sudo flatpak $method ${@:2} -y
     fi
-    check_exit_status
+    checkExitStatus
 }
 
 ################################################################################
@@ -135,7 +145,7 @@ if [ "$pm" == "dnf" ]; then
         fi
 
         update
-        package_manager install newt
+        packageManager install newt
     fi
 elif [ "$distro" == "mint" ]; then
     nosnap=/etc/apt/preferences.d/nosnap.pref
@@ -145,70 +155,70 @@ elif [ "$distro" == "mint" ]; then
     fi
 fi
 
-confirm "   Distrobution: $distro\n    Desktop Env: $de\nPackage Manager: $pm\n\nWould you like to continue?" 11
+confirmWhiptail "   Distrobution: $distro\n    Desktop Env: $de\nPackage Manager: $pm\n\nWould you like to continue?" 11
 if [ $? -eq 1 ]; then
     exit 0
 fi
 
 ################################################################################
 
-individual=true
-srcPref="repo"
-repoOverSnap=true
-repoOverFlatpak=true
-snapOverFlatpak=true
+bulkInstallPackages=true
+sourcePreference="repo"
+preferRepoOverSnap=true
+preferRepoOverFlatpak=true
+preferSnapOverFlatpak=true
 
-confirm "Would you like to bulk install packages?"
+confirmWhiptail "Install packages individually?"
 if [ $? -eq 0 ]; then
-    individual=false
+    bulkInstallPackages=false
 fi
 
 if [ "$distro" == "centos" ]; then
-    srcPref="flatpak"
-    repoOverSnap=false
-    repoOverFlatpak=false
-    snapOverFlatpak=false
+    sourcePreference="flatpak"
+    preferRepoOverSnap=false
+    preferRepoOverFlatpak=false
+    preferSnapOverFlatpak=false
 else
-    confirm "Do you prefer snap over repository?"
+    confirmWhiptail "Do you prefer snap over repository?"
     if [ $? -eq 0 ]; then
-        repoOverSnap=false
+        preferRepoOverSnap=false
     else
-        repoOverSnap=true
+        preferRepoOverSnap=true
     fi
 
-    confirm "Do you prefer flatpak over repository?"
+    confirmWhiptail "Do you prefer flatpak over repository?"
     if [ $? -eq 0 ]; then
-        repoOverFlatpak=false
+        preferRepoOverFlatpak=false
     else
-        repoOverFlatpak=true
+        preferRepoOverFlatpak=true
     fi
 
-    if [ "$repoOverSnap" == true ] && [ "$repoOverFlatpak" == true ]; then
+    if [ "$preferRepoOverSnap" == true ] && [ "$preferRepoOverFlatpak" == true ]; then
         # Prefer repo over both snaps and flatpaks
-        srcPref="repo"
-        confirm "Do you prefer flatpak over snap?"
+        sourcePreference="repo"
+        confirmWhiptail "Do you prefer flatpak over snap?"
         if [ $? -eq 0 ]; then
-            snapOverFlatpak=false
+            preferSnapOverFlatpak=false
         else
-            snapOverFlatpak=true
+            preferSnapOverFlatpak=true
         fi
-    elif [ "$repoOverSnap" == true ]; then
+    elif [ "$preferRepoOverSnap" == true ]; then
         # Prefer repo over snap, but flatpak over repo
-        srcPref="flatpak"
-        snapOverFlatpak=false
-    elif [ "$repoOverFlatpak" == true ]; then
+        sourcePreference="flatpak"
+        preferSnapOverFlatpak=false
+    elif [ "$preferRepoOverFlatpak" == true ]; then
         # Prefer repo over flatpak, but snap over repo
-        srcPref="snap"
-        snapOverFlatpak=true
+        sourcePreference="snap"
+        preferSnapOverFlatpak=true
     else
         # Prefer both snap and flatpak over repo
-        confirm "Do you prefer flatpak over snap?"
+        confirmWhiptail "Do you prefer flatpak over snap?"
         if [ $? -eq 0 ]; then
-            srcPref="flatpak"
-            snapOverFlatpak=false
+            sourcePreference="flatpak"
+            preferSnapOverFlatpak=false
         else
-            srcPref="snap"
-            snapOverFlatpak=true
+            sourcePreference="snap"
+            preferSnapOverFlatpak=true
         fi
     fi
 fi
@@ -217,414 +227,420 @@ fi
 
 # Determine Packages to install and remove
 
-declare -a packagesInstall
-declare -a snapsInstall
-declare -a flatpaksInstall
+declare -a categoryOptions
+categorySelection=""
 
-declare -a packagesRemove
-declare -a snapsRemove
-declare -a flatpaksRemove
+declare -a packageOptions
+declare -a packageSelections
+
+declare -a packagesToInstall
+declare -a snapsToInstall
+declare -a flatpaksToInstall
+
+declare -a packagesToRemove
+declare -a snapsToRemove
+declare -a flatpaksToRemove
 
 function basePackages() {
-    options=()
-    options+=("baobab" "Disk Usage" on)
-    options+=("firefox" "Firefox Broswer" on)
-    options+=("flatpak" "Flatpak Manager" on)
-    options+=("gedit" "GUI Text Editor" on)
+    packageOptions=()
+    packageOptions+=("baobab" "Disk Usage" on)
+    packageOptions+=("firefox" "Firefox Broswer" on)
+    packageOptions+=("flatpak" "Flatpak Manager" on)
+    packageOptions+=("gedit" "GUI Text Editor" on)
 
     if [ "$de" == "gnome" ]; then
-        options+=("gnome-system-monitor" "System Monitor" on)
-        options+=("gnome-terminal" "Terminal" on)
-        options+=("gnome-tweaks" "Gnome Tweaks" on)
+        packageOptions+=("gnome-system-monitor" "System Monitor" on)
+        packageOptions+=("gnome-terminal" "Terminal" on)
+        packageOptions+=("gnome-tweaks" "Gnome Tweaks" on)
         if [ "$distro" != "pop" ]; then
-            options+=("gnome-software" "Gnome Software Manager" on)
+            packageOptions+=("gnome-software" "Gnome Software Manager" on)
         fi
     fi
 
     if [ "$distro" == "ubuntu" ]; then
-        options+=("gnome-software-plugin-flatpak" "Flatpak Support Gnome Software" on)
+        packageOptions+=("gnome-software-plugin-flatpak" "Flatpak Support Gnome Software" on)
     fi
 
-    options+=("nano" "Terminal Text Editor" on)
-    options+=("neofetch" "Displays System Info" on)
-    options+=("snapd" "Snap Daemon" on)
+    packageOptions+=("nano" "Terminal Text Editor" on)
+    packageOptions+=("neofetch" "Displays System Info" on)
+    packageOptions+=("snapd" "Snap Daemon" on)
 
-    selection=$(whiptail --title "Set up GNU/Linux Desktop" --checklist "Select Packages to Install:" --cancel-button "Cancel" --default-item "." 0 0 0 "${options[@]}" 3>&1 1>&2 2>&3)
+    choosePackagesWhiptail
     if [ $? -eq 1 ]; then
 		return
 	fi
 
-    for pkg in $selection; do
+    for pkg in $packageSelections; do
         pkg=$(echo $pkg | sed 's/"//g')
         case ${pkg} in
             "firefox")
                 if [ "$distro" == "debian" ]; then
-                    packagesInstall+=(firefox-esr)
+                    packagesToInstall+=(firefox-esr)
                 else
-                    packagesInstall+=(firefox)
+                    packagesToInstall+=(firefox)
                 fi
             ;;
             "snapd")
-                packagesInstall+=($pkg)
-                snapsInstall+=(snap-store)
+                packagesToInstall+=($pkg)
+                snapsToInstall+=(snap-store)
             ;;
             *)
-                packagesInstall+=($pkg)
+                packagesToInstall+=($pkg)
             ;;
         esac
     done
 }
 
 function developmentPackages() {
-    options=()
-    options+=("code" "Visual Studio Code" off)
-    options+=("git" "Git" off)
-    options+=("meld" "Gnome Meld File Comparitor" off)
-    options+=("net-tools" "Network Packages" off)
-    options+=("nodejs" "NodeJS" off)
-    options+=("npm" "Node Package Manager" off)
+    packageOptions=()
+    packageOptions+=("code" "Visual Studio Code" off)
+    packageOptions+=("git" "Git" off)
+    packageOptions+=("meld" "Gnome Meld File Comparitor" off)
+    packageOptions+=("net-tools" "Network Packages" off)
+    packageOptions+=("nodejs" "NodeJS" off)
+    packageOptions+=("npm" "Node Package Manager" off)
 
-    selection=$(whiptail --title "Set up GNU/Linux Desktop" --checklist "Select Packages to Install:" --cancel-button "Cancel" --default-item "." 0 0 0 "${options[@]}" 3>&1 1>&2 2>&3)
+    choosePackagesWhiptail
     if [ $? -eq 1 ]; then
 		return
 	fi
 
-    for pkg in $selection; do
+    for pkg in $packageSelections; do
         pkg=$(echo $pkg | sed 's/"//g')
         case ${pkg} in
             "code")
-                snapsInstall+=("code --classic")
+                snapsToInstall+=("code --classic")
             ;;
             "meld")
-                if [ "$repoOverFlatpak" == true ]; then
-                    packagesInstall+=(meld)
-                    flatpaksRemove+=(org.gnome.meld)
+                if [ "$preferRepoOverFlatpak" == true ]; then
+                    packagesToInstall+=(meld)
+                    flatpaksToRemove+=(org.gnome.meld)
                 else
-                    flatpaksInstall+=(org.gnome.meld)
-                    packagesRemove+=(meld)
+                    flatpaksToInstall+=(org.gnome.meld)
+                    packagesToRemove+=(meld)
                 fi
             ;;
             *)
-                packagesInstall+=($pkg)
+                packagesToInstall+=($pkg)
             ;;
         esac
     done
 }
 
 function homePackages() {
-    options=()
-    options+=("chromium" "Chromium Web Browser" off)
-    options+=("epiphany" "Gnome Web Browser" off)
-    options+=("deja-dup" "Backup Tool" off)
-    options+=("exfat" "ExFat Format Support" off)
-    options+=("gnome-books" "Gnome Books" off)
-    options+=("gnome-boxes" "Gnome Boxes VM Manager" off)
-    options+=("gnome-calculator" "Gnome Calculator" off)
-    options+=("gnome-calendar" "Gnome Calendar" off)
-    options+=("gnome-clocks" "Gnome Clocks" off)
-    options+=("gnome-photos" "Gnome Photos" off)
-    options+=("gnome-weather" "Gnome Weather" off)
-    options+=("imagemagick" "Image Magick" off)
-    options+=("libreoffice" "LibreOffice Suite" off)
-    options+=("slack" "Slack" off)
-    options+=("simple-scan" "Scanner Application" off)
-    options+=("spotify" "Spotify" off)
-    options+=("texworks" "LaTeX Editor" off)
-    options+=("thunderbird" "Thunderbird Email Client" off)
-    options+=("torbrowser-launcher" "TOR Browser" off)
-    options+=("transmission-gtk" "Transmission Torrent" off)
+    packageOptions=()
+    packageOptions+=("chromium" "Chromium Web Browser" off)
+    packageOptions+=("epiphany" "Gnome Web Browser" off)
+    packageOptions+=("deja-dup" "Backup Tool" off)
+    packageOptions+=("exfat" "ExFat Format Support" off)
+    packageOptions+=("gnome-books" "Gnome Books" off)
+    packageOptions+=("gnome-boxes" "Gnome Boxes VM Manager" off)
+    packageOptions+=("gnome-calculator" "Gnome Calculator" off)
+    packageOptions+=("gnome-calendar" "Gnome Calendar" off)
+    packageOptions+=("gnome-clocks" "Gnome Clocks" off)
+    packageOptions+=("gnome-photos" "Gnome Photos" off)
+    packageOptions+=("gnome-weather" "Gnome Weather" off)
+    packageOptions+=("imagemagick" "Image Magick" off)
+    packageOptions+=("libreoffice" "LibreOffice Suite" off)
+    packageOptions+=("slack" "Slack" off)
+    packageOptions+=("simple-scan" "Scanner Application" off)
+    packageOptions+=("spotify" "Spotify" off)
+    packageOptions+=("texworks" "LaTeX Editor" off)
+    packageOptions+=("thunderbird" "Thunderbird Email Client" off)
+    packageOptions+=("torbrowser-launcher" "TOR Browser" off)
+    packageOptions+=("transmission-gtk" "Transmission Torrent" off)
 
     if [ "$distro" == "ubuntu" ]; then
-        options+=("virtualbox" "Virtual Box VM Manager" off)
-        options+=("usb-creator-gtk" "USB Creator" off)
+        packageOptions+=("virtualbox" "Virtual Box VM Manager" off)
+        packageOptions+=("usb-creator-gtk" "USB Creator" off)
     fi
 
-    selection=$(whiptail --title "Set up GNU/Linux Desktop" --checklist "Select Packages to Install:" --cancel-button "Cancel" --default-item "." 0 0 0 "${options[@]}" 3>&1 1>&2 2>&3)
+    choosePackagesWhiptail
     if [ $? -eq 1 ]; then
 		return
 	fi
 
-    for pkg in $selection; do
+    for pkg in $packageSelections; do
         pkg=$(echo $pkg | sed 's/"//g')
         case ${pkg} in
             "chromium")
                 if [ "$pm" == "dnf" ]; then
-                    if [ "$repoOverSnap" == true ]; then
-                        packagesInstall+=(chromium)
-                        snapsRemove+=(chromium)
+                    if [ "$preferRepoOverSnap" == true ]; then
+                        packagesToInstall+=(chromium)
+                        snapsToRemove+=(chromium)
                     else
-                        snapsInstall+=(chromium)
-                        packagesRemove+=(chromium)
+                        snapsToInstall+=(chromium)
+                        packagesToRemove+=(chromium)
                     fi
                 else
-                    snapsInstall+=(chromium)
+                    snapsToInstall+=(chromium)
                 fi
             ;;
             "epiphany")
-                if [ "$repoOverFlatpak" == true ]; then
+                if [ "$preferRepoOverFlatpak" == true ]; then
                     if [ "$pm" == "dnf" ]; then
-                        packagesInstall+=(epiphany)
+                        packagesToInstall+=(epiphany)
                     else
-                        packagesInstall+=(epiphany-browser)
+                        packagesToInstall+=(epiphany-browser)
                     fi
-                    flatpaksRemove+=(org.gnome.Epiphany)
+                    flatpaksToRemove+=(org.gnome.Epiphany)
                 else
-                    flatpaksInstall+=(org.gnome.Epiphany)
+                    flatpaksToInstall+=(org.gnome.Epiphany)
                     if [ "$pm" == "dnf" ]; then
-                        packagesRemove+=(epiphany)
+                        packagesToRemove+=(epiphany)
                     else
-                        packagesRemove+=(epiphany-browser)
+                        packagesToRemove+=(epiphany-browser)
                     fi
                 fi
             ;;
             "imagemagick")
                 if [ "$pm" == "dnf" ]; then
-                    packagesInstall+=(ImageMagick)
+                    packagesToInstall+=(ImageMagick)
                 elif [ "$pm" == "apt" ]; then
-                    packagesInstall+=(imagemagick)
+                    packagesToInstall+=(imagemagick)
                 fi
             ;;
             "deja-dup")
-                if [ "$repoOverFlatpak" == true ]; then
-                    packagesInstall+=(deja-dup)
-                    flatpaksRemove+=(org.gnome.DejaDup)
+                if [ "$preferRepoOverFlatpak" == true ]; then
+                    packagesToInstall+=(deja-dup)
+                    flatpaksToRemove+=(org.gnome.DejaDup)
                 else
-                    flatpaksInstall+=(org.gnome.DejaDup)
-                    packagesRemove+=(deja-dup)
+                    flatpaksToInstall+=(org.gnome.DejaDup)
+                    packagesToRemove+=(deja-dup)
                 fi
             ;;
             "exfat")
-                packagesInstall+=(exfat-utils)
+                packagesToInstall+=(exfat-utils)
                 if [ "$pm" == "apt" ]; then
-                    packagesInstall+=(exfat-fuse)
+                    packagesToInstall+=(exfat-fuse)
                 elif [ "$pm" == "dnf" ]; then
-                    packagesInstall+=(fuse-exfat)
+                    packagesToInstall+=(fuse-exfat)
                 fi
             ;;
             "gnome-books")
-                if [ "$repoOverFlatpak" == true ]; then
-                    packagesInstall+=(gnome-books)
-                    flatpaksRemove+=(org.gnome.Books)
+                if [ "$preferRepoOverFlatpak" == true ]; then
+                    packagesToInstall+=(gnome-books)
+                    flatpaksToRemove+=(org.gnome.Books)
                 else
-                    flatpaksInstall+=(org.gnome.Books)
-                    packagesRemove+=(gnome-books)
+                    flatpaksToInstall+=(org.gnome.Books)
+                    packagesToRemove+=(gnome-books)
                 fi
             ;;
             "gnome-boxes")
-                if [ "$repoOverFlatpak" == true ]; then
-                    packagesInstall+=(gnome-boxes)
-                    flatpaksRemove+=(org.gnome.Boxes)
+                if [ "$preferRepoOverFlatpak" == true ]; then
+                    packagesToInstall+=(gnome-boxes)
+                    flatpaksToRemove+=(org.gnome.Boxes)
                 else
-                    flatpaksInstall+=(org.gnome.Boxes)
-                    packagesRemove+=(gnome-boxes)
+                    flatpaksToInstall+=(org.gnome.Boxes)
+                    packagesToRemove+=(gnome-boxes)
                 fi
             ;;
             "gnome-calculator")
-                if [ "$repoOverFlatpak" == true ]; then
-                    packagesInstall+=(gnome-calculator)
-                    flatpaksRemove+=(org.gnome.Calculator)
+                if [ "$preferRepoOverFlatpak" == true ]; then
+                    packagesToInstall+=(gnome-calculator)
+                    flatpaksToRemove+=(org.gnome.Calculator)
                 else
-                    flatpaksInstall+=(org.gnome.Calculator)
-                    packagesRemove+=(gnome-calculator)
+                    flatpaksToInstall+=(org.gnome.Calculator)
+                    packagesToRemove+=(gnome-calculator)
                 fi
             ;;
             "gnome-calendar")
-                if [ "$repoOverFlatpak" == true ]; then
-                    packagesInstall+=(gnome-calendar)
-                    flatpaksRemove+=(org.gnome.Calendar)
+                if [ "$preferRepoOverFlatpak" == true ]; then
+                    packagesToInstall+=(gnome-calendar)
+                    flatpaksToRemove+=(org.gnome.Calendar)
                 else
-                    flatpaksInstall+=(org.gnome.Calendar)
-                    packagesRemove+=(gnome-calendar)
+                    flatpaksToInstall+=(org.gnome.Calendar)
+                    packagesToRemove+=(gnome-calendar)
                 fi
             ;;
             "gnome-clocks")
-                if [ "$repoOverFlatpak" == true ]; then
-                    packagesInstall+=(gnome-clocks)
-                    flatpaksRemove+=(org.gnome.clocks)
+                if [ "$preferRepoOverFlatpak" == true ]; then
+                    packagesToInstall+=(gnome-clocks)
+                    flatpaksToRemove+=(org.gnome.clocks)
                 else
-                    flatpaksInstall+=(org.gnome.clocks)
-                    packagesRemove+=(gnome-clocks)
+                    flatpaksToInstall+=(org.gnome.clocks)
+                    packagesToRemove+=(gnome-clocks)
                 fi
             ;;
             "gnome-photos")
-                if [ "$repoOverFlatpak" == true ]; then
-                    packagesInstall+=(gnome-photos)
-                    flatpaksRemove+=(org.gnome.Photos)
+                if [ "$preferRepoOverFlatpak" == true ]; then
+                    packagesToInstall+=(gnome-photos)
+                    flatpaksToRemove+=(org.gnome.Photos)
                 else
-                    flatpaksInstall+=(org.gnome.Photos)
-                    packagesRemove+=(gnome-photos)
+                    flatpaksToInstall+=(org.gnome.Photos)
+                    packagesToRemove+=(gnome-photos)
                 fi
             ;;
             "gnome-weather")
-                if [ "$repoOverFlatpak" == true ]; then
-                    packagesInstall+=(gnome-weather)
-                    flatpaksRemove+=(org.gnome.Weather)
+                if [ "$preferRepoOverFlatpak" == true ]; then
+                    packagesToInstall+=(gnome-weather)
+                    flatpaksToRemove+=(org.gnome.Weather)
                 else
-                    flatpaksInstall+=(org.gnome.Weather)
-                    packagesRemove+=(gnome-weather)
+                    flatpaksToInstall+=(org.gnome.Weather)
+                    packagesToRemove+=(gnome-weather)
                 fi
             ;;
             "libreoffice")
-                if [ "$srcPref" == "snap" ]; then
-                    snapsInstall+=(libreoffice)
+                if [ "$sourcePreference" == "snap" ]; then
+                    snapsToInstall+=(libreoffice)
 
-                    flatpaksRemove+=(org.libreoffice.LibreOffice)
-                    packagesRemove+=(libreoffice*)
-                elif [ "$srcPref" == "flatpak" ]; then
-                    flatpaksInstall+=(org.libreoffice.LibreOffice)
+                    flatpaksToRemove+=(org.libreoffice.LibreOffice)
+                    packagesToRemove+=(libreoffice*)
+                elif [ "$sourcePreference" == "flatpak" ]; then
+                    flatpaksToInstall+=(org.libreoffice.LibreOffice)
 
-                    snapsRemove+=(libreoffice)
-                    packagesRemove+=(libreoffice*)
+                    snapsToRemove+=(libreoffice)
+                    packagesToRemove+=(libreoffice*)
                 else
-                    packagesInstall+=(libreoffice)
+                    packagesToInstall+=(libreoffice)
 
-                    flatpaksRemove+=(org.libreoffice.LibreOffice)
-                    snapsRemove+=(libreoffice)
+                    flatpaksToRemove+=(org.libreoffice.LibreOffice)
+                    snapsToRemove+=(libreoffice)
                 fi
             ;;
             "texworks")
-                flatpaksInstall+=(org.tug.texworks)
+                flatpaksToInstall+=(org.tug.texworks)
             ;;
             "slack")
-                if [ "$snapOverFlatpak" == true ]; then
-                    snapsInstall+=("slack --classic")
-                    flatpaksRemove+=(com.slack.Slack)
+                if [ "$preferSnapOverFlatpak" == true ]; then
+                    snapsToInstall+=("slack --classic")
+                    flatpaksToRemove+=(com.slack.Slack)
                 else
-                    flatpaksInstall+=(com.slack.Slack)
-                    snapsRemove+=(slack)
+                    flatpaksToInstall+=(com.slack.Slack)
+                    snapsToRemove+=(slack)
                 fi
             ;;
             "spotify")
-                if [ "$snapOverFlatpak" == true ]; then
-                    snapsInstall+=(spotify)
-                    flatpaksRemove+=(com.spotify.Client)
+                if [ "$preferSnapOverFlatpak" == true ]; then
+                    snapsToInstall+=(spotify)
+                    flatpaksToRemove+=(com.spotify.Client)
                 else
-                    flatpaksInstall+=(com.spotify.Client)
-                    snapsRemove+=(spotify)
+                    flatpaksToInstall+=(com.spotify.Client)
+                    snapsToRemove+=(spotify)
                 fi
             ;;
             *)
-                packagesInstall+=($pkg)
+                packagesToInstall+=($pkg)
             ;;
         esac
     done
 }
 
 function mediaPackages() {
-    options=()
-    options+=("blender" "3D Modleler and Video Editor" off)
-    options+=("gimp" "GNU Image Manipulation Program" off)
-    options+=("vlc" "Media Player" off)
+    packageOptions=()
+    packageOptions+=("blender" "3D Modleler and Video Editor" off)
+    packageOptions+=("gimp" "GNU Image Manipulation Program" off)
+    packageOptions+=("vlc" "Media Player" off)
 
     if [ "$distro" != "centos" ]; then
-        options+=("ffmpeg" "ffmpeg to watch videos" off)
+        packageOptions+=("ffmpeg" "ffmpeg to watch videos" off)
     fi
 
-    selection=$(whiptail --title "Set up GNU/Linux Desktop" --checklist "Select Packages to Install:" --cancel-button "Cancel" --default-item "." 0 0 0 "${options[@]}" 3>&1 1>&2 2>&3)
+    choosePackagesWhiptail
     if [ $? -eq 1 ]; then
 		return
 	fi
 
-    for pkg in $selection; do
+    for pkg in $packageSelections; do
         pkg=$(echo $pkg | sed 's/"//g')
         case ${pkg} in
             "blender")
-                if [ "$srcPref" == "snap" ]; then
-                    snapsInstall+=("blender --classic")
+                if [ "$sourcePreference" == "snap" ]; then
+                    snapsToInstall+=("blender --classic")
 
-                    flatpaksRemove+=(org.blender.Blender)
-                    packagesRemove+=(blender)
-                elif [ "$srcPref" == "flatpak" ]; then
-                    flatpaksInstall+=(org.blender.Blender)
+                    flatpaksToRemove+=(org.blender.Blender)
+                    packagesToRemove+=(blender)
+                elif [ "$sourcePreference" == "flatpak" ]; then
+                    flatpaksToInstall+=(org.blender.Blender)
 
-                    snapsRemove+=(blender)
-                    packagesRemove+=(blender)
+                    snapsToRemove+=(blender)
+                    packagesToRemove+=(blender)
                 else
-                    packagesInstall+=(blender)
+                    packagesToInstall+=(blender)
 
-                    flatpaksRemove+=(org.blender.Blender)
-                    snapsRemove+=(blender)
+                    flatpaksToRemove+=(org.blender.Blender)
+                    snapsToRemove+=(blender)
                 fi
             ;;
             "gimp")
-                if [ "$repoOverFlatpak" == true ]; then
-                    packagesInstall+=(gimp)
-                    flatpaksRemove+=(org.gimp.GIMP)
+                if [ "$preferRepoOverFlatpak" == true ]; then
+                    packagesToInstall+=(gimp)
+                    flatpaksToRemove+=(org.gimp.GIMP)
                 else
-                    flatpaksInstall+=(org.gimp.GIMP)
-                    packagesRemove+=(gimp)
+                    flatpaksToInstall+=(org.gimp.GIMP)
+                    packagesToRemove+=(gimp)
                 fi
             ;;
             "vlc")
-                if [ "$srcPref" == "snap" ]; then
-                    snapsInstall+=(vlc)
+                if [ "$sourcePreference" == "snap" ]; then
+                    snapsToInstall+=(vlc)
 
-                    flatpaksRemove+=(org.videolan.VLC)
-                    packagesRemove+=(vlc)
-                elif [ "$srcPref" == "flatpak" ]; then
-                    flatpaksInstall+=(org.videolan.VLC)
+                    flatpaksToRemove+=(org.videolan.VLC)
+                    packagesToRemove+=(vlc)
+                elif [ "$sourcePreference" == "flatpak" ]; then
+                    flatpaksToInstall+=(org.videolan.VLC)
 
-                    snapsRemove+=(vlc)
-                    packagesRemove+=(vlc)
+                    snapsToRemove+=(vlc)
+                    packagesToRemove+=(vlc)
                 else
-                    packagesInstall+=(vlc)
+                    packagesToInstall+=(vlc)
 
-                    flatpaksRemove+=(org.videolan.VLC)
-                    snapsRemove+=(vlc)
+                    flatpaksToRemove+=(org.videolan.VLC)
+                    snapsToRemove+=(vlc)
                 fi
             ;;
             *)
-                packagesInstall+=($pkg)
+                packagesToInstall+=($pkg)
             ;;
         esac
     done
 }
 
 function gamingPackages() {
-    options=()
-    options+=("steam" "Steam" off)
-    options+=("xonotic" "Open Source FPS" off)
+    packageOptions=()
+    packageOptions+=("steam" "Steam" off)
+    packageOptions+=("xonotic" "Open Source FPS" off)
 
-    selection=$(whiptail --title "Set up GNU/Linux Desktop" --checklist "Select Packages to Install:" --cancel-button "Cancel" --default-item "." 0 0 0 "${options[@]}" 3>&1 1>&2 2>&3)
+    choosePackagesWhiptail
     if [ $? -eq 1 ]; then
 		return
 	fi
 
-    for pkg in $selection; do
+    for pkg in $packageSelections; do
         pkg=$(echo $pkg | sed 's/"//g')
         case ${pkg} in
             "steam")
-                flatpaksInstall+=(com.valvesoftware.Steam)
+                flatpaksToInstall+=(com.valvesoftware.Steam)
             ;;
             "xonotic")
-                snapsInstall+=(xonotic)
+                snapsToInstall+=(xonotic)
             ;;
             *)
-                packagesInstall+=($pkg)
+                packagesToInstall+=($pkg)
             ;;
         esac
     done
 }
 
 function chooseUsage() {
-    options=()
-    options+=("Base" "")
-    options+=("Development" "")
-    options+=("Home" "")
-    options+=("Multi Media" "")
-    options+=("Gaming" "")
-    options+=("" "")
-    options+=("Install" "")
+    categoryOptions=()
+    categoryOptions+=("Base" "")
+    categoryOptions+=("Development" "")
+    categoryOptions+=("Home" "")
+    categoryOptions+=("Multi Media" "")
+    categoryOptions+=("Gaming" "")
+    categoryOptions+=("" "")
+    categoryOptions+=("Install" "")
 
     # Remove duplicate values in install arrays
-    packagesInstall=($(echo "${packagesInstall[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' '))
+    packagesToInstall=($(echo "${packagesToInstall[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' '))
 
-    selection=$(whiptail --title "Set up GNU/Linux Desktop" --menu "Find Packages to Install by Category:" --cancel-button "Cancel" --default-item "." 0 0 0 "${options[@]}" 3>&1 1>&2 2>&3)
+    chooseCategoryWhiptail
     if [ $? -eq 1 ]; then
 		return 1
 	fi
 
-    case ${selection} in
+    case ${categorySelection} in
         "Base")
             basePackages
         ;;
@@ -658,13 +674,13 @@ fi
 
 # Package manager
 
-if [ ${#packagesInstall[@]} -gt 0 ]; then
-    if [ "$individual" == true ]; then
-        for i in "${packagesInstall[@]}"; do
-            package_manager install $i
-        done
+if [ ${#packagesToInstall[@]} -gt 0 ]; then
+    if [ "$bulkInstallPackages" == true ]; then
+        packageManager install ${packagesToInstall[*]}
     else
-        package_manager install ${packagesInstall[*]}
+        for i in "${packagesToInstall[@]}"; do
+            packageManager install $i
+        done
     fi
 fi
 
@@ -672,9 +688,9 @@ fi
 
 sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
 
-if [ ${#flatpaksInstall[@]} -gt 0 ]; then
-    for i in "${flatpaksInstall[@]}"; do
-        flatpak_manager install $i
+if [ ${#flatpaksToInstall[@]} -gt 0 ]; then
+    for i in "${flatpaksToInstall[@]}"; do
+        flatpakManager install $i
     done
 fi
 
@@ -687,9 +703,9 @@ if [ "$pm" == "dnf" ]; then
     sudo ln -s /var/lib/snapd/snap /snap
 fi
 
-if [ ${#snapsInstall[@]} -gt 0 ]; then
-    for i in "${snapsInstall[@]}"; do
-        snap_manager install $i
+if [ ${#snapsToInstall[@]} -gt 0 ]; then
+    for i in "${snapsToInstall[@]}"; do
+        snapManager install $i
     done
 fi
 
@@ -697,58 +713,58 @@ fi
 
 # Determine Packages to Remove
 
-packagesRemove+=(cheese)
-packagesRemove+=(evolution)
-packagesRemove+=(mpv)
-packagesRemove+=(rhythmbox)
-packagesRemove+=(totem)
+packagesToRemove+=(cheese)
+packagesToRemove+=(evolution)
+packagesToRemove+=(mpv)
+packagesToRemove+=(rhythmbox)
+packagesToRemove+=(totem)
 
 if [ "$distro" == "mint" ] || [ "$distro" == "lmde" ]; then
-    packagesRemove+=(celluloid)
-    packagesRemove+=(drawing)
-    packagesRemove+=(hexchat*)
-    packagesRemove+=(mintbackup)
-    packagesRemove+=(pix*)
-    packagesRemove+=(warpinator)
-    packagesRemove+=(xed)
+    packagesToRemove+=(celluloid)
+    packagesToRemove+=(drawing)
+    packagesToRemove+=(hexchat*)
+    packagesToRemove+=(mintbackup)
+    packagesToRemove+=(pix*)
+    packagesToRemove+=(warpinator)
+    packagesToRemove+=(xed)
 elif [ "$distro" == "ubuntu" ] || [ "$distro" == "debian" ]; then
-    packagesRemove+=(aisleriot)
-    packagesRemove+=(five-or-more)
-    packagesRemove+=(four-in-a-row)
-    packagesRemove+=(gnome-chess)
-    packagesRemove+=(gnome-klotski)
-    packagesRemove+=(gnome-mahjongg)
-    packagesRemove+=(gnome-mines)
-    packagesRemove+=(gnome-music)
-    packagesRemove+=(gnome-nibbles)
-    packagesRemove+=(gnome-robots)
-    packagesRemove+=(gnome-sudoku)
-    packagesRemove+=(gnome-tetravex)
-    packagesRemove+=(gnome-todo)
-    packagesRemove+=(remmina*)
-    packagesRemove+=(seahorse)
-    packagesRemove+=(shotwell*)
+    packagesToRemove+=(aisleriot)
+    packagesToRemove+=(five-or-more)
+    packagesToRemove+=(four-in-a-row)
+    packagesToRemove+=(gnome-chess)
+    packagesToRemove+=(gnome-klotski)
+    packagesToRemove+=(gnome-mahjongg)
+    packagesToRemove+=(gnome-mines)
+    packagesToRemove+=(gnome-music)
+    packagesToRemove+=(gnome-nibbles)
+    packagesToRemove+=(gnome-robots)
+    packagesToRemove+=(gnome-sudoku)
+    packagesToRemove+=(gnome-tetravex)
+    packagesToRemove+=(gnome-todo)
+    packagesToRemove+=(remmina*)
+    packagesToRemove+=(seahorse)
+    packagesToRemove+=(shotwell*)
 
     if [ "$distro" == "debian" ]; then
-        packagesRemove+=(anthy*)
-        packagesRemove+=(fcitx*)
-        packagesRemove+=(goldendict)
-        packagesRemove+=(hitori)
-        packagesRemove+=(tali)
-        packagesRemove+=(quadrapassel)
-        packagesRemove+=(xterm)
+        packagesToRemove+=(anthy*)
+        packagesToRemove+=(fcitx*)
+        packagesToRemove+=(goldendict)
+        packagesToRemove+=(hitori)
+        packagesToRemove+=(tali)
+        packagesToRemove+=(quadrapassel)
+        packagesToRemove+=(xterm)
     fi
 elif [ "$distro" == "pop" ]; then
-    packagesRemove+=(geary)
-    packagesRemove+=(popsicle)
+    packagesToRemove+=(geary)
+    packagesToRemove+=(popsicle)
 elif [ "$distro" == "centos" ]; then
-    packagesRemove+=(pidgin)
+    packagesToRemove+=(pidgin)
 fi
 
 if [ "$de" == "gnome" ]; then
-    packagesRemove+=(gnome-contacts)
-    packagesRemove+=(gnome-maps)
-    packagesRemove+=(gnome-software-plugin-snap)
+    packagesToRemove+=(gnome-contacts)
+    packagesToRemove+=(gnome-maps)
+    packagesToRemove+=(gnome-software-plugin-snap)
 fi
 
 ################################################################################
@@ -757,23 +773,23 @@ fi
 
 # Package manager
 
-if [ ${#packagesRemove[@]} -gt 0 ]; then
-    if [ "$individual" == true ]; then
-        for i in "${packagesRemove[@]}"; do
-            package_manager remove $i
-        done
+if [ ${#packagesToRemove[@]} -gt 0 ]; then
+    if [ "$bulkInstallPackages" == true ]; then
+        packageManager remove ${packagesToRemove[*]}
     else
-        package_manager remove ${packagesRemove[*]}
+        for i in "${packagesToRemove[@]}"; do
+            packageManager remove $i
+        done
     fi
 fi
 
-package_manager autoremove
+packageManager autoremove
 
 # Flatpaks
 
-if [ ${#flatpaksRemove[@]} -gt 0 ]; then
-    for i in "${flatpaksRemove[@]}"; do
-        flatpak_manager remove $i
+if [ ${#flatpaksToRemove[@]} -gt 0 ]; then
+    for i in "${flatpaksToRemove[@]}"; do
+        flatpakManager remove $i
     done
 fi
 
@@ -781,9 +797,9 @@ sudo flatpak remove --unused
 
 # Snaps
 
-if [ ${#snapsRemove[@]} -gt 0 ]; then
-    for i in "${snapsRemove[@]}"; do
-        snap_manager remove $i
+if [ ${#snapsToRemove[@]} -gt 0 ]; then
+    for i in "${snapsToRemove[@]}"; do
+        snapManager remove $i
     done
 fi
 
@@ -805,10 +821,6 @@ if [ "$de" == "gnome" ]; then
 
     # Add WM Buttons
     gsettings set org.gnome.desktop.wm.preferences button-layout ":minimize,maximize,close"
-
-    # Set Favorites
-    # gsettings get org.gnome.shell favorite-apps
-    gsettings set org.gnome.shell favorite-apps "['org.gnome.Nautilus.desktop', 'org.gnome.gedit.desktop', 'org.gnome.Terminal.desktop']"
 fi
 
 # Display neofetch to finish
