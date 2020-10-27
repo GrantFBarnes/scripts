@@ -115,11 +115,6 @@ else
     exit 1
 fi
 
-confirm "   Distrobution: $distro\n    Desktop Env: $de\nPackage Manager: $pm\n\nWould you like to continue?" 11
-if [ $? -eq 1 ]; then
-    exit 0
-fi
-
 ################################################################################
 
 # Update and set up repos
@@ -148,6 +143,11 @@ elif [ "$distro" == "mint" ]; then
         sudo rm $nosnap
         update
     fi
+fi
+
+confirm "   Distrobution: $distro\n    Desktop Env: $de\nPackage Manager: $pm\n\nWould you like to continue?" 11
+if [ $? -eq 1 ]; then
+    exit 0
 fi
 
 ################################################################################
@@ -360,6 +360,23 @@ function homePackages() {
                     snapsInstall+=(chromium)
                 fi
             ;;
+            "epiphany")
+                if [ "$repoOverFlatpak" == true ]; then
+                    if [ "$pm" == "dnf" ]; then
+                        packagesInstall+=(epiphany)
+                    else
+                        packagesInstall+=(epiphany-browser)
+                    fi
+                    flatpaksRemove+=(org.gnome.Epiphany)
+                else
+                    flatpaksInstall+=(org.gnome.Epiphany)
+                    if [ "$pm" == "dnf" ]; then
+                        packagesRemove+=(epiphany)
+                    else
+                        packagesRemove+=(epiphany-browser)
+                    fi
+                fi
+            ;;
             "imagemagick")
                 if [ "$pm" == "dnf" ]; then
                     packagesInstall+=(ImageMagick)
@@ -464,6 +481,9 @@ function homePackages() {
                     flatpaksRemove+=(org.libreoffice.LibreOffice)
                     snapsRemove+=(libreoffice)
                 fi
+            ;;
+            "texworks")
+                flatpaksInstall+=(org.tug.texworks)
             ;;
             "slack")
                 if [ "$snapOverFlatpak" == true ]; then
@@ -598,11 +618,8 @@ function chooseUsage() {
 
     # Remove duplicate values in install arrays
     packagesInstall=($(echo "${packagesInstall[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' '))
-    snapsInstall=($(echo "${snapsInstall[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' '))
-    flatpaksInstall=($(echo "${flatpaksInstall[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' '))
 
-    packageCount=$((${#packagesInstall[@]} + ${#snapsInstall[@]} + ${#flatpaksInstall[@]}))
-    selection=$(whiptail --backtitle "Packages Selected to Install: ${packageCount}" --title "Set up GNU/Linux Desktop" --menu "Find Packages to Install by Category:" --cancel-button "Cancel" --default-item "." 0 0 0 "${options[@]}" 3>&1 1>&2 2>&3)
+    selection=$(whiptail --title "Set up GNU/Linux Desktop" --menu "Find Packages to Install by Category:" --cancel-button "Cancel" --default-item "." 0 0 0 "${options[@]}" 3>&1 1>&2 2>&3)
     if [ $? -eq 1 ]; then
 		return 1
 	fi
