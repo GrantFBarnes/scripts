@@ -348,6 +348,7 @@ function homePackages() {
     packageOptions+=("spotify" "Spotify" off)
     packageOptions+=("texworks" "LaTeX Editor" off)
     packageOptions+=("thunderbird" "Thunderbird Email Client" off)
+    packageOptions+=("virtualbox" "Virtual Box VM Manager" off)
 
     if [ "$distro" != "centos" ]; then
         packageOptions+=("torbrowser-launcher" "TOR Browser" off)
@@ -356,7 +357,6 @@ function homePackages() {
     packageOptions+=("transmission-gtk" "Transmission Torrent" off)
 
     if [ "$distro" == "ubuntu" ]; then
-        packageOptions+=("virtualbox" "Virtual Box VM Manager" off)
         packageOptions+=("usb-creator-gtk" "USB Creator" off)
     fi
 
@@ -531,6 +531,13 @@ function homePackages() {
                 else
                     flatpaksToInstall+=(com.spotify.Client)
                     snapsToRemove+=(spotify)
+                fi
+            ;;
+            "virtualbox")
+                if [ "$pm" == "dnf" ]; then
+                    packagesToInstall+=(VirtualBox)
+                elif [ "$pm" == "apt" ]; then
+                    packagesToInstall+=(virtualbox)
                 fi
             ;;
             *)
