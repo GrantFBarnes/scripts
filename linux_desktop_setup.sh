@@ -16,7 +16,7 @@ function choosePackagesWhiptail() {
 }
 
 function chooseCategoryWhiptail() {
-    categorySelection=$(whiptail --title "Set up GNU/Linux Desktop" --menu "Select a Category to Find Packages:" --cancel-button "Cancel" --default-item "." 0 0 0 "${categoryOptions[@]}" 3>&1 1>&2 2>&3)
+    categorySelection=$(whiptail --title "Set up GNU/Linux Desktop" --menu "Select a Category to Find Packages:" --cancel-button "Cancel" --default-item "${defaultCategory}" 0 0 0 "${categoryOptions[@]}" 3>&1 1>&2 2>&3)
     return $?
 }
 
@@ -227,8 +227,9 @@ fi
 
 # Determine Packages to install and remove
 
-declare -a categoryOptions
+defaultCategory="."
 categorySelection=""
+declare -a categoryOptions
 
 declare -a packageOptions
 declare -a packageSelections
@@ -664,18 +665,23 @@ function chooseUsage() {
     case ${categorySelection} in
         "Base")
             basePackages
+            defaultCategory="Development"
         ;;
         "Development")
             developmentPackages
+            defaultCategory="Home"
         ;;
         "Home")
             homePackages
+            defaultCategory="Multi Media"
         ;;
         "Multi Media")
             mediaPackages
+            defaultCategory="Gaming"
         ;;
         "Gaming")
             gamingPackages
+            defaultCategory="Install"
         ;;
         "Install")
             return
