@@ -242,121 +242,24 @@ declare -a packagesToRemove
 declare -a snapsToRemove
 declare -a flatpaksToRemove
 
-function basePackages() {
+# Always install the following packages
+packagesToInstall+=(flatpak)
+packagesToInstall+=(nano)
+packagesToInstall+=(neofetch)
+packagesToInstall+=(snapd)
+
+function applicationPackages() {
     packageOptions=()
-    packageOptions+=("baobab" "Disk Usage" on)
-    packageOptions+=("firefox" "Firefox Broswer" on)
-    packageOptions+=("flatpak" "Flatpak Manager" on)
-    packageOptions+=("gedit" "GUI Text Editor" on)
-
-    if [ "$de" == "gnome" ]; then
-        packageOptions+=("gnome-system-monitor" "System Monitor" on)
-        packageOptions+=("gnome-terminal" "Terminal" on)
-        packageOptions+=("gnome-tweaks" "Gnome Tweaks" on)
-        if [ "$distro" != "pop" ]; then
-            packageOptions+=("gnome-software" "Gnome Software Manager" on)
-        fi
-    fi
-
-    if [ "$distro" == "ubuntu" ]; then
-        packageOptions+=("gnome-software-plugin-flatpak" "Flatpak Support Gnome Software" on)
-    fi
-
-    packageOptions+=("nano" "Terminal Text Editor" on)
-    packageOptions+=("neofetch" "Displays System Info" on)
-    packageOptions+=("snapd" "Snap Daemon" on)
-
-    choosePackagesWhiptail
-    if [ $? -eq 1 ]; then
-		return
-	fi
-
-    for pkg in $packageSelections; do
-        pkg=$(echo $pkg | sed 's/"//g')
-        case ${pkg} in
-            "firefox")
-                if [ "$distro" == "debian" ]; then
-                    packagesToInstall+=(firefox-esr)
-                else
-                    packagesToInstall+=(firefox)
-                fi
-            ;;
-            "snapd")
-                packagesToInstall+=($pkg)
-                snapsToInstall+=(snap-store)
-            ;;
-            *)
-                packagesToInstall+=($pkg)
-            ;;
-        esac
-    done
-}
-
-function developmentPackages() {
-    packageOptions=()
-    packageOptions+=("code" "Visual Studio Code" off)
-    packageOptions+=("git" "Git" off)
-    packageOptions+=("meld" "Gnome Meld File Comparitor" off)
-    packageOptions+=("net-tools" "Network Packages" off)
-    packageOptions+=("nodejs" "NodeJS" off)
-    packageOptions+=("npm" "Node Package Manager" off)
-
-    choosePackagesWhiptail
-    if [ $? -eq 1 ]; then
-		return
-	fi
-
-    for pkg in $packageSelections; do
-        pkg=$(echo $pkg | sed 's/"//g')
-        case ${pkg} in
-            "code")
-                snapsToInstall+=("code --classic")
-            ;;
-            "meld")
-                if [ "$preferRepoOverFlatpak" == true ]; then
-                    packagesToInstall+=(meld)
-                    flatpaksToRemove+=(org.gnome.meld)
-                else
-                    flatpaksToInstall+=(org.gnome.meld)
-                    packagesToRemove+=(meld)
-                fi
-            ;;
-            *)
-                packagesToInstall+=($pkg)
-            ;;
-        esac
-    done
-}
-
-function homePackages() {
-    packageOptions=()
-    packageOptions+=("chromium" "Chromium Web Browser" off)
     packageOptions+=("deja-dup" "Backup Tool" off)
-    packageOptions+=("discord" "Discord" off)
-    packageOptions+=("epiphany" "Gnome Web Browser" off)
-    packageOptions+=("exfat" "ExFat Format Support" off)
     packageOptions+=("gnome-books" "Gnome Books" off)
     packageOptions+=("gnome-boxes" "Gnome Boxes VM Manager" off)
-    packageOptions+=("gnome-calculator" "Gnome Calculator" off)
-    packageOptions+=("gnome-calendar" "Gnome Calendar" off)
-    packageOptions+=("gnome-clocks" "Gnome Clocks" off)
-    packageOptions+=("gnome-photos" "Gnome Photos" off)
-    packageOptions+=("gnome-weather" "Gnome Weather" off)
-    packageOptions+=("imagemagick" "Image Magick" off)
-    packageOptions+=("libreoffice" "LibreOffice Suite" off)
-    packageOptions+=("slack" "Slack" off)
-    packageOptions+=("simple-scan" "Scanner Application" off)
-    packageOptions+=("spotify" "Spotify" off)
-    packageOptions+=("texworks" "LaTeX Editor" off)
-    packageOptions+=("thunderbird" "Thunderbird Email Client" off)
-    packageOptions+=("virtualbox" "Virtual Box VM Manager" off)
-
-    if [ "$distro" != "centos" ]; then
-        packageOptions+=("torbrowser-launcher" "TOR Browser" off)
-    fi
-
+    packageOptions+=("gnome-calculator" "Gnome Calculator" on)
+    packageOptions+=("gnome-calendar" "Gnome Calendar" on)
+    packageOptions+=("gnome-clocks" "Gnome Clocks" on)
+    packageOptions+=("gnome-photos" "Gnome Photos" on)
+    packageOptions+=("gnome-weather" "Gnome Weather" on)
+    packageOptions+=("meld" "File Comparitor" off)
     packageOptions+=("transmission-gtk" "Transmission Torrent" off)
-
     if [ "$distro" == "ubuntu" ]; then
         packageOptions+=("usb-creator-gtk" "USB Creator" off)
     fi
@@ -369,28 +272,6 @@ function homePackages() {
     for pkg in $packageSelections; do
         pkg=$(echo $pkg | sed 's/"//g')
         case ${pkg} in
-            "chromium")
-                if [ "$pm" == "dnf" ]; then
-                    if [ "$preferRepoOverSnap" == true ]; then
-                        packagesToInstall+=(chromium)
-                        snapsToRemove+=(chromium)
-                    else
-                        snapsToInstall+=(chromium)
-                        packagesToRemove+=(chromium)
-                    fi
-                else
-                    snapsToInstall+=(chromium)
-                fi
-            ;;
-            "discord")
-                if [ "$preferSnapOverFlatpak" == true ]; then
-                    snapsToInstall+=(discord)
-                    flatpaksToRemove+=(com.discordapp.Discord)
-                else
-                    flatpaksToInstall+=(com.discordapp.Discord)
-                    snapsToRemove+=(discord)
-                fi
-            ;;
             "deja-dup")
                 if [ "$preferRepoOverFlatpak" == true ]; then
                     packagesToInstall+=(deja-dup)
@@ -398,31 +279,6 @@ function homePackages() {
                 else
                     flatpaksToInstall+=(org.gnome.DejaDup)
                     packagesToRemove+=(deja-dup)
-                fi
-            ;;
-            "epiphany")
-                if [ "$preferRepoOverFlatpak" == true ]; then
-                    if [ "$pm" == "dnf" ]; then
-                        packagesToInstall+=(epiphany)
-                    else
-                        packagesToInstall+=(epiphany-browser)
-                    fi
-                    flatpaksToRemove+=(org.gnome.Epiphany)
-                else
-                    flatpaksToInstall+=(org.gnome.Epiphany)
-                    if [ "$pm" == "dnf" ]; then
-                        packagesToRemove+=(epiphany)
-                    else
-                        packagesToRemove+=(epiphany-browser)
-                    fi
-                fi
-            ;;
-            "exfat")
-                packagesToInstall+=(exfat-utils)
-                if [ "$pm" == "apt" ]; then
-                    packagesToInstall+=(exfat-fuse)
-                elif [ "$pm" == "dnf" ]; then
-                    packagesToInstall+=(fuse-exfat)
                 fi
             ;;
             "gnome-books")
@@ -488,33 +344,105 @@ function homePackages() {
                     packagesToRemove+=(gnome-weather)
                 fi
             ;;
-            "imagemagick")
-                if [ "$pm" == "dnf" ]; then
-                    packagesToInstall+=(ImageMagick)
-                elif [ "$pm" == "apt" ]; then
-                    packagesToInstall+=(imagemagick)
-                fi
-            ;;
-            "libreoffice")
-                if [ "$sourcePreference" == "snap" ]; then
-                    snapsToInstall+=(libreoffice)
-
-                    flatpaksToRemove+=(org.libreoffice.LibreOffice)
-                    packagesToRemove+=(libreoffice*)
-                elif [ "$sourcePreference" == "flatpak" ]; then
-                    flatpaksToInstall+=(org.libreoffice.LibreOffice)
-
-                    snapsToRemove+=(libreoffice)
-                    packagesToRemove+=(libreoffice*)
+            "meld")
+                if [ "$preferRepoOverFlatpak" == true ]; then
+                    packagesToInstall+=(meld)
+                    flatpaksToRemove+=(org.gnome.meld)
                 else
-                    packagesToInstall+=(libreoffice)
-
-                    flatpaksToRemove+=(org.libreoffice.LibreOffice)
-                    snapsToRemove+=(libreoffice)
+                    flatpaksToInstall+=(org.gnome.meld)
+                    packagesToRemove+=(meld)
                 fi
             ;;
-            "texworks")
-                flatpaksToInstall+=(org.tug.texworks)
+            *)
+                packagesToInstall+=($pkg)
+            ;;
+        esac
+    done
+}
+
+function browserPackages() {
+    packageOptions=()
+    packageOptions+=("chromium" "Chromium Web Browser" off)
+    packageOptions+=("epiphany" "Gnome Web Browser" off)
+    packageOptions+=("firefox" "Firefox Broswer" on)
+    if [ "$distro" != "centos" ]; then
+        packageOptions+=("torbrowser-launcher" "TOR Browser" off)
+    fi
+
+    choosePackagesWhiptail
+    if [ $? -eq 1 ]; then
+		return
+	fi
+
+    for pkg in $packageSelections; do
+        pkg=$(echo $pkg | sed 's/"//g')
+        case ${pkg} in
+            "chromium")
+                if [ "$pm" == "dnf" ]; then
+                    if [ "$preferRepoOverSnap" == true ]; then
+                        packagesToInstall+=(chromium)
+                        snapsToRemove+=(chromium)
+                    else
+                        snapsToInstall+=(chromium)
+                        packagesToRemove+=(chromium)
+                    fi
+                else
+                    snapsToInstall+=(chromium)
+                fi
+            ;;
+            "epiphany")
+                if [ "$preferRepoOverFlatpak" == true ]; then
+                    if [ "$pm" == "dnf" ]; then
+                        packagesToInstall+=(epiphany)
+                    else
+                        packagesToInstall+=(epiphany-browser)
+                    fi
+                    flatpaksToRemove+=(org.gnome.Epiphany)
+                else
+                    flatpaksToInstall+=(org.gnome.Epiphany)
+                    if [ "$pm" == "dnf" ]; then
+                        packagesToRemove+=(epiphany)
+                    else
+                        packagesToRemove+=(epiphany-browser)
+                    fi
+                fi
+            ;;
+            "firefox")
+                if [ "$distro" == "debian" ]; then
+                    packagesToInstall+=(firefox-esr)
+                else
+                    packagesToInstall+=(firefox)
+                fi
+            ;;
+            *)
+                packagesToInstall+=($pkg)
+            ;;
+        esac
+    done
+}
+
+function communicationPackages() {
+    packageOptions=()
+    packageOptions+=("discord" "Discord" off)
+    packageOptions+=("slack" "Slack" off)
+    packageOptions+=("thunderbird" "Thunderbird Email Client" off)
+
+    choosePackagesWhiptail
+    if [ $? -eq 1 ]; then
+		return
+	fi
+
+    for pkg in $packageSelections; do
+        pkg=$(echo $pkg | sed 's/"//g')
+        case ${pkg} in
+            "discord")
+                if [ "$preferSnapOverFlatpak" == true ]; then
+                    snapsToInstall+=(discord)
+                    flatpaksToRemove+=(com.discordapp.Discord)
+                else
+                    flatpaksToInstall+=(com.discordapp.Discord)
+                    snapsToRemove+=(discord)
+                fi
             ;;
             "slack")
                 if [ "$preferSnapOverFlatpak" == true ]; then
@@ -525,22 +453,28 @@ function homePackages() {
                     snapsToRemove+=(slack)
                 fi
             ;;
-            "spotify")
-                if [ "$preferSnapOverFlatpak" == true ]; then
-                    snapsToInstall+=(spotify)
-                    flatpaksToRemove+=(com.spotify.Client)
-                else
-                    flatpaksToInstall+=(com.spotify.Client)
-                    snapsToRemove+=(spotify)
-                fi
+            *)
+                packagesToInstall+=($pkg)
             ;;
-            "virtualbox")
-                if [ "$pm" == "dnf" ]; then
-                    packagesToInstall+=(VirtualBox)
-                elif [ "$pm" == "apt" ]; then
-                    packagesToInstall+=(virtualbox)
-                fi
-            ;;
+        esac
+    done
+}
+
+function developmentPackages() {
+    packageOptions=()
+    packageOptions+=("git" "Git" off)
+    packageOptions+=("net-tools" "Network Packages" off)
+    packageOptions+=("nodejs" "NodeJS" off)
+    packageOptions+=("npm" "Node Package Manager" off)
+
+    choosePackagesWhiptail
+    if [ $? -eq 1 ]; then
+		return
+	fi
+
+    for pkg in $packageSelections; do
+        pkg=$(echo $pkg | sed 's/"//g')
+        case ${pkg} in
             *)
                 packagesToInstall+=($pkg)
             ;;
@@ -552,11 +486,8 @@ function mediaPackages() {
     packageOptions=()
     packageOptions+=("blender" "3D Modleler and Video Editor" off)
     packageOptions+=("gimp" "GNU Image Manipulation Program" off)
+    packageOptions+=("spotify" "Spotify" off)
     packageOptions+=("vlc" "Media Player" off)
-
-    if [ "$distro" != "centos" ]; then
-        packageOptions+=("ffmpeg" "ffmpeg to watch videos" off)
-    fi
 
     choosePackagesWhiptail
     if [ $? -eq 1 ]; then
@@ -591,6 +522,15 @@ function mediaPackages() {
                 else
                     flatpaksToInstall+=(org.gimp.GIMP)
                     packagesToRemove+=(gimp)
+                fi
+            ;;
+            "spotify")
+                if [ "$preferSnapOverFlatpak" == true ]; then
+                    snapsToInstall+=(spotify)
+                    flatpaksToRemove+=(com.spotify.Client)
+                else
+                    flatpaksToInstall+=(com.spotify.Client)
+                    snapsToRemove+=(spotify)
                 fi
             ;;
             "vlc")
@@ -644,13 +584,124 @@ function gamingPackages() {
     done
 }
 
+function textPackages() {
+    packageOptions=()
+    packageOptions+=("code" "Visual Studio Code" off)
+    packageOptions+=("gedit" "GUI Text Editor" on)
+    packageOptions+=("libreoffice" "LibreOffice Suite" off)
+    packageOptions+=("texworks" "LaTeX Editor" off)
+
+    choosePackagesWhiptail
+    if [ $? -eq 1 ]; then
+		return
+	fi
+
+    for pkg in $packageSelections; do
+        pkg=$(echo $pkg | sed 's/"//g')
+        case ${pkg} in
+            "code")
+                snapsToInstall+=("code --classic")
+            ;;
+            "libreoffice")
+                if [ "$sourcePreference" == "snap" ]; then
+                    snapsToInstall+=(libreoffice)
+
+                    flatpaksToRemove+=(org.libreoffice.LibreOffice)
+                    packagesToRemove+=(libreoffice*)
+                elif [ "$sourcePreference" == "flatpak" ]; then
+                    flatpaksToInstall+=(org.libreoffice.LibreOffice)
+
+                    snapsToRemove+=(libreoffice)
+                    packagesToRemove+=(libreoffice*)
+                else
+                    packagesToInstall+=(libreoffice)
+
+                    flatpaksToRemove+=(org.libreoffice.LibreOffice)
+                    snapsToRemove+=(libreoffice)
+                fi
+            ;;
+            "texworks")
+                flatpaksToInstall+=(org.tug.texworks)
+            ;;
+            *)
+                packagesToInstall+=($pkg)
+            ;;
+        esac
+    done
+}
+
+function utilityPackages() {
+    packageOptions=()
+    packageOptions+=("baobab" "Disk Usage" on)
+    packageOptions+=("exfat" "ExFat Format Support" off)
+    if [ "$distro" != "centos" ]; then
+        packageOptions+=("ffmpeg" "ffmpeg to watch videos" on)
+    fi
+    if [ "$de" == "gnome" ]; then
+        packageOptions+=("gnome-system-monitor" "System Monitor" on)
+        packageOptions+=("gnome-tweaks" "Gnome Tweaks" on)
+        if [ "$distro" != "pop" ]; then
+            packageOptions+=("gnome-software" "Gnome Software Manager" on)
+        fi
+    fi
+    if [ "$distro" == "ubuntu" ]; then
+        packageOptions+=("gnome-software-plugin-flatpak" "Flatpak Support Gnome Software" on)
+    fi
+    packageOptions+=("imagemagick" "Image Magick" on)
+    packageOptions+=("simple-scan" "Scanner Application" off)
+    packageOptions+=("snap-store" "Snap Store Software Manager" off)
+    packageOptions+=("virtualbox" "Virtual Box VM Manager" off)
+
+    choosePackagesWhiptail
+    if [ $? -eq 1 ]; then
+		return
+	fi
+
+    for pkg in $packageSelections; do
+        pkg=$(echo $pkg | sed 's/"//g')
+        case ${pkg} in
+            "exfat")
+                packagesToInstall+=(exfat-utils)
+                if [ "$pm" == "apt" ]; then
+                    packagesToInstall+=(exfat-fuse)
+                elif [ "$pm" == "dnf" ]; then
+                    packagesToInstall+=(fuse-exfat)
+                fi
+            ;;
+            "imagemagick")
+                if [ "$pm" == "dnf" ]; then
+                    packagesToInstall+=(ImageMagick)
+                elif [ "$pm" == "apt" ]; then
+                    packagesToInstall+=(imagemagick)
+                fi
+            ;;
+            "snap-store")
+                snapsToInstall+=(snap-store)
+            ;;
+            "virtualbox")
+                if [ "$pm" == "dnf" ]; then
+                    packagesToInstall+=(VirtualBox)
+                elif [ "$pm" == "apt" ]; then
+                    packagesToInstall+=(virtualbox)
+                fi
+            ;;
+            *)
+                packagesToInstall+=($pkg)
+            ;;
+        esac
+    done
+}
+
 function chooseUsage() {
     categoryOptions=()
-    categoryOptions+=("Base" "")
-    categoryOptions+=("Development" "")
-    categoryOptions+=("Home" "")
-    categoryOptions+=("Multi Media" "")
-    categoryOptions+=("Gaming" "")
+    categoryOptions+=("Applications" "Various Desktop Applications")
+    categoryOptions+=("Browsers" "Web Browsers")
+    categoryOptions+=("Communication" "Communication Applications")
+    categoryOptions+=("Development" "Development Packages")
+    categoryOptions+=("Media" "Multi Media Applications")
+    categoryOptions+=("Gaming" "Gaming Applications")
+    categoryOptions+=("Text" "Text Applications")
+    categoryOptions+=("Utility" "Utility Applications and Packages")
     categoryOptions+=("" "")
     categoryOptions+=("Install" "")
 
@@ -663,24 +714,36 @@ function chooseUsage() {
 	fi
 
     case ${categorySelection} in
-        "Base")
-            basePackages
+        "Applications")
+            applicationPackages
+            defaultCategory="Browsers"
+        ;;
+        "Browsers")
+            browserPackages
+            defaultCategory="Communication"
+        ;;
+        "Communication")
+            communicationPackages
             defaultCategory="Development"
         ;;
         "Development")
             developmentPackages
-            defaultCategory="Home"
+            defaultCategory="Media"
         ;;
-        "Home")
-            homePackages
-            defaultCategory="Multi Media"
-        ;;
-        "Multi Media")
+        "Media")
             mediaPackages
             defaultCategory="Gaming"
         ;;
         "Gaming")
             gamingPackages
+            defaultCategory="Text"
+        ;;
+        "Text")
+            textPackages
+            defaultCategory="Utility"
+        ;;
+        "Utility")
+            utilityPackages
             defaultCategory="Install"
         ;;
         "Install")
