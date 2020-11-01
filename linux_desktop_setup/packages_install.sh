@@ -261,9 +261,6 @@ function applicationPackages() {
     packageOptions+=("gnome-weather" "Gnome Weather" on)
     packageOptions+=("meld" "File Comparitor" off)
     packageOptions+=("transmission-gtk" "Transmission Torrent" off)
-    if [ "$distro" == "ubuntu" ]; then
-        packageOptions+=("usb-creator-gtk" "USB Creator" off)
-    fi
 
     choosePackagesWhiptail
     if [ $? -eq 1 ]; then
