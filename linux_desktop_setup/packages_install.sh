@@ -1,5 +1,5 @@
 #!/bin/bash
-# Purpose: Setup fresh install of GNU/Linux Desktop
+# Purpose: Install/Remove basic packages for GNU/Linux Desktop
 ################################################################################
 
 function confirmWhiptail() {
@@ -243,6 +243,7 @@ declare -a snapsToRemove
 declare -a flatpaksToRemove
 
 # Always install the following packages
+packagesToInstall+=(git)
 packagesToInstall+=(flatpak)
 packagesToInstall+=(nano)
 packagesToInstall+=(neofetch)
@@ -462,7 +463,6 @@ function communicationPackages() {
 
 function developmentPackages() {
     packageOptions=()
-    packageOptions+=("git" "Git" off)
     packageOptions+=("net-tools" "Network Packages" off)
     packageOptions+=("nodejs" "NodeJS" off)
     packageOptions+=("npm" "Node Package Manager" off)
@@ -900,18 +900,7 @@ LANG=en_US.UTF-8 snap list --all | awk '/disabled/{print $1, $3}' |
 
 ################################################################################
 
-if [ "$de" == "gnome" ]; then
-    if [ "$distro" == "fedora" ]; then
-        # Install Themes
-        gsettings set org.gnome.desktop.interface gtk-theme "Adwaita-dark"
-    elif [ "$distro" == "ubuntu" ]; then
-        # Install Themes
-        gsettings set org.gnome.desktop.interface gtk-theme "Yaru-dark"
-    fi
-
-    # Add WM Buttons
-    gsettings set org.gnome.desktop.wm.preferences button-layout ":minimize,maximize,close"
-fi
+sudo -u $SUDO_USER ./env_setup.sh
 
 # Display neofetch to finish
 neofetch
