@@ -30,7 +30,8 @@ elif [ "$distro" == "ubuntu" ]; then
 fi
 
 # Set Icons
-if [ "$distro" == "fedora" ]; then
+if [ "$distro" == "fedora" ] || [ "$distro" == "centos" ] || [ "$distro" == "debian" ]; then
+    mkdir ~/.local/share/icons
     cp -r Yaru-Blue/ ~/.local/share/icons/Yaru-Blue
     gsettings set org.gnome.desktop.interface icon-theme "Yaru-Blue"
 fi
