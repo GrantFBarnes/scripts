@@ -36,15 +36,28 @@ if [ "$distro" == "fedora" ] || [ "$distro" == "centos" ] || [ "$distro" == "deb
     gsettings set org.gnome.desktop.interface icon-theme "Yaru-Blue"
 fi
 
-# Set up clock
+# Setup Clock
 gsettings set org.gnome.desktop.interface clock-format "12h"
 gsettings set org.gnome.desktop.interface clock-show-date true
 gsettings set org.gnome.desktop.interface clock-show-seconds true
+gsettings set org.gnome.desktop.interface clock-show-weekday true
 
-# Set blank screen to 15 min (900 seconds)
+# Show Battery Percentage
+gsettings set org.gnome.desktop.interface show-battery-percentage true
+
+# Enable Overview Hot Corner
+gsettings set org.gnome.desktop.interface enable-hot-corners true
+
+# Disable Animations
+gsettings set org.gnome.desktop.interface enable-animations false
+
+# Set Blank Screen to 15 min (900 seconds)
 gsettings set org.gnome.desktop.session idle-delay 900
 
 # Add WM Buttons
 gsettings set org.gnome.desktop.wm.preferences button-layout ":minimize,maximize,close"
+
+# Set Nautilus Default View to List
+gsettings set org.gnome.nautilus.preferences default-folder-viewer "list-view"
 
 exit 0

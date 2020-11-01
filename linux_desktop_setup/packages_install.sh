@@ -633,6 +633,9 @@ function textPackages() {
 function utilityPackages() {
     packageOptions=()
     packageOptions+=("baobab" "Disk Usage" on)
+    if [ "$de" == "gnome" ]; then
+        packageOptions+=("dconf-editor" "dconf Editor" off)
+    fi
     packageOptions+=("exfat" "ExFat Format Support" off)
     if [ "$distro" != "centos" ]; then
         packageOptions+=("ffmpeg" "ffmpeg to watch videos" on)
