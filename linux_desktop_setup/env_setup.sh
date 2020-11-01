@@ -31,11 +31,7 @@ fi
 
 # Set Icons
 if [ "$distro" == "fedora" ]; then
-    git clone https://github.com/Jannomag/Yaru-Colors.git
-
-    cp -r Yaru-Colors/Icons/Yaru-Blue/ ~/.local/share/icons/Yaru-Blue
-    rm -rf Yaru-Colors
-
+    cp -r Yaru-Blue/ ~/.local/share/icons/Yaru-Blue
     gsettings set org.gnome.desktop.interface icon-theme "Yaru-Blue"
 fi
 
