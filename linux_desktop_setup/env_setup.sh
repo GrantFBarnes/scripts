@@ -23,7 +23,7 @@ else
 fi
 
 # Set Themes
-if [ "$distro" == "fedora" ]; then
+if [ "$distro" == "fedora" ] || [ "$distro" == "centos" ] || [ "$distro" == "debian" ]; then
     gsettings set org.gnome.desktop.interface gtk-theme "Adwaita-dark"
 elif [ "$distro" == "ubuntu" ]; then
     gsettings set org.gnome.desktop.interface gtk-theme "Yaru-dark"
@@ -35,6 +35,14 @@ if [ "$distro" == "fedora" ] || [ "$distro" == "centos" ] || [ "$distro" == "deb
     cp -r Yaru-Blue/ ~/.local/share/icons/Yaru-Blue
     gsettings set org.gnome.desktop.interface icon-theme "Yaru-Blue"
 fi
+
+# Set up clock
+gsettings set org.gnome.desktop.interface clock-format "12h"
+gsettings set org.gnome.desktop.interface clock-show-date true
+gsettings set org.gnome.desktop.interface clock-show-seconds true
+
+# Set blank screen to 15 min (900 seconds)
+gsettings set org.gnome.desktop.session idle-delay 900
 
 # Add WM Buttons
 gsettings set org.gnome.desktop.wm.preferences button-layout ":minimize,maximize,close"
