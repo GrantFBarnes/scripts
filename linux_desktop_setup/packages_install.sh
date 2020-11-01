@@ -572,7 +572,13 @@ function gamingPackages() {
                 flatpaksToInstall+=(com.valvesoftware.Steam)
             ;;
             "xonotic")
-                snapsToInstall+=(xonotic)
+                if [ "$preferSnapOverFlatpak" == true ]; then
+                    snapsToInstall+=(xonotic)
+                    flatpaksToRemove+=(org.xonotic.Xonotic)
+                else
+                    flatpaksToInstall+=(org.xonotic.Xonotic)
+                    snapsToRemove+=(xonotic)
+                fi
             ;;
             *)
                 packagesToInstall+=($pkg)
@@ -597,7 +603,36 @@ function textPackages() {
         pkg=$(echo $pkg | sed 's/"//g')
         case ${pkg} in
             "code")
-                snapsToInstall+=("code --classic")
+                if [ "$pm" == "apt" ]; then
+                    if [ "$preferSnapOverFlatpak" == true ]; then
+                        snapsToInstall+=("code --classic")
+                        flatpaksToRemove+=(com.visualstudio.code)
+                    else
+                        flatpaksToInstall+=(com.visualstudio.code)
+                        snapsToRemove+=(code)
+                    fi
+                elif [ "$pm" == "dnf" ]; then
+                    if [ "$sourcePreference" == "snap" ]; then
+                        snapsToInstall+=("code --classic")
+
+                        flatpaksToRemove+=(com.visualstudio.code)
+                        packagesToRemove+=(code)
+                    elif [ "$sourcePreference" == "flatpak" ]; then
+                        flatpaksToInstall+=(com.visualstudio.code)
+
+                        snapsToRemove+=(code)
+                        packagesToRemove+=(code)
+                    else
+                        sudo rpm --import https://packages.microsoft.com/keys/microsoft.asc
+                        sudo sh -c 'echo -e "[code]\nname=Visual Studio Code\nbaseurl=https://packages.microsoft.com/yumrepos/vscode\nenabled=1\ngpgcheck=1\ngpgkey=https://packages.microsoft.com/keys/microsoft.asc" > /etc/yum.repos.d/vscode.repo'
+                        sudo dnf check-update
+
+                        packagesToInstall+=(code)
+
+                        flatpaksToRemove+=(com.visualstudio.code)
+                        snapsToRemove+=(code)
+                    fi
+                fi
             ;;
             "libreoffice")
                 if [ "$sourcePreference" == "snap" ]; then
@@ -611,7 +646,9 @@ function textPackages() {
                     snapsToRemove+=(libreoffice)
                     packagesToRemove+=(libreoffice*)
                 else
-                    packagesToInstall+=(libreoffice)
+                    packagesToInstall+=(libreoffice-writer)
+                    packagesToInstall+=(libreoffice-calc)
+                    packagesToInstall+=(libreoffice-impress)
 
                     flatpaksToRemove+=(org.libreoffice.LibreOffice)
                     snapsToRemove+=(libreoffice)
