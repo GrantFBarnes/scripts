@@ -60,4 +60,7 @@ gsettings set org.gnome.desktop.wm.preferences button-layout ":minimize,maximize
 # Set Nautilus Default View to List
 gsettings set org.gnome.nautilus.preferences default-folder-viewer "list-view"
 
+# Set Touchpad Tap to Click
+gsettings set org.gnome.desktop.peripherals.touchpad tap-to-click true
+
 exit 0

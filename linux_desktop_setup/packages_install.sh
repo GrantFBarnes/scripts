@@ -166,7 +166,7 @@ bulkInstallPackages=true
 sourcePreference="repo"
 preferRepoOverSnap=true
 preferRepoOverFlatpak=true
-preferSnapOverFlatpak=true
+preferFlatpakOverSnap=true
 
 confirmWhiptail "Install packages individually?"
 if [ $? -eq 0 ]; then
@@ -177,7 +177,7 @@ if [ "$distro" == "centos" ]; then
     sourcePreference="flatpak"
     preferRepoOverSnap=false
     preferRepoOverFlatpak=false
-    preferSnapOverFlatpak=false
+    preferFlatpakOverSnap=true
 else
     confirmWhiptail "Do you prefer snap over repository?"
     if [ $? -eq 0 ]; then
@@ -196,29 +196,29 @@ else
     if [ "$preferRepoOverSnap" == true ] && [ "$preferRepoOverFlatpak" == true ]; then
         # Prefer repo over both snaps and flatpaks
         sourcePreference="repo"
-        confirmWhiptail "Do you prefer flatpak over snap?"
+        confirmWhiptail "Do you prefer snap over flatpak?"
         if [ $? -eq 0 ]; then
-            preferSnapOverFlatpak=false
+            preferFlatpakOverSnap=false
         else
-            preferSnapOverFlatpak=true
+            preferFlatpakOverSnap=true
         fi
     elif [ "$preferRepoOverSnap" == true ]; then
         # Prefer repo over snap, but flatpak over repo
         sourcePreference="flatpak"
-        preferSnapOverFlatpak=false
+        preferFlatpakOverSnap=true
     elif [ "$preferRepoOverFlatpak" == true ]; then
         # Prefer repo over flatpak, but snap over repo
         sourcePreference="snap"
-        preferSnapOverFlatpak=true
+        preferFlatpakOverSnap=false
     else
         # Prefer both snap and flatpak over repo
-        confirmWhiptail "Do you prefer flatpak over snap?"
+        confirmWhiptail "Do you prefer snap over flatpak?"
         if [ $? -eq 0 ]; then
             sourcePreference="flatpak"
-            preferSnapOverFlatpak=false
+            preferFlatpakOverSnap=false
         else
             sourcePreference="snap"
-            preferSnapOverFlatpak=true
+            preferFlatpakOverSnap=true
         fi
     fi
 fi
@@ -243,7 +243,6 @@ declare -a snapsToRemove
 declare -a flatpaksToRemove
 
 # Always install the following packages
-packagesToInstall+=(git)
 packagesToInstall+=(flatpak)
 packagesToInstall+=(nano)
 packagesToInstall+=(neofetch)
@@ -434,21 +433,21 @@ function communicationPackages() {
         pkg=$(echo $pkg | sed 's/"//g')
         case ${pkg} in
             "discord")
-                if [ "$preferSnapOverFlatpak" == true ]; then
-                    snapsToInstall+=(discord)
-                    flatpaksToRemove+=(com.discordapp.Discord)
-                else
+                if [ "$preferFlatpakOverSnap" == true ]; then
                     flatpaksToInstall+=(com.discordapp.Discord)
                     snapsToRemove+=(discord)
+                else
+                    snapsToInstall+=(discord)
+                    flatpaksToRemove+=(com.discordapp.Discord)
                 fi
             ;;
             "slack")
-                if [ "$preferSnapOverFlatpak" == true ]; then
-                    snapsToInstall+=("slack --classic")
-                    flatpaksToRemove+=(com.slack.Slack)
-                else
+                if [ "$preferFlatpakOverSnap" == true ]; then
                     flatpaksToInstall+=(com.slack.Slack)
                     snapsToRemove+=(slack)
+                else
+                    snapsToInstall+=("slack --classic")
+                    flatpaksToRemove+=(com.slack.Slack)
                 fi
             ;;
             *)
@@ -460,6 +459,7 @@ function communicationPackages() {
 
 function developmentPackages() {
     packageOptions=()
+    packageOptions+=("git" "Git" off)
     packageOptions+=("net-tools" "Network Packages" off)
     packageOptions+=("nodejs" "NodeJS" off)
     packageOptions+=("npm" "Node Package Manager" off)
@@ -522,12 +522,12 @@ function mediaPackages() {
                 fi
             ;;
             "spotify")
-                if [ "$preferSnapOverFlatpak" == true ]; then
-                    snapsToInstall+=(spotify)
-                    flatpaksToRemove+=(com.spotify.Client)
-                else
+                if [ "$preferFlatpakOverSnap" == true ]; then
                     flatpaksToInstall+=(com.spotify.Client)
                     snapsToRemove+=(spotify)
+                else
+                    snapsToInstall+=(spotify)
+                    flatpaksToRemove+=(com.spotify.Client)
                 fi
             ;;
             "vlc")
@@ -572,12 +572,12 @@ function gamingPackages() {
                 flatpaksToInstall+=(com.valvesoftware.Steam)
             ;;
             "xonotic")
-                if [ "$preferSnapOverFlatpak" == true ]; then
-                    snapsToInstall+=(xonotic)
-                    flatpaksToRemove+=(org.xonotic.Xonotic)
-                else
+                if [ "$preferFlatpakOverSnap" == true ]; then
                     flatpaksToInstall+=(org.xonotic.Xonotic)
                     snapsToRemove+=(xonotic)
+                else
+                    snapsToInstall+=(xonotic)
+                    flatpaksToRemove+=(org.xonotic.Xonotic)
                 fi
             ;;
             *)
@@ -605,12 +605,12 @@ function textPackages() {
         case ${pkg} in
             "code")
                 if [ "$pm" == "apt" ]; then
-                    if [ "$preferSnapOverFlatpak" == true ]; then
-                        snapsToInstall+=("code --classic")
-                        flatpaksToRemove+=(com.visualstudio.code)
-                    else
+                    if [ "$preferFlatpakOverSnap" == true ]; then
                         flatpaksToInstall+=(com.visualstudio.code)
                         snapsToRemove+=(code)
+                    else
+                        snapsToInstall+=("code --classic")
+                        flatpaksToRemove+=(com.visualstudio.code)
                     fi
                 elif [ "$pm" == "dnf" ]; then
                     if [ "$sourcePreference" == "snap" ]; then
@@ -938,9 +938,6 @@ LANG=en_US.UTF-8 snap list --all | awk '/disabled/{print $1, $3}' |
 
 ################################################################################
 
-sudo -u $SUDO_USER ./env_setup.sh
-
-# Display neofetch to finish
 neofetch
 
 exit 0
