@@ -592,6 +592,7 @@ function textPackages() {
     packageOptions+=("code" "Visual Studio Code" off)
     packageOptions+=("gedit" "GUI Text Editor" on)
     packageOptions+=("libreoffice" "LibreOffice Suite" off)
+    packageOptions+=("retext" "Markdown Editor" off)
     packageOptions+=("texworks" "LaTeX Editor" off)
 
     choosePackagesWhiptail
