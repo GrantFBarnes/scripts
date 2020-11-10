@@ -173,53 +173,46 @@ if [ $? -eq 0 ]; then
     bulkInstallPackages=false
 fi
 
-if [ "$distro" == "centos" ]; then
-    sourcePreference="flatpak"
+confirmWhiptail "Do you prefer snap over repository?"
+if [ $? -eq 0 ]; then
     preferRepoOverSnap=false
-    preferRepoOverFlatpak=false
-    preferFlatpakOverSnap=true
 else
-    confirmWhiptail "Do you prefer snap over repository?"
-    if [ $? -eq 0 ]; then
-        preferRepoOverSnap=false
-    else
-        preferRepoOverSnap=true
-    fi
+    preferRepoOverSnap=true
+fi
 
-    confirmWhiptail "Do you prefer flatpak over repository?"
-    if [ $? -eq 0 ]; then
-        preferRepoOverFlatpak=false
-    else
-        preferRepoOverFlatpak=true
-    fi
+confirmWhiptail "Do you prefer flatpak over repository?"
+if [ $? -eq 0 ]; then
+    preferRepoOverFlatpak=false
+else
+    preferRepoOverFlatpak=true
+fi
 
-    if [ "$preferRepoOverSnap" == true ] && [ "$preferRepoOverFlatpak" == true ]; then
-        # Prefer repo over both snaps and flatpaks
-        sourcePreference="repo"
-        confirmWhiptail "Do you prefer snap over flatpak?"
-        if [ $? -eq 0 ]; then
-            preferFlatpakOverSnap=false
-        else
-            preferFlatpakOverSnap=true
-        fi
-    elif [ "$preferRepoOverSnap" == true ]; then
-        # Prefer repo over snap, but flatpak over repo
-        sourcePreference="flatpak"
-        preferFlatpakOverSnap=true
-    elif [ "$preferRepoOverFlatpak" == true ]; then
-        # Prefer repo over flatpak, but snap over repo
-        sourcePreference="snap"
+if [ "$preferRepoOverSnap" == true ] && [ "$preferRepoOverFlatpak" == true ]; then
+    # Prefer repo over both snaps and flatpaks
+    sourcePreference="repo"
+    confirmWhiptail "Do you prefer snap over flatpak?"
+    if [ $? -eq 0 ]; then
         preferFlatpakOverSnap=false
     else
-        # Prefer both snap and flatpak over repo
-        confirmWhiptail "Do you prefer snap over flatpak?"
-        if [ $? -eq 0 ]; then
-            sourcePreference="flatpak"
-            preferFlatpakOverSnap=false
-        else
-            sourcePreference="snap"
-            preferFlatpakOverSnap=true
-        fi
+        preferFlatpakOverSnap=true
+    fi
+elif [ "$preferRepoOverSnap" == true ]; then
+    # Prefer repo over snap, but flatpak over repo
+    sourcePreference="flatpak"
+    preferFlatpakOverSnap=true
+elif [ "$preferRepoOverFlatpak" == true ]; then
+    # Prefer repo over flatpak, but snap over repo
+    sourcePreference="snap"
+    preferFlatpakOverSnap=false
+else
+    # Prefer both snap and flatpak over repo
+    confirmWhiptail "Do you prefer snap over flatpak?"
+    if [ $? -eq 0 ]; then
+        sourcePreference="flatpak"
+        preferFlatpakOverSnap=false
+    else
+        sourcePreference="snap"
+        preferFlatpakOverSnap=true
     fi
 fi
 
@@ -362,9 +355,7 @@ function browserPackages() {
     packageOptions+=("chromium" "Chromium Web Browser" off)
     packageOptions+=("epiphany" "Gnome Web Browser" off)
     packageOptions+=("firefox" "Firefox Broswer" on)
-    if [ "$distro" != "centos" ]; then
-        packageOptions+=("torbrowser-launcher" "TOR Browser" off)
-    fi
+    packageOptions+=("torbrowser-launcher" "TOR Browser" off)
 
     choosePackagesWhiptail
     if [ $? -eq 1 ]; then
@@ -409,6 +400,17 @@ function browserPackages() {
                     packagesToInstall+=(firefox-esr)
                 else
                     packagesToInstall+=(firefox)
+                fi
+            ;;
+            "torbrowser-launcher")
+                if [ "$distro" == "centos" ]; then
+                    flatpaksToInstall+=(com.github.micahflee.torbrowser-launcher)
+                elif [ "$preferRepoOverFlatpak" == true ]; then
+                    packagesToInstall+=(torbrowser-launcher)
+                    flatpaksToRemove+=(com.github.micahflee.torbrowser-launcher)
+                else
+                    flatpaksToInstall+=(com.github.micahflee.torbrowser-launcher)
+                    packagesToRemove+=(torbrowser-launcher)
                 fi
             ;;
             *)
@@ -605,33 +607,20 @@ function textPackages() {
         case ${pkg} in
             "code")
                 if [ "$pm" == "apt" ]; then
-                    if [ "$preferFlatpakOverSnap" == true ]; then
-                        flatpaksToInstall+=(com.visualstudio.code)
-                        snapsToRemove+=(code)
-                    else
-                        snapsToInstall+=("code --classic")
-                        flatpaksToRemove+=(com.visualstudio.code)
-                    fi
+                    snapsToInstall+=("code --classic")
                 elif [ "$pm" == "dnf" ]; then
-                    if [ "$sourcePreference" == "snap" ]; then
-                        snapsToInstall+=("code --classic")
-
-                        flatpaksToRemove+=(com.visualstudio.code)
-                        packagesToRemove+=(code)
-                    elif [ "$sourcePreference" == "flatpak" ]; then
-                        flatpaksToInstall+=(com.visualstudio.code)
-
-                        snapsToRemove+=(code)
-                        packagesToRemove+=(code)
-                    else
+                    if [ "$preferRepoOverSnap" == true ]; then
                         sudo rpm --import https://packages.microsoft.com/keys/microsoft.asc
                         sudo sh -c 'echo -e "[code]\nname=Visual Studio Code\nbaseurl=https://packages.microsoft.com/yumrepos/vscode\nenabled=1\ngpgcheck=1\ngpgkey=https://packages.microsoft.com/keys/microsoft.asc" > /etc/yum.repos.d/vscode.repo'
                         sudo dnf check-update
 
                         packagesToInstall+=(code)
 
-                        flatpaksToRemove+=(com.visualstudio.code)
                         snapsToRemove+=(code)
+                    else
+                        snapsToInstall+=("code --classic")
+
+                        packagesToRemove+=(code)
                     fi
                 fi
             ;;
