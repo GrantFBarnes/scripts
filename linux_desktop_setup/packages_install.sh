@@ -263,7 +263,9 @@ function applicationPackages() {
         pkg=$(echo $pkg | sed 's/"//g')
         case ${pkg} in
             "deja-dup")
-                if [ "$preferRepoOverFlatpak" == true ]; then
+                if [ "$distro" == "centos" ]; then
+                    flatpaksToInstall+=(org.gnome.DejaDup)
+                elif [ "$preferRepoOverFlatpak" == true ]; then
                     packagesToInstall+=(deja-dup)
                     flatpaksToRemove+=(org.gnome.DejaDup)
                 else
@@ -272,7 +274,9 @@ function applicationPackages() {
                 fi
             ;;
             "gnome-books")
-                if [ "$preferRepoOverFlatpak" == true ]; then
+                if [ "$distro" == "centos" ]; then
+                    flatpaksToInstall+=(org.gnome.Books)
+                elif [ "$preferRepoOverFlatpak" == true ]; then
                     packagesToInstall+=(gnome-books)
                     flatpaksToRemove+=(org.gnome.Books)
                 else
@@ -299,7 +303,9 @@ function applicationPackages() {
                 fi
             ;;
             "gnome-calendar")
-                if [ "$preferRepoOverFlatpak" == true ]; then
+                if [ "$distro" == "centos" ]; then
+                    flatpaksToInstall+=(org.gnome.Calendar)
+                elif [ "$preferRepoOverFlatpak" == true ]; then
                     packagesToInstall+=(gnome-calendar)
                     flatpaksToRemove+=(org.gnome.Calendar)
                 else
@@ -308,7 +314,9 @@ function applicationPackages() {
                 fi
             ;;
             "gnome-clocks")
-                if [ "$preferRepoOverFlatpak" == true ]; then
+                if [ "$distro" == "centos" ]; then
+                    flatpaksToInstall+=(org.gnome.clocks)
+                elif [ "$preferRepoOverFlatpak" == true ]; then
                     packagesToInstall+=(gnome-clocks)
                     flatpaksToRemove+=(org.gnome.clocks)
                 else
@@ -326,7 +334,9 @@ function applicationPackages() {
                 fi
             ;;
             "gnome-weather")
-                if [ "$preferRepoOverFlatpak" == true ]; then
+                if [ "$distro" == "centos" ]; then
+                    flatpaksToInstall+=(org.gnome.Weather)
+                elif [ "$preferRepoOverFlatpak" == true ]; then
                     packagesToInstall+=(gnome-weather)
                     flatpaksToRemove+=(org.gnome.Weather)
                 else
@@ -379,7 +389,9 @@ function browserPackages() {
                 fi
             ;;
             "epiphany")
-                if [ "$preferRepoOverFlatpak" == true ]; then
+                if [ "$distro" == "centos" ]; then
+                    flatpaksToInstall+=(org.gnome.Epiphany)
+                elif [ "$preferRepoOverFlatpak" == true ]; then
                     if [ "$pm" == "dnf" ]; then
                         packagesToInstall+=(epiphany)
                     else
@@ -497,7 +509,15 @@ function mediaPackages() {
         pkg=$(echo $pkg | sed 's/"//g')
         case ${pkg} in
             "blender")
-                if [ "$sourcePreference" == "snap" ]; then
+                if [ "$distro" == "centos" ]; then
+                    if [ "$preferFlatpakOverSnap" == true ]; then
+                        flatpaksToInstall+=(org.blender.Blender)
+                        snapsToRemove+=(blender)
+                    else
+                        snapsToInstall+=("blender --classic")
+                        flatpaksToRemove+=(org.blender.Blender)
+                    fi
+                elif [ "$sourcePreference" == "snap" ]; then
                     snapsToInstall+=("blender --classic")
 
                     flatpaksToRemove+=(org.blender.Blender)
@@ -594,7 +614,6 @@ function textPackages() {
     packageOptions+=("code" "Visual Studio Code" off)
     packageOptions+=("gedit" "GUI Text Editor" on)
     packageOptions+=("libreoffice" "LibreOffice Suite" off)
-    packageOptions+=("retext" "Markdown Editor" off)
     packageOptions+=("texworks" "LaTeX Editor" off)
 
     choosePackagesWhiptail
@@ -661,9 +680,7 @@ function utilityPackages() {
         packageOptions+=("dconf-editor" "dconf Editor" off)
     fi
     packageOptions+=("exfat" "ExFat Format Support" off)
-    if [ "$distro" != "centos" ]; then
-        packageOptions+=("ffmpeg" "ffmpeg to watch videos" on)
-    fi
+    packageOptions+=("ffmpeg" "ffmpeg to watch videos" on)
     if [ "$de" == "gnome" ]; then
         packageOptions+=("gnome-system-monitor" "System Monitor" on)
         packageOptions+=("gnome-tweaks" "Gnome Tweaks" on)
@@ -693,6 +710,15 @@ function utilityPackages() {
                     packagesToInstall+=(exfat-fuse)
                 elif [ "$pm" == "dnf" ]; then
                     packagesToInstall+=(fuse-exfat)
+                fi
+            ;;
+            "ffmpeg")
+                if [ "$distro" == "centos" ]; then
+                    packagesToInstall+=(http://rpmfind.net/linux/epel/7/x86_64/Packages/s/SDL2-2.0.10-1.el7.x86_64.rpm)
+                    packagesToInstall+=(ffmpeg)
+                    packagesToInstall+=(ffmpeg-devel)
+                else
+                    packagesToInstall+=(ffmpeg)
                 fi
             ;;
             "imagemagick")
