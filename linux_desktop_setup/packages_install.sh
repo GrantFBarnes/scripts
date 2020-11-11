@@ -246,6 +246,12 @@ packagesToInstall+=(nano)
 packagesToInstall+=(neofetch)
 packagesToInstall+=(snapd)
 
+# CentOS gnome extensions
+if [ "$distro" == "centos" ]; then
+    packagesToInstall+=(gnome-shell-extension-dash-to-dock)
+    packagesToInstall+=(gnome-shell-extension-system-monitor-applet)
+fi
+
 function applicationPackages() {
     packageOptions=()
     packageOptions+=("deja-dup" "Backup Tool" off)
