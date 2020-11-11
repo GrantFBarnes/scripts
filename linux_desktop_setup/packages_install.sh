@@ -208,10 +208,10 @@ else
     # Prefer both snap and flatpak over repo
     confirmWhiptail "Do you prefer snap over flatpak?"
     if [ $? -eq 0 ]; then
-        sourcePreference="flatpak"
+        sourcePreference="snap"
         preferFlatpakOverSnap=false
     else
-        sourcePreference="snap"
+        sourcePreference="flatpak"
         preferFlatpakOverSnap=true
     fi
 fi
