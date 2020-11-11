@@ -382,13 +382,7 @@ function browserPackages() {
         case ${pkg} in
             "chromium")
                 if [ "$pm" == "dnf" ]; then
-                    if [ "$preferRepoOverSnap" == true ]; then
-                        packagesToInstall+=(chromium)
-                        snapsToRemove+=(chromium)
-                    else
-                        snapsToInstall+=(chromium)
-                        packagesToRemove+=(chromium)
-                    fi
+                    packagesToInstall+=(chromium)
                 else
                     snapsToInstall+=(chromium)
                 fi
