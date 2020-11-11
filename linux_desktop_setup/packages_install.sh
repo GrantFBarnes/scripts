@@ -155,6 +155,11 @@ elif [ "$distro" == "mint" ]; then
     fi
 fi
 
+grep -q EDITOR ~/.bashrc
+if [ $? -eq 1 ]; then
+    sudo sh -c 'echo export EDITOR="nano" >> ~/.bashrc'
+fi
+
 confirmWhiptail "   Distrobution: $distro\n    Desktop Env: $de\nPackage Manager: $pm\n\nWould you like to continue?" 11
 if [ $? -eq 1 ]; then
     exit 0
@@ -544,13 +549,7 @@ function mediaPackages() {
                 fi
             ;;
             "spotify")
-                if [ "$preferFlatpakOverSnap" == true ]; then
-                    flatpaksToInstall+=(com.spotify.Client)
-                    snapsToRemove+=(spotify)
-                else
-                    snapsToInstall+=(spotify)
-                    flatpaksToRemove+=(com.spotify.Client)
-                fi
+                snapsToInstall+=(spotify)
             ;;
             "vlc")
                 if [ "$sourcePreference" == "snap" ]; then
@@ -634,11 +633,11 @@ function textPackages() {
                         sudo dnf check-update
 
                         packagesToInstall+=(code)
-
                         snapsToRemove+=(code)
                     else
-                        snapsToInstall+=("code --classic")
+                        sudo rm -rf /etc/yum.repos.d/vscode.repo
 
+                        snapsToInstall+=("code --classic")
                         packagesToRemove+=(code)
                     fi
                 fi
