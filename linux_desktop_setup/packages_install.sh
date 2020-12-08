@@ -260,7 +260,7 @@ function applicationPackages() {
     packageOptions+=("gnome-calculator" "Gnome Calculator" on)
     packageOptions+=("gnome-calendar" "Gnome Calendar" on)
     packageOptions+=("gnome-clocks" "Gnome Clocks" on)
-    packageOptions+=("gnome-photos" "Gnome Photos" on)
+    packageOptions+=("gnome-photos" "Gnome Photos" off)
     packageOptions+=("gnome-weather" "Gnome Weather" on)
     packageOptions+=("meld" "File Comparitor" off)
     packageOptions+=("transmission-gtk" "Transmission Torrent" off)
@@ -387,10 +387,37 @@ function browserPackages() {
         pkg=$(echo $pkg | sed 's/"//g')
         case ${pkg} in
             "chromium")
-                if [ "$pm" == "dnf" ]; then
-                    packagesToInstall+=(chromium)
-                else
+                if [ "$distro" == "ubuntu" ]; then
+                    if [ "$preferFlatpakOverSnap" == true ]; then
+                        flatpaksToInstall+=(org.chromium.Chromium)
+                        snapsToRemove+=(chromium)
+                    else
+                        snapsToInstall+=(chromium)
+                        flatpaksToRemove+=(com.chromium.Chromium)
+                    fi
+                elif [ "$distro" == "centos" ]; then
+                    if [ "$preferRepoOverSnap" == true ]; then
+                        packagesToInstall+=(chromium)
+                        snapsToRemove+=(chromium)
+                    else
+                        snapsToInstall+=(chromium)
+                        packagesToRemove+=(chromium)
+                    fi
+                elif [ "$sourcePreference" == "snap" ]; then
                     snapsToInstall+=(chromium)
+
+                    flatpaksToRemove+=(org.chromium.Chromium)
+                    packagesToRemove+=(chromium)
+                elif [ "$sourcePreference" == "flatpak" ]; then
+                    flatpaksToInstall+=(org.chromium.Chromium)
+
+                    snapsToRemove+=(chromium)
+                    packagesToRemove+=(chromium)
+                else
+                    packagesToInstall+=(chromium)
+
+                    flatpaksToRemove+=(org.chromium.Chromium)
+                    snapsToRemove+=(chromium)
                 fi
             ;;
             "epiphany")
@@ -478,10 +505,12 @@ function communicationPackages() {
 
 function developmentPackages() {
     packageOptions=()
-    packageOptions+=("git" "Git" off)
+    packageOptions+=("curl" "Curl Command" on)
+    packageOptions+=("git" "Git" on)
     packageOptions+=("net-tools" "Network Packages" off)
     packageOptions+=("nodejs" "NodeJS" off)
     packageOptions+=("npm" "Node Package Manager" off)
+    packageOptions+=("youtube-dl" "Command Line YT Downloader" off)
 
     choosePackagesWhiptail
     if [ $? -eq 1 ]; then
@@ -578,8 +607,10 @@ function mediaPackages() {
 
 function gamingPackages() {
     packageOptions=()
+    packageOptions+=("0ad" "0 A.D. Ancient Warfare" off)
     packageOptions+=("steam" "Steam" off)
-    packageOptions+=("xonotic" "Open Source FPS" off)
+    packageOptions+=("supertuxkart" "Tux Kart Racer" off)
+    packageOptions+=("xonotic" "Xonotic FPS" off)
 
     choosePackagesWhiptail
     if [ $? -eq 1 ]; then
@@ -589,8 +620,60 @@ function gamingPackages() {
     for pkg in $packageSelections; do
         pkg=$(echo $pkg | sed 's/"//g')
         case ${pkg} in
+            "0ad")
+                if [ "$distro" == "centos" ]; then
+                    if [ "$preferFlatpakOverSnap" == true ]; then
+                        flatpaksToInstall+=(com.play0ad.zeroad)
+                        snapsToRemove+=(0ad)
+                    else
+                        snapsToInstall+=(0ad)
+                        flatpaksToRemove+=(com.play0ad.zeroad)
+                    fi
+                elif [ "$sourcePreference" == "snap" ]; then
+                    snapsToInstall+=(0ad)
+
+                    flatpaksToRemove+=(com.play0ad.zeroad)
+                    packagesToRemove+=(0ad)
+                elif [ "$sourcePreference" == "flatpak" ]; then
+                    flatpaksToInstall+=(com.play0ad.zeroad)
+
+                    snapsToRemove+=(0ad)
+                    packagesToRemove+=(0ad)
+                else
+                    packagesToInstall+=(0ad)
+
+                    flatpaksToRemove+=(com.play0ad.zeroad)
+                    snapsToRemove+=(0ad)
+                fi
+            ;;
             "steam")
                 flatpaksToInstall+=(com.valvesoftware.Steam)
+            ;;
+            "supertuxkart")
+                if [ "$distro" == "centos" ]; then
+                    if [ "$preferFlatpakOverSnap" == true ]; then
+                        flatpaksToInstall+=(net.supertuxkart.SuperTuxKart)
+                        snapsToRemove+=(supertuxkart)
+                    else
+                        snapsToInstall+=(supertuxkart)
+                        flatpaksToRemove+=(net.supertuxkart.SuperTuxKart)
+                    fi
+                elif [ "$sourcePreference" == "snap" ]; then
+                    snapsToInstall+=(supertuxkart)
+
+                    flatpaksToRemove+=(net.supertuxkart.SuperTuxKart)
+                    packagesToRemove+=(supertuxkart)
+                elif [ "$sourcePreference" == "flatpak" ]; then
+                    flatpaksToInstall+=(net.supertuxkart.SuperTuxKart)
+
+                    snapsToRemove+=(supertuxkart)
+                    packagesToRemove+=(supertuxkart)
+                else
+                    packagesToInstall+=(supertuxkart)
+
+                    flatpaksToRemove+=(net.supertuxkart.SuperTuxKart)
+                    snapsToRemove+=(supertuxkart)
+                fi
             ;;
             "xonotic")
                 if [ "$preferFlatpakOverSnap" == true ]; then
@@ -684,11 +767,11 @@ function utilityPackages() {
         packageOptions+=("gnome-system-monitor" "System Monitor" on)
         packageOptions+=("gnome-tweaks" "Gnome Tweaks" on)
         if [ "$distro" != "pop" ]; then
-            packageOptions+=("gnome-software" "Gnome Software Manager" on)
+            packageOptions+=("gnome-software" "Gnome Software Manager" off)
         fi
     fi
     if [ "$distro" == "ubuntu" ]; then
-        packageOptions+=("gnome-software-plugin-flatpak" "Flatpak Support Gnome Software" on)
+        packageOptions+=("gnome-software-plugin-flatpak" "Flatpak Support Gnome Software" off)
     fi
     packageOptions+=("imagemagick" "Image Magick" on)
     packageOptions+=("simple-scan" "Scanner Application" off)
