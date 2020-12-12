@@ -611,6 +611,7 @@ function mediaPackages() {
 function gamingPackages() {
     packageOptions=()
     packageOptions+=("0ad" "0 A.D. Ancient Warfare" off)
+    packageOptions+=("parsec" "Streaming App" off)
     packageOptions+=("steam" "Steam" off)
     packageOptions+=("supertuxkart" "Tux Kart Racer" off)
     packageOptions+=("xonotic" "Xonotic FPS" off)
@@ -648,6 +649,9 @@ function gamingPackages() {
                     flatpaksToRemove+=(com.play0ad.zeroad)
                     snapsToRemove+=(0ad)
                 fi
+            ;;
+            "parsec")
+                packagesToInstall+=(com.parsecgaming.parsec)
             ;;
             "steam")
                 if [ "$distro" == "ubuntu" ]; then
