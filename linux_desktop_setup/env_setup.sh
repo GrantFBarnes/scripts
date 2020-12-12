@@ -70,8 +70,8 @@ if [ "$distro" == "centos" ]; then
 
     gsettings set org.gnome.shell.extensions.dash-to-dock dash-max-icon-size 28
 elif [ "$distro" == "ubuntu" ]; then
-    gnome-extensions enable caffeine
-    gnome-extensions enable system-monitor
+    gnome-extensions enable caffeine@patapon.info
+    gnome-extensions enable system-monitor@paradoxxx.zero.gmail.com
 
     gsettings set org.gnome.shell.extensions.dash-to-dock dash-max-icon-size 28
 fi
