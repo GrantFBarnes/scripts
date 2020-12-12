@@ -63,4 +63,17 @@ gsettings set org.gnome.nautilus.preferences default-folder-viewer "list-view"
 # Set Touchpad Tap to Click
 gsettings set org.gnome.desktop.peripherals.touchpad tap-to-click true
 
+# Set Gnome extensions
+if [ "$distro" == "centos" ]; then
+    gnome-extensions enable dash-to-dock
+    gnome-extensions enable system-monitor-applet
+
+    gsettings set org.gnome.shell.extensions.dash-to-dock dash-max-icon-size 28
+elif [ "$distro" == "ubuntu" ]; then
+    gnome-extensions enable caffeine
+    gnome-extensions enable system-monitor
+
+    gsettings set org.gnome.shell.extensions.dash-to-dock dash-max-icon-size 28
+fi
+
 exit 0

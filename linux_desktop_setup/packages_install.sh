@@ -246,10 +246,13 @@ packagesToInstall+=(nano)
 packagesToInstall+=(neofetch)
 packagesToInstall+=(snapd)
 
-# CentOS gnome extensions
+# Gnome extensions
 if [ "$distro" == "centos" ]; then
     packagesToInstall+=(gnome-shell-extension-dash-to-dock)
     packagesToInstall+=(gnome-shell-extension-system-monitor-applet)
+elif [ "$distro" == "ubuntu" ]; then
+    packagesToInstall+=(gnome-shell-extension-caffeine)
+    packagesToInstall+=(gnome-shell-extension-system-monitor)
 fi
 
 function applicationPackages() {
@@ -647,7 +650,17 @@ function gamingPackages() {
                 fi
             ;;
             "steam")
-                flatpaksToInstall+=(com.valvesoftware.Steam)
+                if [ "$distro" == "ubuntu" ]; then
+                    if [ "$preferRepoOverFlatpak" == true ]; then
+                        packagesToInstall+=(steam)
+                        flatpaksToRemove+=(com.valvesoftware.Steam)
+                    else
+                        flatpaksToInstall+=(com.valvesoftware.Steam)
+                        packagesToRemove+=(steam)
+                    fi
+                else
+                    packagesToInstall+=(com.valvesoftware.Steam)
+                fi
             ;;
             "supertuxkart")
                 if [ "$distro" == "centos" ]; then
