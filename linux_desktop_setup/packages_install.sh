@@ -651,7 +651,7 @@ function gamingPackages() {
                 fi
             ;;
             "parsec")
-                packagesToInstall+=(com.parsecgaming.parsec)
+                flatpaksToInstall+=(com.parsecgaming.parsec)
             ;;
             "steam")
                 if [ "$distro" == "ubuntu" ]; then
