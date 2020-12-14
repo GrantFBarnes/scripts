@@ -246,6 +246,20 @@ packagesToInstall+=(nano)
 packagesToInstall+=(neofetch)
 packagesToInstall+=(snapd)
 
+confirmWhiptail "Do you want software stores installed?"
+if [ $? -eq 0 ]; then
+    if [ "$de" == "gnome" ]; then
+        if [ "$distro" != "pop" ]; then
+            packagesToInstall+=(gnome-software)
+            packagesToInstall+=(gnome-software-plugin-flatpak)
+        fi
+    fi
+    snapsToInstall+=(snap-store)
+else
+    packagesToRemove+=(gnome-software)
+    snapsToRemove+=(snap-store)
+fi
+
 # Gnome extensions
 if [ "$distro" == "centos" ]; then
     packagesToInstall+=(gnome-shell-extension-dash-to-dock)
@@ -513,6 +527,7 @@ function developmentPackages() {
     packageOptions+=("net-tools" "Network Packages" off)
     packageOptions+=("nodejs" "NodeJS" off)
     packageOptions+=("npm" "Node Package Manager" off)
+    packageOptions+=("ssh" "SSH" on)
     packageOptions+=("youtube-dl" "Command Line YT Downloader" off)
 
     choosePackagesWhiptail
@@ -783,16 +798,9 @@ function utilityPackages() {
     if [ "$de" == "gnome" ]; then
         packageOptions+=("gnome-system-monitor" "System Monitor" on)
         packageOptions+=("gnome-tweaks" "Gnome Tweaks" on)
-        if [ "$distro" != "pop" ]; then
-            packageOptions+=("gnome-software" "Gnome Software Manager" off)
-        fi
-    fi
-    if [ "$distro" == "ubuntu" ]; then
-        packageOptions+=("gnome-software-plugin-flatpak" "Flatpak Support Gnome Software" off)
     fi
     packageOptions+=("imagemagick" "Image Magick" on)
     packageOptions+=("simple-scan" "Scanner Application" off)
-    packageOptions+=("snap-store" "Snap Store Software Manager" off)
     packageOptions+=("virtualbox" "Virtual Box VM Manager" off)
 
     choosePackagesWhiptail
@@ -826,9 +834,6 @@ function utilityPackages() {
                 elif [ "$pm" == "apt" ]; then
                     packagesToInstall+=(imagemagick)
                 fi
-            ;;
-            "snap-store")
-                snapsToInstall+=(snap-store)
             ;;
             "virtualbox")
                 if [ "$pm" == "dnf" ]; then
