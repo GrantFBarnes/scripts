@@ -795,10 +795,12 @@ function utilityPackages() {
     fi
     packageOptions+=("exfat" "ExFat Format Support" off)
     packageOptions+=("ffmpeg" "ffmpeg to watch videos" on)
+    packageOptions+=("glances" "Monitoring Tool" off)
     if [ "$de" == "gnome" ]; then
         packageOptions+=("gnome-system-monitor" "System Monitor" on)
         packageOptions+=("gnome-tweaks" "Gnome Tweaks" on)
     fi
+    packageOptions+=("htop" "Process Reviewer" off)
     packageOptions+=("imagemagick" "Image Magick" on)
     packageOptions+=("simple-scan" "Scanner Application" off)
     packageOptions+=("virtualbox" "Virtual Box VM Manager" off)
