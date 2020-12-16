@@ -484,6 +484,9 @@ function browserPackages() {
 function communicationPackages() {
     packageOptions=()
     packageOptions+=("discord" "Discord" off)
+    if [ "$de" == "gnome" ]; then
+        packageOptions+=("geary" "Gnome Email Client" off)
+    fi
     packageOptions+=("slack" "Slack" off)
     packageOptions+=("thunderbird" "Thunderbird Email Client" off)
 
@@ -803,6 +806,7 @@ function utilityPackages() {
     packageOptions+=("htop" "Process Reviewer" off)
     packageOptions+=("imagemagick" "Image Magick" on)
     packageOptions+=("simple-scan" "Scanner Application" off)
+    packageOptions+=("timeshift" "Backup Tool" off)
     packageOptions+=("virtualbox" "Virtual Box VM Manager" off)
 
     choosePackagesWhiptail
@@ -1004,7 +1008,6 @@ elif [ "$distro" == "ubuntu" ] || [ "$distro" == "debian" ]; then
         packagesToRemove+=(xterm)
     fi
 elif [ "$distro" == "pop" ]; then
-    packagesToRemove+=(geary)
     packagesToRemove+=(popsicle)
 elif [ "$distro" == "centos" ]; then
     packagesToRemove+=(pidgin)
