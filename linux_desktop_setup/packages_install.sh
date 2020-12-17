@@ -77,11 +77,11 @@ function aurManager() {
     echo "---------------------------------------------------------------------"
     echo "aur install $1"
     echo "---------------------------------------------------------------------"
+    cd /home/$SUDO_USER/aur
     sudo -u $SUDO_USER git clone https://aur.archlinux.org/$1.git
     cd $1
     sudo -u $SUDO_USER makepkg -si --noconfirm
-    cd ..
-    rm -rf $1
+    cd $startingDir
     checkExitStatus
 }
 
@@ -113,6 +113,7 @@ clear
 
 # Determine distrobution
 
+startingDir=$(pwd)
 osName=$(head -n 1 /etc/os-release)
 distro=""
 pm=""
@@ -184,6 +185,8 @@ elif [ "$distro" == "mint" ]; then
         sudo rm $nosnap
         update
     fi
+elif [ "$pm" == "pacman" ]; then
+    sudo -u $SUDO_USER mkdir /home/$SUDO_USER/aur
 fi
 
 grep -q EDITOR ~/.bashrc
