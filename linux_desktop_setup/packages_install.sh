@@ -590,10 +590,11 @@ function developmentPackages() {
         pkg=$(echo $pkg | sed 's/"//g')
         case ${pkg} in
             "ssh")
-                if [ "$pm" == "pacman" ]; then
-                    packagesToInstall+=(openssh)
-                else
+                if [ "$pm" == "apt" ]; then
                     packagesToInstall+=(ssh)
+                else
+                    packagesToInstall+=(libssh)
+                    packagesToInstall+=(openssh)
                 fi
             ;;
             *)
