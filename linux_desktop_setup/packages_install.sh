@@ -603,6 +603,7 @@ function mediaPackages() {
     packageOptions=()
     packageOptions+=("blender" "3D Modleler and Video Editor" off)
     packageOptions+=("gimp" "GNU Image Manipulation Program" off)
+    packageOptions+=("rhythmbox" "Rhythmbox Music" off)
     packageOptions+=("spotify" "Spotify" off)
     packageOptions+=("vlc" "Media Player" off)
 
@@ -1039,7 +1040,6 @@ fi
 packagesToRemove+=(cheese)
 packagesToRemove+=(evolution)
 packagesToRemove+=(mpv)
-packagesToRemove+=(rhythmbox)
 packagesToRemove+=(totem)
 
 if [ "$distro" == "mint" ] || [ "$distro" == "lmde" ]; then
