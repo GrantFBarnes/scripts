@@ -63,7 +63,7 @@ function packageManager() {
         if [ "$method" == "install" ]; then
             sudo $pm -S ${@:2} --noconfirm --needed
         elif [ "$method" == "remove" ]; then
-            sudo $pm -Rsscun ${@:2} --noconfirm
+            sudo $pm -Rsun ${@:2} --noconfirm
         fi
     elif [ "$method" == "remove" ] && [ "$pm" == "apt" ]; then
         sudo apt-get remove --purge ${@:2} -y
@@ -109,6 +109,11 @@ function flatpakManager() {
 
 ################################################################################
 
+if [ -z "$SUDO_USER" ]; then
+    echo "Must be run with sudo"
+    exit 1
+fi
+
 clear
 
 # Determine distrobution
@@ -134,6 +139,9 @@ elif [[ $osName == *"Fedora"* ]]; then
 elif [[ $osName == *"LMDE"* ]]; then
     distro="lmde"
     pm="apt"
+elif [[ $osName == *"Manjaro"* ]]; then
+    distro="manjaro"
+    pm="pacman"
 elif [[ $osName == *"Mint"* ]]; then
     distro="mint"
     pm="apt"
