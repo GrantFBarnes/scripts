@@ -81,7 +81,7 @@ function aurManager() {
     sudo -u $SUDO_USER git clone https://aur.archlinux.org/$1.git
     cd $1
     sudo -u $SUDO_USER makepkg -si --noconfirm
-    cd $startingDir
+    cd $folderLocation
     checkExitStatus
 }
 
@@ -118,7 +118,8 @@ clear
 
 # Determine distrobution
 
-startingDir=$(pwd)
+cd $(dirname "$0")
+folderLocation=$(pwd)
 osName=$(head -n 1 /etc/os-release)
 distro=""
 pm=""
@@ -312,15 +313,6 @@ if [ $? -eq 0 ]; then
 else
     packagesToRemove+=(gnome-software)
     snapsToRemove+=(snap-store)
-fi
-
-# Gnome extensions
-if [ "$distro" == "centos" ]; then
-    packagesToInstall+=(gnome-shell-extension-dash-to-dock)
-    packagesToInstall+=(gnome-shell-extension-system-monitor-applet)
-elif [ "$distro" == "ubuntu" ]; then
-    packagesToInstall+=(gnome-shell-extension-caffeine)
-    packagesToInstall+=(gnome-shell-extension-system-monitor)
 fi
 
 function applicationPackages() {
@@ -602,6 +594,48 @@ function developmentPackages() {
                     packagesToInstall+=(openssh)
                 else
                     packagesToInstall+=(ssh)
+                fi
+            ;;
+            *)
+                packagesToInstall+=($pkg)
+            ;;
+        esac
+    done
+}
+
+function environmentPackages() {
+    packageOptions=()
+    if [ "$de" == "gnome" ]; then
+        packageOptions+=("caffeine" "Gnome Extension" off)
+        if [ "$distro" != "ubuntu" ]; then
+            packageOptions+=("dash-to-dock" "Gnome Extension" off)
+        fi
+        packageOptions+=("system-monitor" "Gnome Extension" off)
+    fi
+
+    choosePackagesWhiptail
+    if [ $? -eq 1 ]; then
+		return
+	fi
+
+    for pkg in $packageSelections; do
+        pkg=$(echo $pkg | sed 's/"//g')
+        case ${pkg} in
+            "caffeine")
+                if [ "$distro" == "ubuntu" ]; then
+                    packagesToInstall+=(gnome-shell-extension-caffeine)
+                fi
+            ;;
+            "dash-to-dock")
+                if [ "$distro" == "centos" ]; then
+                    packagesToInstall+=(gnome-shell-extension-dash-to-dock)
+                fi
+            ;;
+            "system-monitor")
+                if [ "$distro" == "centos" ]; then
+                    packagesToInstall+=(gnome-shell-extension-system-monitor-applet)
+                elif [ "$distro" == "ubuntu" ]; then
+                    packagesToInstall+=(gnome-shell-extension-system-monitor)
                 fi
             ;;
             *)
@@ -939,6 +973,7 @@ function chooseUsage() {
     categoryOptions+=("Browsers" "Web Browsers")
     categoryOptions+=("Communication" "Communication Applications")
     categoryOptions+=("Development" "Development Packages")
+    categoryOptions+=("Environment" "Environment Packages")
     categoryOptions+=("Media" "Multi Media Applications")
     categoryOptions+=("Gaming" "Gaming Applications")
     categoryOptions+=("Text" "Text Applications")
@@ -969,6 +1004,10 @@ function chooseUsage() {
         ;;
         "Development")
             developmentPackages
+            defaultCategory="Environment"
+        ;;
+        "Environment")
+            environmentPackages
             defaultCategory="Media"
         ;;
         "Media")
@@ -1141,6 +1180,12 @@ LANG=en_US.UTF-8 snap list --all | awk '/disabled/{print $1, $3}' |
     while read snapname revision; do
         sudo snap remove "$snapname" --revision="$revision"
     done
+
+################################################################################
+
+if [ "$de" == "gnome" ]; then
+    sudo -u $SUDO_USER bash $folderLocation/gnome_setup.sh $distro
+fi
 
 ################################################################################
 
