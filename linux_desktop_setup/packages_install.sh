@@ -20,6 +20,14 @@ function chooseCategoryWhiptail() {
     return $?
 }
 
+function checkNotInstalled() {
+    if ! command -v $1 &> /dev/null; then
+        return 0
+    fi
+    echo "$1 already installed"
+    return 1
+}
+
 function checkExitStatus() {
     if [ $? -eq 0 ]; then
         echo "Success"
@@ -36,10 +44,12 @@ function update() {
     echo "---------------------------------------------------------------------"
     echo "Update"
     echo "---------------------------------------------------------------------"
-    if [ "$pm" == "dnf" ]; then
-        sudo dnf upgrade --refresh -y
-    elif [ "$pm" == "apt" ]; then
+    if [ "$pm" == "apt" ]; then
         sudo apt update && sudo apt full-upgrade -y
+    elif [ "$pm" == "dnf" ]; then
+        sudo dnf upgrade --refresh -y
+    elif [ "$pm" == "pacman" ]; then
+        sudo pacman -Syyu --noconfirm
     fi
     checkExitStatus
 }
@@ -47,9 +57,15 @@ function update() {
 function packageManager() {
     local method=$1
     echo "---------------------------------------------------------------------"
-    echo "sudo $pm $method ${@:2} -y"
+    echo "$pm $method ${@:2}"
     echo "---------------------------------------------------------------------"
-    if [ "$method" == "remove" ] && [ "$pm" == "apt" ]; then
+    if [ "$pm" == "pacman" ]; then
+        if [ "$method" == "install" ]; then
+            sudo $pm -S ${@:2} --noconfirm --needed
+        elif [ "$method" == "remove" ]; then
+            sudo $pm -Rsscun ${@:2} --noconfirm
+        fi
+    elif [ "$method" == "remove" ] && [ "$pm" == "apt" ]; then
         sudo apt-get remove --purge ${@:2} -y
     else
         sudo $pm $method ${@:2} -y
@@ -57,10 +73,22 @@ function packageManager() {
     checkExitStatus
 }
 
+function aurManager() {
+    echo "---------------------------------------------------------------------"
+    echo "aur install $1"
+    echo "---------------------------------------------------------------------"
+    sudo -u $SUDO_USER git clone https://aur.archlinux.org/$1.git
+    cd $1
+    sudo -u $SUDO_USER makepkg -si --noconfirm
+    cd ..
+    rm -rf $1
+    checkExitStatus
+}
+
 function snapManager() {
     local method=$1
     echo "---------------------------------------------------------------------"
-    echo "sudo snap $method ${@:2}"
+    echo "snap $method ${@:2}"
     echo "---------------------------------------------------------------------"
     sudo snap $method ${@:2}
     checkExitStatus
@@ -69,7 +97,7 @@ function snapManager() {
 function flatpakManager() {
     local method=$1
     echo "---------------------------------------------------------------------"
-    echo "sudo flatpak $method flathub ${@:2} -y"
+    echo "flatpak $method ${@:2}"
     echo "---------------------------------------------------------------------"
     if [ "$method" == "install" ]; then
         sudo flatpak $method flathub ${@:2} -y
@@ -90,10 +118,9 @@ distro=""
 pm=""
 de=""
 
-if [[ $osName == *"Fedora"* ]]; then
-    distro="fedora"
-    pm="dnf"
-    de="gnome"
+if [[ $osName == *"Arch"* ]]; then
+    distro="arch"
+    pm="pacman"
 elif [[ $osName == *"CentOS"* ]]; then
     distro="centos"
     pm="dnf"
@@ -101,6 +128,10 @@ elif [[ $osName == *"CentOS"* ]]; then
 elif [[ $osName == *"Debian"* ]]; then
     distro="debian"
     pm="apt"
+    de="gnome"
+elif [[ $osName == *"Fedora"* ]]; then
+    distro="fedora"
+    pm="dnf"
     de="gnome"
 elif [[ $osName == *"LMDE"* ]]; then
     distro="lmde"
@@ -233,6 +264,7 @@ declare -a packageOptions
 declare -a packageSelections
 
 declare -a packagesToInstall
+declare -a aurToInstall
 declare -a snapsToInstall
 declare -a flatpaksToInstall
 
@@ -244,7 +276,17 @@ declare -a flatpaksToRemove
 packagesToInstall+=(flatpak)
 packagesToInstall+=(nano)
 packagesToInstall+=(neofetch)
-packagesToInstall+=(snapd)
+
+if [ "$pm" == "pacman" ]; then
+    checkNotInstalled snap
+    if [ $? -eq 0 ]; then
+        aurToInstall+=(snapd)
+    fi
+    packagesToInstall+=(git)
+    packagesToInstall+=(base-devel)
+else
+    packagesToInstall+=(snapd)
+fi
 
 confirmWhiptail "Do you want software stores installed?"
 if [ $? -eq 0 ]; then
@@ -441,10 +483,10 @@ function browserPackages() {
                 if [ "$distro" == "centos" ]; then
                     flatpaksToInstall+=(org.gnome.Epiphany)
                 elif [ "$preferRepoOverFlatpak" == true ]; then
-                    if [ "$pm" == "dnf" ]; then
-                        packagesToInstall+=(epiphany)
-                    else
+                    if [ "$pm" == "apt" ]; then
                         packagesToInstall+=(epiphany-browser)
+                    else
+                        packagesToInstall+=(epiphany)
                     fi
                     flatpaksToRemove+=(org.gnome.Epiphany)
                 else
@@ -526,7 +568,9 @@ function communicationPackages() {
 function developmentPackages() {
     packageOptions=()
     packageOptions+=("curl" "Curl Command" on)
-    packageOptions+=("git" "Git" on)
+    if [ "$pm" != "pacman" ]; then
+        packageOptions+=("git" "Git" on)
+    fi
     packageOptions+=("net-tools" "Network Packages" off)
     packageOptions+=("nodejs" "NodeJS" off)
     packageOptions+=("npm" "Node Package Manager" off)
@@ -541,6 +585,13 @@ function developmentPackages() {
     for pkg in $packageSelections; do
         pkg=$(echo $pkg | sed 's/"//g')
         case ${pkg} in
+            "ssh")
+                if [ "$pm" == "pacman" ]; then
+                    packagesToInstall+=(openssh)
+                else
+                    packagesToInstall+=(ssh)
+                fi
+            ;;
             *)
                 packagesToInstall+=($pkg)
             ;;
@@ -772,9 +823,13 @@ function textPackages() {
                     snapsToRemove+=(libreoffice)
                     packagesToRemove+=(libreoffice*)
                 else
-                    packagesToInstall+=(libreoffice-writer)
-                    packagesToInstall+=(libreoffice-calc)
-                    packagesToInstall+=(libreoffice-impress)
+                    if [ "$pm" == "pacman" ]; then
+                        packagesToInstall+=(libreoffice-fresh)
+                    else
+                        packagesToInstall+=(libreoffice-writer)
+                        packagesToInstall+=(libreoffice-calc)
+                        packagesToInstall+=(libreoffice-impress)
+                    fi
 
                     flatpaksToRemove+=(org.libreoffice.LibreOffice)
                     snapsToRemove+=(libreoffice)
@@ -839,6 +894,16 @@ function utilityPackages() {
                     packagesToInstall+=(ImageMagick)
                 elif [ "$pm" == "apt" ]; then
                     packagesToInstall+=(imagemagick)
+                fi
+            ;;
+            "timeshift")
+                if [ "$pm" == "pacman" ]; then
+                    checkNotInstalled timeshift
+                    if [ $? -eq 0 ]; then
+                        aurToInstall+=(timeshift)
+                    fi
+                else
+                    packagesToInstall+=(timeshift)
                 fi
             ;;
             "virtualbox")
@@ -937,6 +1002,13 @@ if [ ${#packagesToInstall[@]} -gt 0 ]; then
     fi
 fi
 
+# AUR
+if [ ${#aurToInstall[@]} -gt 0 ]; then
+    for i in "${aurToInstall[@]}"; do
+        aurManager $i
+    done
+fi
+
 # Flatpaks
 
 sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
@@ -949,10 +1021,8 @@ fi
 
 # Snaps
 
-if [ "$pm" == "dnf" ]; then
-    if [ "$distro" == "centos" ]; then
-        sudo systemctl enable --now snapd.socket
-    fi
+if [ "$pm" == "dnf" ] || [ "$pm" == "pacman" ]; then
+    sudo systemctl enable --now snapd.socket
     sudo ln -s /var/lib/snapd/snap /snap
 fi
 
