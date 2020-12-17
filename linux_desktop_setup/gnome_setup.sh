@@ -46,16 +46,20 @@ gsettings set org.gnome.nautilus.preferences default-folder-viewer "list-view"
 gsettings set org.gnome.desktop.peripherals.touchpad tap-to-click true
 
 # Set Gnome extensions
-if [ "$distro" == "centos" ]; then
-    gnome-extensions enable dash-to-dock
-    gnome-extensions enable system-monitor-applet
-
-    gsettings set org.gnome.shell.extensions.dash-to-dock dash-max-icon-size 28
-elif [ "$distro" == "ubuntu" ]; then
+gnome-extensions info caffeine@patapon.info
+if [ $? -eq 0 ]; then
     gnome-extensions enable caffeine@patapon.info
-    gnome-extensions enable system-monitor@paradoxxx.zero.gmail.com
+fi
 
+gnome-extensions info dash-to-dock@micxgx.gmail.com
+if [ $? -eq 0 ]; then
+    gnome-extensions enable dash-to-dock@micxgx.gmail.com
     gsettings set org.gnome.shell.extensions.dash-to-dock dash-max-icon-size 28
+fi
+
+gnome-extensions info system-monitor@paradoxxx.zero.gmail.com
+if [ $? -eq 0 ]; then
+    gnome-extensions enable system-monitor@paradoxxx.zero.gmail.com
 fi
 
 exit 0
