@@ -125,36 +125,37 @@ if [[ $osName == *"Arch"* ]]; then
 elif [[ $osName == *"CentOS"* ]]; then
     distro="centos"
     pm="dnf"
-    de="gnome"
 elif [[ $osName == *"Debian"* ]]; then
     distro="debian"
     pm="apt"
-    de="gnome"
 elif [[ $osName == *"Fedora"* ]]; then
     distro="fedora"
     pm="dnf"
-    de="gnome"
 elif [[ $osName == *"LMDE"* ]]; then
     distro="lmde"
     pm="apt"
-    de="cinnamon"
 elif [[ $osName == *"Mint"* ]]; then
     distro="mint"
     pm="apt"
-    de="cinnamon"
 elif [[ $osName == *"Pop!_OS"* ]]; then
     distro="pop"
     pm="apt"
-    de="gnome"
 elif [[ $osName == *"Ubuntu"* ]]; then
     distro="ubuntu"
     pm="apt"
-    de="gnome"
 else
     echo "---------------------------------------------------------------------"
     echo "Distrobution not recognized"
     echo "---------------------------------------------------------------------"
     exit 1
+fi
+
+if [[ $XDG_CURRENT_DESKTOP == *"GNOME"* ]]; then
+    de="gnome"
+elif [[ $XDG_CURRENT_DESKTOP == *"Cinnamon"* ]]; then
+    de="cinnamon"
+elif command -v gnome-shell &> /dev/null; then
+    de="gnome"
 fi
 
 ################################################################################
