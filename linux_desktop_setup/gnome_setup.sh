@@ -49,9 +49,11 @@ gsettings set org.gnome.desktop.peripherals.touchpad tap-to-click true
 
 screenDimensions=$(xdpyinfo | awk '/dimensions/{print $2}')
 screenWidth=$(cut -d "x" -f 1 <<< $screenDimensions)
-smallScreen=false
-if [ $screenWidth \< 1500 ]; then
-    smallScreen=true
+screenSize="large"
+if [ $screenWidth \< 1800 ]; then
+    screenSize="medium"
+elif [ $screenWidth \< 1300 ]; then
+    screenSize="small"
 fi
 
 gsettings set org.gnome.shell.extensions.desktop-icons show-home false
@@ -82,7 +84,7 @@ if [ $dashToDock == true ]; then
     gsettings set org.gnome.shell.extensions.dash-to-dock custom-background-color true
     gsettings set org.gnome.shell.extensions.dash-to-dock custom-theme-shrink true
     gsettings set org.gnome.shell.extensions.dash-to-dock dash-max-icon-size 28
-    if [ $smallScreen == true ]; then
+    if [ $screenSize == "small" ]; then
         gsettings set org.gnome.shell.extensions.dash-to-dock dock-fixed false
     else
         gsettings set org.gnome.shell.extensions.dash-to-dock dock-fixed true
@@ -111,42 +113,58 @@ if [ $? -eq 0 ]; then
     gsettings --schemadir /usr/share/gnome-shell/extensions/system-monitor@paradoxxx.zero.gmail.com/schemas set org.gnome.shell.extensions.system-monitor cpu-display true
     gsettings --schemadir /usr/share/gnome-shell/extensions/system-monitor@paradoxxx.zero.gmail.com/schemas set org.gnome.shell.extensions.system-monitor cpu-show-menu true
     gsettings --schemadir /usr/share/gnome-shell/extensions/system-monitor@paradoxxx.zero.gmail.com/schemas set org.gnome.shell.extensions.system-monitor cpu-show-text false
-    gsettings --schemadir /usr/share/gnome-shell/extensions/system-monitor@paradoxxx.zero.gmail.com/schemas set org.gnome.shell.extensions.system-monitor cpu-style "both"
-    if [ $smallScreen == true ]; then
+    if [ $screenSize == "small" ]; then
+        gsettings --schemadir /usr/share/gnome-shell/extensions/system-monitor@paradoxxx.zero.gmail.com/schemas set org.gnome.shell.extensions.system-monitor cpu-style "graph"
         gsettings --schemadir /usr/share/gnome-shell/extensions/system-monitor@paradoxxx.zero.gmail.com/schemas set org.gnome.shell.extensions.system-monitor cpu-graph-width 50
+    elif [ $screenSize == "medium" ]; then
+        gsettings --schemadir /usr/share/gnome-shell/extensions/system-monitor@paradoxxx.zero.gmail.com/schemas set org.gnome.shell.extensions.system-monitor cpu-style "graph"
+        gsettings --schemadir /usr/share/gnome-shell/extensions/system-monitor@paradoxxx.zero.gmail.com/schemas set org.gnome.shell.extensions.system-monitor cpu-graph-width 100
     else
+        gsettings --schemadir /usr/share/gnome-shell/extensions/system-monitor@paradoxxx.zero.gmail.com/schemas set org.gnome.shell.extensions.system-monitor cpu-style "both"
         gsettings --schemadir /usr/share/gnome-shell/extensions/system-monitor@paradoxxx.zero.gmail.com/schemas set org.gnome.shell.extensions.system-monitor cpu-graph-width 100
     fi
 
     gsettings --schemadir /usr/share/gnome-shell/extensions/system-monitor@paradoxxx.zero.gmail.com/schemas set org.gnome.shell.extensions.system-monitor disk-display true
     gsettings --schemadir /usr/share/gnome-shell/extensions/system-monitor@paradoxxx.zero.gmail.com/schemas set org.gnome.shell.extensions.system-monitor disk-show-menu true
     gsettings --schemadir /usr/share/gnome-shell/extensions/system-monitor@paradoxxx.zero.gmail.com/schemas set org.gnome.shell.extensions.system-monitor disk-show-text false
-    gsettings --schemadir /usr/share/gnome-shell/extensions/system-monitor@paradoxxx.zero.gmail.com/schemas set org.gnome.shell.extensions.system-monitor disk-style "both"
-    if [ $smallScreen == true ]; then
+    if [ $screenSize == "small" ]; then
+        gsettings --schemadir /usr/share/gnome-shell/extensions/system-monitor@paradoxxx.zero.gmail.com/schemas set org.gnome.shell.extensions.system-monitor disk-style "graph"
         gsettings --schemadir /usr/share/gnome-shell/extensions/system-monitor@paradoxxx.zero.gmail.com/schemas set org.gnome.shell.extensions.system-monitor disk-graph-width 50
+    elif [ $screenSize == "medium" ]; then
+        gsettings --schemadir /usr/share/gnome-shell/extensions/system-monitor@paradoxxx.zero.gmail.com/schemas set org.gnome.shell.extensions.system-monitor disk-style "graph"
+        gsettings --schemadir /usr/share/gnome-shell/extensions/system-monitor@paradoxxx.zero.gmail.com/schemas set org.gnome.shell.extensions.system-monitor disk-graph-width 100
     else
+        gsettings --schemadir /usr/share/gnome-shell/extensions/system-monitor@paradoxxx.zero.gmail.com/schemas set org.gnome.shell.extensions.system-monitor disk-style "both"
         gsettings --schemadir /usr/share/gnome-shell/extensions/system-monitor@paradoxxx.zero.gmail.com/schemas set org.gnome.shell.extensions.system-monitor disk-graph-width 100
     fi
 
     gsettings --schemadir /usr/share/gnome-shell/extensions/system-monitor@paradoxxx.zero.gmail.com/schemas set org.gnome.shell.extensions.system-monitor memory-display true
     gsettings --schemadir /usr/share/gnome-shell/extensions/system-monitor@paradoxxx.zero.gmail.com/schemas set org.gnome.shell.extensions.system-monitor memory-show-menu true
     gsettings --schemadir /usr/share/gnome-shell/extensions/system-monitor@paradoxxx.zero.gmail.com/schemas set org.gnome.shell.extensions.system-monitor memory-show-text false
-    gsettings --schemadir /usr/share/gnome-shell/extensions/system-monitor@paradoxxx.zero.gmail.com/schemas set org.gnome.shell.extensions.system-monitor memory-style "both"
     gsettings --schemadir /usr/share/gnome-shell/extensions/system-monitor@paradoxxx.zero.gmail.com/schemas set org.gnome.shell.extensions.system-monitor memory-buffer-color "#00000000"
     gsettings --schemadir /usr/share/gnome-shell/extensions/system-monitor@paradoxxx.zero.gmail.com/schemas set org.gnome.shell.extensions.system-monitor memory-cache-color "#00000000"
-    if [ $smallScreen == true ]; then
+    if [ $screenSize == "small" ]; then
+        gsettings --schemadir /usr/share/gnome-shell/extensions/system-monitor@paradoxxx.zero.gmail.com/schemas set org.gnome.shell.extensions.system-monitor memory-style "graph"
         gsettings --schemadir /usr/share/gnome-shell/extensions/system-monitor@paradoxxx.zero.gmail.com/schemas set org.gnome.shell.extensions.system-monitor memory-graph-width 50
+    elif [ $screenSize == "medium" ]; then
+        gsettings --schemadir /usr/share/gnome-shell/extensions/system-monitor@paradoxxx.zero.gmail.com/schemas set org.gnome.shell.extensions.system-monitor memory-style "graph"
+        gsettings --schemadir /usr/share/gnome-shell/extensions/system-monitor@paradoxxx.zero.gmail.com/schemas set org.gnome.shell.extensions.system-monitor memory-graph-width 100
     else
+        gsettings --schemadir /usr/share/gnome-shell/extensions/system-monitor@paradoxxx.zero.gmail.com/schemas set org.gnome.shell.extensions.system-monitor memory-style "both"
         gsettings --schemadir /usr/share/gnome-shell/extensions/system-monitor@paradoxxx.zero.gmail.com/schemas set org.gnome.shell.extensions.system-monitor memory-graph-width 100
     fi
 
     gsettings --schemadir /usr/share/gnome-shell/extensions/system-monitor@paradoxxx.zero.gmail.com/schemas set org.gnome.shell.extensions.system-monitor net-display true
     gsettings --schemadir /usr/share/gnome-shell/extensions/system-monitor@paradoxxx.zero.gmail.com/schemas set org.gnome.shell.extensions.system-monitor net-show-menu true
     gsettings --schemadir /usr/share/gnome-shell/extensions/system-monitor@paradoxxx.zero.gmail.com/schemas set org.gnome.shell.extensions.system-monitor net-show-text false
-    gsettings --schemadir /usr/share/gnome-shell/extensions/system-monitor@paradoxxx.zero.gmail.com/schemas set org.gnome.shell.extensions.system-monitor net-style "both"
-    if [ $smallScreen == true ]; then
+    if [ $screenSize == "small" ]; then
+        gsettings --schemadir /usr/share/gnome-shell/extensions/system-monitor@paradoxxx.zero.gmail.com/schemas set org.gnome.shell.extensions.system-monitor net-style "graph"
         gsettings --schemadir /usr/share/gnome-shell/extensions/system-monitor@paradoxxx.zero.gmail.com/schemas set org.gnome.shell.extensions.system-monitor net-graph-width 50
+    elif [ $screenSize == "medium" ]; then
+        gsettings --schemadir /usr/share/gnome-shell/extensions/system-monitor@paradoxxx.zero.gmail.com/schemas set org.gnome.shell.extensions.system-monitor net-style "graph"
+        gsettings --schemadir /usr/share/gnome-shell/extensions/system-monitor@paradoxxx.zero.gmail.com/schemas set org.gnome.shell.extensions.system-monitor net-graph-width 100
     else
+        gsettings --schemadir /usr/share/gnome-shell/extensions/system-monitor@paradoxxx.zero.gmail.com/schemas set org.gnome.shell.extensions.system-monitor net-style "both"
         gsettings --schemadir /usr/share/gnome-shell/extensions/system-monitor@paradoxxx.zero.gmail.com/schemas set org.gnome.shell.extensions.system-monitor net-graph-width 100
     fi
 
