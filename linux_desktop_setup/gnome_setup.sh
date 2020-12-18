@@ -51,16 +51,38 @@ if [ $? -eq 0 ]; then
     gnome-extensions enable caffeine@patapon.info
 fi
 
+dashToDock=false
+
 gnome-extensions info dash-to-dock@micxgx.gmail.com
 if [ $? -eq 0 ]; then
     gnome-extensions enable dash-to-dock@micxgx.gmail.com
-    gsettings set org.gnome.shell.extensions.dash-to-dock dash-max-icon-size 28
+    dashToDock=true
 fi
 
-gnome-extensions info ubuntu-dock@ubuntu.com 
+gnome-extensions info ubuntu-dock@ubuntu.com
 if [ $? -eq 0 ]; then
-    gnome-extensions enable ubuntu-dock@ubuntu.com 
+    gnome-extensions enable ubuntu-dock@ubuntu.com
+    dashToDock=true
+fi
+
+if [ $dashToDock == true ]; then
+    gsettings set org.gnome.shell.extensions.dash-to-dock background-color "#000000"
+    gsettings set org.gnome.shell.extensions.dash-to-dock background-opacity 0.5
+    gsettings set org.gnome.shell.extensions.dash-to-dock custom-background-color true
+    gsettings set org.gnome.shell.extensions.dash-to-dock custom-theme-shrink true
     gsettings set org.gnome.shell.extensions.dash-to-dock dash-max-icon-size 28
+    gsettings set org.gnome.shell.extensions.dash-to-dock dock-fixed true
+    gsettings set org.gnome.shell.extensions.dash-to-dock extend-height true
+    gsettings set org.gnome.shell.extensions.dash-to-dock hot-keys false
+    gsettings set org.gnome.shell.extensions.dash-to-dock icon-size-fixed true
+    gsettings set org.gnome.shell.extensions.dash-to-dock intellihide-mode "MAXIMIZED_WINDOWS"
+    gsettings set org.gnome.shell.extensions.dash-to-dock running-indicator-dominant-color true
+    gsettings set org.gnome.shell.extensions.dash-to-dock running-indicator-style "DASHES"
+    gsettings set org.gnome.shell.extensions.dash-to-dock preferred-monitor 0
+    gsettings set org.gnome.shell.extensions.dash-to-dock show-favorites true
+    gsettings set org.gnome.shell.extensions.dash-to-dock show-mounts true
+    gsettings set org.gnome.shell.extensions.dash-to-dock show-trash false
+    gsettings set org.gnome.shell.extensions.dash-to-dock transparency-mode "FIXED"
 fi
 
 gnome-extensions info system-monitor@paradoxxx.zero.gmail.com
