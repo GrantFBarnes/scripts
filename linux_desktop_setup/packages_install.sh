@@ -607,7 +607,9 @@ function developmentPackages() {
 function environmentPackages() {
     packageOptions=()
     if [ "$de" == "gnome" ]; then
-        packageOptions+=("caffeine" "Gnome Extension" off)
+        if [ "$pm" == "apt" ] || [ "$pm" == "pacman" ]; then
+            packageOptions+=("caffeine" "Gnome Extension" off)
+        fi
         if [ "$distro" != "ubuntu" ]; then
             packageOptions+=("dash-to-dock" "Gnome Extension" off)
         fi
@@ -623,20 +625,41 @@ function environmentPackages() {
         pkg=$(echo $pkg | sed 's/"//g')
         case ${pkg} in
             "caffeine")
-                if [ "$distro" == "ubuntu" ]; then
+                if [ "$pm" == "apt" ]; then
                     packagesToInstall+=(gnome-shell-extension-caffeine)
+                elif [ "$pm" == "pacman" ]; then
+                    checkNotInstalled gnome-shell-extension-caffeine-git
+                    if [ $? -eq 0 ]; then
+                        aurToInstall+=(gnome-shell-extension-caffeine-git)
+                    fi
                 fi
             ;;
             "dash-to-dock")
-                if [ "$distro" == "centos" ]; then
+                if [ "$pm" == "apt" ]; then
+                    if [ "$distro" == "debian" ]; then
+                        packagesToInstall+=(gnome-shell-extension-dashtodock)
+                    elif [ "$distro" == "pop" ]; then
+                        packagesToInstall+=(gnome-shell-extension-ubuntu-dock)
+                    fi
+                elif [ "$pm" == "dnf" ]; then
                     packagesToInstall+=(gnome-shell-extension-dash-to-dock)
+                elif [ "$pm" == "pacman" ]; then
+                    checkNotInstalled gnome-shell-extension-dash-to-dock
+                    if [ $? -eq 0 ]; then
+                        aurToInstall+=(gnome-shell-extension-dash-to-dock)
+                    fi
                 fi
             ;;
             "system-monitor")
-                if [ "$distro" == "centos" ]; then
-                    packagesToInstall+=(gnome-shell-extension-system-monitor-applet)
-                elif [ "$distro" == "ubuntu" ]; then
+                if [ "$pm" == "apt" ]; then
                     packagesToInstall+=(gnome-shell-extension-system-monitor)
+                elif [ "$pm" == "dnf" ]; then
+                    packagesToInstall+=(gnome-shell-extension-system-monitor-applet)
+                elif [ "$pm" == "pacman" ]; then
+                    checkNotInstalled gnome-shell-extension-system-monitor-git
+                    if [ $? -eq 0 ]; then
+                        aurToInstall+=(gnome-shell-extension-system-monitor-git)
+                    fi
                 fi
             ;;
             *)

@@ -57,6 +57,12 @@ if [ $? -eq 0 ]; then
     gsettings set org.gnome.shell.extensions.dash-to-dock dash-max-icon-size 28
 fi
 
+gnome-extensions info ubuntu-dock@ubuntu.com 
+if [ $? -eq 0 ]; then
+    gnome-extensions enable ubuntu-dock@ubuntu.com 
+    gsettings set org.gnome.shell.extensions.dash-to-dock dash-max-icon-size 28
+fi
+
 gnome-extensions info system-monitor@paradoxxx.zero.gmail.com
 if [ $? -eq 0 ]; then
     gnome-extensions enable system-monitor@paradoxxx.zero.gmail.com
