@@ -88,6 +88,56 @@ fi
 gnome-extensions info system-monitor@paradoxxx.zero.gmail.com
 if [ $? -eq 0 ]; then
     gnome-extensions enable system-monitor@paradoxxx.zero.gmail.com
+
+    gsettings set org.gnome.shell.extensions.system-monitor center-display false
+    gsettings set org.gnome.shell.extensions.system-monitor compact-display true
+    gsettings set org.gnome.shell.extensions.system-monitor icon-display false
+
+    gsettings set org.gnome.shell.extensions.system-monitor cpu-display true
+    gsettings set org.gnome.shell.extensions.system-monitor cpu-show-menu true
+    gsettings set org.gnome.shell.extensions.system-monitor cpu-show-text false
+    gsettings set org.gnome.shell.extensions.system-monitor cpu-style "both"
+
+    gsettings set org.gnome.shell.extensions.system-monitor disk-display true
+    gsettings set org.gnome.shell.extensions.system-monitor disk-show-menu true
+    gsettings set org.gnome.shell.extensions.system-monitor disk-show-text false
+    gsettings set org.gnome.shell.extensions.system-monitor disk-style "both"
+
+    gsettings set org.gnome.shell.extensions.system-monitor memory-display true
+    gsettings set org.gnome.shell.extensions.system-monitor memory-show-menu true
+    gsettings set org.gnome.shell.extensions.system-monitor memory-show-text false
+    gsettings set org.gnome.shell.extensions.system-monitor memory-style "both"
+    gsettings set org.gnome.shell.extensions.system-monitor memory-buffer-color "#00000000"
+    gsettings set org.gnome.shell.extensions.system-monitor memory-cache-color "#00000000"
+
+    gsettings set org.gnome.shell.extensions.system-monitor net-display true
+    gsettings set org.gnome.shell.extensions.system-monitor net-show-menu true
+    gsettings set org.gnome.shell.extensions.system-monitor net-show-text false
+    gsettings set org.gnome.shell.extensions.system-monitor net-style "both"
+
+    gsettings set org.gnome.shell.extensions.system-monitor battery-display false
+    gsettings set org.gnome.shell.extensions.system-monitor battery-show-menu false
+    gsettings set org.gnome.shell.extensions.system-monitor battery-show-text false
+
+    gsettings set org.gnome.shell.extensions.system-monitor fan-display false
+    gsettings set org.gnome.shell.extensions.system-monitor fan-show-menu false
+    gsettings set org.gnome.shell.extensions.system-monitor fan-show-text false
+
+    gsettings set org.gnome.shell.extensions.system-monitor freq-display false
+    gsettings set org.gnome.shell.extensions.system-monitor freq-show-menu false
+    gsettings set org.gnome.shell.extensions.system-monitor freq-show-text false
+
+    gsettings set org.gnome.shell.extensions.system-monitor gpu-display false
+    gsettings set org.gnome.shell.extensions.system-monitor gpu-show-menu false
+    gsettings set org.gnome.shell.extensions.system-monitor gpu-show-text false
+
+    gsettings set org.gnome.shell.extensions.system-monitor swap-display false
+    gsettings set org.gnome.shell.extensions.system-monitor swap-show-menu false
+    gsettings set org.gnome.shell.extensions.system-monitor swap-show-text false
+
+    gsettings set org.gnome.shell.extensions.system-monitor thermal-display false
+    gsettings set org.gnome.shell.extensions.system-monitor thermal-show-menu false
+    gsettings set org.gnome.shell.extensions.system-monitor thermal-show-text false
 fi
 
 exit 0
