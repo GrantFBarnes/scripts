@@ -317,6 +317,7 @@ fi
 
 function applicationPackages() {
     packageOptions=()
+    packageOptions+=("bitwarden" "Bitwarden Password Manager" off)
     packageOptions+=("deja-dup" "Backup Tool" off)
     packageOptions+=("gnome-books" "Gnome Books" off)
     packageOptions+=("gnome-boxes" "Gnome Boxes VM Manager" off)
@@ -336,6 +337,15 @@ function applicationPackages() {
     for pkg in $packageSelections; do
         pkg=$(echo $pkg | sed 's/"//g')
         case ${pkg} in
+            "bitwarden")
+                if [ "$preferFlatpakOverSnap" == true ]; then
+                    flatpaksToInstall+=(com.bitwarden.desktop)
+                    snapsToRemove+=(bitwarden)
+                else
+                    snapsToInstall+=(bitwarden)
+                    flatpaksToRemove+=(com.bitwarden.desktop)
+                fi
+            ;;
             "deja-dup")
                 if [ "$distro" == "centos" ]; then
                     flatpaksToInstall+=(org.gnome.DejaDup)
@@ -532,6 +542,9 @@ function communicationPackages() {
     packageOptions+=("discord" "Discord" off)
     if [ "$de" == "gnome" ]; then
         packageOptions+=("geary" "Gnome Email Client" off)
+    fi
+    if [ "$distro" == "ubuntu" ]; then
+        packageOptions+=("protonmail-bridge" "ProtonMail Bridge" off)
     fi
     packageOptions+=("slack" "Slack" off)
     packageOptions+=("thunderbird" "Thunderbird Email Client" off)
