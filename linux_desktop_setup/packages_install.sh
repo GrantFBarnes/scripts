@@ -866,7 +866,7 @@ function textPackages() {
     packageOptions+=("code" "Visual Studio Code" off)
     packageOptions+=("gedit" "GUI Text Editor" on)
     packageOptions+=("libreoffice" "LibreOffice Suite" off)
-    packageOptions+=("texworks" "LaTeX Editor" off)
+    packageOptions+=("texstudio" "LaTeX Editor" off)
 
     choosePackagesWhiptail
     if [ $? -eq 1 ]; then
@@ -919,8 +919,8 @@ function textPackages() {
                     snapsToRemove+=(libreoffice)
                 fi
             ;;
-            "texworks")
-                flatpaksToInstall+=(org.tug.texworks)
+            "texstudio")
+                flatpaksToInstall+=(org.texstudio.TeXstudio)
             ;;
             *)
                 packagesToInstall+=($pkg)
