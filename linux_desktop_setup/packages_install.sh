@@ -774,6 +774,9 @@ function mediaPackages() {
 function gamingPackages() {
     packageOptions=()
     packageOptions+=("0ad" "0 A.D. Ancient Warfare" off)
+    packageOptions+=("aisleriot" "Solitare" off)
+    packageOptions+=("gnome-chess" "Chess" off)
+    packageOptions+=("gnome-sudoku" "Sudoku" off)
     packageOptions+=("parsec" "Streaming App" off)
     packageOptions+=("steam" "Steam" off)
     packageOptions+=("supertuxkart" "Tux Kart Racer" off)
@@ -811,6 +814,33 @@ function gamingPackages() {
 
                     flatpaksToRemove+=(com.play0ad.zeroad)
                     snapsToRemove+=(0ad)
+                fi
+            ;;
+            "aisleriot")
+                if [ "$preferRepoOverFlatpak" == true ]; then
+                    packagesToInstall+=(aisleriot)
+                    flatpaksToRemove+=(org.gnome.Aisleriot)
+                else
+                    flatpaksToInstall+=(org.gnome.Aisleriot)
+                    packagesToRemove+=(aisleriot)
+                fi
+            ;;
+            "gnome-chess")
+                if [ "$preferRepoOverFlatpak" == true ]; then
+                    packagesToInstall+=(gnome-chess)
+                    flatpaksToRemove+=(org.gnome.Chess)
+                else
+                    flatpaksToInstall+=(org.gnome.Chess)
+                    packagesToRemove+=(gnome-chess)
+                fi
+            ;;
+            "gnome-sudoku")
+                if [ "$preferRepoOverFlatpak" == true ]; then
+                    packagesToInstall+=(gnome-sudoku)
+                    flatpaksToRemove+=(org.gnome.Sudoku)
+                else
+                    flatpaksToInstall+=(org.gnome.Chess)
+                    packagesToRemove+=(gnome-sudoku)
                 fi
             ;;
             "parsec")
@@ -1149,17 +1179,14 @@ if [ "$distro" == "mint" ] || [ "$distro" == "lmde" ]; then
     packagesToRemove+=(warpinator)
     packagesToRemove+=(xed)
 elif [ "$distro" == "ubuntu" ] || [ "$distro" == "debian" ]; then
-    packagesToRemove+=(aisleriot)
     packagesToRemove+=(five-or-more)
     packagesToRemove+=(four-in-a-row)
-    packagesToRemove+=(gnome-chess)
     packagesToRemove+=(gnome-klotski)
     packagesToRemove+=(gnome-mahjongg)
     packagesToRemove+=(gnome-mines)
     packagesToRemove+=(gnome-music)
     packagesToRemove+=(gnome-nibbles)
     packagesToRemove+=(gnome-robots)
-    packagesToRemove+=(gnome-sudoku)
     packagesToRemove+=(gnome-tetravex)
     packagesToRemove+=(gnome-todo)
     packagesToRemove+=(remmina*)
