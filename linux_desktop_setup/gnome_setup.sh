@@ -36,6 +36,13 @@ gsettings set org.gnome.desktop.interface enable-animations false
 # Set Blank Screen to 15 min (900 seconds)
 gsettings set org.gnome.desktop.session idle-delay 900
 
+# Enable Night Shift
+gsettings set org.gnome.settings-daemon.plugins.color night-light-enabled true
+gsettings set org.gnome.settings-daemon.plugins.color night-light-schedule-automatic false
+gsettings set org.gnome.settings-daemon.plugins.color night-light-temperature "uint32 2700"
+gsettings set org.gnome.settings-daemon.plugins.color night-light-schedule-from "4.0"
+gsettings set org.gnome.settings-daemon.plugins.color night-light-schedule-to "3.9"
+
 # Add WM Buttons
 gsettings set org.gnome.desktop.wm.preferences button-layout ":minimize,maximize,close"
 
