@@ -326,6 +326,7 @@ function applicationPackages() {
     packageOptions+=("gnome-clocks" "Gnome Clocks" on)
     packageOptions+=("gnome-photos" "Gnome Photos" off)
     packageOptions+=("gnome-weather" "Gnome Weather" on)
+    packageOptions+=("gnucash" "Finance Program" off)
     packageOptions+=("meld" "File Comparitor" off)
     packageOptions+=("transmission-gtk" "Transmission Torrent" off)
 
@@ -426,6 +427,15 @@ function applicationPackages() {
                 else
                     flatpaksToInstall+=(org.gnome.Weather)
                     packagesToRemove+=(gnome-weather)
+                fi
+            ;;
+            "gnucash")
+                if [ "$preferRepoOverFlatpak" == true ]; then
+                    packagesToInstall+=(gnucash)
+                    flatpaksToRemove+=(org.gnucash.GnuCash)
+                else
+                    flatpaksToInstall+=(org.gnucash.GnuCash)
+                    packagesToRemove+=(gnucash)
                 fi
             ;;
             "meld")
