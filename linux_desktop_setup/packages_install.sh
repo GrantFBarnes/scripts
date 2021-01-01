@@ -317,6 +317,7 @@ fi
 
 function applicationPackages() {
     packageOptions=()
+    packageOptions+=("gramps" "Genealogical Research and Analysis Management Programming System" off)
     packageOptions+=("bitwarden" "Bitwarden Password Manager" off)
     packageOptions+=("deja-dup" "Backup Tool" off)
     packageOptions+=("gnome-books" "Gnome Books" off)
@@ -338,6 +339,15 @@ function applicationPackages() {
     for pkg in $packageSelections; do
         pkg=$(echo $pkg | sed 's/"//g')
         case ${pkg} in
+            "gramps")
+                if [ "$preferRepoOverFlatpak" == true ]; then
+                    packagesToInstall+=(gramps)
+                    flatpaksToRemove+=(org.gramps_project.Gramps)
+                else
+                    flatpaksToInstall+=(org.gramps_project.Gramps)
+                    packagesToRemove+=(gramps)
+                fi
+            ;;
             "bitwarden")
                 if [ "$preferFlatpakOverSnap" == true ]; then
                     flatpaksToInstall+=(com.bitwarden.desktop)
