@@ -46,6 +46,9 @@ gsettings set org.gnome.settings-daemon.plugins.color night-light-schedule-to "3
 # Add WM Buttons
 gsettings set org.gnome.desktop.wm.preferences button-layout ":minimize,maximize,close"
 
+# Enable Num Lock
+gsettings set org.gnome.desktop.peripherals.keyboard numlock-state true
+
 # Set Nautilus Default View to List
 gsettings set org.gnome.nautilus.preferences default-folder-viewer "list-view"
 
