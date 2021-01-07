@@ -317,7 +317,7 @@ fi
 
 function applicationPackages() {
     packageOptions=()
-    packageOptions+=("gramps" "Genealogical Research and Analysis Management Programming System" off)
+    packageOptions+=("cheese" "Webcam Application" off)
     packageOptions+=("bitwarden" "Bitwarden Password Manager" off)
     packageOptions+=("deja-dup" "Backup Tool" off)
     packageOptions+=("gnome-books" "Gnome Books" off)
@@ -328,6 +328,7 @@ function applicationPackages() {
     packageOptions+=("gnome-photos" "Gnome Photos" off)
     packageOptions+=("gnome-weather" "Gnome Weather" on)
     packageOptions+=("gnucash" "Finance Program" off)
+    packageOptions+=("gramps" "Genealogical Research and Analysis Management Programming System" off)
     packageOptions+=("meld" "File Comparitor" off)
     packageOptions+=("transmission-gtk" "Transmission Torrent" off)
 
@@ -339,13 +340,15 @@ function applicationPackages() {
     for pkg in $packageSelections; do
         pkg=$(echo $pkg | sed 's/"//g')
         case ${pkg} in
-            "gramps")
-                if [ "$preferRepoOverFlatpak" == true ]; then
-                    packagesToInstall+=(gramps)
-                    flatpaksToRemove+=(org.gramps_project.Gramps)
+            "cheese")
+                if [ "$distro" == "centos" ]; then
+                    flatpaksToInstall+=(org.gnome.Cheese)
+                elif [ "$preferRepoOverFlatpak" == true ]; then
+                    packagesToInstall+=(cheese)
+                    flatpaksToRemove+=(org.gnome.Cheese)
                 else
-                    flatpaksToInstall+=(org.gramps_project.Gramps)
-                    packagesToRemove+=(gramps)
+                    flatpaksToInstall+=(org.gnome.Cheese)
+                    packagesToRemove+=(cheese)
                 fi
             ;;
             "bitwarden")
@@ -446,6 +449,15 @@ function applicationPackages() {
                 else
                     flatpaksToInstall+=(org.gnucash.GnuCash)
                     packagesToRemove+=(gnucash)
+                fi
+            ;;
+            "gramps")
+                if [ "$preferRepoOverFlatpak" == true ]; then
+                    packagesToInstall+=(gramps)
+                    flatpaksToRemove+=(org.gramps_project.Gramps)
+                else
+                    flatpaksToInstall+=(org.gramps_project.Gramps)
+                    packagesToRemove+=(gramps)
                 fi
             ;;
             "meld")
@@ -566,6 +578,7 @@ function communicationPackages() {
     if [ "$distro" == "ubuntu" ]; then
         packageOptions+=("protonmail-bridge" "ProtonMail Bridge" off)
     fi
+    packageOptions+=("skype" "Skype" off)
     packageOptions+=("slack" "Slack" off)
     packageOptions+=("thunderbird" "Thunderbird Email Client" off)
 
@@ -584,6 +597,15 @@ function communicationPackages() {
                 else
                     snapsToInstall+=(discord)
                     flatpaksToRemove+=(com.discordapp.Discord)
+                fi
+            ;;
+            "skype")
+                if [ "$preferFlatpakOverSnap" == true ]; then
+                    flatpaksToInstall+=(com.skype.Client)
+                    snapsToRemove+=(skype)
+                else
+                    snapsToInstall+=("skype --classic")
+                    flatpaksToRemove+=(com.skype.Client)
                 fi
             ;;
             "slack")
@@ -1175,7 +1197,6 @@ fi
 
 # Determine Packages to Remove
 
-packagesToRemove+=(cheese)
 packagesToRemove+=(evolution)
 packagesToRemove+=(mpv)
 packagesToRemove+=(totem)
