@@ -55,6 +55,11 @@ gsettings set org.gnome.nautilus.preferences default-folder-viewer "list-view"
 # Set Touchpad Tap to Click
 gsettings set org.gnome.desktop.peripherals.touchpad tap-to-click true
 
+# Set up keybindings
+gsettings set org.gnome.settings-daemon.plugins.media-keys calculator "['<Super>c']"
+gsettings set org.gnome.settings-daemon.plugins.media-keys terminal "['<Primary><Alt>t','<Super>Return']"
+gsettings set org.gnome.settings-daemon.plugins.media-keys www "['<Super>b']"
+
 # Set Gnome extensions
 
 screenDimensions=$(xdpyinfo | awk '/dimensions/{print $2}')
