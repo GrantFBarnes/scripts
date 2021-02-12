@@ -579,7 +579,6 @@ function communicationPackages() {
         packageOptions+=("protonmail-bridge" "ProtonMail Bridge" off)
     fi
     packageOptions+=("skype" "Skype" off)
-    packageOptions+=("slack" "Slack" off)
     packageOptions+=("thunderbird" "Thunderbird Email Client" off)
 
     choosePackagesWhiptail
@@ -606,15 +605,6 @@ function communicationPackages() {
                 else
                     snapsToInstall+=("skype --classic")
                     flatpaksToRemove+=(com.skype.Client)
-                fi
-            ;;
-            "slack")
-                if [ "$preferFlatpakOverSnap" == true ]; then
-                    flatpaksToInstall+=(com.slack.Slack)
-                    snapsToRemove+=(slack)
-                else
-                    snapsToInstall+=("slack --classic")
-                    flatpaksToRemove+=(com.slack.Slack)
                 fi
             ;;
             *)
