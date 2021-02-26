@@ -624,6 +624,7 @@ function developmentPackages() {
     packageOptions+=("nodejs" "NodeJS" off)
     packageOptions+=("npm" "Node Package Manager" off)
     packageOptions+=("ssh" "SSH" on)
+    packageOptions+=("vim" "VIM" on)
     packageOptions+=("youtube-dl" "Command Line YT Downloader" off)
 
     choosePackagesWhiptail
