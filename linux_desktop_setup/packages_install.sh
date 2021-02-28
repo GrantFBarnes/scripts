@@ -575,9 +575,6 @@ function communicationPackages() {
     if [ "$de" == "gnome" ]; then
         packageOptions+=("geary" "Gnome Email Client" off)
     fi
-    if [ "$distro" == "ubuntu" ]; then
-        packageOptions+=("protonmail-bridge" "ProtonMail Bridge" off)
-    fi
     packageOptions+=("skype" "Skype" off)
     packageOptions+=("thunderbird" "Thunderbird Email Client" off)
 
