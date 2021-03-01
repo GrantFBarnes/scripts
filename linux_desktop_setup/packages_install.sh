@@ -201,7 +201,7 @@ fi
 
 grep -q EDITOR ~/.bashrc
 if [ $? -eq 1 ]; then
-    sudo sh -c 'echo export EDITOR="nano" >> ~/.bashrc'
+    sudo sh -c 'echo export EDITOR="vim" >> ~/.bashrc'
 fi
 
 confirmWhiptail "   Distrobution: $distro\n    Desktop Env: $de\nPackage Manager: $pm\n\nWould you like to continue?" 11
@@ -287,8 +287,8 @@ declare -a flatpaksToRemove
 
 # Always install the following packages
 packagesToInstall+=(flatpak)
-packagesToInstall+=(nano)
 packagesToInstall+=(neofetch)
+packagesToInstall+=(vim)
 
 if [ "$pm" == "pacman" ]; then
     checkNotInstalled snap
@@ -617,11 +617,11 @@ function developmentPackages() {
     if [ "$pm" != "pacman" ]; then
         packageOptions+=("git" "Git" on)
     fi
+    packageOptions+=("nano" "nano" on)
     packageOptions+=("net-tools" "Network Packages" off)
     packageOptions+=("nodejs" "NodeJS" off)
     packageOptions+=("npm" "Node Package Manager" off)
     packageOptions+=("ssh" "SSH" on)
-    packageOptions+=("vim" "VIM" on)
     packageOptions+=("youtube-dl" "Command Line YT Downloader" off)
 
     choosePackagesWhiptail
