@@ -199,9 +199,24 @@ elif [ "$pm" == "pacman" ]; then
     sudo -u $SUDO_USER mkdir /home/$SUDO_USER/aur
 fi
 
-grep -q EDITOR ~/.bashrc
+bashrc=/home/$SUDO_USER/.bashrc
+if [ ! -f "$bashrc" ]; then
+    sudo -u $SUDO_USER touch $bashrc
+fi
+
+grep -q EDITOR $bashrc
 if [ $? -eq 1 ]; then
-    sudo sh -c 'echo export EDITOR="vim" >> ~/.bashrc'
+    sudo -u $SUDO_USER echo export EDITOR="vim" >> $bashrc
+fi
+
+vimrc=/home/$SUDO_USER/.vimrc
+if [ ! -f "$vimrc" ]; then
+    sudo -u $SUDO_USER touch $vimrc
+fi
+
+grep -q "set number" $vimrc
+if [ $? -eq 1 ]; then
+    sudo -u $SUDO_USER echo set number >> $vimrc
 fi
 
 confirmWhiptail "   Distrobution: $distro\n    Desktop Env: $de\nPackage Manager: $pm\n\nWould you like to continue?" 11
