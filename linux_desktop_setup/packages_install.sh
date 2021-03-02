@@ -214,9 +214,9 @@ if [ ! -f "$vimrc" ]; then
     sudo -u $SUDO_USER touch $vimrc
 fi
 
-grep -q "set number" $vimrc
+grep -q "set relativenumber" $vimrc
 if [ $? -eq 1 ]; then
-    sudo -u $SUDO_USER echo set number >> $vimrc
+    sudo -u $SUDO_USER echo set relativenumber >> $vimrc
 fi
 
 confirmWhiptail "   Distrobution: $distro\n    Desktop Env: $de\nPackage Manager: $pm\n\nWould you like to continue?" 11
@@ -939,6 +939,7 @@ function gamingPackages() {
 function textPackages() {
     packageOptions=()
     packageOptions+=("code" "Visual Studio Code" off)
+    packageOptions+=("codium" "Visual Studio Codium" off)
     packageOptions+=("gedit" "GUI Text Editor" on)
     packageOptions+=("libreoffice" "LibreOffice Suite" off)
     packageOptions+=("texstudio" "LaTeX Editor" off)
@@ -996,6 +997,13 @@ function textPackages() {
             ;;
             "texstudio")
                 flatpaksToInstall+=(org.texstudio.TeXstudio)
+            ;;
+            "codium")
+                flatpaksToInstall+=(com.vscodium.codium)
+                grep -q codium $bashrc
+                if [ $? -eq 1 ]; then
+                    sudo -u $SUDO_USER echo alias codium="flatpak run com.vscodium.codium" >> $bashrc
+                fi
             ;;
             *)
                 packagesToInstall+=($pkg)
