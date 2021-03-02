@@ -206,7 +206,7 @@ fi
 
 grep -q EDITOR $bashrc
 if [ $? -eq 1 ]; then
-    sudo -u $SUDO_USER echo export EDITOR="vim" >> $bashrc
+    sudo -u $SUDO_USER echo export EDITOR='"/usr/bin/vim"' >> $bashrc
 fi
 
 vimrc=/home/$SUDO_USER/.vimrc
@@ -1002,7 +1002,7 @@ function textPackages() {
                 flatpaksToInstall+=(com.vscodium.codium)
                 grep -q codium $bashrc
                 if [ $? -eq 1 ]; then
-                    sudo -u $SUDO_USER echo alias codium="flatpak run com.vscodium.codium" >> $bashrc
+                    sudo -u $SUDO_USER echo alias codium='"flatpak run com.vscodium.codium"' >> $bashrc
                 fi
             ;;
             *)
