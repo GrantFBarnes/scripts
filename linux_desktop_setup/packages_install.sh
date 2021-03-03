@@ -301,33 +301,12 @@ declare -a snapsToRemove
 declare -a flatpaksToRemove
 
 # Always install the following packages
-packagesToInstall+=(flatpak)
 packagesToInstall+=(neofetch)
 packagesToInstall+=(vim)
 
 if [ "$pm" == "pacman" ]; then
-    checkNotInstalled snap
-    if [ $? -eq 0 ]; then
-        aurToInstall+=(snapd)
-    fi
     packagesToInstall+=(git)
     packagesToInstall+=(base-devel)
-else
-    packagesToInstall+=(snapd)
-fi
-
-confirmWhiptail "Do you want software stores installed?"
-if [ $? -eq 0 ]; then
-    if [ "$de" == "gnome" ]; then
-        if [ "$distro" != "pop" ]; then
-            packagesToInstall+=(gnome-software)
-            packagesToInstall+=(gnome-software-plugin-flatpak)
-        fi
-    fi
-    snapsToInstall+=(snap-store)
-else
-    packagesToRemove+=(gnome-software)
-    snapsToRemove+=(snap-store)
 fi
 
 function applicationPackages() {
@@ -349,8 +328,8 @@ function applicationPackages() {
 
     choosePackagesWhiptail
     if [ $? -eq 1 ]; then
-		return
-	fi
+        return
+    fi
 
     for pkg in $packageSelections; do
         pkg=$(echo $pkg | sed 's/"//g')
@@ -500,8 +479,8 @@ function browserPackages() {
 
     choosePackagesWhiptail
     if [ $? -eq 1 ]; then
-		return
-	fi
+        return
+    fi
 
     for pkg in $packageSelections; do
         pkg=$(echo $pkg | sed 's/"//g')
@@ -595,8 +574,8 @@ function communicationPackages() {
 
     choosePackagesWhiptail
     if [ $? -eq 1 ]; then
-		return
-	fi
+        return
+    fi
 
     for pkg in $packageSelections; do
         pkg=$(echo $pkg | sed 's/"//g')
@@ -641,8 +620,8 @@ function developmentPackages() {
 
     choosePackagesWhiptail
     if [ $? -eq 1 ]; then
-		return
-	fi
+        return
+    fi
 
     for pkg in $packageSelections; do
         pkg=$(echo $pkg | sed 's/"//g')
@@ -671,13 +650,17 @@ function environmentPackages() {
         if [ "$distro" != "ubuntu" ]; then
             packageOptions+=("dash-to-dock" "Gnome Extension" off)
         fi
+        if [ "$distro" != "pop" ]; then
+            packageOptions+=("gnome-software" "Gnome Software" off)
+        fi
+        packageOptions+=("snap-store" "Snap Store" off)
         packageOptions+=("system-monitor" "Gnome Extension" off)
     fi
 
     choosePackagesWhiptail
     if [ $? -eq 1 ]; then
-		return
-	fi
+        return
+    fi
 
     for pkg in $packageSelections; do
         pkg=$(echo $pkg | sed 's/"//g')
@@ -708,6 +691,9 @@ function environmentPackages() {
                     fi
                 fi
             ;;
+            "snap-store")
+                snapsToInstall+=(snap-store)
+            ;;
             "system-monitor")
                 if [ "$pm" == "apt" ]; then
                     packagesToInstall+=(gnome-shell-extension-system-monitor)
@@ -737,8 +723,8 @@ function mediaPackages() {
 
     choosePackagesWhiptail
     if [ $? -eq 1 ]; then
-		return
-	fi
+        return
+    fi
 
     for pkg in $packageSelections; do
         pkg=$(echo $pkg | sed 's/"//g')
@@ -819,8 +805,8 @@ function gamingPackages() {
 
     choosePackagesWhiptail
     if [ $? -eq 1 ]; then
-		return
-	fi
+        return
+    fi
 
     for pkg in $packageSelections; do
         pkg=$(echo $pkg | sed 's/"//g')
@@ -946,8 +932,8 @@ function textPackages() {
 
     choosePackagesWhiptail
     if [ $? -eq 1 ]; then
-		return
-	fi
+        return
+    fi
 
     for pkg in $packageSelections; do
         pkg=$(echo $pkg | sed 's/"//g')
@@ -1033,8 +1019,8 @@ function utilityPackages() {
 
     choosePackagesWhiptail
     if [ $? -eq 1 ]; then
-		return
-	fi
+        return
+    fi
 
     for pkg in $packageSelections; do
         pkg=$(echo $pkg | sed 's/"//g')
@@ -1106,8 +1092,8 @@ function chooseUsage() {
 
     chooseCategoryWhiptail
     if [ $? -eq 1 ]; then
-		return 1
-	fi
+        return 1
+    fi
 
     case ${categorySelection} in
         "Applications")
@@ -1160,6 +1146,23 @@ fi
 
 ################################################################################
 
+# Decide if flatpak or snapd need to be installed
+
+if [ ${#flatpaksToInstall[@]} -gt 0 ]; then
+    packagesToInstall+=(flatpak)
+fi
+
+if [ ${#snapsToInstall[@]} -gt 0 ]; then
+    if [ "$pm" == "pacman" ]; then
+        checkNotInstalled snap
+        if [ $? -eq 0 ]; then
+            aurToInstall+=(snapd)
+        fi
+    else
+        packagesToInstall+=(snapd)
+    fi
+fi
+
 # Install Packages
 
 # Package manager
@@ -1183,9 +1186,9 @@ fi
 
 # Flatpaks
 
-sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
-
 if [ ${#flatpaksToInstall[@]} -gt 0 ]; then
+    sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+
     for i in "${flatpaksToInstall[@]}"; do
         flatpakManager install $i
     done
@@ -1193,12 +1196,12 @@ fi
 
 # Snaps
 
-if [ "$pm" == "dnf" ] || [ "$pm" == "pacman" ]; then
-    sudo systemctl enable --now snapd.socket
-    sudo ln -s /var/lib/snapd/snap /snap
-fi
-
 if [ ${#snapsToInstall[@]} -gt 0 ]; then
+    if [ "$pm" == "dnf" ] || [ "$pm" == "pacman" ]; then
+        sudo systemctl enable --now snapd.socket
+        sudo ln -s /var/lib/snapd/snap /snap
+    fi
+
     for i in "${snapsToInstall[@]}"; do
         snapManager install $i
     done
