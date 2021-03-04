@@ -1296,9 +1296,9 @@ LANG=en_US.UTF-8 snap list --all | awk '/disabled/{print $1, $3}' |
 
 ################################################################################
 
-if [ "$de" == "gnome" ]; then
-    # sudo -u $SUDO_USER bash $folderLocation/gnome_setup.sh $distro
-fi
+#if [ "$de" == "gnome" ]; then
+#    sudo -u $SUDO_USER bash $folderLocation/gnome_setup.sh $distro
+#fi
 
 ################################################################################
 
