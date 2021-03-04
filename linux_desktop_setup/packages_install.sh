@@ -1221,14 +1221,12 @@ if [ "$distro" == "mint" ] || [ "$distro" == "lmde" ]; then
     packagesToRemove+=(hexchat*)
     packagesToRemove+=(mintbackup)
     packagesToRemove+=(pix*)
-    packagesToRemove+=(warpinator)
     packagesToRemove+=(xed)
 elif [ "$distro" == "ubuntu" ] || [ "$distro" == "debian" ]; then
     packagesToRemove+=(five-or-more)
     packagesToRemove+=(four-in-a-row)
     packagesToRemove+=(gnome-klotski)
     packagesToRemove+=(gnome-mahjongg)
-    packagesToRemove+=(gnome-mines)
     packagesToRemove+=(gnome-music)
     packagesToRemove+=(gnome-nibbles)
     packagesToRemove+=(gnome-robots)
@@ -1247,15 +1245,11 @@ elif [ "$distro" == "ubuntu" ] || [ "$distro" == "debian" ]; then
         packagesToRemove+=(quadrapassel)
         packagesToRemove+=(xterm)
     fi
-elif [ "$distro" == "pop" ]; then
-    packagesToRemove+=(popsicle)
 elif [ "$distro" == "centos" ]; then
     packagesToRemove+=(pidgin)
 fi
 
 if [ "$de" == "gnome" ]; then
-    packagesToRemove+=(gnome-contacts)
-    packagesToRemove+=(gnome-maps)
     packagesToRemove+=(gnome-software-plugin-snap)
 fi
 
@@ -1303,7 +1297,7 @@ LANG=en_US.UTF-8 snap list --all | awk '/disabled/{print $1, $3}' |
 ################################################################################
 
 if [ "$de" == "gnome" ]; then
-    sudo -u $SUDO_USER bash $folderLocation/gnome_setup.sh $distro
+    # sudo -u $SUDO_USER bash $folderLocation/gnome_setup.sh $distro
 fi
 
 ################################################################################
