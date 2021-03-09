@@ -1013,6 +1013,7 @@ function utilityPackages() {
     fi
     packageOptions+=("htop" "Process Reviewer" off)
     packageOptions+=("imagemagick" "Image Magick" on)
+    packageOptions+=("ncdu" "Command Line Disk Usage" off)
     packageOptions+=("simple-scan" "Scanner Application" off)
     packageOptions+=("timeshift" "Backup Tool" off)
     packageOptions+=("virtualbox" "Virtual Box VM Manager" off)
