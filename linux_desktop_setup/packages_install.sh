@@ -644,9 +644,6 @@ function developmentPackages() {
 function environmentPackages() {
     packageOptions=()
     if [ "$de" == "gnome" ]; then
-        if [ "$pm" == "apt" ] || [ "$pm" == "pacman" ]; then
-            packageOptions+=("caffeine" "Gnome Extension" off)
-        fi
         if [ "$distro" != "ubuntu" ]; then
             packageOptions+=("dash-to-dock" "Gnome Extension" off)
         fi
@@ -654,7 +651,6 @@ function environmentPackages() {
             packageOptions+=("gnome-software" "Gnome Software" off)
         fi
         packageOptions+=("snap-store" "Snap Store" off)
-        packageOptions+=("system-monitor" "Gnome Extension" off)
     fi
 
     choosePackagesWhiptail
@@ -665,16 +661,6 @@ function environmentPackages() {
     for pkg in $packageSelections; do
         pkg=$(echo $pkg | sed 's/"//g')
         case ${pkg} in
-            "caffeine")
-                if [ "$pm" == "apt" ]; then
-                    packagesToInstall+=(gnome-shell-extension-caffeine)
-                elif [ "$pm" == "pacman" ]; then
-                    checkNotInstalled gnome-shell-extension-caffeine-git
-                    if [ $? -eq 0 ]; then
-                        aurToInstall+=(gnome-shell-extension-caffeine-git)
-                    fi
-                fi
-            ;;
             "dash-to-dock")
                 if [ "$pm" == "apt" ]; then
                     if [ "$distro" == "debian" ]; then
@@ -693,18 +679,6 @@ function environmentPackages() {
             ;;
             "snap-store")
                 snapsToInstall+=(snap-store)
-            ;;
-            "system-monitor")
-                if [ "$pm" == "apt" ]; then
-                    packagesToInstall+=(gnome-shell-extension-system-monitor)
-                elif [ "$pm" == "dnf" ]; then
-                    packagesToInstall+=(gnome-shell-extension-system-monitor-applet)
-                elif [ "$pm" == "pacman" ]; then
-                    checkNotInstalled gnome-shell-extension-system-monitor-git
-                    if [ $? -eq 0 ]; then
-                        aurToInstall+=(gnome-shell-extension-system-monitor-git)
-                    fi
-                fi
             ;;
             *)
                 packagesToInstall+=($pkg)

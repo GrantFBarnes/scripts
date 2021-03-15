@@ -11,13 +11,6 @@ elif [ "$distro" == "ubuntu" ]; then
     gsettings set org.gnome.desktop.interface gtk-theme "Yaru-dark"
 fi
 
-# Set Icons
-if [ "$distro" == "arch" ] || [ "$distro" == "centos" ] || [ "$distro" == "debian" ] || [ "$distro" == "fedora" ]; then
-    mkdir ~/.local/share/icons
-    cp -r Yaru-Blue/ ~/.local/share/icons/Yaru-Blue
-    gsettings set org.gnome.desktop.interface icon-theme "Yaru-Blue"
-fi
-
 # Setup Clock
 gsettings set org.gnome.desktop.interface clock-format "12h"
 gsettings set org.gnome.desktop.interface clock-show-date true
@@ -74,11 +67,6 @@ fi
 gsettings set org.gnome.shell.extensions.desktop-icons show-home false
 gsettings set org.gnome.shell.extensions.desktop-icons show-trash false
 
-gnome-extensions info caffeine@patapon.info
-if [ $? -eq 0 ]; then
-    gnome-extensions enable caffeine@patapon.info
-fi
-
 dashToDock=false
 
 gnome-extensions info dash-to-dock@micxgx.gmail.com
@@ -115,89 +103,6 @@ if [ $dashToDock == true ]; then
     gsettings set org.gnome.shell.extensions.dash-to-dock show-mounts true
     gsettings set org.gnome.shell.extensions.dash-to-dock show-trash false
     gsettings set org.gnome.shell.extensions.dash-to-dock transparency-mode "FIXED"
-fi
-
-gnome-extensions info system-monitor@paradoxxx.zero.gmail.com
-if [ $? -eq 0 ]; then
-    gnome-extensions enable system-monitor@paradoxxx.zero.gmail.com
-
-    gsettings --schemadir /usr/share/gnome-shell/extensions/system-monitor@paradoxxx.zero.gmail.com/schemas set org.gnome.shell.extensions.system-monitor center-display false
-    gsettings --schemadir /usr/share/gnome-shell/extensions/system-monitor@paradoxxx.zero.gmail.com/schemas set org.gnome.shell.extensions.system-monitor compact-display true
-    gsettings --schemadir /usr/share/gnome-shell/extensions/system-monitor@paradoxxx.zero.gmail.com/schemas set org.gnome.shell.extensions.system-monitor icon-display false
-
-    gsettings --schemadir /usr/share/gnome-shell/extensions/system-monitor@paradoxxx.zero.gmail.com/schemas set org.gnome.shell.extensions.system-monitor cpu-display true
-    gsettings --schemadir /usr/share/gnome-shell/extensions/system-monitor@paradoxxx.zero.gmail.com/schemas set org.gnome.shell.extensions.system-monitor cpu-show-menu true
-    gsettings --schemadir /usr/share/gnome-shell/extensions/system-monitor@paradoxxx.zero.gmail.com/schemas set org.gnome.shell.extensions.system-monitor cpu-show-text false
-    gsettings --schemadir /usr/share/gnome-shell/extensions/system-monitor@paradoxxx.zero.gmail.com/schemas set org.gnome.shell.extensions.system-monitor cpu-style "graph"
-    if [ $screenSize == "small" ]; then
-        gsettings --schemadir /usr/share/gnome-shell/extensions/system-monitor@paradoxxx.zero.gmail.com/schemas set org.gnome.shell.extensions.system-monitor cpu-graph-width 33
-    elif [ $screenSize == "medium" ]; then
-        gsettings --schemadir /usr/share/gnome-shell/extensions/system-monitor@paradoxxx.zero.gmail.com/schemas set org.gnome.shell.extensions.system-monitor cpu-graph-width 66
-    else
-        gsettings --schemadir /usr/share/gnome-shell/extensions/system-monitor@paradoxxx.zero.gmail.com/schemas set org.gnome.shell.extensions.system-monitor cpu-graph-width 100
-    fi
-
-    gsettings --schemadir /usr/share/gnome-shell/extensions/system-monitor@paradoxxx.zero.gmail.com/schemas set org.gnome.shell.extensions.system-monitor disk-display true
-    gsettings --schemadir /usr/share/gnome-shell/extensions/system-monitor@paradoxxx.zero.gmail.com/schemas set org.gnome.shell.extensions.system-monitor disk-show-menu true
-    gsettings --schemadir /usr/share/gnome-shell/extensions/system-monitor@paradoxxx.zero.gmail.com/schemas set org.gnome.shell.extensions.system-monitor disk-show-text false
-    gsettings --schemadir /usr/share/gnome-shell/extensions/system-monitor@paradoxxx.zero.gmail.com/schemas set org.gnome.shell.extensions.system-monitor disk-style "graph"
-    if [ $screenSize == "small" ]; then
-        gsettings --schemadir /usr/share/gnome-shell/extensions/system-monitor@paradoxxx.zero.gmail.com/schemas set org.gnome.shell.extensions.system-monitor disk-graph-width 33
-    elif [ $screenSize == "medium" ]; then
-        gsettings --schemadir /usr/share/gnome-shell/extensions/system-monitor@paradoxxx.zero.gmail.com/schemas set org.gnome.shell.extensions.system-monitor disk-graph-width 66
-    else
-        gsettings --schemadir /usr/share/gnome-shell/extensions/system-monitor@paradoxxx.zero.gmail.com/schemas set org.gnome.shell.extensions.system-monitor disk-graph-width 100
-    fi
-
-    gsettings --schemadir /usr/share/gnome-shell/extensions/system-monitor@paradoxxx.zero.gmail.com/schemas set org.gnome.shell.extensions.system-monitor memory-display true
-    gsettings --schemadir /usr/share/gnome-shell/extensions/system-monitor@paradoxxx.zero.gmail.com/schemas set org.gnome.shell.extensions.system-monitor memory-show-menu true
-    gsettings --schemadir /usr/share/gnome-shell/extensions/system-monitor@paradoxxx.zero.gmail.com/schemas set org.gnome.shell.extensions.system-monitor memory-show-text false
-    gsettings --schemadir /usr/share/gnome-shell/extensions/system-monitor@paradoxxx.zero.gmail.com/schemas set org.gnome.shell.extensions.system-monitor memory-buffer-color "#00000000"
-    gsettings --schemadir /usr/share/gnome-shell/extensions/system-monitor@paradoxxx.zero.gmail.com/schemas set org.gnome.shell.extensions.system-monitor memory-cache-color "#00000000"
-    gsettings --schemadir /usr/share/gnome-shell/extensions/system-monitor@paradoxxx.zero.gmail.com/schemas set org.gnome.shell.extensions.system-monitor memory-style "graph"
-    if [ $screenSize == "small" ]; then
-        gsettings --schemadir /usr/share/gnome-shell/extensions/system-monitor@paradoxxx.zero.gmail.com/schemas set org.gnome.shell.extensions.system-monitor memory-graph-width 33
-    elif [ $screenSize == "medium" ]; then
-        gsettings --schemadir /usr/share/gnome-shell/extensions/system-monitor@paradoxxx.zero.gmail.com/schemas set org.gnome.shell.extensions.system-monitor memory-graph-width 66
-    else
-        gsettings --schemadir /usr/share/gnome-shell/extensions/system-monitor@paradoxxx.zero.gmail.com/schemas set org.gnome.shell.extensions.system-monitor memory-graph-width 100
-    fi
-
-    gsettings --schemadir /usr/share/gnome-shell/extensions/system-monitor@paradoxxx.zero.gmail.com/schemas set org.gnome.shell.extensions.system-monitor net-display true
-    gsettings --schemadir /usr/share/gnome-shell/extensions/system-monitor@paradoxxx.zero.gmail.com/schemas set org.gnome.shell.extensions.system-monitor net-show-menu true
-    gsettings --schemadir /usr/share/gnome-shell/extensions/system-monitor@paradoxxx.zero.gmail.com/schemas set org.gnome.shell.extensions.system-monitor net-show-text false
-    gsettings --schemadir /usr/share/gnome-shell/extensions/system-monitor@paradoxxx.zero.gmail.com/schemas set org.gnome.shell.extensions.system-monitor net-style "graph"
-    if [ $screenSize == "small" ]; then
-        gsettings --schemadir /usr/share/gnome-shell/extensions/system-monitor@paradoxxx.zero.gmail.com/schemas set org.gnome.shell.extensions.system-monitor net-graph-width 33
-    elif [ $screenSize == "medium" ]; then
-        gsettings --schemadir /usr/share/gnome-shell/extensions/system-monitor@paradoxxx.zero.gmail.com/schemas set org.gnome.shell.extensions.system-monitor net-graph-width 66
-    else
-        gsettings --schemadir /usr/share/gnome-shell/extensions/system-monitor@paradoxxx.zero.gmail.com/schemas set org.gnome.shell.extensions.system-monitor net-graph-width 100
-    fi
-
-    gsettings --schemadir /usr/share/gnome-shell/extensions/system-monitor@paradoxxx.zero.gmail.com/schemas set org.gnome.shell.extensions.system-monitor battery-display false
-    gsettings --schemadir /usr/share/gnome-shell/extensions/system-monitor@paradoxxx.zero.gmail.com/schemas set org.gnome.shell.extensions.system-monitor battery-show-menu false
-    gsettings --schemadir /usr/share/gnome-shell/extensions/system-monitor@paradoxxx.zero.gmail.com/schemas set org.gnome.shell.extensions.system-monitor battery-show-text false
-
-    gsettings --schemadir /usr/share/gnome-shell/extensions/system-monitor@paradoxxx.zero.gmail.com/schemas set org.gnome.shell.extensions.system-monitor fan-display false
-    gsettings --schemadir /usr/share/gnome-shell/extensions/system-monitor@paradoxxx.zero.gmail.com/schemas set org.gnome.shell.extensions.system-monitor fan-show-menu false
-    gsettings --schemadir /usr/share/gnome-shell/extensions/system-monitor@paradoxxx.zero.gmail.com/schemas set org.gnome.shell.extensions.system-monitor fan-show-text false
-
-    gsettings --schemadir /usr/share/gnome-shell/extensions/system-monitor@paradoxxx.zero.gmail.com/schemas set org.gnome.shell.extensions.system-monitor freq-display false
-    gsettings --schemadir /usr/share/gnome-shell/extensions/system-monitor@paradoxxx.zero.gmail.com/schemas set org.gnome.shell.extensions.system-monitor freq-show-menu false
-    gsettings --schemadir /usr/share/gnome-shell/extensions/system-monitor@paradoxxx.zero.gmail.com/schemas set org.gnome.shell.extensions.system-monitor freq-show-text false
-
-    gsettings --schemadir /usr/share/gnome-shell/extensions/system-monitor@paradoxxx.zero.gmail.com/schemas set org.gnome.shell.extensions.system-monitor gpu-display false
-    gsettings --schemadir /usr/share/gnome-shell/extensions/system-monitor@paradoxxx.zero.gmail.com/schemas set org.gnome.shell.extensions.system-monitor gpu-show-menu false
-    gsettings --schemadir /usr/share/gnome-shell/extensions/system-monitor@paradoxxx.zero.gmail.com/schemas set org.gnome.shell.extensions.system-monitor gpu-show-text false
-
-    gsettings --schemadir /usr/share/gnome-shell/extensions/system-monitor@paradoxxx.zero.gmail.com/schemas set org.gnome.shell.extensions.system-monitor swap-display false
-    gsettings --schemadir /usr/share/gnome-shell/extensions/system-monitor@paradoxxx.zero.gmail.com/schemas set org.gnome.shell.extensions.system-monitor swap-show-menu false
-    gsettings --schemadir /usr/share/gnome-shell/extensions/system-monitor@paradoxxx.zero.gmail.com/schemas set org.gnome.shell.extensions.system-monitor swap-show-text false
-
-    gsettings --schemadir /usr/share/gnome-shell/extensions/system-monitor@paradoxxx.zero.gmail.com/schemas set org.gnome.shell.extensions.system-monitor thermal-display false
-    gsettings --schemadir /usr/share/gnome-shell/extensions/system-monitor@paradoxxx.zero.gmail.com/schemas set org.gnome.shell.extensions.system-monitor thermal-show-menu false
-    gsettings --schemadir /usr/share/gnome-shell/extensions/system-monitor@paradoxxx.zero.gmail.com/schemas set org.gnome.shell.extensions.system-monitor thermal-show-text false
 fi
 
 exit 0
