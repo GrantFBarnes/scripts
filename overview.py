@@ -123,11 +123,34 @@ def get_cpu():
     return "(Unknown)"
 
 
+def get_cpu_speed():
+    speeds = []
+    speed = 0
+    maxSpeed = 0
+
+    file = open("/proc/cpuinfo", "r")
+    for line in file:
+        if line.startswith("cpu MHz"):
+            speeds.append(float(line.split(": ")[1].strip()))
+    speed = (sum(speeds) / len(speeds)) / 1000
+
+    sDir = "/sys/devices/system/cpu/cpu0/cpufreq/"
+    for fileName in [sDir + "bios_limit", sDir + "cpuinfo_max_freq", sDir + "scaling_max_freq"]:
+        if os.path.isfile(fileName):
+            file = open(fileName, "r")
+            for line in file:
+                if line[0].isdigit():
+                    maxSpeed = int(line) / 1000 / 1000
+
+    return "{:.3f}".format(speed) + " GHz / " + "{:.3f}".format(maxSpeed) + " GHz"
+
+
 print(run_command("echo $USER") + "@" + run_command("echo $HOSTNAME"))
 print("-------------------------------")
-print("  Distro: " + get_distro())
-print("  Kernel: " + run_command("uname -srm"))
-print("  Uptime: " + get_uptime())
-print("Packages: " + get_packages())
-print("     CPU: " + get_cpu())
-print("  Memory: " + get_memory())
+print("   Distro: " + get_distro())
+print("   Kernel: " + run_command("uname -srm"))
+print("   Uptime: " + get_uptime())
+print(" Packages: " + get_packages())
+print("      CPU: " + get_cpu())
+print("CPU Speed: " + get_cpu_speed())
+print("   Memory: " + get_memory())
