@@ -147,15 +147,18 @@ def get_packages():
     packages = packages[:-2]
     return packages
 
+blue = '\033[94m'
+stop = '\033[0m'
+bold = '\033[1m'
 
-print("-------------------------------")
-print("    User: " + run_command("echo $USER"))
-print("Hostname: " + run_command("echo $HOSTNAME"))
-print("  Distro: " + get_distro())
-print("  Kernel: " + run_command("uname -srm"))
-print("     CPU: " + get_cpu())
-print("   Speed: " + get_cpu_speed())
-print("  Memory: " + get_memory())
-print("  Uptime: " + get_uptime())
-print("Packages: " + get_packages())
-print("-------------------------------")
+print(f"{blue}-------------------------------{stop}")
+print(f"{bold}{blue}    User{stop}: " + run_command("echo $USER"))
+print(f"{bold}{blue}Hostname{stop}: " + run_command("echo $HOSTNAME"))
+print(f"{bold}{blue}  Distro{stop}: " + get_distro())
+print(f"{bold}{blue}  Kernel{stop}: " + run_command("uname -rm"))
+print(f"{bold}{blue}     CPU{stop}: " + get_cpu())
+print(f"{bold}{blue}   Speed{stop}: " + get_cpu_speed())
+print(f"{bold}{blue}  Memory{stop}: " + get_memory())
+print(f"{bold}{blue}  Uptime{stop}: " + get_uptime())
+print(f"{bold}{blue}Packages{stop}: " + get_packages())
+print(f"{blue}-------------------------------{stop}")
