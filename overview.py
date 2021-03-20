@@ -147,18 +147,19 @@ def get_packages():
     packages = packages[:-2]
     return packages
 
-blue = '\033[94m'
-stop = '\033[0m'
-bold = '\033[1m'
 
-print(f"{blue}-------------------------------{stop}")
-print(f"{bold}{blue}    User{stop}: " + run_command("echo $USER"))
-print(f"{bold}{blue}Hostname{stop}: " + run_command("echo $HOSTNAME"))
-print(f"{bold}{blue}  Distro{stop}: " + get_distro())
-print(f"{bold}{blue}  Kernel{stop}: " + run_command("uname -rm"))
-print(f"{bold}{blue}     CPU{stop}: " + get_cpu())
-print(f"{bold}{blue}   Speed{stop}: " + get_cpu_speed())
-print(f"{bold}{blue}  Memory{stop}: " + get_memory())
-print(f"{bold}{blue}  Uptime{stop}: " + get_uptime())
-print(f"{bold}{blue}Packages{stop}: " + get_packages())
-print(f"{blue}-------------------------------{stop}")
+bold = "\033[1m"
+cyan = "\033[36m"
+reset = "\033[0m"
+
+print(f"{cyan}-------------------------------{reset}")
+print(f"{bold}{cyan}    User{reset}: " + run_command("echo $USER"))
+print(f"{bold}{cyan}Hostname{reset}: " + run_command("echo $HOSTNAME"))
+print(f"{bold}{cyan}  Distro{reset}: " + get_distro())
+print(f"{bold}{cyan}  Kernel{reset}: " + run_command("uname -rm"))
+print(f"{bold}{cyan}     CPU{reset}: " + get_cpu())
+print(f"{bold}{cyan}   Speed{reset}: " + get_cpu_speed())
+print(f"{bold}{cyan}  Memory{reset}: " + get_memory())
+print(f"{bold}{cyan}  Uptime{reset}: " + get_uptime())
+print(f"{bold}{cyan}Packages{reset}: " + get_packages())
+print(f"{cyan}-------------------------------{reset}")
