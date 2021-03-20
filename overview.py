@@ -20,6 +20,53 @@ def get_distro():
     return "(Unknown)"
 
 
+def get_cpu():
+    file = open("/proc/cpuinfo", "r")
+    for line in file:
+        if line.startswith("model name"):
+            return line.split(": ")[1].strip()
+    return "(Unknown)"
+
+
+def get_cpu_speed():
+    speeds = []
+    speed = 0
+    maxSpeed = 0
+
+    file = open("/proc/cpuinfo", "r")
+    for line in file:
+        if line.startswith("cpu MHz"):
+            speeds.append(float(line.split(": ")[1].strip()))
+    speed = (sum(speeds) / len(speeds)) / 1000
+
+    sDir = "/sys/devices/system/cpu/cpu0/cpufreq/"
+    for fileName in [sDir + "bios_limit", sDir + "cpuinfo_max_freq", sDir + "scaling_max_freq"]:
+        if os.path.isfile(fileName):
+            file = open(fileName, "r")
+            for line in file:
+                if line[0].isdigit():
+                    maxSpeed = int(line) / 1000 / 1000
+
+    return "{:.3f}".format(speed) + " GHz / " + "{:.3f}".format(maxSpeed) + " GHz"
+
+
+def get_memory():
+    file = open("/proc/meminfo", "r")
+    total = 0
+    available = 0
+    for line in file:
+        if line.startswith("MemTotal"):
+            total = int(line.split(" ")[-2]) // 1024
+        if line.startswith("MemAvailable"):
+            available = int(line.split(" ")[-2]) // 1024
+        if total and available:
+            break
+
+    used = total - available
+    percent = (used * 100) // total
+    return str(used) + " MB / " + str(total) + " MB (" + str(percent) + "%)"
+
+
 def get_uptime():
     boot = int(run_command('date -d"$(uptime -s)" +%s'))
     now = int(run_command("date +%s"))
@@ -98,59 +145,14 @@ def get_packages():
     return packages
 
 
-def get_memory():
-    file = open("/proc/meminfo", "r")
-    total = 0
-    available = 0
-    for line in file:
-        if line.startswith("MemTotal"):
-            total = int(line.split(" ")[-2]) // 1024
-        if line.startswith("MemAvailable"):
-            available = int(line.split(" ")[-2]) // 1024
-        if total and available:
-            break
-
-    used = total - available
-    percent = (used * 100) // total
-    return str(used) + " MB / " + str(total) + " MB (" + str(percent) + "%)"
-
-
-def get_cpu():
-    file = open("/proc/cpuinfo", "r")
-    for line in file:
-        if line.startswith("model name"):
-            return line.split(": ")[1].strip()
-    return "(Unknown)"
-
-
-def get_cpu_speed():
-    speeds = []
-    speed = 0
-    maxSpeed = 0
-
-    file = open("/proc/cpuinfo", "r")
-    for line in file:
-        if line.startswith("cpu MHz"):
-            speeds.append(float(line.split(": ")[1].strip()))
-    speed = (sum(speeds) / len(speeds)) / 1000
-
-    sDir = "/sys/devices/system/cpu/cpu0/cpufreq/"
-    for fileName in [sDir + "bios_limit", sDir + "cpuinfo_max_freq", sDir + "scaling_max_freq"]:
-        if os.path.isfile(fileName):
-            file = open(fileName, "r")
-            for line in file:
-                if line[0].isdigit():
-                    maxSpeed = int(line) / 1000 / 1000
-
-    return "{:.3f}".format(speed) + " GHz / " + "{:.3f}".format(maxSpeed) + " GHz"
-
-
-print(run_command("echo $USER") + "@" + run_command("echo $HOSTNAME"))
 print("-------------------------------")
-print("   Distro: " + get_distro())
-print("   Kernel: " + run_command("uname -srm"))
-print("   Uptime: " + get_uptime())
-print(" Packages: " + get_packages())
-print("      CPU: " + get_cpu())
-print("CPU Speed: " + get_cpu_speed())
-print("   Memory: " + get_memory())
+print("    User: " + run_command("echo $USER"))
+print("Hostname: " + run_command("echo $HOSTNAME"))
+print("  Distro: " + get_distro())
+print("  Kernel: " + run_command("uname -srm"))
+print("     CPU: " + get_cpu())
+print("   Speed: " + get_cpu_speed())
+print("  Memory: " + get_memory())
+print("  Uptime: " + get_uptime())
+print("Packages: " + get_packages())
+print("-------------------------------")
