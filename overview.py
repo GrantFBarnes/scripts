@@ -12,10 +12,11 @@ def run_command(command):
 
 def get_distro():
     for fileName in ["/etc/lsb-release", "/usr/lib/os-release", "/etc/os-release"]:
-        file = open(fileName, "r")
-        for line in file:
-            if line.startswith('PRETTY_NAME="') or line.startswith('DISTRIB_DESCRIPTION="'):
-                return line.split('"')[1]
+        if os.path.isfile(fileName):
+            file = open(fileName, "r")
+            for line in file:
+                if line.startswith('PRETTY_NAME="') or line.startswith('DISTRIB_DESCRIPTION="'):
+                    return line.split('"')[1]
     return "(Unknown)"
 
 
