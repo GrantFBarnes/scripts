@@ -47,10 +47,23 @@ def get_cpu_speed():
             for line in file:
                 if line[0].isdigit():
                     maxSpeed = int(line) / 1000 / 1000
+                    break
+        if maxSpeed != 0:
+            break
 
-    if speed != 0 and maxSpeed != 0:
+    result = ""
+    if speed != 0:
+        result += "{:.3f}".format(speed) + " GHz"
+
+    if maxSpeed != 0:
+        if speed != 0:
+            result += " / "
+        result += "{:.3f}".format(maxSpeed) + " GHz"
         percent = int((speed / maxSpeed) * 100)
-    return "{:.3f}".format(speed) + " GHz / " + "{:.3f}".format(maxSpeed) + " GHz (" + str(percent) + "%)"
+        if percent != 0:
+            result += " (" + str(percent) + "%)"
+
+    return result
 
 
 def get_memory():
@@ -66,8 +79,20 @@ def get_memory():
             break
 
     used = total - available
-    percent = (used * 100) // total
-    return str(used) + " MB / " + str(total) + " MB (" + str(percent) + "%)"
+
+    result = ""
+    if used != 0:
+        result += str(used) + " MB"
+
+    if total != 0:
+        if used != 0:
+            result += " / "
+        result += str(total) + " MB"
+        percent = (used * 100) // total
+        if percent != 0:
+            result += " (" + str(percent) + "%)"
+
+    return result
 
 
 def get_uptime():
@@ -148,18 +173,23 @@ def get_packages():
     return packages
 
 
-bold = "\033[1m"
-cyan = "\033[36m"
-reset = "\033[0m"
+def main():
+    bold = "\033[1m"
+    cyan = "\033[36m"
+    reset = "\033[0m"
 
-print(f"{cyan}-------------------------------{reset}")
-print(f"{bold}{cyan}    User{reset}: " + run_command("echo $USER"))
-print(f"{bold}{cyan}Hostname{reset}: " + run_command("echo $HOSTNAME"))
-print(f"{bold}{cyan}  Distro{reset}: " + get_distro())
-print(f"{bold}{cyan}  Kernel{reset}: " + run_command("uname -rm"))
-print(f"{bold}{cyan}     CPU{reset}: " + get_cpu())
-print(f"{bold}{cyan}   Speed{reset}: " + get_cpu_speed())
-print(f"{bold}{cyan}  Memory{reset}: " + get_memory())
-print(f"{bold}{cyan}  Uptime{reset}: " + get_uptime())
-print(f"{bold}{cyan}Packages{reset}: " + get_packages())
-print(f"{cyan}-------------------------------{reset}")
+    print(f"{cyan}-------------------------------{reset}")
+    print(f"{bold}{cyan}    User{reset}: " + run_command("echo $USER"))
+    print(f"{bold}{cyan}Hostname{reset}: " + run_command("echo $HOSTNAME"))
+    print(f"{bold}{cyan}  Distro{reset}: " + get_distro())
+    print(f"{bold}{cyan}  Kernel{reset}: " + run_command("uname -rm"))
+    print(f"{bold}{cyan}     CPU{reset}: " + get_cpu())
+    print(f"{bold}{cyan}   Speed{reset}: " + get_cpu_speed())
+    print(f"{bold}{cyan}  Memory{reset}: " + get_memory())
+    print(f"{bold}{cyan}  Uptime{reset}: " + get_uptime())
+    print(f"{bold}{cyan}Packages{reset}: " + get_packages())
+    print(f"{cyan}-------------------------------{reset}")
+
+
+if __name__ == "__main__":
+    main()
