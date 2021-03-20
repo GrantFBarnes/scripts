@@ -47,7 +47,8 @@ def get_cpu_speed():
                 if line[0].isdigit():
                     maxSpeed = int(line) / 1000 / 1000
 
-    return "{:.3f}".format(speed) + " GHz / " + "{:.3f}".format(maxSpeed) + " GHz"
+    percent = str(int((speed / maxSpeed) * 100))
+    return "{:.3f}".format(speed) + " GHz / " + "{:.3f}".format(maxSpeed) + " GHz (" + percent + "%)"
 
 
 def get_memory():
