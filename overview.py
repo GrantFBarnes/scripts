@@ -32,6 +32,7 @@ def get_cpu_speed():
     speeds = []
     speed = 0
     maxSpeed = 0
+    percent = 0
 
     file = open("/proc/cpuinfo", "r")
     for line in file:
@@ -47,8 +48,9 @@ def get_cpu_speed():
                 if line[0].isdigit():
                     maxSpeed = int(line) / 1000 / 1000
 
-    percent = str(int((speed / maxSpeed) * 100))
-    return "{:.3f}".format(speed) + " GHz / " + "{:.3f}".format(maxSpeed) + " GHz (" + percent + "%)"
+    if speed != 0 and maxSpeed != 0:
+        percent = int((speed / maxSpeed) * 100)
+    return "{:.3f}".format(speed) + " GHz / " + "{:.3f}".format(maxSpeed) + " GHz (" + str(percent) + "%)"
 
 
 def get_memory():
