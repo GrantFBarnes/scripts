@@ -38,7 +38,8 @@ def get_cpu_speed():
     for line in file:
         if line.startswith("cpu MHz"):
             speeds.append(float(line.split(": ")[1].strip()))
-    speed = (sum(speeds) / len(speeds)) / 1000
+    if len(speeds) != 0:
+        speed = (sum(speeds) / len(speeds)) / 1000
 
     sDir = "/sys/devices/system/cpu/cpu0/cpufreq/"
     for fileName in [sDir + "bios_limit", sDir + "cpuinfo_max_freq", sDir + "scaling_max_freq"]:
