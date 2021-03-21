@@ -301,7 +301,6 @@ declare -a snapsToRemove
 declare -a flatpaksToRemove
 
 # Always install the following packages
-packagesToInstall+=(neofetch)
 packagesToInstall+=(vim)
 
 if [ "$pm" == "pacman" ]; then
@@ -987,6 +986,7 @@ function utilityPackages() {
     fi
     packageOptions+=("htop" "Process Reviewer" off)
     packageOptions+=("imagemagick" "Image Magick" on)
+    packageOptions+=("neofetch" "neofetch overview display" off)
     packageOptions+=("ncdu" "Command Line Disk Usage" off)
     packageOptions+=("simple-scan" "Scanner Application" off)
     packageOptions+=("timeshift" "Backup Tool" off)
@@ -1277,6 +1277,8 @@ LANG=en_US.UTF-8 snap list --all | awk '/disabled/{print $1, $3}' |
 
 ################################################################################
 
-neofetch
+echo "---------------------------------------------------------------------"
+echo "Finished"
+echo "---------------------------------------------------------------------"
 
 exit 0
