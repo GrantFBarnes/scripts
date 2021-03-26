@@ -218,9 +218,9 @@ if [ ! -f "$vimrc" ]; then
     sudo -u $SUDO_USER touch $vimrc
 fi
 
-grep -q "set relativenumber" $vimrc
+grep -q "set number relativenumber" $vimrc
 if [ $? -eq 1 ]; then
-    sudo -u $SUDO_USER echo set relativenumber >> $vimrc
+    sudo -u $SUDO_USER echo set number relativenumber >> $vimrc
 fi
 
 confirmWhiptail "   Distrobution: $distro\n    Desktop Env: $de\nPackage Manager: $pm\n\nWould you like to continue?" 11
