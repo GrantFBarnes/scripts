@@ -174,20 +174,24 @@ fi
 update
 
 if [ "$pm" == "dnf" ]; then
+    packageManager install newt
+
     grep -q max_parallel_downloads /etc/dnf/dnf.conf
     if [ $? -eq 1 ]; then
         sudo sh -c 'echo max_parallel_downloads=10 >> /etc/dnf/dnf.conf'
         sudo sh -c 'echo fastestmirror=true >> /etc/dnf/dnf.conf'
+        update
+    fi
 
+    confirmWhiptail "Add EPEL Repositories?"
+    if [ $? -eq 0 ]; then
         if [ "$distro" == "fedora" ]; then
             sudo dnf install https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm -y
         elif [ "$distro" == "centos" ]; then
             sudo dnf install --nogpgcheck https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm -y
             sudo dnf install --nogpgcheck https://download1.rpmfusion.org/free/el/rpmfusion-free-release-8.noarch.rpm https://download1.rpmfusion.org/nonfree/el/rpmfusion-nonfree-release-8.noarch.rpm -y
         fi
-
         update
-        packageManager install newt
     fi
 elif [ "$distro" == "mint" ]; then
     nosnap=/etc/apt/preferences.d/nosnap.pref
@@ -473,6 +477,9 @@ function browserPackages() {
     packageOptions=()
     packageOptions+=("chromium" "Chromium Web Browser" off)
     packageOptions+=("epiphany" "Gnome Web Browser" off)
+    if [ "$distro" == "fedora" ]; then
+        packageOptions+=("icecat" "GNU IceCat Broswer" on)
+    fi
     packageOptions+=("firefox" "Firefox Broswer" on)
     packageOptions+=("torbrowser-launcher" "TOR Browser" off)
 
@@ -692,6 +699,7 @@ function mediaPackages() {
     packageOptions+=("gimp" "GNU Image Manipulation Program" off)
     packageOptions+=("rhythmbox" "Rhythmbox Music" off)
     packageOptions+=("spotify" "Spotify" off)
+    packageOptions+=("totem" "Gnome Video" off)
     packageOptions+=("vlc" "Media Player" off)
 
     choosePackagesWhiptail
@@ -1188,7 +1196,6 @@ fi
 
 packagesToRemove+=(evolution)
 packagesToRemove+=(mpv)
-packagesToRemove+=(totem)
 
 if [ "$distro" == "mint" ] || [ "$distro" == "lmde" ]; then
     packagesToRemove+=(celluloid)
