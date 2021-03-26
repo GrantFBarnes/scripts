@@ -45,13 +45,21 @@ gsettings set org.gnome.desktop.peripherals.keyboard numlock-state true
 # Set Nautilus Default View to List
 gsettings set org.gnome.nautilus.preferences default-folder-viewer "list-view"
 
-# Set Touchpad Tap to Click
+# Set gedit color
+gsettings set org.gnome.gedit.preferences.editor scheme "oblivion"
+
+# Set up Touchpad/Mouse
 gsettings set org.gnome.desktop.peripherals.touchpad tap-to-click true
+gsettings set org.gnome.desktop.peripherals.touchpad natural-scroll false
+gsettings set org.gnome.desktop.peripherals.mouse natural-scroll false
 
 # Set up keybindings
 gsettings set org.gnome.settings-daemon.plugins.media-keys calculator "['<Super>c']"
 gsettings set org.gnome.settings-daemon.plugins.media-keys terminal "['<Primary><Alt>t','<Super>Return']"
 gsettings set org.gnome.settings-daemon.plugins.media-keys www "['<Super>b']"
+
+# Set up Notifications
+gsettings set org.gnome.desktop.notifications.application:/org/gnome/desktop/notifications/application/org-gnome-software/ enable false
 
 # Set Gnome extensions
 
