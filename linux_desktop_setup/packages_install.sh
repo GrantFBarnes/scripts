@@ -183,13 +183,21 @@ if [ "$pm" == "dnf" ]; then
         update
     fi
 
-    confirmWhiptail "Add EPEL Repositories?"
+    confirmWhiptail "Enable EPEL Repositories?"
     if [ $? -eq 0 ]; then
         if [ "$distro" == "fedora" ]; then
-            sudo dnf install https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm -y
+            sudo dnf install https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm -y
         elif [ "$distro" == "centos" ]; then
             sudo dnf install --nogpgcheck https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm -y
-            sudo dnf install --nogpgcheck https://download1.rpmfusion.org/free/el/rpmfusion-free-release-8.noarch.rpm https://download1.rpmfusion.org/nonfree/el/rpmfusion-nonfree-release-8.noarch.rpm -y
+            sudo dnf install --nogpgcheck https://download1.rpmfusion.org/free/el/rpmfusion-free-release-8.noarch.rpm -y
+        fi
+        confirmWhiptail "Enable Non-Free EPEL Repositories?"
+        if [ $? -eq 0 ]; then
+            if [ "$distro" == "fedora" ]; then
+                sudo dnf install https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm -y
+            elif [ "$distro" == "centos" ]; then
+                sudo dnf install --nogpgcheck https://download1.rpmfusion.org/nonfree/el/rpmfusion-nonfree-release-8.noarch.rpm -y
+            fi
         fi
         update
     fi
