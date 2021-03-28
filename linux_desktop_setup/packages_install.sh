@@ -622,6 +622,7 @@ function communicationPackages() {
 function developmentPackages() {
     packageOptions=()
     packageOptions+=("curl" "Curl Command" on)
+    packageOptions+=("id3v2" "Modify MP3 Meta Data" off)
     if [ "$pm" != "pacman" ]; then
         packageOptions+=("git" "Git" on)
     fi
