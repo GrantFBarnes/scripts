@@ -325,6 +325,8 @@ function applicationPackages() {
     packageOptions+=("cheese" "Webcam Application" off)
     packageOptions+=("bitwarden" "Bitwarden Password Manager" off)
     packageOptions+=("deja-dup" "Backup Tool" off)
+    packageOptions+=("calibre" "E Book Reader/Editor" off)
+    packageOptions+=("foliate" "E Book Reader" off)
     packageOptions+=("gnome-books" "Gnome Books" off)
     packageOptions+=("gnome-boxes" "Gnome Boxes VM Manager" off)
     packageOptions+=("gnome-calculator" "Gnome Calculator" on)
@@ -378,6 +380,26 @@ function applicationPackages() {
                 else
                     flatpaksToInstall+=(org.gnome.DejaDup)
                     packagesToRemove+=(deja-dup)
+                fi
+            ;;
+            "foliate")
+                if [ "$distro" == "centos" ]; then
+                    flatpaksToInstall+=(com.github.johnfactotum.Foliate)
+                elif [ "$sourcePreference" == "snap" ]; then
+                    snapsToInstall+=(foliate)
+
+                    flatpaksToRemove+=(com.github.johnfactotum.Foliate)
+                    packagesToRemove+=(foliate)
+                elif [ "$sourcePreference" == "flatpak" ]; then
+                    flatpaksToInstall+=(com.github.johnfactotum.Foliate)
+
+                    snapsToRemove+=(foliate)
+                    packagesToRemove+=(foliate)
+                else
+                    packagesToInstall+=(foliate)
+
+                    flatpaksToRemove+=(com.github.johnfactotum.Foliate)
+                    snapsToRemove+=(foliate)
                 fi
             ;;
             "gnome-books")
