@@ -33,8 +33,7 @@ def get_cpu():
 def get_cpu_speed():
     speeds = []
     speed = 0
-    maxSpeed = 0
-    percent = 0
+    max_speed = 0
 
     file = open("/proc/cpuinfo", "r")
     for line in file:
@@ -43,26 +42,26 @@ def get_cpu_speed():
     if len(speeds) != 0:
         speed = (sum(speeds) / len(speeds)) / 1000
 
-    sDir = "/sys/devices/system/cpu/cpu0/cpufreq/"
-    for fileName in [sDir + "bios_limit", sDir + "cpuinfo_max_freq", sDir + "scaling_max_freq"]:
+    cpu_dir = "/sys/devices/system/cpu/cpu0/cpufreq/"
+    for fileName in [cpu_dir + "bios_limit", cpu_dir + "cpuinfo_max_freq", cpu_dir + "scaling_max_freq"]:
         if os.path.isfile(fileName):
             file = open(fileName, "r")
             for line in file:
                 if line[0].isdigit():
-                    maxSpeed = int(line) / 1000 / 1000
+                    max_speed = int(line) / 1000 / 1000
                     break
-        if maxSpeed != 0:
+        if max_speed != 0:
             break
 
     result = ""
     if speed != 0:
         result += "{:.3f}".format(speed) + " GHz"
 
-    if maxSpeed != 0:
+    if max_speed != 0:
         if speed != 0:
             result += " / "
-        result += "{:.3f}".format(maxSpeed) + " GHz"
-        percent = int((speed / maxSpeed) * 100)
+        result += "{:.3f}".format(max_speed) + " GHz"
+        percent = int((speed / max_speed) * 100)
         if percent != 0:
             result += " (" + str(percent) + "%)"
 
@@ -101,39 +100,39 @@ def get_memory():
 def get_uptime():
     boot = int(run_command('date -d"$(uptime -s)" +%s'))
     now = int(run_command("date +%s"))
-    uptimeSeconds = now - boot
+    uptime_count = now - boot
 
-    secondsCount = int(uptimeSeconds % 60)
-    minutesCount = int(uptimeSeconds / 60 % 60)
-    hoursCount = int(uptimeSeconds / 60 / 60 % 24)
-    daysCount = int(uptimeSeconds / 60 / 60 / 24 % 365)
-    yearsCount = int(uptimeSeconds / 60 / 60 / 24 / 365)
+    seconds_count = int(uptime_count % 60)
+    minutes_count = int(uptime_count / 60 % 60)
+    hours_count = int(uptime_count / 60 / 60 % 24)
+    days_count = int(uptime_count / 60 / 60 / 24 % 365)
+    years_count = int(uptime_count / 60 / 60 / 24 / 365)
 
-    seconds = str(secondsCount) + " seconds"
-    minutes = str(minutesCount) + " minutes"
-    hours = str(hoursCount) + " hours"
-    days = str(daysCount) + " days"
-    years = str(yearsCount) + " years"
+    seconds = str(seconds_count) + " seconds"
+    minutes = str(minutes_count) + " minutes"
+    hours = str(hours_count) + " hours"
+    days = str(days_count) + " days"
+    years = str(years_count) + " years"
 
-    if secondsCount == 1:
+    if seconds_count == 1:
         seconds = seconds[:-1]
-    if minutesCount == 1:
+    if minutes_count == 1:
         minutes = minutes[:-1]
-    if hoursCount == 1:
+    if hours_count == 1:
         hours = hours[:-1]
-    if daysCount == 1:
+    if days_count == 1:
         days = days[:-1]
-    if yearsCount == 1:
+    if years_count == 1:
         years = years[:-1]
 
     uptime = ""
-    if yearsCount != 0:
+    if years_count != 0:
         uptime += years + ", "
-    if daysCount != 0:
+    if days_count != 0:
         uptime += days + ", "
-    if hoursCount != 0:
+    if hours_count != 0:
         uptime += hours + ", "
-    if minutesCount != 0:
+    if minutes_count != 0:
         uptime += minutes + ", "
     uptime += seconds
     return uptime
