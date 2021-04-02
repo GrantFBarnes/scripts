@@ -331,10 +331,14 @@ function applicationPackages() {
     packageOptions+=("gnome-calendar" "Gnome Calendar" on)
     packageOptions+=("gnome-clocks" "Gnome Clocks" on)
     packageOptions+=("gnome-photos" "Gnome Photos" off)
+    if [ "$distro" != "pop" ]; then
+        packageOptions+=("gnome-software" "Gnome Software" off)
+    fi
     packageOptions+=("gnome-weather" "Gnome Weather" on)
     packageOptions+=("gnucash" "Finance Program" off)
     packageOptions+=("gramps" "Genealogical Research and Analysis Management Programming System" off)
     packageOptions+=("meld" "File Comparitor" off)
+    packageOptions+=("snap-store" "Snap Store" off)
     packageOptions+=("transmission-gtk" "Transmission Torrent" off)
 
     choosePackagesWhiptail
@@ -473,6 +477,9 @@ function applicationPackages() {
                     flatpaksToInstall+=(org.gnome.meld)
                     packagesToRemove+=(meld)
                 fi
+            ;;
+            "snap-store")
+                snapsToInstall+=(snap-store)
             ;;
             *)
                 packagesToInstall+=($pkg)
@@ -648,52 +655,6 @@ function developmentPackages() {
                     packagesToInstall+=(libssh)
                     packagesToInstall+=(openssh)
                 fi
-            ;;
-            *)
-                packagesToInstall+=($pkg)
-            ;;
-        esac
-    done
-}
-
-function environmentPackages() {
-    packageOptions=()
-    if [ "$de" == "gnome" ]; then
-        if [ "$distro" != "ubuntu" ]; then
-            packageOptions+=("dash-to-dock" "Gnome Extension" off)
-        fi
-        if [ "$distro" != "pop" ]; then
-            packageOptions+=("gnome-software" "Gnome Software" off)
-        fi
-        packageOptions+=("snap-store" "Snap Store" off)
-    fi
-
-    choosePackagesWhiptail
-    if [ $? -eq 1 ]; then
-        return
-    fi
-
-    for pkg in $packageSelections; do
-        pkg=$(echo $pkg | sed 's/"//g')
-        case ${pkg} in
-            "dash-to-dock")
-                if [ "$pm" == "apt" ]; then
-                    if [ "$distro" == "debian" ]; then
-                        packagesToInstall+=(gnome-shell-extension-dashtodock)
-                    elif [ "$distro" == "pop" ]; then
-                        packagesToInstall+=(gnome-shell-extension-ubuntu-dock)
-                    fi
-                elif [ "$pm" == "dnf" ]; then
-                    packagesToInstall+=(gnome-shell-extension-dash-to-dock)
-                elif [ "$pm" == "pacman" ]; then
-                    checkNotInstalled gnome-shell-extension-dash-to-dock
-                    if [ $? -eq 0 ]; then
-                        aurToInstall+=(gnome-shell-extension-dash-to-dock)
-                    fi
-                fi
-            ;;
-            "snap-store")
-                snapsToInstall+=(snap-store)
             ;;
             *)
                 packagesToInstall+=($pkg)
@@ -918,6 +879,7 @@ function textPackages() {
     packageOptions+=("codium" "Visual Studio Codium" off)
     packageOptions+=("gedit" "GUI Text Editor" on)
     packageOptions+=("libreoffice" "LibreOffice Suite" off)
+    packageOptions+=("pycharm" "PyCharm Python Editor" off)
     packageOptions+=("texstudio" "LaTeX Editor" off)
 
     choosePackagesWhiptail
@@ -979,6 +941,13 @@ function textPackages() {
                 grep -q codium $bashrc
                 if [ $? -eq 1 ]; then
                     sudo -u $SUDO_USER echo alias codium='"flatpak run com.vscodium.codium"' >> $bashrc
+                fi
+            ;;
+            "pycharm")
+                flatpaksToInstall+=(com.jetbrains.PyCharm-Community)
+                grep -q pycharm $bashrc
+                if [ $? -eq 1 ]; then
+                    sudo -u $SUDO_USER echo alias pycharm='"flatpak run com.jetbrains.PyCharm-Community"' >> $bashrc
                 fi
             ;;
             *)
@@ -1103,10 +1072,6 @@ function chooseUsage() {
         "Development")
             developmentPackages
             defaultCategory="Environment"
-        ;;
-        "Environment")
-            environmentPackages
-            defaultCategory="Media"
         ;;
         "Media")
             mediaPackages
