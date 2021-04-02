@@ -944,10 +944,17 @@ function textPackages() {
                 fi
             ;;
             "pycharm")
-                flatpaksToInstall+=(com.jetbrains.PyCharm-Community)
-                grep -q pycharm $bashrc
-                if [ $? -eq 1 ]; then
-                    sudo -u $SUDO_USER echo alias pycharm='"flatpak run com.jetbrains.PyCharm-Community"' >> $bashrc
+                if [ "$preferFlatpakOverSnap" == true ]; then
+                    flatpaksToInstall+=(com.jetbrains.PyCharm-Community)
+                    grep -q pycharm $bashrc
+                    if [ $? -eq 1 ]; then
+                        sudo -u $SUDO_USER echo alias pycharm='"flatpak run com.jetbrains.PyCharm-Community"' >> $bashrc
+                    fi
+
+                    snapsToRemove+=(pycharm-community)
+                else
+                    snapsToInstall+=("pycharm-community --classic")
+                    flatpaksToRemove+=(com.jetbrains.PyCharm-Community)
                 fi
             ;;
             *)
