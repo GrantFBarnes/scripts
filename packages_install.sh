@@ -1054,7 +1054,6 @@ function chooseUsage() {
     categoryOptions+=("Browsers" "Web Browsers")
     categoryOptions+=("Communication" "Communication Applications")
     categoryOptions+=("Development" "Development Packages")
-    categoryOptions+=("Environment" "Environment Packages")
     categoryOptions+=("Media" "Multi Media Applications")
     categoryOptions+=("Gaming" "Gaming Applications")
     categoryOptions+=("Text" "Text Applications")
@@ -1085,7 +1084,7 @@ function chooseUsage() {
         ;;
         "Development")
             developmentPackages
-            defaultCategory="Environment"
+            defaultCategory="Media"
         ;;
         "Media")
             mediaPackages

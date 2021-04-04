@@ -4,6 +4,17 @@ import os
 import subprocess
 
 
+def set_alias():
+    bashrc = os.path.expanduser("~") + "/.bashrc"
+    with open(bashrc) as file:
+        if "alias ov=" in file.read():
+            return
+
+    file = open(bashrc, "a")
+    file.write('alias ov="python3 ' + os.path.abspath(__file__) + '"\n')
+    file.close()
+
+
 def has_command(command):
     return os.system("command -v " + command + " >/dev/null 2>&1") == 0
 
@@ -176,6 +187,8 @@ def get_packages():
 
 
 def main():
+    set_alias()
+
     bold = "\033[1m"
     cyan = "\033[36m"
     reset = "\033[0m"
