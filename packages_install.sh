@@ -123,7 +123,6 @@ folderLocation=$(pwd)
 osName=$(head -n 1 /etc/os-release)
 distro=""
 pm=""
-de=""
 
 if [[ $osName == *"Arch"* ]]; then
     distro="arch"
@@ -157,14 +156,6 @@ else
     echo "Distrobution not recognized"
     echo "---------------------------------------------------------------------"
     exit 1
-fi
-
-if [[ $XDG_CURRENT_DESKTOP == *"GNOME"* ]]; then
-    de="gnome"
-elif [[ $XDG_CURRENT_DESKTOP == *"Cinnamon"* ]]; then
-    de="cinnamon"
-elif command -v gnome-shell &> /dev/null; then
-    de="gnome"
 fi
 
 ################################################################################
@@ -231,7 +222,7 @@ if [ $? -eq 1 ]; then
     sudo -u $SUDO_USER echo set number relativenumber >> $vimrc
 fi
 
-confirmWhiptail "   Distrobution: $distro\n    Desktop Env: $de\nPackage Manager: $pm\n\nWould you like to continue?" 11
+confirmWhiptail "   Distrobution: $distro\nPackage Manager: $pm\n\nWould you like to continue?" 11
 if [ $? -eq 1 ]; then
     exit 0
 fi
@@ -329,14 +320,14 @@ function applicationPackages() {
     packageOptions+=("foliate" "E Book Reader" off)
     packageOptions+=("gnome-books" "Gnome Books" off)
     packageOptions+=("gnome-boxes" "Gnome Boxes VM Manager" off)
-    packageOptions+=("gnome-calculator" "Gnome Calculator" on)
-    packageOptions+=("gnome-calendar" "Gnome Calendar" on)
-    packageOptions+=("gnome-clocks" "Gnome Clocks" on)
+    packageOptions+=("gnome-calculator" "Gnome Calculator" off)
+    packageOptions+=("gnome-calendar" "Gnome Calendar" off)
+    packageOptions+=("gnome-clocks" "Gnome Clocks" off)
     packageOptions+=("gnome-photos" "Gnome Photos" off)
     if [ "$distro" != "pop" ]; then
         packageOptions+=("gnome-software" "Gnome Software" off)
     fi
-    packageOptions+=("gnome-weather" "Gnome Weather" on)
+    packageOptions+=("gnome-weather" "Gnome Weather" off)
     packageOptions+=("gnucash" "Finance Program" off)
     packageOptions+=("gramps" "Genealogical Research and Analysis Management Programming System" off)
     packageOptions+=("meld" "File Comparitor" off)
@@ -515,9 +506,9 @@ function browserPackages() {
     packageOptions+=("chromium" "Chromium Web Browser" off)
     packageOptions+=("epiphany" "Gnome Web Browser" off)
     if [ "$distro" == "fedora" ]; then
-        packageOptions+=("icecat" "GNU IceCat Broswer" on)
+        packageOptions+=("icecat" "GNU IceCat Broswer" off)
     fi
-    packageOptions+=("firefox" "Firefox Broswer" on)
+    packageOptions+=("firefox" "Firefox Broswer" off)
     packageOptions+=("torbrowser-launcher" "TOR Browser" off)
 
     choosePackagesWhiptail
@@ -609,9 +600,7 @@ function browserPackages() {
 function communicationPackages() {
     packageOptions=()
     packageOptions+=("discord" "Discord" off)
-    if [ "$de" == "gnome" ]; then
-        packageOptions+=("geary" "Gnome Email Client" off)
-    fi
+    packageOptions+=("geary" "Gnome Email Client" off)
     packageOptions+=("skype" "Skype" off)
     packageOptions+=("thunderbird" "Thunderbird Email Client" off)
 
@@ -899,7 +888,7 @@ function textPackages() {
     packageOptions=()
     packageOptions+=("code" "Visual Studio Code" off)
     packageOptions+=("codium" "Visual Studio Codium" off)
-    packageOptions+=("gedit" "GUI Text Editor" on)
+    packageOptions+=("gedit" "GUI Text Editor" off)
     packageOptions+=("libreoffice" "LibreOffice Suite" off)
     packageOptions+=("pycharm" "PyCharm Python Editor" off)
     packageOptions+=("texstudio" "LaTeX Editor" off)
@@ -988,19 +977,15 @@ function textPackages() {
 
 function utilityPackages() {
     packageOptions=()
-    packageOptions+=("baobab" "Disk Usage" on)
-    if [ "$de" == "gnome" ]; then
-        packageOptions+=("dconf-editor" "dconf Editor" off)
-    fi
+    packageOptions+=("baobab" "Disk Usage" off)
+    packageOptions+=("dconf-editor" "dconf Editor" off)
     packageOptions+=("exfat" "ExFat Format Support" off)
-    packageOptions+=("ffmpeg" "ffmpeg to watch videos" on)
+    packageOptions+=("ffmpeg" "ffmpeg to watch videos" off)
     packageOptions+=("glances" "Monitoring Tool" off)
-    if [ "$de" == "gnome" ]; then
-        packageOptions+=("gnome-system-monitor" "System Monitor" on)
-        packageOptions+=("gnome-tweaks" "Gnome Tweaks" on)
-    fi
+    packageOptions+=("gnome-system-monitor" "System Monitor" off)
+    packageOptions+=("gnome-tweaks" "Gnome Tweaks" off)
     packageOptions+=("htop" "Process Reviewer" off)
-    packageOptions+=("imagemagick" "Image Magick" on)
+    packageOptions+=("imagemagick" "Image Magick" off)
     packageOptions+=("neofetch" "neofetch overview display" off)
     packageOptions+=("ncdu" "Command Line Disk Usage" off)
     packageOptions+=("simple-scan" "Scanner Application" off)
@@ -1234,10 +1219,6 @@ elif [ "$distro" == "centos" ]; then
     packagesToRemove+=(pidgin)
 fi
 
-if [ "$de" == "gnome" ]; then
-    packagesToRemove+=(gnome-software-plugin-snap)
-fi
-
 ################################################################################
 
 # Remove Packages
@@ -1278,12 +1259,6 @@ LANG=en_US.UTF-8 snap list --all | awk '/disabled/{print $1, $3}' |
     while read snapname revision; do
         sudo snap remove "$snapname" --revision="$revision"
     done
-
-################################################################################
-
-#if [ "$de" == "gnome" ]; then
-#    sudo -u $SUDO_USER bash $folderLocation/gnome_setup.sh $distro
-#fi
 
 ################################################################################
 

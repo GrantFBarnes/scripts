@@ -13,9 +13,9 @@ def run_command(command):
 
 
 def get_distro():
-    for fileName in ["/etc/lsb-release", "/usr/lib/os-release", "/etc/os-release"]:
-        if os.path.isfile(fileName):
-            file = open(fileName, "r")
+    for file_name in ["/etc/lsb-release", "/usr/lib/os-release", "/etc/os-release"]:
+        if os.path.isfile(file_name):
+            file = open(file_name, "r")
             for line in file:
                 if line.startswith('PRETTY_NAME="') or line.startswith('DISTRIB_DESCRIPTION="'):
                     return line.split('"')[1]
@@ -43,9 +43,9 @@ def get_cpu_speed():
         speed = (sum(speeds) / len(speeds)) / 1000
 
     cpu_dir = "/sys/devices/system/cpu/cpu0/cpufreq/"
-    for fileName in [cpu_dir + "bios_limit", cpu_dir + "cpuinfo_max_freq", cpu_dir + "scaling_max_freq"]:
-        if os.path.isfile(fileName):
-            file = open(fileName, "r")
+    for file_name in [cpu_dir + "bios_limit", cpu_dir + "cpuinfo_max_freq", cpu_dir + "scaling_max_freq"]:
+        if os.path.isfile(file_name):
+            file = open(file_name, "r")
             for line in file:
                 if line[0].isdigit():
                     max_speed = int(line) / 1000 / 1000
