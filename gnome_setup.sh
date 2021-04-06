@@ -1,6 +1,7 @@
 #!/bin/bash
 # Purpose: Setup environment of GNU/Linux Desktop
 ################################################################################
+cd $(dirname "$0")
 . helper_functions.sh
 
 distro=$(getDistrobution)

@@ -1,6 +1,8 @@
 #!/bin/bash
 # Purpose: Install/Remove basic packages for GNU/Linux Desktop
 ################################################################################
+cd $(dirname "$0")
+folderLocation=$(pwd)
 . helper_functions.sh
 
 function confirmWhiptail() {
@@ -119,8 +121,6 @@ clear
 
 # Determine distrobution
 
-cd $(dirname "$0")
-folderLocation=$(pwd)
 distro=$(getDistrobution)
 pm=$(getPackageManager)
 
