@@ -1,7 +1,6 @@
 #!/bin/bash
 # Purpose: Install/Remove basic packages for GNU/Linux Desktop
 ################################################################################
-
 . helper_functions.sh
 
 function confirmWhiptail() {

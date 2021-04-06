@@ -1,8 +1,9 @@
 #!/bin/bash
 # Purpose: Setup environment of GNU/Linux Desktop
 ################################################################################
+. helper_functions.sh
 
-distro=$1
+distro=$(getDistrobution)
 
 # Set Themes
 if [ "$distro" == "arch" ] || [ "$distro" == "centos" ] || [ "$distro" == "debian" ] || [ "$distro" == "fedora" ]; then
@@ -55,14 +56,15 @@ gsettings set org.gnome.desktop.peripherals.mouse natural-scroll false
 
 # Set up keybindings
 gsettings set org.gnome.settings-daemon.plugins.media-keys calculator "['<Super>c']"
-gsettings set org.gnome.settings-daemon.plugins.media-keys terminal "['<Primary><Alt>t','<Super>Return']"
 gsettings set org.gnome.settings-daemon.plugins.media-keys www "['<Super>b']"
 
 # Set up Notifications
 gsettings set org.gnome.desktop.notifications.application:/org/gnome/desktop/notifications/application/org-gnome-software/ enable false
 
 # Set Gnome extensions
-gsettings set org.gnome.shell.extensions.desktop-icons show-home false
-gsettings set org.gnome.shell.extensions.desktop-icons show-trash false
+if [ "$distro" == "ubuntu" ]; then
+    gsettings set org.gnome.shell.extensions.desktop-icons show-home false
+    gsettings set org.gnome.shell.extensions.desktop-icons show-trash false
+fi
 
 exit 0
