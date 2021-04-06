@@ -2,6 +2,8 @@
 # Purpose: Install/Remove basic packages for GNU/Linux Desktop
 ################################################################################
 
+. helper_functions.sh
+
 function confirmWhiptail() {
     local height=7
     if [ -n "$2" ]; then
@@ -120,38 +122,10 @@ clear
 
 cd $(dirname "$0")
 folderLocation=$(pwd)
-osName=$(head -n 1 /etc/os-release)
-distro=""
-pm=""
+distro=$(getDistrobution)
+pm=$(getPackageManager)
 
-if [[ $osName == *"Arch"* ]]; then
-    distro="arch"
-    pm="pacman"
-elif [[ $osName == *"CentOS"* ]]; then
-    distro="centos"
-    pm="dnf"
-elif [[ $osName == *"Debian"* ]]; then
-    distro="debian"
-    pm="apt"
-elif [[ $osName == *"Fedora"* ]]; then
-    distro="fedora"
-    pm="dnf"
-elif [[ $osName == *"LMDE"* ]]; then
-    distro="lmde"
-    pm="apt"
-elif [[ $osName == *"Manjaro"* ]]; then
-    distro="manjaro"
-    pm="pacman"
-elif [[ $osName == *"Mint"* ]]; then
-    distro="mint"
-    pm="apt"
-elif [[ $osName == *"Pop!_OS"* ]]; then
-    distro="pop"
-    pm="apt"
-elif [[ $osName == *"Ubuntu"* ]]; then
-    distro="ubuntu"
-    pm="apt"
-else
+if [ "$distro" == "" ]; then
     echo "---------------------------------------------------------------------"
     echo "Distrobution not recognized"
     echo "---------------------------------------------------------------------"
