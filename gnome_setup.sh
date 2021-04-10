@@ -68,34 +68,139 @@ if [ "$distro" == "ubuntu" ]; then
     gsettings set org.gnome.shell.extensions.desktop-icons show-trash false
 fi
 
-# Set Favorites
-gsettings set org.gnome.shell favorite-apps "['org.gnome.Nautilus.desktop', 'icecat.desktop', 'firefox.desktop', 'mozilla-thunderbird.desktop', 'com.vscodium.codium.desktop', 'org.gnome.gedit.desktop', 'org.gnome.Terminal.desktop']"
-
 # Set App Folders
-gsettings reset-recursively org.gnome.desktop.app-folders
-gsettings set org.gnome.desktop.app-folders folder-children "['Apps', 'Internet', 'Editors', 'Office', 'MultiMedia', 'Games', 'System', 'Settings', 'Utilities']"
+APP_FOLDERS=org.gnome.desktop.app-folders
+APP_FOLDERS_PATH=${APP_FOLDERS}.folder:/org/gnome/desktop/app-folders/folders/
 
-gsettings set org.gnome.desktop.app-folders.folder:/org/gnome/desktop/app-folders/folders/Apps/ name "Apps"
-gsettings set org.gnome.desktop.app-folders.folder:/org/gnome/desktop/app-folders/folders/Internet/ name "Internet"
-gsettings set org.gnome.desktop.app-folders.folder:/org/gnome/desktop/app-folders/folders/Editors/ name "Editors"
-gsettings set org.gnome.desktop.app-folders.folder:/org/gnome/desktop/app-folders/folders/Office/ name "Office"
-gsettings set org.gnome.desktop.app-folders.folder:/org/gnome/desktop/app-folders/folders/MultiMedia/ name "Multi Media"
-gsettings set org.gnome.desktop.app-folders.folder:/org/gnome/desktop/app-folders/folders/Games/ name "Games"
-gsettings set org.gnome.desktop.app-folders.folder:/org/gnome/desktop/app-folders/folders/System/ name "System"
-gsettings set org.gnome.desktop.app-folders.folder:/org/gnome/desktop/app-folders/folders/Settings/ name "Settings"
-gsettings set org.gnome.desktop.app-folders.folder:/org/gnome/desktop/app-folders/folders/Utilities/ name "Utilities"
+gsettings reset-recursively ${APP_FOLDERS}
+gsettings reset-recursively ${APP_FOLDERS_PATH}
 
-gsettings set org.gnome.desktop.app-folders.folder:/org/gnome/desktop/app-folders/folders/Apps/ apps "['org.gnome.Boxes.desktop', 'virtualbox.desktop', 'gnucash.desktop', 'org.gnome.Calendar.desktop', 'org.gnome.clocks.desktop', 'org.gnome.Weather.desktop', 'com.github.johnfactotum.Foliate.desktop', 'org.gnome.Maps.desktop', 'org.gnome.Cheese.desktop', 'gramps.desktop']"
-gsettings set org.gnome.desktop.app-folders.folder:/org/gnome/desktop/app-folders/folders/Internet/ apps "['icecat.desktop', 'firefox.desktop', 'torbrowser.desktop', 'mozilla-thunderbird.desktop', 'transmission-gtk.desktop']"
-gsettings set org.gnome.desktop.app-folders.folder:/org/gnome/desktop/app-folders/folders/Editors/ apps "['org.gnome.gedit.desktop', 'com.vscodium.codium.desktop', 'com.jetbrains.PyCharm-Community.desktop', 'org.texstudio.TeXstudio.desktop']"
-gsettings set org.gnome.desktop.app-folders.folder:/org/gnome/desktop/app-folders/folders/Office/ apps "['libreoffice-writer.desktop', 'libreoffice-calc.desktop', 'libreoffice-impress.desktop']"
-gsettings set org.gnome.desktop.app-folders.folder:/org/gnome/desktop/app-folders/folders/MultiMedia/ apps "['blender.desktop', 'gimp.desktop', 'rhythmbox.desktop', 'org.gnome.Photos.desktop', 'org.gnome.Totem.desktop', 'vlc.desktop', 'org.gnome.eog.desktop']"
-gsettings set org.gnome.desktop.app-folders.folder:/org/gnome/desktop/app-folders/folders/Games/ apps "['sol.desktop', 'org.gnome.Chess.desktop', 'org.gnome.Sudoku.desktop']"
-gsettings set org.gnome.desktop.app-folders.folder:/org/gnome/desktop/app-folders/folders/System/ apps "['org.gnome.Nautilus.desktop', 'org.gnome.Terminal.desktop', 'gnome-system-monitor.desktop', 'org.gnome.baobab.desktop', 'org.gnome.DiskUtility.desktop', 'timeshift-gtk.desktop', 'org.gnome.DejaDup.desktop', 'htop.desktop']"
-gsettings set org.gnome.desktop.app-folders.folder:/org/gnome/desktop/app-folders/folders/Settings/ apps "['gnome-control-center.desktop', 'org.gnome.tweaks.desktop', 'org.gnome.Software.desktop', 'ca.desrt.dconf-editor.desktop']"
-gsettings set org.gnome.desktop.app-folders.folder:/org/gnome/desktop/app-folders/folders/Utilities/ apps "['org.gnome.Calculator.desktop', 'simple-scan.desktop', 'org.gnome.Evince.desktop', 'org.gnome.Screenshot.desktop', 'org.gnome.Logs.desktop', 'org.gnome.FileRoller.desktop', 'org.gnome.font-viewer.desktop', 'org.gnome.Characters.desktop', 'yelp.desktop', 'org.freedesktop.GnomeAbrt.desktop', 'torbrowser-settings.desktop']"
+gsettings set ${APP_FOLDERS} folder-children "[
+    'Apps',
+    'Internet',
+    'Editors',
+    'Office',
+    'MultiMedia',
+    'Games',
+    'System',
+    'Settings',
+    'Utilities'
+]"
+
+gsettings set ${APP_FOLDERS_PATH}Apps/ name "Apps"
+gsettings set ${APP_FOLDERS_PATH}Apps/ apps "[
+    'org.gnome.Boxes.desktop',
+    'virtualbox.desktop',
+    'gnucash.desktop',
+    'org.gnome.Calendar.desktop',
+    'org.gnome.clocks.desktop',
+    'org.gnome.Weather.desktop',
+    'com.github.johnfactotum.Foliate.desktop',
+    'org.gnome.Maps.desktop',
+    'org.gnome.Cheese.desktop',
+    'gramps.desktop'
+]"
+
+gsettings set ${APP_FOLDERS_PATH}Internet/ name "Internet"
+gsettings set ${APP_FOLDERS_PATH}Internet/ apps "[
+    'icecat.desktop',
+    'firefox.desktop',
+    'torbrowser.desktop',
+    'mozilla-thunderbird.desktop',
+    'transmission-gtk.desktop'
+]"
+
+gsettings set ${APP_FOLDERS_PATH}Editors/ name "Editors"
+gsettings set ${APP_FOLDERS_PATH}Editors/ apps "[
+    'org.gnome.gedit.desktop',
+    'com.vscodium.codium.desktop',
+    'com.jetbrains.PyCharm-Community.desktop',
+    'org.texstudio.TeXstudio.desktop'
+]"
+
+gsettings set ${APP_FOLDERS_PATH}Office/ name "Office"
+gsettings set ${APP_FOLDERS_PATH}Office/ apps "[
+    'libreoffice-writer.desktop',
+    'libreoffice-calc.desktop',
+    'libreoffice-impress.desktop'
+]"
+gsettings set ${APP_FOLDERS_PATH}MultiMedia/ name "Multi Media"
+gsettings set ${APP_FOLDERS_PATH}MultiMedia/ apps "[
+    'blender.desktop',
+    'gimp.desktop',
+    'rhythmbox.desktop',
+    'org.gnome.Photos.desktop',
+    'org.gnome.Totem.desktop',
+    'vlc.desktop',
+    'org.gnome.eog.desktop'
+]"
+
+gsettings set ${APP_FOLDERS_PATH}Games/ name "Games"
+gsettings set ${APP_FOLDERS_PATH}Games/ apps "[
+    'sol.desktop',
+    'org.gnome.Chess.desktop',
+    'org.gnome.Sudoku.desktop'
+]"
+
+gsettings set ${APP_FOLDERS_PATH}System/ name "System"
+gsettings set ${APP_FOLDERS_PATH}System/ apps "[
+    'org.gnome.Nautilus.desktop',
+    'org.gnome.Terminal.desktop',
+    'gnome-system-monitor.desktop',
+    'org.gnome.baobab.desktop',
+    'org.gnome.DiskUtility.desktop',
+    'timeshift-gtk.desktop',
+    'org.gnome.DejaDup.desktop',
+    'htop.desktop'
+]"
+
+gsettings set ${APP_FOLDERS_PATH}Settings/ name "Settings"
+gsettings set ${APP_FOLDERS_PATH}Settings/ apps "[
+    'gnome-control-center.desktop',
+    'org.gnome.tweaks.desktop',
+    'org.gnome.Software.desktop',
+    'ca.desrt.dconf-editor.desktop'
+]"
+
+gsettings set ${APP_FOLDERS_PATH}Utilities/ name "Utilities"
+gsettings set ${APP_FOLDERS_PATH}Utilities/ apps "[
+    'org.gnome.Calculator.desktop',
+    'simple-scan.desktop',
+    'org.gnome.Evince.desktop',
+    'org.gnome.Screenshot.desktop',
+    'org.gnome.Logs.desktop',
+    'org.gnome.FileRoller.desktop',
+    'org.gnome.font-viewer.desktop',
+    'org.gnome.Characters.desktop',
+    'yelp.desktop',
+    'org.freedesktop.GnomeAbrt.desktop',
+    'torbrowser-settings.desktop'
+]"
 
 # Set Layout
-gsettings set org.gnome.shell app-picker-layout "[{'Apps': <{'position': <0>}>, 'Internet': <{'position': <1>}>, 'Editors': <{'position': <2>}>, 'Office': <{'position': <3>}>, 'MultiMedia': <{'position': <4>}>, 'Games': <{'position': <5>}>, 'System': <{'position': <6>}>, 'Settings': <{'position': <7>}>, 'Utilities': <{'position': <8>}>}]"
+gsettings set org.gnome.shell app-picker-layout "[
+    {
+        'Apps': <{'position': <0>}>,
+        'Internet': <{'position': <1>}>,
+        'Editors': <{'position': <2>}>,
+        'Office': <{'position': <3>}>,
+        'MultiMedia': <{'position': <4>}>,
+        'Games': <{'position': <5>}>,
+        'System': <{'position': <6>}>,
+        'Settings': <{'position': <7>}>,
+        'Utilities': <{'position': <8>}>
+    }
+]"
+
+# Set Favorites
+gsettings set org.gnome.shell favorite-apps "[
+    'org.gnome.Nautilus.desktop',
+    'icecat.desktop',
+    'firefox.desktop',
+    'mozilla-thunderbird.desktop',
+    'com.vscodium.codium.desktop',
+    'org.gnome.gedit.desktop',
+    'org.gnome.Terminal.desktop'
+]"
 
 exit 0
