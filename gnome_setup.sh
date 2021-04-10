@@ -92,6 +92,7 @@ gsettings set ${APP_FOLDERS_PATH}Apps/ apps "[
     'org.gnome.Boxes.desktop',
     'virtualbox.desktop',
     'gnucash.desktop',
+    'org.gnucash.GnuCash.desktop',
     'org.gnome.Calendar.desktop',
     'org.gnome.clocks.desktop',
     'org.gnome.Weather.desktop',
