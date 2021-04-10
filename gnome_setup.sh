@@ -95,6 +95,7 @@ gsettings set ${APP_FOLDERS_PATH}Apps/ apps "[
     'org.gnome.Calendar.desktop',
     'org.gnome.clocks.desktop',
     'org.gnome.Weather.desktop',
+    'org.gnome.Contacts.desktop',
     'com.github.johnfactotum.Foliate.desktop',
     'org.gnome.Maps.desktop',
     'org.gnome.Cheese.desktop',
@@ -105,6 +106,7 @@ gsettings set ${APP_FOLDERS_PATH}Internet/ name "Internet"
 gsettings set ${APP_FOLDERS_PATH}Internet/ apps "[
     'icecat.desktop',
     'firefox.desktop',
+    'firefox-esr.desktop',
     'torbrowser.desktop',
     'mozilla-thunderbird.desktop',
     'transmission-gtk.desktop'
@@ -115,14 +117,17 @@ gsettings set ${APP_FOLDERS_PATH}Editors/ apps "[
     'org.gnome.gedit.desktop',
     'com.vscodium.codium.desktop',
     'com.jetbrains.PyCharm-Community.desktop',
-    'org.texstudio.TeXstudio.desktop'
+    'org.texstudio.TeXstudio.desktop',
+    'vim.desktop'
 ]"
 
 gsettings set ${APP_FOLDERS_PATH}Office/ name "Office"
 gsettings set ${APP_FOLDERS_PATH}Office/ apps "[
     'libreoffice-writer.desktop',
     'libreoffice-calc.desktop',
-    'libreoffice-impress.desktop'
+    'libreoffice-impress.desktop',
+    'libreoffice-draw.desktop',
+    'libreoffice-startcenter.desktop'
 ]"
 gsettings set ${APP_FOLDERS_PATH}MultiMedia/ name "Multi Media"
 gsettings set ${APP_FOLDERS_PATH}MultiMedia/ apps "[
@@ -132,6 +137,7 @@ gsettings set ${APP_FOLDERS_PATH}MultiMedia/ apps "[
     'org.gnome.Photos.desktop',
     'org.gnome.Totem.desktop',
     'vlc.desktop',
+    'org.gnome.SoundRecorder.desktop',
     'org.gnome.eog.desktop'
 ]"
 
@@ -139,7 +145,13 @@ gsettings set ${APP_FOLDERS_PATH}Games/ name "Games"
 gsettings set ${APP_FOLDERS_PATH}Games/ apps "[
     'sol.desktop',
     'org.gnome.Chess.desktop',
-    'org.gnome.Sudoku.desktop'
+    'org.gnome.TwentyFortyEight.desktop',
+    'org.gnome.Sudoku.desktop',
+    'org.gnome.Mines.desktop',
+    'org.gnome.Reversi.desktop',
+    'org.gnome.SwellFoop.desktop',
+    'org.gnome.Taquin.desktop',
+    'org.gnome.LightsOff.desktop'
 ]"
 
 gsettings set ${APP_FOLDERS_PATH}System/ name "System"
@@ -158,8 +170,11 @@ gsettings set ${APP_FOLDERS_PATH}Settings/ name "Settings"
 gsettings set ${APP_FOLDERS_PATH}Settings/ apps "[
     'gnome-control-center.desktop',
     'org.gnome.tweaks.desktop',
+    'org.gnome.Extensions.desktop',
+    'ca.desrt.dconf-editor.desktop',
+    'org.freedesktop.MalcontentControl.desktop',
     'org.gnome.Software.desktop',
-    'ca.desrt.dconf-editor.desktop'
+    'software-properties-gnome.desktop'
 ]"
 
 gsettings set ${APP_FOLDERS_PATH}Utilities/ name "Utilities"
@@ -167,6 +182,7 @@ gsettings set ${APP_FOLDERS_PATH}Utilities/ apps "[
     'org.gnome.Calculator.desktop',
     'simple-scan.desktop',
     'org.gnome.Evince.desktop',
+    'org.gnome.Documents.desktop',
     'org.gnome.Screenshot.desktop',
     'org.gnome.Logs.desktop',
     'org.gnome.FileRoller.desktop',
@@ -174,6 +190,8 @@ gsettings set ${APP_FOLDERS_PATH}Utilities/ apps "[
     'org.gnome.Characters.desktop',
     'yelp.desktop',
     'org.freedesktop.GnomeAbrt.desktop',
+    'im-config.desktop',
+    'nm-connection-editor.desktop',
     'torbrowser-settings.desktop'
 ]"
 
@@ -197,6 +215,7 @@ gsettings set org.gnome.shell favorite-apps "[
     'org.gnome.Nautilus.desktop',
     'icecat.desktop',
     'firefox.desktop',
+    'firefox-esr.desktop',
     'mozilla-thunderbird.desktop',
     'com.vscodium.codium.desktop',
     'org.gnome.gedit.desktop',
