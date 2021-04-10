@@ -96,6 +96,12 @@ gsettings set ${APP_FOLDERS_PATH}Apps/ apps "[
     'org.gnome.clocks.desktop',
     'org.gnome.Weather.desktop',
     'org.gnome.Contacts.desktop',
+    'org.gnome.Books.desktop',
+    'calibre-gui.desktop',
+    'calibre-ebook-edit.desktop',
+    'calibre-ebook-viewer.desktop',
+    'calibre-lrfviewer.desktop',
+    'foliate_foliate.desktop',
     'com.github.johnfactotum.Foliate.desktop',
     'org.gnome.Maps.desktop',
     'org.gnome.Cheese.desktop',
@@ -109,6 +115,7 @@ gsettings set ${APP_FOLDERS_PATH}Internet/ apps "[
     'firefox.desktop',
     'firefox-esr.desktop',
     'torbrowser.desktop',
+    'org.gnome.Epiphany.desktop',
     'thunderbird.desktop',
     'mozilla-thunderbird.desktop',
     'transmission-gtk.desktop'
@@ -120,25 +127,45 @@ gsettings set ${APP_FOLDERS_PATH}Editors/ apps "[
     'com.vscodium.codium.desktop',
     'com.jetbrains.PyCharm-Community.desktop',
     'org.texstudio.TeXstudio.desktop',
+    'org.gnome.meld.desktop',
     'vim.desktop'
 ]"
 
 gsettings set ${APP_FOLDERS_PATH}Office/ name "Office"
 gsettings set ${APP_FOLDERS_PATH}Office/ apps "[
     'libreoffice-writer.desktop',
+    'libreoffice_writer.desktop',
+    'org.libreoffice.LibreOffice.writer.desktop',
     'libreoffice-calc.desktop',
+    'libreoffice_calc.desktop',
+    'org.libreoffice.LibreOffice.calc.desktop',
     'libreoffice-impress.desktop',
+    'libreoffice_impress.desktop',
+    'org.libreoffice.LibreOffice.impress.desktop',
     'libreoffice-draw.desktop',
+    'libreoffice_draw.desktop',
+    'org.libreoffice.LibreOffice.draw.desktop',
+    'libreoffice_math.desktop',
+    'org.libreoffice.LibreOffice.math.desktop',
+    'libreoffice_base.desktop',
+    'org.libreoffice.LibreOffice.base.desktop',
+    'libreoffice_libreoffice.desktop',
+    'org.libreoffice.LibreOffice.desktop',
     'libreoffice-startcenter.desktop'
 ]"
 gsettings set ${APP_FOLDERS_PATH}MultiMedia/ name "Multi Media"
 gsettings set ${APP_FOLDERS_PATH}MultiMedia/ apps "[
     'blender.desktop',
+    'blender_blender.desktop',
+    'org.blender.Blender.desktop',
     'gimp.desktop',
+    'org.gimp.GIMP.desktop',
     'rhythmbox.desktop',
     'org.gnome.Photos.desktop',
     'org.gnome.Totem.desktop',
     'vlc.desktop',
+    'vlc_vlc.desktop',
+    'org.videolan.VLC.desktop',
     'org.gnome.SoundRecorder.desktop',
     'eog.desktop',
     'org.gnome.eog.desktop'
@@ -147,6 +174,7 @@ gsettings set ${APP_FOLDERS_PATH}MultiMedia/ apps "[
 gsettings set ${APP_FOLDERS_PATH}Games/ name "Games"
 gsettings set ${APP_FOLDERS_PATH}Games/ apps "[
     'sol.desktop',
+    'org.gnome.Aisleriot.desktop',
     'org.gnome.Chess.desktop',
     'org.gnome.TwentyFortyEight.desktop',
     'org.gnome.Sudoku.desktop',
@@ -205,6 +233,7 @@ gsettings set ${APP_FOLDERS_PATH}Utilities/ apps "[
     'im-config.desktop',
     'nm-connection-editor.desktop',
     'gnome-language-selector.desktop',
+    'display-im6.q16.desktop',
     'torbrowser-settings.desktop'
 ]"
 
