@@ -99,6 +99,7 @@ gsettings set ${APP_FOLDERS_PATH}Apps/ apps "[
     'com.github.johnfactotum.Foliate.desktop',
     'org.gnome.Maps.desktop',
     'org.gnome.Cheese.desktop',
+    'usb-creator-gtk.desktop',
     'gramps.desktop'
 ]"
 
@@ -108,6 +109,7 @@ gsettings set ${APP_FOLDERS_PATH}Internet/ apps "[
     'firefox.desktop',
     'firefox-esr.desktop',
     'torbrowser.desktop',
+    'thunderbird.desktop',
     'mozilla-thunderbird.desktop',
     'transmission-gtk.desktop'
 ]"
@@ -138,6 +140,7 @@ gsettings set ${APP_FOLDERS_PATH}MultiMedia/ apps "[
     'org.gnome.Totem.desktop',
     'vlc.desktop',
     'org.gnome.SoundRecorder.desktop',
+    'eog.desktop',
     'org.gnome.eog.desktop'
 ]"
 
@@ -174,24 +177,34 @@ gsettings set ${APP_FOLDERS_PATH}Settings/ apps "[
     'ca.desrt.dconf-editor.desktop',
     'org.freedesktop.MalcontentControl.desktop',
     'org.gnome.Software.desktop',
-    'software-properties-gnome.desktop'
+    'snap-store_ubuntu-software.desktop',
+    'software-properties-gnome.desktop',
+    'software-properties-gtk.desktop',
+    'update-manager.desktop',
+    'software-properties-livepatch.desktop',
+    'gnome-session-properties.desktop',
+    'software-properties-drivers.desktop'
 ]"
 
 gsettings set ${APP_FOLDERS_PATH}Utilities/ name "Utilities"
 gsettings set ${APP_FOLDERS_PATH}Utilities/ apps "[
     'org.gnome.Calculator.desktop',
     'simple-scan.desktop',
+    'evince.desktop',
     'org.gnome.Evince.desktop',
     'org.gnome.Documents.desktop',
     'org.gnome.Screenshot.desktop',
+    'org.gnome.PowerStats.desktop',
     'org.gnome.Logs.desktop',
     'org.gnome.FileRoller.desktop',
+    'setroubleshoot.desktop',
     'org.gnome.font-viewer.desktop',
     'org.gnome.Characters.desktop',
     'yelp.desktop',
     'org.freedesktop.GnomeAbrt.desktop',
     'im-config.desktop',
     'nm-connection-editor.desktop',
+    'gnome-language-selector.desktop',
     'torbrowser-settings.desktop'
 ]"
 
@@ -216,6 +229,7 @@ gsettings set org.gnome.shell favorite-apps "[
     'icecat.desktop',
     'firefox.desktop',
     'firefox-esr.desktop',
+    'thunderbird.desktop',
     'mozilla-thunderbird.desktop',
     'com.vscodium.codium.desktop',
     'org.gnome.gedit.desktop',
