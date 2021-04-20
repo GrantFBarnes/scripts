@@ -93,6 +93,7 @@ gsettings set ${APP_FOLDERS_PATH}Apps/ apps "[
     'virtualbox.desktop',
     'gnucash.desktop',
     'org.gnucash.GnuCash.desktop',
+    'bitwarden_bitwarden.desktop',
     'org.gnome.Calendar.desktop',
     'org.gnome.clocks.desktop',
     'org.gnome.Weather.desktop',
