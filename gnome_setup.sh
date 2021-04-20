@@ -127,6 +127,7 @@ gsettings set ${APP_FOLDERS_PATH}Editors/ apps "[
     'org.gnome.gedit.desktop',
     'com.vscodium.codium.desktop',
     'com.jetbrains.PyCharm-Community.desktop',
+    'pycharm-community_pycharm-community.desktop',
     'org.texstudio.TeXstudio.desktop',
     'org.gnome.meld.desktop',
     'vim.desktop'

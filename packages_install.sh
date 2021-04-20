@@ -347,23 +347,12 @@ function applicationPackages() {
                 fi
             ;;
             "foliate")
-                if [ "$distro" == "centos" ]; then
+                if [ "$preferFlatpakOverSnap" == true ]; then
                     flatpaksToInstall+=(com.github.johnfactotum.Foliate)
-                elif [ "$sourcePreference" == "snap" ]; then
-                    snapsToInstall+=(foliate)
-
-                    flatpaksToRemove+=(com.github.johnfactotum.Foliate)
-                    packagesToRemove+=(foliate)
-                elif [ "$sourcePreference" == "flatpak" ]; then
-                    flatpaksToInstall+=(com.github.johnfactotum.Foliate)
-
                     snapsToRemove+=(foliate)
-                    packagesToRemove+=(foliate)
                 else
-                    packagesToInstall+=(foliate)
-
+                    snapsToInstall+=(foliate)
                     flatpaksToRemove+=(com.github.johnfactotum.Foliate)
-                    snapsToRemove+=(foliate)
                 fi
             ;;
             "gnome-books")
