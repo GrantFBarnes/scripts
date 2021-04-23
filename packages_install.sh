@@ -327,13 +327,7 @@ function applicationPackages() {
                 fi
             ;;
             "bitwarden")
-                if [ "$preferFlatpakOverSnap" == true ]; then
-                    flatpaksToInstall+=(com.bitwarden.desktop)
-                    snapsToRemove+=(bitwarden)
-                else
-                    snapsToInstall+=(bitwarden)
-                    flatpaksToRemove+=(com.bitwarden.desktop)
-                fi
+                snapsToInstall+=(bitwarden)
             ;;
             "deja-dup")
                 if [ "$distro" == "centos" ]; then
@@ -882,6 +876,13 @@ function textPackages() {
                     fi
                 fi
             ;;
+            "codium")
+                flatpaksToInstall+=(com.vscodium.codium)
+                grep -q codium $bashrc
+                if [ $? -eq 1 ]; then
+                    sudo -u $SUDO_USER echo alias codium='"flatpak run com.vscodium.codium"' >> $bashrc
+                fi
+            ;;
             "libreoffice")
                 if [ "$sourcePreference" == "snap" ]; then
                     snapsToInstall+=(libreoffice)
@@ -908,13 +909,6 @@ function textPackages() {
             ;;
             "texstudio")
                 flatpaksToInstall+=(org.texstudio.TeXstudio)
-            ;;
-            "codium")
-                flatpaksToInstall+=(com.vscodium.codium)
-                grep -q codium $bashrc
-                if [ $? -eq 1 ]; then
-                    sudo -u $SUDO_USER echo alias codium='"flatpak run com.vscodium.codium"' >> $bashrc
-                fi
             ;;
             "pycharm")
                 if [ "$preferFlatpakOverSnap" == true ]; then

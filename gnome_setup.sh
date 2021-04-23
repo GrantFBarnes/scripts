@@ -18,6 +18,15 @@ gsettings set org.gnome.desktop.interface clock-format "12h"
 gsettings set org.gnome.desktop.interface clock-show-date true
 gsettings set org.gnome.desktop.interface clock-show-seconds true
 gsettings set org.gnome.desktop.interface clock-show-weekday true
+gsettings set org.gnome.clocks world-clocks "[
+    {'location': <(uint32 2, <('Honolulu', 'PHNL', true, [(0.37223509621909062, -2.7566263578617853)], [(0.37187632633805073, -2.7551476625596174)])>)>},
+    {'location': <(uint32 2, <('Los Angeles', 'KCQT', true, [(0.59370283970450188, -2.0644336110828618)], [(0.59432360095955872, -2.063741622941031)])>)>},
+    {'location': <(uint32 2, <('Denver', 'KBKF', true, [(0.69307024596694822, -1.8283729951886007)], [(0.69357907925707463, -1.8323287315783685)])>)>},
+    {'location': <(uint32 2, <('Rochester', 'KRST', true, [(0.76627226949544125, -1.6142841198081861)], [(0.76832240304800381, -1.6139041965366119)])>)>},
+    {'location': <(uint32 2, <('New York City', 'KNYC', false, [(0.71180344078725644, -1.2909618758762367)], @a(dd) [])>)>},
+    {'location': <(uint32 2, <('Oslo', 'ENGM', true, [(1.0506882097005865, 0.19344065294494067)], [(1.0457431159710333, 0.18762289458939041)])>)>},
+    {'location': <(uint32 2, <('Ho Chi Minh City', 'VVTS', true, [(0.18878645324181748, 1.8616845412783825)], [(0.18762289458939041, 1.8616845412783825)])>)>}
+]"
 
 # Show Battery Percentage
 gsettings set org.gnome.desktop.interface show-battery-percentage true
@@ -61,11 +70,43 @@ gsettings set org.gnome.settings-daemon.plugins.media-keys www "['<Super>b']"
 
 # Set up Notifications
 gsettings set org.gnome.desktop.notifications.application:/org/gnome/desktop/notifications/application/org-gnome-software/ enable false
+gsettings set org.gnome.desktop.notifications.application:/org/gnome/desktop/notifications/application/org-gnome-dejadup/ enable false
 
 # Set Gnome extensions
 if [ "$distro" == "ubuntu" ]; then
     gsettings set org.gnome.shell.extensions.desktop-icons show-home false
     gsettings set org.gnome.shell.extensions.desktop-icons show-trash false
+
+    screenDimensions=$(xdpyinfo | awk '/dimensions/{print $2}')
+    screenWidth=$(cut -d "x" -f 1 <<<$screenDimensions)
+    screenSize="large"
+    if [ $screenWidth \< 1800 ]; then
+        screenSize="medium"
+    elif [ $screenWidth \< 1300 ]; then
+        screenSize="small"
+    fi
+
+    gsettings set org.gnome.shell.extensions.dash-to-dock background-color "#000000"
+    gsettings set org.gnome.shell.extensions.dash-to-dock background-opacity 0.5
+    gsettings set org.gnome.shell.extensions.dash-to-dock custom-background-color true
+    gsettings set org.gnome.shell.extensions.dash-to-dock custom-theme-shrink true
+    gsettings set org.gnome.shell.extensions.dash-to-dock dash-max-icon-size 28
+    if [ $screenSize == "small" ]; then
+        gsettings set org.gnome.shell.extensions.dash-to-dock dock-fixed false
+    else
+        gsettings set org.gnome.shell.extensions.dash-to-dock dock-fixed true
+    fi
+    gsettings set org.gnome.shell.extensions.dash-to-dock extend-height true
+    gsettings set org.gnome.shell.extensions.dash-to-dock hot-keys false
+    gsettings set org.gnome.shell.extensions.dash-to-dock icon-size-fixed true
+    gsettings set org.gnome.shell.extensions.dash-to-dock intellihide-mode "MAXIMIZED_WINDOWS"
+    gsettings set org.gnome.shell.extensions.dash-to-dock running-indicator-dominant-color true
+    gsettings set org.gnome.shell.extensions.dash-to-dock running-indicator-style "DASHES"
+    gsettings set org.gnome.shell.extensions.dash-to-dock preferred-monitor 0
+    gsettings set org.gnome.shell.extensions.dash-to-dock show-favorites true
+    gsettings set org.gnome.shell.extensions.dash-to-dock show-mounts true
+    gsettings set org.gnome.shell.extensions.dash-to-dock show-trash false
+    gsettings set org.gnome.shell.extensions.dash-to-dock transparency-mode "FIXED"
 fi
 
 # Set App Folders
@@ -113,6 +154,7 @@ gsettings set ${APP_FOLDERS_PATH}Apps/ apps "[
 
 gsettings set ${APP_FOLDERS_PATH}Internet/ name "Internet"
 gsettings set ${APP_FOLDERS_PATH}Internet/ apps "[
+    'chromium_chromium.desktop',
     'icecat.desktop',
     'firefox.desktop',
     'firefox-esr.desktop',
@@ -126,6 +168,7 @@ gsettings set ${APP_FOLDERS_PATH}Internet/ apps "[
 gsettings set ${APP_FOLDERS_PATH}Editors/ name "Editors"
 gsettings set ${APP_FOLDERS_PATH}Editors/ apps "[
     'org.gnome.gedit.desktop',
+    'code_code.desktop',
     'com.vscodium.codium.desktop',
     'com.jetbrains.PyCharm-Community.desktop',
     'pycharm-community_pycharm-community.desktop',
@@ -265,9 +308,12 @@ gsettings set org.gnome.shell favorite-apps "[
     'firefox-esr.desktop',
     'thunderbird.desktop',
     'mozilla-thunderbird.desktop',
+    'code_code.desktop',
     'com.vscodium.codium.desktop',
     'org.gnome.gedit.desktop',
-    'org.gnome.Terminal.desktop'
+    'org.gnome.Terminal.desktop',
+    'gnucash.desktop',
+    'bitwarden_bitwarden.desktop'
 ]"
 
 exit 0
