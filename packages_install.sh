@@ -600,10 +600,12 @@ function developmentPackages() {
     if [ "$pm" != "pacman" ]; then
         packageOptions+=("git" "Git" on)
     fi
+    packageOptions+=("mysql-server" "MySQL Server" off)
     packageOptions+=("nano" "nano" on)
     packageOptions+=("net-tools" "Network Packages" off)
     packageOptions+=("nodejs" "NodeJS" off)
     packageOptions+=("npm" "Node Package Manager" off)
+    packageOptions+=("python3-pip" "Python PIP" off)
     packageOptions+=("ssh" "SSH" on)
     packageOptions+=("youtube-dl" "Command Line YT Downloader" off)
 
@@ -901,6 +903,7 @@ function textPackages() {
                     packagesToInstall+=(libreoffice-writer)
                     packagesToInstall+=(libreoffice-calc)
                     packagesToInstall+=(libreoffice-impress)
+                    packagesToInstall+=(libreoffice-base)
                 fi
 
                 flatpaksToRemove+=(org.libreoffice.LibreOffice)
