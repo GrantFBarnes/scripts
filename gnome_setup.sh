@@ -56,8 +56,16 @@ gsettings set org.gnome.desktop.peripherals.keyboard numlock-state true
 # Set Nautilus Default View to List
 gsettings set org.gnome.nautilus.preferences default-folder-viewer "list-view"
 
-# Set gedit color
+# Set up gedit
 gsettings set org.gnome.gedit.preferences.editor scheme "oblivion"
+gsettings set org.gnome.gedit.preferences.editor background-pattern "grid"
+gsettings set org.gnome.gedit.preferences.editor bracket-matching true
+gsettings set org.gnome.gedit.preferences.editor display-line-numbers true
+gsettings set org.gnome.gedit.preferences.editor display-right-margin true
+gsettings set org.gnome.gedit.preferences.editor right-margin-position 80
+gsettings set org.gnome.gedit.preferences.editor search-highlighting true
+gsettings set org.gnome.gedit.preferences.editor insert-spaces true
+gsettings set org.gnome.gedit.preferences.editor tabs-size 4
 
 # Set up Touchpad/Mouse
 gsettings set org.gnome.desktop.peripherals.touchpad tap-to-click true
