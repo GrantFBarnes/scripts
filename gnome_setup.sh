@@ -216,6 +216,7 @@ gsettings set ${APP_FOLDERS_PATH}MultiMedia/ apps "[
     'org.blender.Blender.desktop',
     'gimp.desktop',
     'org.gimp.GIMP.desktop',
+    'org.kde.kdenlive.desktop',
     'rhythmbox.desktop',
     'org.gnome.Photos.desktop',
     'org.gnome.Totem.desktop',

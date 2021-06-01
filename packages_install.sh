@@ -636,6 +636,7 @@ function mediaPackages() {
     packageOptions=()
     packageOptions+=("blender" "3D Modleler and Video Editor" off)
     packageOptions+=("gimp" "GNU Image Manipulation Program" off)
+    packageOptions+=("kdenlive" "KDE Video Editor" off)
     packageOptions+=("rhythmbox" "Rhythmbox Music" off)
     packageOptions+=("spotify" "Spotify" off)
     packageOptions+=("totem" "Gnome Video" off)
@@ -683,6 +684,9 @@ function mediaPackages() {
                 flatpaksToInstall+=(org.gimp.GIMP)
                 packagesToRemove+=(gimp)
             fi
+            ;;
+        "kdenlive")
+            flatpaksToInstall+=(org.kde.kdenlive)
             ;;
         "spotify")
             snapsToInstall+=(spotify)
