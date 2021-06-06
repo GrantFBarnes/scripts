@@ -27,7 +27,7 @@ for file in $(find ~/Pictures -name '*.*'); do
     maxSize=2400
     for i in "${leaveLarge[@]}"; do
         if [[ $file == *"$i"* ]]; then
-            maxSize=4000
+            maxSize=10000
             break
         fi
     done
