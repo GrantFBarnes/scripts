@@ -3,7 +3,9 @@
 ################################################################################
 
 totalPictures=0
-declare -a leaveLarge=("events")
+declare -a makeSmall=()
+# makeSmall+=("vehicles")
+# makeSmall+=("work")
 
 # loop through all files in Pictures
 for file in $(find ~/Pictures -name '*.*'); do
@@ -23,29 +25,26 @@ for file in $(find ~/Pictures -name '*.*'); do
     fi
     file="$filename".jpeg
 
-    # find max size
-    maxSize=2400
-    for i in "${leaveLarge[@]}"; do
+    # resize photos that are too large
+    for i in "${makeSmall[@]}"; do
         if [[ $file == *"$i"* ]]; then
-            maxSize=10000
+            maxSize=2400
+            width=$(identify -format "%[w]" "$file")
+            height=$(identify -format "%[h]" "$file")
+            if [ $width -gt $height ]; then
+                if [ $width -gt $maxSize ]; then
+                    echo "    too wide ($width), resizing to $maxSize..."
+                    convert "$file" -resize "$maxSize" "$file"
+                fi
+            else
+                if [ $height -gt $maxSize ]; then
+                    echo "    too tall ($height), resizing to $maxSize..."
+                    convert "$file" -resize "x$maxSize" "$file"
+                fi
+            fi
             break
         fi
     done
-
-    # resize photos that are too large
-    width=$(identify -format "%[w]" "$file")
-    height=$(identify -format "%[h]" "$file")
-    if [ $width -gt $height ]; then
-        if [ $width -gt $maxSize ]; then
-            echo "    too wide ($width), resizing to $maxSize..."
-            convert "$file" -resize "$maxSize" "$file"
-        fi
-    else
-        if [ $height -gt $maxSize ]; then
-            echo "    too tall ($height), resizing to $maxSize..."
-            convert "$file" -resize "x$maxSize" "$file"
-        fi
-    fi
 
     ((totalPictures++))
 done
