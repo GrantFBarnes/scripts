@@ -163,10 +163,13 @@ gsettings set ${APP_FOLDERS_PATH}Apps/ apps "[
 gsettings set ${APP_FOLDERS_PATH}Internet/ name "Internet"
 gsettings set ${APP_FOLDERS_PATH}Internet/ apps "[
     'chromium_chromium.desktop',
+    'chromium-browser.desktop',
+    'org.chromium.Chromium.desktop',
     'icecat.desktop',
     'firefox.desktop',
     'firefox-esr.desktop',
     'torbrowser.desktop',
+    'com.github.micahflee.torbrowser-launcher.desktop',
     'org.gnome.Epiphany.desktop',
     'thunderbird.desktop',
     'mozilla-thunderbird.desktop',
@@ -291,7 +294,8 @@ gsettings set ${APP_FOLDERS_PATH}Utilities/ apps "[
     'nm-connection-editor.desktop',
     'gnome-language-selector.desktop',
     'display-im6.q16.desktop',
-    'torbrowser-settings.desktop'
+    'torbrowser-settings.desktop',
+    'com.github.micahflee.torbrowser-launcher.settings.desktop'
 ]"
 
 # Set Layout

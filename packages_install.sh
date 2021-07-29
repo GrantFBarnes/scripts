@@ -484,14 +484,6 @@ function browserPackages() {
                     snapsToInstall+=(chromium)
                     flatpaksToRemove+=(com.chromium.Chromium)
                 fi
-            elif [ "$distro" == "centos" ]; then
-                if [ "$preferRepoOverSnap" == true ]; then
-                    packagesToInstall+=(chromium)
-                    snapsToRemove+=(chromium)
-                else
-                    snapsToInstall+=(chromium)
-                    packagesToRemove+=(chromium)
-                fi
             elif [ "$sourcePreference" == "snap" ]; then
                 snapsToInstall+=(chromium)
 
