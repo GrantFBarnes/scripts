@@ -287,7 +287,6 @@ fi
 function applicationPackages() {
     packageOptions=()
     packageOptions+=("cheese" "Webcam Application" off)
-    packageOptions+=("bitwarden" "Bitwarden Password Manager" off)
     packageOptions+=("deja-dup" "Backup Tool" off)
     packageOptions+=("calibre" "E Book Reader/Editor" off)
     packageOptions+=("foliate" "E Book Reader" off)
@@ -303,7 +302,6 @@ function applicationPackages() {
     packageOptions+=("gnome-weather" "Gnome Weather" off)
     packageOptions+=("gnucash" "Finance Program" off)
     packageOptions+=("gramps" "Genealogical Research and Analysis Management Programming System" off)
-    packageOptions+=("meld" "File Comparitor" off)
     packageOptions+=("snap-store" "Snap Store" off)
     packageOptions+=("transmission-gtk" "Transmission Torrent" off)
 
@@ -325,9 +323,6 @@ function applicationPackages() {
                 flatpaksToInstall+=(org.gnome.Cheese)
                 packagesToRemove+=(cheese)
             fi
-            ;;
-        "bitwarden")
-            snapsToInstall+=(bitwarden)
             ;;
         "deja-dup")
             if [ "$distro" == "centos" ]; then
@@ -436,15 +431,6 @@ function applicationPackages() {
             else
                 flatpaksToInstall+=(org.gramps_project.Gramps)
                 packagesToRemove+=(gramps)
-            fi
-            ;;
-        "meld")
-            if [ "$preferRepoOverFlatpak" == true ]; then
-                packagesToInstall+=(meld)
-                flatpaksToRemove+=(org.gnome.meld)
-            else
-                flatpaksToInstall+=(org.gnome.meld)
-                packagesToRemove+=(meld)
             fi
             ;;
         "snap-store")
@@ -595,8 +581,7 @@ function developmentPackages() {
     packageOptions+=("mysql-server" "MySQL Server" off)
     packageOptions+=("nano" "nano" on)
     packageOptions+=("net-tools" "Network Packages" off)
-    packageOptions+=("nodejs" "NodeJS" off)
-    packageOptions+=("npm" "Node Package Manager" off)
+    packageOptions+=("node" "Node.js and NPM" off)
     packageOptions+=("python3-pip" "Python PIP" off)
     packageOptions+=("ssh" "SSH" on)
     packageOptions+=("youtube-dl" "Command Line YT Downloader" off)
@@ -609,6 +594,21 @@ function developmentPackages() {
     for pkg in $packageSelections; do
         pkg=$(echo $pkg | sed 's/"//g')
         case ${pkg} in
+        "node")
+            packagesToInstall+=(nodejs)
+            packagesToInstall+=(npm)
+            grep -q NODE_OPTIONS $bashrc
+            if [ $? -eq 1 ]; then
+                sudo -u $SUDO_USER echo export NODE_OPTIONS='--max_old_space_size=8192' >>$bashrc
+            fi
+            ;;
+        "mysql-server")
+            if [ "$distro" == "fedora" ]; then
+                packagesToInstall+=(mariadb-server)
+            else
+                packagesToInstall+=($pkg)
+            fi
+            ;;
         "ssh")
             if [ "$pm" == "apt" ]; then
                 packagesToInstall+=(ssh)
@@ -936,10 +936,10 @@ function utilityPackages() {
     packageOptions+=("dconf-editor" "dconf Editor" off)
     packageOptions+=("exfat" "ExFat Format Support" off)
     packageOptions+=("ffmpeg" "ffmpeg to watch videos" off)
-    packageOptions+=("glances" "Monitoring Tool" off)
     packageOptions+=("gnome-system-monitor" "System Monitor" off)
     packageOptions+=("gnome-tweaks" "Gnome Tweaks" off)
     packageOptions+=("htop" "Process Reviewer" off)
+    packageOptions+=("ibus-unikey" "Vietnamese Unikey" off)
     packageOptions+=("imagemagick" "Image Magick" off)
     packageOptions+=("neofetch" "neofetch overview display" off)
     packageOptions+=("ncdu" "Command Line Disk Usage" off)
@@ -1169,6 +1169,8 @@ elif [ "$distro" == "ubuntu" ] || [ "$distro" == "debian" ]; then
         packagesToRemove+=(quadrapassel)
         packagesToRemove+=(xterm)
     fi
+elif [ "$distro" == "fedora" ]; then
+    packagesToRemove+=(gnome-tour)
 elif [ "$distro" == "centos" ]; then
     packagesToRemove+=(pidgin)
 fi
