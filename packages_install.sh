@@ -195,6 +195,11 @@ if [ $? -eq 1 ]; then
     sudo -u $SUDO_USER echo set number relativenumber >>$vimrc
 fi
 
+grep -q "syntax on" $vimrc
+if [ $? -eq 1 ]; then
+    sudo -u $SUDO_USER echo syntax on >>$vimrc
+fi
+
 confirmWhiptail "   Distrobution: $distro\nPackage Manager: $pm\n\nWould you like to continue?" 11
 if [ $? -eq 1 ]; then
     exit 0
@@ -936,6 +941,7 @@ function utilityPackages() {
     packageOptions+=("dconf-editor" "dconf Editor" off)
     packageOptions+=("exfat" "ExFat Format Support" off)
     packageOptions+=("ffmpeg" "ffmpeg to watch videos" off)
+    packageOptions+=("gnome-disk-utility" "Disk Utility" off)
     packageOptions+=("gnome-system-monitor" "System Monitor" off)
     packageOptions+=("gnome-tweaks" "Gnome Tweaks" off)
     packageOptions+=("htop" "Process Reviewer" off)
@@ -965,11 +971,18 @@ function utilityPackages() {
             ;;
         "ffmpeg")
             if [ "$distro" == "centos" ]; then
-                packagesToInstall+=(http://rpmfind.net/linux/epel/7/x86_64/Packages/s/SDL2-2.0.10-1.el7.x86_64.rpm)
+                packagesToInstall+=(http://rpmfind.net/linux/epel/7/x86_64/Packages/s/SDL2-2.0.14-2.el7.x86_64.rpm)
                 packagesToInstall+=(ffmpeg)
                 packagesToInstall+=(ffmpeg-devel)
             else
                 packagesToInstall+=(ffmpeg)
+            fi
+            ;;
+        "ibus-unikey")
+            if [ "$distro" == "centos" ]; then
+                packagesToInstall+=(http://rpmfind.net/linux/fedora/linux/releases/34/Everything/x86_64/os/Packages/i/ibus-unikey-0.6.1-26.20190311git46b5b9e.fc34.x86_64.rpm)
+            else
+                packagesToInstall+=($pkg)
             fi
             ;;
         "imagemagick")
