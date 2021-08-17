@@ -168,11 +168,13 @@ gsettings set ${APP_FOLDERS_PATH}Internet/ apps "[
     'icecat.desktop',
     'firefox.desktop',
     'firefox-esr.desktop',
+    'org.mozilla.firefox.desktop',
     'torbrowser.desktop',
     'com.github.micahflee.torbrowser-launcher.desktop',
     'org.gnome.Epiphany.desktop',
     'thunderbird.desktop',
     'mozilla-thunderbird.desktop',
+    'org.mozilla.Thunderbird.desktop',
     'transmission-gtk.desktop'
 ]"
 
@@ -221,6 +223,7 @@ gsettings set ${APP_FOLDERS_PATH}MultiMedia/ apps "[
     'org.gimp.GIMP.desktop',
     'org.kde.kdenlive.desktop',
     'rhythmbox.desktop',
+    'org.gnome.Rhythmbox3.desktop',
     'org.gnome.Photos.desktop',
     'org.gnome.Totem.desktop',
     'vlc.desktop',
@@ -319,8 +322,10 @@ gsettings set org.gnome.shell favorite-apps "[
     'icecat.desktop',
     'firefox.desktop',
     'firefox-esr.desktop',
+    'org.mozilla.firefox.desktop',
     'thunderbird.desktop',
     'mozilla-thunderbird.desktop',
+    'org.mozilla.Thunderbird.desktop',
     'code_code.desktop',
     'com.vscodium.codium.desktop',
     'org.gnome.gedit.desktop',

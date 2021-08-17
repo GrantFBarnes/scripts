@@ -295,6 +295,8 @@ function applicationPackages() {
     packageOptions+=("deja-dup" "Backup Tool" off)
     packageOptions+=("calibre" "E Book Reader/Editor" off)
     packageOptions+=("foliate" "E Book Reader" off)
+    packageOptions+=("eog" "Eye of Gnome" off)
+    packageOptions+=("evince" "Gnome Document Viewer" off)
     packageOptions+=("gnome-books" "Gnome Books" off)
     packageOptions+=("gnome-boxes" "Gnome Boxes VM Manager" off)
     packageOptions+=("gnome-calculator" "Gnome Calculator" off)
@@ -347,6 +349,24 @@ function applicationPackages() {
             else
                 snapsToInstall+=(foliate)
                 flatpaksToRemove+=(com.github.johnfactotum.Foliate)
+            fi
+            ;;
+        "eog")
+            if [ "$preferRepoOverFlatpak" == true ]; then
+                packagesToInstall+=(eog)
+                flatpaksToRemove+=(org.gnome.eog)
+            else
+                flatpaksToInstall+=(org.gnome.eog)
+                packagesToRemove+=(eog)
+            fi
+            ;;
+        "evince")
+            if [ "$preferRepoOverFlatpak" == true ]; then
+                packagesToInstall+=(evince)
+                flatpaksToRemove+=(org.gnome.Evince)
+            else
+                flatpaksToInstall+=(org.gnome.Evince)
+                packagesToRemove+=(evince)
             fi
             ;;
         "gnome-books")
@@ -456,6 +476,9 @@ function browserPackages() {
         packageOptions+=("icecat" "GNU IceCat Broswer" off)
     fi
     packageOptions+=("firefox" "Firefox Broswer" off)
+    if [ "$distro" == "centos" ] || [ "$distro" == "debian" ]; then
+        packageOptions+=("firefox-esr" "Firefox ESR Broswer" off)
+    fi
     packageOptions+=("torbrowser-launcher" "TOR Browser" off)
 
     choosePackagesWhiptail
@@ -512,10 +535,17 @@ function browserPackages() {
             fi
             ;;
         "firefox")
-            if [ "$distro" == "debian" ]; then
-                packagesToInstall+=(firefox-esr)
+            if [ "$distro" == "centos" ] || [ "$distro" == "debian" ]; then
+                flatpaksToInstall+=(org.mozilla.firefox)
             else
                 packagesToInstall+=(firefox)
+            fi
+            ;;
+        "firefox-esr")
+            if [ "$distro" == "centos" ]; then
+                packagesToInstall+=(firefox)
+            elif [ "$distro" == "debian" ]; then
+                packagesToInstall+=(firefox-esr)
             fi
             ;;
         "torbrowser-launcher")
@@ -567,6 +597,15 @@ function communicationPackages() {
             else
                 snapsToInstall+=("skype --classic")
                 flatpaksToRemove+=(com.skype.Client)
+            fi
+            ;;
+        "thunderbird")
+            if [ "$preferRepoOverFlatpak" == true ]; then
+                packagesToInstall+=(thunderbird)
+                flatpaksToRemove+=(org.mozilla.Thunderbird)
+            else
+                flatpaksToInstall+=(org.mozilla.Thunderbird)
+                packagesToRemove+=(thunderbird)
             fi
             ;;
         *)
@@ -685,8 +724,26 @@ function mediaPackages() {
         "kdenlive")
             flatpaksToInstall+=(org.kde.kdenlive)
             ;;
+        "rhythmbox")
+            if [ "$preferRepoOverFlatpak" == true ]; then
+                packagesToInstall+=(rhythmbox)
+                flatpaksToRemove+=(org.gnome.Rhythmbox3)
+            else
+                flatpaksToInstall+=(org.gnome.Rhythmbox3)
+                packagesToRemove+=(rhythmbox)
+            fi
+            ;;
         "spotify")
             snapsToInstall+=(spotify)
+            ;;
+        "totem")
+            if [ "$preferRepoOverFlatpak" == true ]; then
+                packagesToInstall+=(totem)
+                flatpaksToRemove+=(org.gnome.Totem)
+            else
+                flatpaksToInstall+=(org.gnome.Totem)
+                packagesToRemove+=(totem)
+            fi
             ;;
         "vlc")
             if [ "$sourcePreference" == "snap" ]; then
@@ -781,7 +838,7 @@ function gamingPackages() {
                 packagesToInstall+=(gnome-sudoku)
                 flatpaksToRemove+=(org.gnome.Sudoku)
             else
-                flatpaksToInstall+=(org.gnome.Chess)
+                flatpaksToInstall+=(org.gnome.Sudoku)
                 packagesToRemove+=(gnome-sudoku)
             fi
             ;;
@@ -884,6 +941,15 @@ function textPackages() {
             grep -q codium $bashrc
             if [ $? -eq 1 ]; then
                 sudo -u $SUDO_USER echo alias codium='"flatpak run com.vscodium.codium"' >>$bashrc
+            fi
+            ;;
+        "gedit")
+            if [ "$preferRepoOverFlatpak" == true ]; then
+                packagesToInstall+=(gedit)
+                flatpaksToRemove+=(org.gnome.gedit)
+            else
+                flatpaksToInstall+=(org.gnome.gedit)
+                packagesToRemove+=(gedit)
             fi
             ;;
         "libreoffice")
