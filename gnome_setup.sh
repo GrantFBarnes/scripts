@@ -294,6 +294,7 @@ gsettings set ${APP_FOLDERS_PATH}Utilities/ apps "[
     'org.gnome.PowerStats.desktop',
     'org.gnome.Logs.desktop',
     'org.gnome.FileRoller.desktop',
+    'system-config-printer.desktop',
     'setroubleshoot.desktop',
     'org.gnome.font-viewer.desktop',
     'org.gnome.Characters.desktop',
@@ -304,6 +305,12 @@ gsettings set ${APP_FOLDERS_PATH}Utilities/ apps "[
     'nm-connection-editor.desktop',
     'gnome-language-selector.desktop',
     'display-im6.q16.desktop',
+    'avahi-discover.desktop',
+    'bssh.desktop',
+    'bvnc.desktop',
+    'lstopo.desktop',
+    'qv412.desktop',
+    'qvidcap.desktop',
     'torbrowser-settings.desktop',
     'com.github.micahflee.torbrowser-launcher.settings.desktop'
 ]"

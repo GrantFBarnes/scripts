@@ -311,7 +311,9 @@ function applicationPackages() {
     packageOptions+=("gramps" "Genealogical Research and Analysis Management Programming System" off)
     packageOptions+=("shotwell" "Shotwell Photos" off)
     packageOptions+=("snap-store" "Snap Store" off)
-    packageOptions+=("synaptic" "Synaptic Package Manager" off)
+    if [ "$pm" == "apt" ]; then
+        packageOptions+=("synaptic" "Synaptic Package Manager" off)
+    fi
     packageOptions+=("transmission-gtk" "Transmission Torrent" off)
 
     choosePackagesWhiptail
@@ -658,7 +660,9 @@ function developmentPackages() {
             fi
             ;;
         "mysql-server")
-            if [ "$distro" == "debian" ] || [ "$distro" == "fedora" ]; then
+            if [ "$pm" == "pacman" ]; then
+                packagesToInstall+=(mariadb)
+            elif [ "$distro" == "debian" ] || [ "$distro" == "fedora" ]; then
                 packagesToInstall+=(mariadb-server)
             else
                 packagesToInstall+=($pkg)
@@ -1273,8 +1277,11 @@ elif [ "$distro" == "ubuntu" ] || [ "$distro" == "debian" ]; then
         packagesToRemove+=(fcitx*)
         packagesToRemove+=(goldendict)
         packagesToRemove+=(hitori)
+        packagesToRemove+=(hdate-applet)
+        packagesToRemove+=(*mozc*)
+        packagesToRemove+=(mlterm*)
         packagesToRemove+=(tali)
-        packagesToRemove+=(quadrapassel)
+        packagesToRemove+=(xiterm*)
         packagesToRemove+=(xterm)
     fi
 elif [ "$distro" == "fedora" ]; then
