@@ -309,7 +309,9 @@ function applicationPackages() {
     packageOptions+=("gnome-weather" "Gnome Weather" off)
     packageOptions+=("gnucash" "Finance Program" off)
     packageOptions+=("gramps" "Genealogical Research and Analysis Management Programming System" off)
+    packageOptions+=("shotwell" "Shotwell Photos" off)
     packageOptions+=("snap-store" "Snap Store" off)
+    packageOptions+=("synaptic" "Synaptic Package Manager" off)
     packageOptions+=("transmission-gtk" "Transmission Torrent" off)
 
     choosePackagesWhiptail
@@ -456,6 +458,15 @@ function applicationPackages() {
             else
                 flatpaksToInstall+=(org.gramps_project.Gramps)
                 packagesToRemove+=(gramps)
+            fi
+            ;;
+        "shotwell")
+            if [ "$preferRepoOverFlatpak" == true ]; then
+                packagesToInstall+=(shotwell)
+                flatpaksToRemove+=(org.gnome.Shotwell)
+            else
+                flatpaksToInstall+=(org.gnome.Shotwell)
+                packagesToRemove+=(shotwell)
             fi
             ;;
         "snap-store")
@@ -647,7 +658,7 @@ function developmentPackages() {
             fi
             ;;
         "mysql-server")
-            if [ "$distro" == "fedora" ]; then
+            if [ "$distro" == "debian" ] || [ "$distro" == "fedora" ]; then
                 packagesToInstall+=(mariadb-server)
             else
                 packagesToInstall+=($pkg)
@@ -668,108 +679,6 @@ function developmentPackages() {
     done
 }
 
-function mediaPackages() {
-    packageOptions=()
-    packageOptions+=("blender" "3D Modleler and Video Editor" off)
-    packageOptions+=("gimp" "GNU Image Manipulation Program" off)
-    packageOptions+=("kdenlive" "KDE Video Editor" off)
-    packageOptions+=("rhythmbox" "Rhythmbox Music" off)
-    packageOptions+=("spotify" "Spotify" off)
-    packageOptions+=("totem" "Gnome Video" off)
-    packageOptions+=("vlc" "Media Player" off)
-
-    choosePackagesWhiptail
-    if [ $? -eq 1 ]; then
-        return
-    fi
-
-    for pkg in $packageSelections; do
-        pkg=$(echo $pkg | sed 's/"//g')
-        case ${pkg} in
-        "blender")
-            if [ "$distro" == "centos" ]; then
-                if [ "$preferFlatpakOverSnap" == true ]; then
-                    flatpaksToInstall+=(org.blender.Blender)
-                    snapsToRemove+=(blender)
-                else
-                    snapsToInstall+=("blender --classic")
-                    flatpaksToRemove+=(org.blender.Blender)
-                fi
-            elif [ "$sourcePreference" == "snap" ]; then
-                snapsToInstall+=("blender --classic")
-
-                flatpaksToRemove+=(org.blender.Blender)
-                packagesToRemove+=(blender)
-            elif [ "$sourcePreference" == "flatpak" ]; then
-                flatpaksToInstall+=(org.blender.Blender)
-
-                snapsToRemove+=(blender)
-                packagesToRemove+=(blender)
-            else
-                packagesToInstall+=(blender)
-
-                flatpaksToRemove+=(org.blender.Blender)
-                snapsToRemove+=(blender)
-            fi
-            ;;
-        "gimp")
-            if [ "$preferRepoOverFlatpak" == true ]; then
-                packagesToInstall+=(gimp)
-                flatpaksToRemove+=(org.gimp.GIMP)
-            else
-                flatpaksToInstall+=(org.gimp.GIMP)
-                packagesToRemove+=(gimp)
-            fi
-            ;;
-        "kdenlive")
-            flatpaksToInstall+=(org.kde.kdenlive)
-            ;;
-        "rhythmbox")
-            if [ "$preferRepoOverFlatpak" == true ]; then
-                packagesToInstall+=(rhythmbox)
-                flatpaksToRemove+=(org.gnome.Rhythmbox3)
-            else
-                flatpaksToInstall+=(org.gnome.Rhythmbox3)
-                packagesToRemove+=(rhythmbox)
-            fi
-            ;;
-        "spotify")
-            snapsToInstall+=(spotify)
-            ;;
-        "totem")
-            if [ "$preferRepoOverFlatpak" == true ]; then
-                packagesToInstall+=(totem)
-                flatpaksToRemove+=(org.gnome.Totem)
-            else
-                flatpaksToInstall+=(org.gnome.Totem)
-                packagesToRemove+=(totem)
-            fi
-            ;;
-        "vlc")
-            if [ "$sourcePreference" == "snap" ]; then
-                snapsToInstall+=(vlc)
-
-                flatpaksToRemove+=(org.videolan.VLC)
-                packagesToRemove+=(vlc)
-            elif [ "$sourcePreference" == "flatpak" ]; then
-                flatpaksToInstall+=(org.videolan.VLC)
-
-                snapsToRemove+=(vlc)
-                packagesToRemove+=(vlc)
-            else
-                packagesToInstall+=(vlc)
-
-                flatpaksToRemove+=(org.videolan.VLC)
-                snapsToRemove+=(vlc)
-            fi
-            ;;
-        *)
-            packagesToInstall+=($pkg)
-            ;;
-        esac
-    done
-}
-
 function gamingPackages() {
     packageOptions=()
     packageOptions+=("0ad" "0 A.D. Ancient Warfare" off)
@@ -777,6 +686,7 @@ function gamingPackages() {
     packageOptions+=("gnome-chess" "Chess" off)
     packageOptions+=("gnome-sudoku" "Sudoku" off)
     packageOptions+=("parsec" "Streaming App" off)
+    packageOptions+=("quadrapassel" "Gnome Tetris" off)
     packageOptions+=("steam" "Steam" off)
     packageOptions+=("supertuxkart" "Tux Kart Racer" off)
     packageOptions+=("xonotic" "Xonotic FPS" off)
@@ -845,6 +755,15 @@ function gamingPackages() {
         "parsec")
             flatpaksToInstall+=(com.parsecgaming.parsec)
             ;;
+        "quadrapassel")
+            if [ "$preferRepoOverFlatpak" == true ]; then
+                packagesToInstall+=(quadrapassel)
+                flatpaksToRemove+=(org.gnome.Quadrapassel)
+            else
+                flatpaksToInstall+=(org.gnome.Quadrapassel)
+                packagesToRemove+=(quadrapassel)
+            fi
+            ;;
         "steam")
             if [ "$distro" == "ubuntu" ]; then
                 if [ "$preferRepoOverFlatpak" == true ]; then
@@ -891,6 +810,118 @@ function gamingPackages() {
             else
                 snapsToInstall+=(xonotic)
                 flatpaksToRemove+=(org.xonotic.Xonotic)
+            fi
+            ;;
+        *)
+            packagesToInstall+=($pkg)
+            ;;
+        esac
+    done
+}
+
+function mediaPackages() {
+    packageOptions=()
+    packageOptions+=("blender" "3D Modleler and Video Editor" off)
+    packageOptions+=("gimp" "GNU Image Manipulation Program" off)
+    packageOptions+=("gnome-music" "Gnome Music" off)
+    packageOptions+=("kdenlive" "KDE Video Editor" off)
+    packageOptions+=("rhythmbox" "Rhythmbox Music" off)
+    packageOptions+=("spotify" "Spotify" off)
+    packageOptions+=("totem" "Gnome Video" off)
+    packageOptions+=("vlc" "Media Player" off)
+
+    choosePackagesWhiptail
+    if [ $? -eq 1 ]; then
+        return
+    fi
+
+    for pkg in $packageSelections; do
+        pkg=$(echo $pkg | sed 's/"//g')
+        case ${pkg} in
+        "blender")
+            if [ "$distro" == "centos" ]; then
+                if [ "$preferFlatpakOverSnap" == true ]; then
+                    flatpaksToInstall+=(org.blender.Blender)
+                    snapsToRemove+=(blender)
+                else
+                    snapsToInstall+=("blender --classic")
+                    flatpaksToRemove+=(org.blender.Blender)
+                fi
+            elif [ "$sourcePreference" == "snap" ]; then
+                snapsToInstall+=("blender --classic")
+
+                flatpaksToRemove+=(org.blender.Blender)
+                packagesToRemove+=(blender)
+            elif [ "$sourcePreference" == "flatpak" ]; then
+                flatpaksToInstall+=(org.blender.Blender)
+
+                snapsToRemove+=(blender)
+                packagesToRemove+=(blender)
+            else
+                packagesToInstall+=(blender)
+
+                flatpaksToRemove+=(org.blender.Blender)
+                snapsToRemove+=(blender)
+            fi
+            ;;
+        "gimp")
+            if [ "$preferRepoOverFlatpak" == true ]; then
+                packagesToInstall+=(gimp)
+                flatpaksToRemove+=(org.gimp.GIMP)
+            else
+                flatpaksToInstall+=(org.gimp.GIMP)
+                packagesToRemove+=(gimp)
+            fi
+            ;;
+        "gnome-music")
+            if [ "$preferRepoOverFlatpak" == true ]; then
+                packagesToInstall+=(gnome-music)
+                flatpaksToRemove+=(org.gnome.Music)
+            else
+                flatpaksToInstall+=(org.gnome.Music)
+                packagesToRemove+=(gnome-music)
+            fi
+            ;;
+        "kdenlive")
+            flatpaksToInstall+=(org.kde.kdenlive)
+            ;;
+        "rhythmbox")
+            if [ "$preferRepoOverFlatpak" == true ]; then
+                packagesToInstall+=(rhythmbox)
+                flatpaksToRemove+=(org.gnome.Rhythmbox3)
+            else
+                flatpaksToInstall+=(org.gnome.Rhythmbox3)
+                packagesToRemove+=(rhythmbox)
+            fi
+            ;;
+        "spotify")
+            snapsToInstall+=(spotify)
+            ;;
+        "totem")
+            if [ "$preferRepoOverFlatpak" == true ]; then
+                packagesToInstall+=(totem)
+                flatpaksToRemove+=(org.gnome.Totem)
+            else
+                flatpaksToInstall+=(org.gnome.Totem)
+                packagesToRemove+=(totem)
+            fi
+            ;;
+        "vlc")
+            if [ "$sourcePreference" == "snap" ]; then
+                snapsToInstall+=(vlc)
+
+                flatpaksToRemove+=(org.videolan.VLC)
+                packagesToRemove+=(vlc)
+            elif [ "$sourcePreference" == "flatpak" ]; then
+                flatpaksToInstall+=(org.videolan.VLC)
+
+                snapsToRemove+=(vlc)
+                packagesToRemove+=(vlc)
+            else
+                packagesToInstall+=(vlc)
+
+                flatpaksToRemove+=(org.videolan.VLC)
+                snapsToRemove+=(vlc)
             fi
             ;;
         *)
@@ -1088,8 +1119,8 @@ function chooseUsage() {
     categoryOptions+=("Browsers" "Web Browsers")
     categoryOptions+=("Communication" "Communication Applications")
     categoryOptions+=("Development" "Development Packages")
-    categoryOptions+=("Media" "Multi Media Applications")
     categoryOptions+=("Gaming" "Gaming Applications")
+    categoryOptions+=("Media" "Multi Media Applications")
     categoryOptions+=("Text" "Text Applications")
     categoryOptions+=("Utility" "Utility Applications and Packages")
     categoryOptions+=("" "")
@@ -1118,14 +1149,14 @@ function chooseUsage() {
         ;;
     "Development")
         developmentPackages
-        defaultCategory="Media"
-        ;;
-    "Media")
-        mediaPackages
         defaultCategory="Gaming"
         ;;
     "Gaming")
         gamingPackages
+        defaultCategory="Media"
+        ;;
+    "Media")
+        mediaPackages
         defaultCategory="Text"
         ;;
     "Text")
@@ -1230,14 +1261,12 @@ elif [ "$distro" == "ubuntu" ] || [ "$distro" == "debian" ]; then
     packagesToRemove+=(four-in-a-row)
     packagesToRemove+=(gnome-klotski)
     packagesToRemove+=(gnome-mahjongg)
-    packagesToRemove+=(gnome-music)
     packagesToRemove+=(gnome-nibbles)
     packagesToRemove+=(gnome-robots)
     packagesToRemove+=(gnome-tetravex)
     packagesToRemove+=(gnome-todo)
     packagesToRemove+=(remmina*)
     packagesToRemove+=(seahorse)
-    packagesToRemove+=(shotwell*)
 
     if [ "$distro" == "debian" ]; then
         packagesToRemove+=(anthy*)
