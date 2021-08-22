@@ -190,14 +190,34 @@ if [ ! -f "$vimrc" ]; then
     sudo -u $SUDO_USER touch $vimrc
 fi
 
+grep -q "syntax on" $vimrc
+if [ $? -eq 1 ]; then
+    sudo -u $SUDO_USER echo syntax on >>$vimrc
+fi
+
+grep -q "filetype plugin indent on" $vimrc
+if [ $? -eq 1 ]; then
+    sudo -u $SUDO_USER echo filetype plugin indent on >>$vimrc
+fi
+
+grep -q "set scrolloff" $vimrc
+if [ $? -eq 1 ]; then
+    sudo -u $SUDO_USER echo set scrolloff=10 >>$vimrc
+fi
+
 grep -q "set number relativenumber" $vimrc
 if [ $? -eq 1 ]; then
     sudo -u $SUDO_USER echo set number relativenumber >>$vimrc
 fi
 
-grep -q "syntax on" $vimrc
+grep -q "set ignorecase smartcase" $vimrc
 if [ $? -eq 1 ]; then
-    sudo -u $SUDO_USER echo syntax on >>$vimrc
+    sudo -u $SUDO_USER echo set ignorecase smartcase  >>$vimrc
+fi
+
+grep -q "set incsearch hlsearch" $vimrc
+if [ $? -eq 1 ]; then
+    sudo -u $SUDO_USER echo set incsearch hlsearch  >>$vimrc
 fi
 
 confirmWhiptail "   Distrobution: $distro\nPackage Manager: $pm\n\nWould you like to continue?" 11
