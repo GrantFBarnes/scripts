@@ -25,11 +25,11 @@ class Distribution:
         return []
 
     def install_flatpak(self):
-        self.install("flatpak")
+        self.install(["flatpak"])
         run_command("sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo")
 
     def install_snap(self):
-        self.install("snapd")
+        self.install(["snapd"])
         if self.package_manager == "dnf":
             run_command("sudo systemctl enable --now snapd.socket")
             run_command("sudo ln -s /var/lib/snapd/snap /snap")
