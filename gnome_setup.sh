@@ -142,7 +142,6 @@ gsettings set ${APP_FOLDERS_PATH}Apps/ apps "[
     'virtualbox.desktop',
     'gnucash.desktop',
     'org.gnucash.GnuCash.desktop',
-    'bitwarden_bitwarden.desktop',
     'org.gnome.Calendar.desktop',
     'org.gnome.clocks.desktop',
     'org.gnome.Weather.desktop',
@@ -157,6 +156,7 @@ gsettings set ${APP_FOLDERS_PATH}Apps/ apps "[
     'org.gnome.Maps.desktop',
     'org.gnome.Cheese.desktop',
     'usb-creator-gtk.desktop',
+    'org.fedoraproject.MediaWriter.desktop',
     'gramps.desktop'
 ]"
 
@@ -340,12 +340,8 @@ gsettings set org.gnome.shell favorite-apps "[
     'thunderbird.desktop',
     'mozilla-thunderbird.desktop',
     'org.mozilla.Thunderbird.desktop',
-    'code_code.desktop',
-    'com.vscodium.codium.desktop',
     'org.gnome.gedit.desktop',
-    'org.gnome.Terminal.desktop',
-    'gnucash.desktop',
-    'bitwarden_bitwarden.desktop'
+    'org.gnome.Terminal.desktop'
 ]"
 
 exit 0

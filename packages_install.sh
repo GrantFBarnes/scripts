@@ -23,6 +23,14 @@ function chooseCategoryWhiptail() {
     return $?
 }
 
+function checkNotInstalled() {
+    if ! command -v $1 &>/dev/null; then
+        return 0
+    fi
+    echo "$1 already installed"
+    return 1
+}
+
 function checkExitStatus() {
     if [ $? -eq 0 ]; then
         echo "Success"
@@ -88,10 +96,13 @@ if [ "$distro" == "" ]; then
 fi
 
 # Install newt to get Whiptail to work
-if [ "$pm" == "dnf" ]; then
-    packageManager install newt
-elif [ "$pm" == "pacman" ]; then
-    packageManager install libnewt
+checkNotInstalled whiptail
+if [ $? -eq 0 ]; then
+    if [ "$pm" == "dnf" ]; then
+        packageManager install newt
+    elif [ "$pm" == "pacman" ]; then
+        packageManager install libnewt
+    fi
 fi
 
 ################################################################################
@@ -148,6 +159,26 @@ function setupEnvironment() {
     grep -q EDITOR $bashrc
     if [ $? -eq 1 ]; then
         sudo -u $SUDO_USER echo export EDITOR='"/usr/bin/vim"' >>$bashrc
+    fi
+
+    grep -q GFB_HOSTING_ENV $bashrc
+    if [ $? -eq 1 ]; then
+        sudo -u $SUDO_USER echo export GFB_HOSTING_ENV='"dev"' >>$bashrc
+    fi
+
+    grep -q GFB_EDIT_SECRET $bashrc
+    if [ $? -eq 1 ]; then
+        sudo -u $SUDO_USER echo export GFB_EDIT_SECRET='""' >>$bashrc
+    fi
+
+    grep -q JWT_SECRET $bashrc
+    if [ $? -eq 1 ]; then
+        sudo -u $SUDO_USER echo export JWT_SECRET='""' >>$bashrc
+    fi
+
+    grep -q MYSQL_TU_PASSWORD $bashrc
+    if [ $? -eq 1 ]; then
+        sudo -u $SUDO_USER echo export MYSQL_TU_PASSWORD='""' >>$bashrc
     fi
 
     # Setup up vimrc

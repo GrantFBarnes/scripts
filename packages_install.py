@@ -26,7 +26,6 @@ class Distribution:
 
     def install_flatpak(self):
         self.install(["flatpak"])
-        run_command("sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo")
 
     def install_snap(self):
         self.install(["snapd"])
@@ -138,6 +137,7 @@ def install_package(pkg, method):
     elif method == "flatpak":
         if not has_command("flatpak"):
             distribution.install_flatpak()
+        run_command("sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo")
         run_command("flatpak install " + package.flatpak + " -y")
     elif method == "snap":
         if not has_command("snap"):
@@ -242,6 +242,10 @@ def define_packages():
     packages["foliate"] = Package(
         name="Foliate", desc="E Book Reader", group="Applications",
         repo=[], flatpak="com.github.johnfactotum.Foliate", snap="foliate",
+        repo_other={})
+    packages["fedora-media-writer"] = Package(
+        name="Fedora Media Writer", desc="ISO Writer", group="Applications",
+        repo=[], flatpak="org.fedoraproject.MediaWriter", snap="",
         repo_other={})
     packages["gnome-books"] = Package(
         name="Gnome Books", desc="", group="Applications",
