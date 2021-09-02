@@ -267,6 +267,18 @@ def define_packages():
         name="Gnome Clocks", desc="", group="Applications",
         repo=["gnome-clocks"], flatpak="org.gnome.clocks", snap="",
         repo_other={"redhat": []})
+    packages["gnome-dialect"] = Package(
+        name="Gnome Dialect", desc="", group="Applications",
+        repo=[], flatpak="com.github.gi_lom.dialect", snap="",
+        repo_other={"fedora": ["dialect"]})
+    packages["gnome-maps"] = Package(
+        name="Gnome Maps", desc="", group="Applications",
+        repo=["gnome-maps"], flatpak="org.gnome.Maps", snap="",
+        repo_other={})
+    packages["gnome-passwordsafe"] = Package(
+        name="Gnome Password Safe", desc="", group="Applications",
+        repo=[], flatpak="org.gnome.PasswordSafe", snap="",
+        repo_other={"fedora": ["gnome-passwordsafe"]})
     packages["gnome-photos"] = Package(
         name="Gnome Photos", desc="", group="Applications",
         repo=["gnome-photos"], flatpak="org.gnome.Photos", snap="",
@@ -380,7 +392,7 @@ def define_packages():
     packages["xonotic"] = Package(
         name="Xonotic", desc="FPS", group="Games",
         repo=[], flatpak="org.xonotic.Xonotic", snap="xonotic",
-        repo_other={})
+        repo_other={"fedora": ["xonotic"]})
 
     # Multi Media Group
     packages["blender"] = Package(
@@ -427,7 +439,7 @@ def define_packages():
         repo_other={})
     packages["libreoffice"] = Package(
         name="LibreOffice", desc="Office Suite", group="Editors",
-        repo=["libreoffice-writer", "libreoffice-calc", "libreoffice-impress", "libreoffice-base"],
+        repo=["libreoffice-writer", "libreoffice-calc", "libreoffice-impress", "libreoffice-draw", "libreoffice-base"],
         flatpak="org.libreoffice.LibreOffice", snap="libreoffice",
         repo_other={"pacman": ["libreoffice-fresh"]})
     packages["texstudio"] = Package(

@@ -386,6 +386,7 @@ fi
 # Determine Packages to Remove
 
 packagesToRemove+=(evolution)
+packagesToRemove+=(gnome-contacts)
 packagesToRemove+=(mpv)
 
 if [ "$distro" == "mint" ] || [ "$distro" == "lmde" ]; then
