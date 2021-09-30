@@ -159,6 +159,7 @@ gsettings set ${APP_FOLDERS_PATH}Apps/ apps "[
     'org.gnome.Cheese.desktop',
     'usb-creator-gtk.desktop',
     'org.fedoraproject.MediaWriter.desktop',
+    'org.gramps_project.Gramps.desktop',
     'gramps.desktop'
 ]"
 
@@ -248,11 +249,8 @@ gsettings set ${APP_FOLDERS_PATH}Games/ apps "[
     'org.gnome.TwentyFortyEight.desktop',
     'org.gnome.Sudoku.desktop',
     'org.gnome.Mines.desktop',
-    'org.gnome.Quadrapassel.desktop',
-    'org.gnome.Reversi.desktop',
-    'org.gnome.SwellFoop.desktop',
-    'org.gnome.Taquin.desktop',
-    'org.gnome.LightsOff.desktop'
+    'supertuxkart.desktop',
+    'org.gnome.Quadrapassel.desktop'
 ]"
 
 gsettings set ${APP_FOLDERS_PATH}System/ name "System"

@@ -26,6 +26,9 @@ class Distribution:
 
     def install_flatpak(self):
         self.install(["flatpak"])
+        run_command("sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo")
+        if self.name == "debian":
+            run_command("flatpak install org.gtk.Gtk3theme.Adwaita-dark -y")
 
     def install_snap(self):
         self.install(["snapd"])
@@ -137,7 +140,6 @@ def install_package(pkg, method):
     elif method == "flatpak":
         if not has_command("flatpak"):
             distribution.install_flatpak()
-        run_command("sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo")
         run_command("flatpak install " + package.flatpak + " -y")
     elif method == "snap":
         if not has_command("snap"):
@@ -279,14 +281,6 @@ def define_packages():
         name="Gnome Password Safe", desc="", group="Applications",
         repo=[], flatpak="org.gnome.PasswordSafe", snap="",
         repo_other={"fedora": ["gnome-passwordsafe"]})
-    packages["gnome-photos"] = Package(
-        name="Gnome Photos", desc="", group="Applications",
-        repo=["gnome-photos"], flatpak="org.gnome.Photos", snap="",
-        repo_other={})
-    packages["gnome-software"] = Package(
-        name="Gnome Software", desc="", group="Applications",
-        repo=["gnome-software"], flatpak="", snap="",
-        repo_other={"pop": []})
     packages["gnome-weather"] = Package(
         name="Gnome Weather", desc="", group="Applications",
         repo=["gnome-weather"], flatpak="org.gnome.Weather", snap="",
@@ -299,18 +293,6 @@ def define_packages():
         name="GRAMPS", desc="Genealogical Research and Analysis Management Programming System", group="Applications",
         repo=["gramps"], flatpak="org.gramps_project.Gramps", snap="",
         repo_other={"redhat": []})
-    packages["shotwell"] = Package(
-        name="Shotwell", desc="Photos", group="Applications",
-        repo=["shotwell"], flatpak="org.gnome.Shotwell", snap="",
-        repo_other={"redhat": []})
-    packages["snap-store"] = Package(
-        name="Snap Store", desc="", group="Applications",
-        repo=[], flatpak="", snap="snap-store",
-        repo_other={})
-    packages["synaptic"] = Package(
-        name="Synaptic", desc="Apt Software Manager", group="Applications",
-        repo=[], flatpak="", snap="",
-        repo_other={"apt": ["synaptic"]})
     packages["transmission-gtk"] = Package(
         name="Transmission", desc="Torrent", group="Applications",
         repo=["transmission-gtk"], flatpak="", snap="",
@@ -318,7 +300,7 @@ def define_packages():
     packages["virtualbox"] = Package(
         name="Virtual Box", desc="Virtual Machine Manager", group="Applications",
         repo=[], flatpak="", snap="",
-        repo_other={"apt": ["virtualbox"], "dnf": ["VirtualBox"]})
+        repo_other={"apt": ["virtualbox"], "dnf": ["VirtualBox"], "debian": []})
 
     # Browsers Group
     packages["chromium"] = Package(
@@ -335,7 +317,7 @@ def define_packages():
         repo_other={"fedora": ["icecat"]})
     packages["firefox"] = Package(
         name="Firefox", desc="", group="Browsers",
-        repo=["firefox"], flatpak="org.mozilla.firefox", snap="",
+        repo=["firefox"], flatpak="org.mozilla.firefox", snap="firefox",
         repo_other={"redhat": [], "debian": []})
     packages["firefox-esr"] = Package(
         name="Firefox ESR", desc="Extended Support Release", group="Browsers",
@@ -369,9 +351,17 @@ def define_packages():
         name="Aisleriot", desc="Solitare", group="Games",
         repo=["aisleriot"], flatpak="org.gnome.Aisleriot", snap="",
         repo_other={"redhat": []})
+    packages["gnome-2048"] = Package(
+        name="Gnome 2048", desc="", group="Games",
+        repo=["gnome-2048"], flatpak="org.gnome.TwentyFortyEight", snap="",
+        repo_other={"redhat": []})
     packages["gnome-chess"] = Package(
         name="Gnome Chess", desc="", group="Games",
         repo=["gnome-chess"], flatpak="org.gnome.Chess", snap="",
+        repo_other={"redhat": []})
+    packages["gnome-mines"] = Package(
+        name="Gnome Mines", desc="", group="Games",
+        repo=["gnome-mines"], flatpak="org.gnome.Mines", snap="",
         repo_other={"redhat": []})
     packages["gnome-sudoku"] = Package(
         name="Gnome Sudoku", desc="", group="Games",
@@ -407,6 +397,14 @@ def define_packages():
         name="Gnome Music", desc="", group="Multi Media",
         repo=["gnome-music"], flatpak="org.gnome.Music", snap="",
         repo_other={"redhat": []})
+    packages["gnome-photos"] = Package(
+        name="Gnome Photos", desc="", group="Multi Media",
+        repo=["gnome-photos"], flatpak="org.gnome.Photos", snap="",
+        repo_other={})
+    packages["gnome-sound-recorder"] = Package(
+        name="Gnome Sound Recorder", desc="", group="Multi Media",
+        repo=["gnome-sound-recorder"], flatpak="org.gnome.SoundRecorder", snap="",
+        repo_other={})
     packages["kdenlive"] = Package(
         name="KdenLive", desc="KDE Video Editor", group="Multi Media",
         repo=["kdenlive"], flatpak="org.kde.kdenlive", snap="",
@@ -415,6 +413,10 @@ def define_packages():
         name="RhythmBox", desc="Music Player", group="Multi Media",
         repo=["rhythmbox"], flatpak="org.gnome.Rhythmbox3", snap="",
         repo_other={})
+    packages["shotwell"] = Package(
+        name="Shotwell", desc="Photos", group="Multi Media",
+        repo=["shotwell"], flatpak="org.gnome.Shotwell", snap="",
+        repo_other={"redhat": []})
     packages["totem"] = Package(
         name="Totem", desc="Gnome Video Player", group="Multi Media",
         repo=["totem"], flatpak="org.gnome.Totem", snap="",
@@ -450,6 +452,20 @@ def define_packages():
         name="PyCharm", desc="JetBrains Python Editor", group="Editors",
         repo=[], flatpak="com.jetbrains.PyCharm-Community", snap="pycharm-community",
         repo_other={}, snap_classic=True)
+
+    # Software Group
+    packages["gnome-software"] = Package(
+        name="Gnome Software", desc="", group="Software",
+        repo=["gnome-software"], flatpak="", snap="",
+        repo_other={"pop": []})
+    packages["snap-store"] = Package(
+        name="Snap Store", desc="", group="Software",
+        repo=[], flatpak="", snap="snap-store",
+        repo_other={})
+    packages["synaptic"] = Package(
+        name="Synaptic", desc="Apt Software Manager", group="Software",
+        repo=[], flatpak="", snap="",
+        repo_other={"apt": ["synaptic"]})
 
     # Utilities Group
     packages["baobab"] = Package(
@@ -548,16 +564,31 @@ def create_gui(root):
         Label(group_frame, text="Remove", width=7).grid(row=row, column=5)
 
         for pkg in groups[group]:
+            package = packages[pkg]
+            has_package = False
+            has_flatpak = False
+            has_snap = False
+
+            if package.get_repo() and len(package.get_repo()) > 0:
+                has_package = True
+
+            if package.flatpak:
+                has_flatpak = True
+
+            if package.snap:
+                has_snap = True
+
+            if not has_package and not has_flatpak and not has_snap:
+                continue
+
             row += 1
             ttk.Separator(group_frame, orient="horizontal").grid(row=row, column=0, columnspan=6, sticky="we")
 
             row += 1
-            package = packages[pkg]
-
             Label(group_frame, text=package.name, wraplength=180).grid(row=row, column=0, sticky="e")
             Label(group_frame, text=package.desc, wraplength=280).grid(row=row, column=1)
 
-            if package.get_repo() and len(package.get_repo()) > 0:
+            if has_package:
                 Radiobutton(
                     group_frame,
                     text="R",
@@ -565,7 +596,7 @@ def create_gui(root):
                     value="repo"
                 ).grid(row=row, column=2)
 
-            if package.flatpak:
+            if has_flatpak:
                 Radiobutton(
                     group_frame,
                     text="F",
@@ -573,7 +604,7 @@ def create_gui(root):
                     value="flatpak"
                 ).grid(row=row, column=3)
 
-            if package.snap:
+            if has_snap:
                 Radiobutton(
                     group_frame,
                     text="S",

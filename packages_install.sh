@@ -403,10 +403,14 @@ elif [ "$distro" == "ubuntu" ] || [ "$distro" == "debian" ]; then
     packagesToRemove+=(gnome-mahjongg)
     packagesToRemove+=(gnome-nibbles)
     packagesToRemove+=(gnome-robots)
+    packagesToRemove+=(gnome-taquin)
     packagesToRemove+=(gnome-tetravex)
     packagesToRemove+=(gnome-todo)
+    packagesToRemove+=(iagno)
+    packagesToRemove+=(lightsoff)
     packagesToRemove+=(remmina*)
     packagesToRemove+=(seahorse)
+    packagesToRemove+=(swell-foop)
 
     if [ "$distro" == "debian" ]; then
         packagesToRemove+=(anthy*)
@@ -416,6 +420,7 @@ elif [ "$distro" == "ubuntu" ] || [ "$distro" == "debian" ]; then
         packagesToRemove+=(hdate-applet)
         packagesToRemove+=(*mozc*)
         packagesToRemove+=(mlterm*)
+        packagesToRemove+=(malcontent)
         packagesToRemove+=(tali)
         packagesToRemove+=(xiterm*)
         packagesToRemove+=(xterm)
