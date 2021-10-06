@@ -34,8 +34,8 @@ gsettings set org.gnome.desktop.interface show-battery-percentage true
 # Enable Overview Hot Corner
 gsettings set org.gnome.desktop.interface enable-hot-corners true
 
-# Disable Animations
-gsettings set org.gnome.desktop.interface enable-animations false
+# Enable Animations
+gsettings set org.gnome.desktop.interface enable-animations true
 
 # Set Blank Screen to 15 min (900 seconds)
 gsettings set org.gnome.desktop.session idle-delay 900
@@ -47,8 +47,8 @@ gsettings set org.gnome.settings-daemon.plugins.color night-light-temperature "u
 gsettings set org.gnome.settings-daemon.plugins.color night-light-schedule-from "4.0"
 gsettings set org.gnome.settings-daemon.plugins.color night-light-schedule-to "3.9"
 
-# Add WM Buttons
-gsettings set org.gnome.desktop.wm.preferences button-layout ":minimize,maximize,close"
+# Set WM Buttons
+gsettings set org.gnome.desktop.wm.preferences button-layout ":close"
 
 # Enable Num Lock
 gsettings set org.gnome.desktop.peripherals.keyboard numlock-state true
@@ -249,8 +249,10 @@ gsettings set ${APP_FOLDERS_PATH}Games/ apps "[
     'org.gnome.TwentyFortyEight.desktop',
     'org.gnome.Sudoku.desktop',
     'org.gnome.Mines.desktop',
+    'org.gnome.Quadrapassel.desktop',
+    '0ad.desktop',
     'supertuxkart.desktop',
-    'org.gnome.Quadrapassel.desktop'
+    'xonotic.desktop'
 ]"
 
 gsettings set ${APP_FOLDERS_PATH}System/ name "System"

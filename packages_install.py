@@ -23,12 +23,16 @@ class Distribution:
         if self.package_manager == "pacman":
             return get_command("pacman -Q | awk '{print $1}'").split("\n")
         return []
+    
+    def setup_flatpak(self):
+        if has_command("flatpak"):
+            run_command("sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo")
+            if self.name == "debian" or self.name == "fedora":
+                run_command("flatpak install org.gtk.Gtk3theme.Adwaita-dark -y")
 
     def install_flatpak(self):
         self.install(["flatpak"])
-        run_command("sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo")
-        if self.name == "debian":
-            run_command("flatpak install org.gtk.Gtk3theme.Adwaita-dark -y")
+        self.setup_flatpak()
 
     def install_snap(self):
         self.install(["snapd"])
@@ -140,7 +144,7 @@ def install_package(pkg, method):
     elif method == "flatpak":
         if not has_command("flatpak"):
             distribution.install_flatpak()
-        run_command("flatpak install " + package.flatpak + " -y")
+        run_command("flatpak install flathub " + package.flatpak + " -y")
     elif method == "snap":
         if not has_command("snap"):
             distribution.install_snap()
@@ -634,6 +638,8 @@ def main():
     get_distribution()
     define_packages()
     define_groups()
+
+    distribution.setup_flatpak()
 
     root = Tk()
     root.title("Package Installer")
