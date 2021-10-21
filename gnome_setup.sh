@@ -4,7 +4,7 @@
 cd $(dirname "$0")
 . helper_functions.sh
 
-distro=$(getDistrobution)
+distro=$(getDistribution)
 
 # Set Themes
 if [ "$distro" == "arch" ] || [ "$distro" == "centos" ] || [ "$distro" == "debian" ] || [ "$distro" == "fedora" ]; then

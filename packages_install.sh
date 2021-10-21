@@ -83,14 +83,14 @@ if [ -z "$SUDO_USER" ]; then
     exit 1
 fi
 
-# Determine distrobution
+# Determine distribution
 
-distro=$(getDistrobution)
+distro=$(getDistribution)
 pm=$(getPackageManager)
 
 if [ "$distro" == "" ]; then
     echo "---------------------------------------------------------------------"
-    echo "Distrobution not recognized"
+    echo "Distribution not recognized"
     echo "---------------------------------------------------------------------"
     exit 1
 fi

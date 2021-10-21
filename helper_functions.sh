@@ -2,7 +2,7 @@
 # Purpose: Define Bash Helper Functions to be used by other scripts
 ################################################################################
 
-function getDistrobution() {
+function getDistribution() {
     distro=$(head -n 1 /etc/os-release)
     if [[ $distro == *"Arch"* ]]; then
         echo "arch"
