@@ -443,6 +443,10 @@ def define_packages():
         name="gedit", desc="Gnome Text Editor", group="Editors",
         repo=["gedit"], flatpak="org.gnome.gedit", snap="",
         repo_other={})
+    packages["gnome-builder"] = Package(
+        name="Gnome Builder", desc="Gnome IDE", group="Editors",
+        repo=[], flatpak="org.gnome.Builder", snap="",
+        repo_other={})
     packages["libreoffice"] = Package(
         name="LibreOffice", desc="Office Suite", group="Editors",
         repo=["libreoffice-writer", "libreoffice-calc", "libreoffice-impress", "libreoffice-draw", "libreoffice-base"],

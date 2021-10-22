@@ -3,6 +3,15 @@
 import os
 import subprocess
 
+# ANSI Escape Sequences
+reset = "\033[0m"
+bold = "\033[1m"
+red = "\033[31m"
+green = "\033[32m"
+yellow = "\033[33m"
+cyan = "\033[36m"
+red_bg = "\033[41m"
+
 
 def set_alias():
     bashrc = os.path.expanduser("~") + "/.bashrc"
@@ -75,6 +84,14 @@ def get_cpu_speed():
         percent = int((speed / max_speed) * 100)
         if percent != 0:
             result += " (" + str(percent) + "%)"
+            if percent < 25:
+                result = f"{green}" + result + f"{reset}"
+            elif percent < 50:
+                result = f"{yellow}" + result + f"{reset}"
+            elif percent < 75:
+                result = f"{red}" + result + f"{reset}"
+            else:
+                result = f"{red_bg}" + result + f"{reset}"
 
     return result
 
@@ -104,6 +121,14 @@ def get_memory():
         percent = (used * 100) // total
         if percent != 0:
             result += " (" + str(percent) + "%)"
+            if percent < 25:
+                result = f"{green}" + result + f"{reset}"
+            elif percent < 50:
+                result = f"{yellow}" + result + f"{reset}"
+            elif percent < 75:
+                result = f"{red}" + result + f"{reset}"
+            else:
+                result = f"{red_bg}" + result + f"{reset}"
 
     return result
 
@@ -188,10 +213,6 @@ def get_packages():
 
 def main():
     set_alias()
-
-    bold = "\033[1m"
-    cyan = "\033[36m"
-    reset = "\033[0m"
 
     print(f"{cyan}-------------------------------{reset}")
     print(f"{bold}{cyan}    User{reset}: " + run_command("echo $USER"))
