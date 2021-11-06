@@ -252,7 +252,7 @@ def define_packages():
     packages["fedora-media-writer"] = Package(
         name="Fedora Media Writer", desc="ISO Writer", group="Applications",
         repo=[], flatpak="org.fedoraproject.MediaWriter", snap="",
-        repo_other={})
+        repo_other={"fedora": ["mediawriter"]})
     packages["gnome-books"] = Package(
         name="Gnome Books", desc="", group="Applications",
         repo=["gnome-books"], flatpak="org.gnome.Books", snap="",

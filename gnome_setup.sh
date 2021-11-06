@@ -293,6 +293,7 @@ gsettings set ${APP_FOLDERS_PATH}Utilities/ apps "[
     'org.gnome.Evince.desktop',
     'org.gnome.Documents.desktop',
     'org.gnome.Screenshot.desktop',
+    'org.gnome.Tour.desktop',
     'org.gnome.PowerStats.desktop',
     'org.gnome.Logs.desktop',
     'org.gnome.FileRoller.desktop',

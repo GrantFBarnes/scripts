@@ -236,8 +236,8 @@ function selectPackages() {
     packageOptions+=("net-tools" "Network Packages" off)
     packageOptions+=("node" "Node.js and NPM" off)
     packageOptions+=("python3-pip" "Python PIP" off)
-    packageOptions+=("ssh" "SSH" on)
-    packageOptions+=("tkinter" "Python Tkinter" on)
+    packageOptions+=("ssh" "SSH" off)
+    packageOptions+=("tkinter" "Python Tkinter" off)
     packageOptions+=("vim" "VIM" on)
     packageOptions+=("youtube-dl" "Command Line YT Downloader" off)
 
@@ -425,8 +425,6 @@ elif [ "$distro" == "ubuntu" ] || [ "$distro" == "debian" ]; then
         packagesToRemove+=(xiterm*)
         packagesToRemove+=(xterm)
     fi
-elif [ "$distro" == "fedora" ]; then
-    packagesToRemove+=(gnome-tour)
 elif [ "$distro" == "centos" ]; then
     packagesToRemove+=(pidgin)
 fi
