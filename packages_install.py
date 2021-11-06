@@ -273,6 +273,10 @@ def define_packages():
         name="Gnome Clocks", desc="", group="Applications",
         repo=["gnome-clocks"], flatpak="org.gnome.clocks", snap="",
         repo_other={"redhat": []})
+    packages["gnome-connections"] = Package(
+        name="Gnome Connections", desc="Network Connection Manager", group="Applications",
+        repo=["gnome-connections"], flatpak="org.gnome.Connections", snap="",
+        repo_other={})
     packages["gnome-dialect"] = Package(
         name="Gnome Dialect", desc="", group="Applications",
         repo=[], flatpak="com.github.gi_lom.dialect", snap="",

@@ -139,6 +139,7 @@ gsettings set ${APP_FOLDERS} folder-children "[
 gsettings set ${APP_FOLDERS_PATH}Apps/ name "Apps"
 gsettings set ${APP_FOLDERS_PATH}Apps/ apps "[
     'org.gnome.Boxes.desktop',
+    'org.gnome.Connections.desktop',
     'virtualbox.desktop',
     'gnucash.desktop',
     'org.gnucash.GnuCash.desktop',
