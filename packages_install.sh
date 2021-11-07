@@ -321,6 +321,80 @@ function selectPackages() {
     done
 }
 
+function installPackages() {
+    if [ ${#packagesToInstall[@]} -gt 0 ]; then
+        confirmWhiptail "Install packages individually?"
+        if [ $? -eq 0 ]; then
+            for i in "${packagesToInstall[@]}"; do
+                packageManager install $i
+            done
+        else
+            packageManager install ${packagesToInstall[*]}
+        fi
+    fi
+}
+
+function removePackages() {
+    packagesToRemove+=(evolution)
+    packagesToRemove+=(gnome-contacts)
+    packagesToRemove+=(mpv)
+
+    if [ "$distro" == "mint" ] || [ "$distro" == "lmde" ]; then
+        packagesToRemove+=(celluloid)
+        packagesToRemove+=(drawing)
+        packagesToRemove+=(hexchat*)
+        packagesToRemove+=(mintbackup)
+        packagesToRemove+=(pix*)
+        packagesToRemove+=(xed)
+    elif [ "$distro" == "ubuntu" ] || [ "$distro" == "debian" ]; then
+        packagesToRemove+=(five-or-more)
+        packagesToRemove+=(four-in-a-row)
+        packagesToRemove+=(gnome-klotski)
+        packagesToRemove+=(gnome-mahjongg)
+        packagesToRemove+=(gnome-nibbles)
+        packagesToRemove+=(gnome-robots)
+        packagesToRemove+=(gnome-taquin)
+        packagesToRemove+=(gnome-tetravex)
+        packagesToRemove+=(gnome-todo)
+        packagesToRemove+=(iagno)
+        packagesToRemove+=(lightsoff)
+        packagesToRemove+=(remmina*)
+        packagesToRemove+=(seahorse)
+        packagesToRemove+=(swell-foop)
+
+        if [ "$distro" == "debian" ]; then
+            packagesToRemove+=(anthy*)
+            packagesToRemove+=(fcitx*)
+            packagesToRemove+=(goldendict)
+            packagesToRemove+=(hitori)
+            packagesToRemove+=(hdate-applet)
+            packagesToRemove+=(*mozc*)
+            packagesToRemove+=(mlterm*)
+            packagesToRemove+=(malcontent)
+            packagesToRemove+=(tali)
+            packagesToRemove+=(xiterm*)
+            packagesToRemove+=(xterm)
+
+            # Remove Languages
+            packagesToRemove+=(firefox-esr-l10n-*)
+            packagesToRemove+=(libreoffice-l10n-*)
+            packagesToRemove+=(hunspell-*)
+            packagesToRemove+=(aspell-*)
+            packagesToRemove+=(task-*-desktop)
+        fi
+    elif [ "$distro" == "centos" ]; then
+        packagesToRemove+=(pidgin)
+    fi
+
+    # Remove Packages
+
+    if [ ${#packagesToRemove[@]} -gt 0 ]; then
+        packageManager remove ${packagesToRemove[*]}
+    fi
+
+    packageManager autoremove
+}
+
 function chooseUsage() {
     categoryOptions=()
     categoryOptions+=("Update" "Packages")
@@ -328,6 +402,8 @@ function chooseUsage() {
     categoryOptions+=("Environment" "Setup")
     categoryOptions+=("Select" "Packages")
     categoryOptions+=("Install" "Packages")
+    categoryOptions+=("Remove" "Packages")
+    categoryOptions+=("Exit" "")
 
     # Remove duplicate values in install arrays
     packagesToInstall=($(echo "${packagesToInstall[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' '))
@@ -355,6 +431,15 @@ function chooseUsage() {
         defaultCategory="Install"
         ;;
     "Install")
+        installPackages
+        defaultCategory="Remove"
+        ;;
+    "Remove")
+        removePackages
+        defaultCategory="Exit"
+        return
+        ;;
+    "Exit")
         return
         ;;
     esac
@@ -362,85 +447,5 @@ function chooseUsage() {
 }
 
 chooseUsage
-if [ $? -eq 1 ]; then
-    exit 0
-fi
-
-################################################################################
-
-# Install Packages
-
-if [ ${#packagesToInstall[@]} -gt 0 ]; then
-    confirmWhiptail "Install packages individually?"
-    if [ $? -eq 0 ]; then
-        for i in "${packagesToInstall[@]}"; do
-            packageManager install $i
-        done
-    else
-        packageManager install ${packagesToInstall[*]}
-    fi
-fi
-
-################################################################################
-
-# Determine Packages to Remove
-
-packagesToRemove+=(evolution)
-packagesToRemove+=(gnome-contacts)
-packagesToRemove+=(mpv)
-
-if [ "$distro" == "mint" ] || [ "$distro" == "lmde" ]; then
-    packagesToRemove+=(celluloid)
-    packagesToRemove+=(drawing)
-    packagesToRemove+=(hexchat*)
-    packagesToRemove+=(mintbackup)
-    packagesToRemove+=(pix*)
-    packagesToRemove+=(xed)
-elif [ "$distro" == "ubuntu" ] || [ "$distro" == "debian" ]; then
-    packagesToRemove+=(five-or-more)
-    packagesToRemove+=(four-in-a-row)
-    packagesToRemove+=(gnome-klotski)
-    packagesToRemove+=(gnome-mahjongg)
-    packagesToRemove+=(gnome-nibbles)
-    packagesToRemove+=(gnome-robots)
-    packagesToRemove+=(gnome-taquin)
-    packagesToRemove+=(gnome-tetravex)
-    packagesToRemove+=(gnome-todo)
-    packagesToRemove+=(iagno)
-    packagesToRemove+=(lightsoff)
-    packagesToRemove+=(remmina*)
-    packagesToRemove+=(seahorse)
-    packagesToRemove+=(swell-foop)
-
-    if [ "$distro" == "debian" ]; then
-        packagesToRemove+=(anthy*)
-        packagesToRemove+=(fcitx*)
-        packagesToRemove+=(goldendict)
-        packagesToRemove+=(hitori)
-        packagesToRemove+=(hdate-applet)
-        packagesToRemove+=(*mozc*)
-        packagesToRemove+=(mlterm*)
-        packagesToRemove+=(malcontent)
-        packagesToRemove+=(tali)
-        packagesToRemove+=(xiterm*)
-        packagesToRemove+=(xterm)
-    fi
-elif [ "$distro" == "centos" ]; then
-    packagesToRemove+=(pidgin)
-fi
-
-# Remove Packages
-
-if [ ${#packagesToRemove[@]} -gt 0 ]; then
-    packageManager remove ${packagesToRemove[*]}
-fi
-
-packageManager autoremove
-
-################################################################################
-
-echo "---------------------------------------------------------------------"
-echo "Finished"
-echo "---------------------------------------------------------------------"
 
 exit 0
