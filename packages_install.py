@@ -82,7 +82,7 @@ class Distribution:
 class Package:
     def __init__(self, name, desc="", group="",
                  repo=[], flatpak="", snap="",
-                 repo_other=None, snap_classic=False):
+                 repo_other=None, snap_classic=False, de=""):
 
         if repo_other is None:
             repo_other = {}
@@ -95,6 +95,7 @@ class Package:
         self.snap = snap
         self.repo_other = repo_other
         self.snap_classic = snap_classic
+        self.de = de
 
     def get_repo(self):
         if distribution.name in self.repo_other:
@@ -240,11 +241,11 @@ def define_packages():
     packages["eog"] = Package(
         name="Eye of Gnome", desc="Gnome Image Viewer", group="Applications",
         repo=["eog"], flatpak="org.gnome.eog", snap="",
-        repo_other={})
+        repo_other={}, de="gnome")
     packages["evince"] = Package(
         name="Evince", desc="Gnome Document Viewer", group="Applications",
         repo=["evince"], flatpak="org.gnome.Evince", snap="",
-        repo_other={})
+        repo_other={}, de="gnome")
     packages["foliate"] = Package(
         name="Foliate", desc="E Book Reader", group="Applications",
         repo=[], flatpak="com.github.johnfactotum.Foliate", snap="foliate",
@@ -256,43 +257,43 @@ def define_packages():
     packages["gnome-books"] = Package(
         name="Gnome Books", desc="", group="Applications",
         repo=["gnome-books"], flatpak="org.gnome.Books", snap="",
-        repo_other={"redhat": []})
+        repo_other={"redhat": []}, de="gnome")
     packages["gnome-boxes"] = Package(
         name="Gnome Boxes", desc="Virtual Machine Manager", group="Applications",
         repo=["gnome-boxes"], flatpak="org.gnome.Boxes", snap="",
-        repo_other={})
+        repo_other={}, de="gnome")
     packages["gnome-calculator"] = Package(
         name="Gnome Calculator", desc="", group="Applications",
         repo=["gnome-calculator"], flatpak="org.gnome.Calculator", snap="",
-        repo_other={})
+        repo_other={}, de="gnome")
     packages["gnome-calendar"] = Package(
         name="Gnome Calendar", desc="", group="Applications",
         repo=["gnome-calendar"], flatpak="org.gnome.Calendar", snap="",
-        repo_other={"redhat": []})
+        repo_other={"redhat": []}, de="gnome")
     packages["gnome-clocks"] = Package(
         name="Gnome Clocks", desc="", group="Applications",
         repo=["gnome-clocks"], flatpak="org.gnome.clocks", snap="",
-        repo_other={"redhat": []})
+        repo_other={"redhat": []}, de="gnome")
     packages["gnome-connections"] = Package(
         name="Gnome Connections", desc="Network Connection Manager", group="Applications",
         repo=["gnome-connections"], flatpak="org.gnome.Connections", snap="",
-        repo_other={})
+        repo_other={}, de="gnome")
     packages["gnome-dialect"] = Package(
         name="Gnome Dialect", desc="", group="Applications",
         repo=[], flatpak="com.github.gi_lom.dialect", snap="",
-        repo_other={"fedora": ["dialect"]})
+        repo_other={"fedora": ["dialect"]}, de="gnome")
     packages["gnome-maps"] = Package(
         name="Gnome Maps", desc="", group="Applications",
         repo=["gnome-maps"], flatpak="org.gnome.Maps", snap="",
-        repo_other={})
+        repo_other={}, de="gnome")
     packages["gnome-passwordsafe"] = Package(
         name="Gnome Password Safe", desc="", group="Applications",
         repo=[], flatpak="org.gnome.PasswordSafe", snap="",
-        repo_other={"fedora": ["gnome-passwordsafe"]})
+        repo_other={"fedora": ["gnome-passwordsafe"]}, de="gnome")
     packages["gnome-weather"] = Package(
         name="Gnome Weather", desc="", group="Applications",
         repo=["gnome-weather"], flatpak="org.gnome.Weather", snap="",
-        repo_other={"redhat": []})
+        repo_other={"redhat": []}, de="gnome")
     packages["gnucash"] = Package(
         name="GNU Cash", desc="Accounting Application", group="Applications",
         repo=["gnucash"], flatpak="org.gnucash.GnuCash", snap="",
@@ -304,7 +305,7 @@ def define_packages():
     packages["transmission-gtk"] = Package(
         name="Transmission", desc="Torrent", group="Applications",
         repo=["transmission-gtk"], flatpak="", snap="",
-        repo_other={})
+        repo_other={}, de="gnome")
     packages["virtualbox"] = Package(
         name="Virtual Box", desc="Virtual Machine Manager", group="Applications",
         repo=[], flatpak="", snap="",
@@ -318,7 +319,7 @@ def define_packages():
     packages["epiphany"] = Package(
         name="Epiphany", desc="Gnome", group="Browsers",
         repo=["epiphany"], flatpak="org.gnome.Epiphany", snap="",
-        repo_other={"redhat": [], "apt": ["epiphany-browser"]})
+        repo_other={"redhat": [], "apt": ["epiphany-browser"]}, de="gnome")
     packages["icecat"] = Package(
         name="Icecat", desc="GNU", group="Browsers",
         repo=[], flatpak="", snap="",
@@ -358,27 +359,27 @@ def define_packages():
     packages["aisleriot"] = Package(
         name="Aisleriot", desc="Solitare", group="Games",
         repo=["aisleriot"], flatpak="org.gnome.Aisleriot", snap="",
-        repo_other={"redhat": []})
+        repo_other={"redhat": []}, de="gnome")
     packages["gnome-2048"] = Package(
         name="Gnome 2048", desc="", group="Games",
         repo=["gnome-2048"], flatpak="org.gnome.TwentyFortyEight", snap="",
-        repo_other={"redhat": []})
+        repo_other={"redhat": []}, de="gnome")
     packages["gnome-chess"] = Package(
         name="Gnome Chess", desc="", group="Games",
         repo=["gnome-chess"], flatpak="org.gnome.Chess", snap="",
-        repo_other={"redhat": []})
+        repo_other={"redhat": []}, de="gnome")
     packages["gnome-mines"] = Package(
         name="Gnome Mines", desc="", group="Games",
         repo=["gnome-mines"], flatpak="org.gnome.Mines", snap="",
-        repo_other={"redhat": []})
+        repo_other={"redhat": []}, de="gnome")
     packages["gnome-sudoku"] = Package(
         name="Gnome Sudoku", desc="", group="Games",
         repo=["gnome-sudoku"], flatpak="org.gnome.Sudoku", snap="",
-        repo_other={"redhat": []})
+        repo_other={"redhat": []}, de="gnome")
     packages["quadrapassel"] = Package(
         name="Quadrapassel", desc="Gnome Tetris", group="Games",
         repo=["quadrapassel"], flatpak="org.gnome.Quadrapassel", snap="",
-        repo_other={"redhat": []})
+        repo_other={"redhat": []}, de="gnome")
     packages["steam"] = Package(
         name="Steam", desc="", group="Games",
         repo=[], flatpak="com.valvesoftware.Steam", snap="",
@@ -404,31 +405,31 @@ def define_packages():
     packages["gnome-music"] = Package(
         name="Gnome Music", desc="", group="Multi Media",
         repo=["gnome-music"], flatpak="org.gnome.Music", snap="",
-        repo_other={"redhat": []})
+        repo_other={"redhat": []}, de="gnome")
     packages["gnome-photos"] = Package(
         name="Gnome Photos", desc="", group="Multi Media",
         repo=["gnome-photos"], flatpak="org.gnome.Photos", snap="",
-        repo_other={})
+        repo_other={}, de="gnome")
     packages["gnome-sound-recorder"] = Package(
         name="Gnome Sound Recorder", desc="", group="Multi Media",
         repo=["gnome-sound-recorder"], flatpak="org.gnome.SoundRecorder", snap="",
-        repo_other={})
+        repo_other={}, de="gnome")
     packages["kdenlive"] = Package(
         name="KdenLive", desc="KDE Video Editor", group="Multi Media",
         repo=["kdenlive"], flatpak="org.kde.kdenlive", snap="",
-        repo_other={"redhat": []})
+        repo_other={"redhat": []}, de="kde")
     packages["rhythmbox"] = Package(
         name="RhythmBox", desc="Music Player", group="Multi Media",
         repo=["rhythmbox"], flatpak="org.gnome.Rhythmbox3", snap="",
-        repo_other={})
+        repo_other={}, de="gnome")
     packages["shotwell"] = Package(
         name="Shotwell", desc="Photos", group="Multi Media",
         repo=["shotwell"], flatpak="org.gnome.Shotwell", snap="",
-        repo_other={"redhat": []})
+        repo_other={"redhat": []}, de="gnome")
     packages["totem"] = Package(
         name="Totem", desc="Gnome Video Player", group="Multi Media",
         repo=["totem"], flatpak="org.gnome.Totem", snap="",
-        repo_other={})
+        repo_other={}, de="gnome")
     packages["vlc"] = Package(
         name="VLC", desc="Media Player", group="Multi Media",
         repo=["vlc"], flatpak="org.videolan.VLC", snap="vlc",
@@ -446,11 +447,11 @@ def define_packages():
     packages["gedit"] = Package(
         name="gedit", desc="Gnome Text Editor", group="Editors",
         repo=["gedit"], flatpak="org.gnome.gedit", snap="",
-        repo_other={})
+        repo_other={}, de="gnome")
     packages["gnome-builder"] = Package(
         name="Gnome Builder", desc="Gnome IDE", group="Editors",
         repo=[], flatpak="org.gnome.Builder", snap="",
-        repo_other={})
+        repo_other={}, de="gnome")
     packages["libreoffice"] = Package(
         name="LibreOffice", desc="Office Suite", group="Editors",
         repo=["libreoffice-writer", "libreoffice-calc", "libreoffice-impress", "libreoffice-draw", "libreoffice-base"],
@@ -469,7 +470,7 @@ def define_packages():
     packages["gnome-software"] = Package(
         name="Gnome Software", desc="", group="Software",
         repo=["gnome-software"], flatpak="", snap="",
-        repo_other={"pop": []})
+        repo_other={"pop": []}, de="gnome")
     packages["snap-store"] = Package(
         name="Snap Store", desc="", group="Software",
         repo=[], flatpak="", snap="snap-store",
@@ -483,23 +484,23 @@ def define_packages():
     packages["baobab"] = Package(
         name="Baobab", desc="Gnome Disk Usage", group="Utilities",
         repo=["baobab"], flatpak="", snap="",
-        repo_other={})
+        repo_other={}, de="gnome")
     packages["dconf-editor"] = Package(
         name="dconf editor", desc="Gnome Environment Variables", group="Utilities",
         repo=["dconf-editor"], flatpak="", snap="",
-        repo_other={})
+        repo_other={}, de="gnome")
     packages["gnome-disk-utility"] = Package(
         name="Gnome Disk Utility", desc="", group="Utilities",
         repo=["gnome-disk-utility"], flatpak="", snap="",
-        repo_other={})
+        repo_other={}, de="gnome")
     packages["gnome-system-monitor"] = Package(
         name="Gnome System Monitor", desc="", group="Utilities",
         repo=["gnome-system-monitor"], flatpak="", snap="",
-        repo_other={})
+        repo_other={}, de="gnome")
     packages["gnome-tweaks"] = Package(
         name="Gnome Tweaks", desc="", group="Utilities",
         repo=["gnome-tweaks"], flatpak="", snap="",
-        repo_other={})
+        repo_other={}, de="gnome")
     packages["simple-scan"] = Package(
         name="Simple Scan", desc="", group="Utilities",
         repo=["simple-scan"], flatpak="", snap="",
@@ -596,8 +597,14 @@ def create_gui(root):
             row += 1
             ttk.Separator(group_frame, orient="horizontal").grid(row=row, column=0, columnspan=6, sticky="we")
 
+            de_bg = "white"
+            if package.de == "gnome":
+                de_bg = "#c3d0ff"
+            elif package.de == "kde":
+                de_bg = "#c7ffc3"
+
             row += 1
-            Label(group_frame, text=package.name, wraplength=180, bg="white").grid(row=row, column=0, sticky="e")
+            Label(group_frame, text=package.name, wraplength=180, bg=de_bg).grid(row=row, column=0, sticky="e")
             Label(group_frame, text=package.desc, wraplength=280, bg="white").grid(row=row, column=1)
 
             if has_package:
