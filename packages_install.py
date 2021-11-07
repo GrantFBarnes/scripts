@@ -553,27 +553,27 @@ def get_packages():
 
 
 def create_gui(root):
-    Button(root, text="Update", command=execute_update, height=2, width=16).grid(row=0, column=1)
-    Button(root, text="Auto-Remove", command=execute_autoremove, height=2, width=16).grid(row=1, column=1)
-    Button(root, text="Sync Packages", command=execute_sync_packages, height=2, width=16).grid(row=2, column=1)
+    Button(root, text="Update", command=execute_update, height=2, width=16, bg="white").grid(row=0, column=1)
+    Button(root, text="Auto-Remove", command=execute_autoremove, height=2, width=16, bg="white").grid(row=1, column=1)
+    Button(root, text="Sync Packages", command=execute_sync_packages, height=2, width=16, bg="white").grid(row=2, column=1)
 
     box = ScrolledText(root)
-    box.config(height=35, width=92)
+    box.config(height=35, width=92, bg="white")
     box.grid(row=0, column=0, rowspan=3)
 
     for group in groups:
-        group_frame = Frame(root)
+        group_frame = Frame(root, bg="white")
 
         row = 0
-        Label(group_frame, text=group, font=("", 16)).grid(row=row, column=0, columnspan=6, pady=10)
+        Label(group_frame, text=group, font=("", 16), bg="white").grid(row=row, column=0, columnspan=6, pady=10)
 
         row += 1
-        Label(group_frame, text="Package", width=24).grid(row=row, column=0, pady=10)
-        Label(group_frame, text="Description", width=40).grid(row=row, column=1)
-        Label(group_frame, text="Repo", width=6).grid(row=row, column=2)
-        Label(group_frame, text="Flatpak", width=6).grid(row=row, column=3)
-        Label(group_frame, text="Snap", width=6).grid(row=row, column=4)
-        Label(group_frame, text="Remove", width=7).grid(row=row, column=5)
+        Label(group_frame, text="Package", width=24, bg="white").grid(row=row, column=0, pady=10)
+        Label(group_frame, text="Description", width=40, bg="white").grid(row=row, column=1)
+        Label(group_frame, text="Repo", width=6, bg="white").grid(row=row, column=2)
+        Label(group_frame, text="Flatpak", width=6, bg="white").grid(row=row, column=3)
+        Label(group_frame, text="Snap", width=6, bg="white").grid(row=row, column=4)
+        Label(group_frame, text="Remove", width=7, bg="white").grid(row=row, column=5)
 
         for pkg in groups[group]:
             package = packages[pkg]
@@ -597,15 +597,16 @@ def create_gui(root):
             ttk.Separator(group_frame, orient="horizontal").grid(row=row, column=0, columnspan=6, sticky="we")
 
             row += 1
-            Label(group_frame, text=package.name, wraplength=180).grid(row=row, column=0, sticky="e")
-            Label(group_frame, text=package.desc, wraplength=280).grid(row=row, column=1)
+            Label(group_frame, text=package.name, wraplength=180, bg="white").grid(row=row, column=0, sticky="e")
+            Label(group_frame, text=package.desc, wraplength=280, bg="white").grid(row=row, column=1)
 
             if has_package:
                 Radiobutton(
                     group_frame,
                     text="R",
                     variable=selected_installs[pkg],
-                    value="repo"
+                    value="repo",
+                    bg="white"
                 ).grid(row=row, column=2)
 
             if has_flatpak:
@@ -613,7 +614,8 @@ def create_gui(root):
                     group_frame,
                     text="F",
                     variable=selected_installs[pkg],
-                    value="flatpak"
+                    value="flatpak",
+                    bg="white"
                 ).grid(row=row, column=3)
 
             if has_snap:
@@ -621,14 +623,16 @@ def create_gui(root):
                     group_frame,
                     text="S",
                     variable=selected_installs[pkg],
-                    value="snap"
+                    value="snap",
+                    bg="white"
                 ).grid(row=row, column=4)
 
             Radiobutton(
                 group_frame,
                 text="X",
                 variable=selected_installs[pkg],
-                value=""
+                value="",
+                bg="white"
             ).grid(row=row, column=5, padx=12)
 
         row += 1
@@ -651,6 +655,7 @@ def main():
 
     root = Tk()
     root.title("Package Installer")
+    root["bg"] = "white"
     get_packages()
     create_gui(root)
     root.mainloop()
