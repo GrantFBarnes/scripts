@@ -1,5 +1,5 @@
 #!/bin/bash
-# Purpose: Setup environment of GNU/Linux Desktop
+# Purpose: Setup Gnome Desktop
 ################################################################################
 cd $(dirname "$0")
 . helper_functions.sh

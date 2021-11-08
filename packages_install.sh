@@ -335,8 +335,11 @@ function installPackages() {
 }
 
 function removePackages() {
+    packagesToRemove+=(akregator)
     packagesToRemove+=(evolution)
     packagesToRemove+=(gnome-contacts)
+    packagesToRemove+=(konqueror)
+    packagesToRemove+=(kmail)
     packagesToRemove+=(mpv)
 
     if [ "$distro" == "mint" ] || [ "$distro" == "lmde" ]; then
@@ -437,7 +440,6 @@ function chooseUsage() {
     "Remove")
         removePackages
         defaultCategory="Exit"
-        return
         ;;
     "Exit")
         return

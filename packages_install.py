@@ -302,10 +302,26 @@ def define_packages():
         name="GRAMPS", desc="Genealogical Research and Analysis Management Programming System", group="Applications",
         repo=["gramps"], flatpak="org.gramps_project.Gramps", snap="",
         repo_other={"redhat": []})
+    packages["gwenview"] = Package(
+        name="Gwenview", desc="KDE Image Viewer", group="Applications",
+        repo=["gwenview"], flatpak="org.kde.gwenview", snap="",
+        repo_other={}, de="kde")
+    packages["kcalc"] = Package(
+        name="KCalc", desc="KDE Calculator", group="Applications",
+        repo=["kcalc"], flatpak="org.kde.kcalc", snap="",
+        repo_other={}, de="kde")
+    packages["okular"] = Package(
+        name="Okular", desc="KDE Document Viewer", group="Applications",
+        repo=["okular"], flatpak="org.kde.okular", snap="",
+        repo_other={}, de="kde")
     packages["transmission-gtk"] = Package(
-        name="Transmission", desc="Torrent", group="Applications",
+        name="Transmission (GTK)", desc="Torrent", group="Applications",
         repo=["transmission-gtk"], flatpak="", snap="",
         repo_other={}, de="gnome")
+    packages["transmission-qt"] = Package(
+        name="Transmission (QT)", desc="Torrent", group="Applications",
+        repo=["transmission-qt"], flatpak="", snap="",
+        repo_other={}, de="kde")
     packages["virtualbox"] = Package(
         name="Virtual Box", desc="Virtual Machine Manager", group="Applications",
         repo=[], flatpak="", snap="",
@@ -452,6 +468,14 @@ def define_packages():
         name="Gnome Builder", desc="Gnome IDE", group="Editors",
         repo=[], flatpak="org.gnome.Builder", snap="",
         repo_other={}, de="gnome")
+    packages["kate"] = Package(
+        name="Kate", desc="Text Editor", group="Editors",
+        repo=["kate"], flatpak="", snap="",
+        repo_other={}, de="kde")
+    packages["kwrite"] = Package(
+        name="KWrite", desc="KDE Text Editor", group="Editors",
+        repo=["kwrite"], flatpak="org.kde.kwrite", snap="",
+        repo_other={}, de="kde")
     packages["libreoffice"] = Package(
         name="LibreOffice", desc="Office Suite", group="Editors",
         repo=["libreoffice-writer", "libreoffice-calc", "libreoffice-impress", "libreoffice-draw", "libreoffice-base"],
@@ -471,6 +495,10 @@ def define_packages():
         name="Gnome Software", desc="", group="Software",
         repo=["gnome-software"], flatpak="", snap="",
         repo_other={"pop": []}, de="gnome")
+    packages["plasma-discover"] = Package(
+        name="Plasma Discover", desc="", group="Software",
+        repo=["plasma-discover"], flatpak="", snap="",
+        repo_other={}, de="kde")
     packages["snap-store"] = Package(
         name="Snap Store", desc="", group="Software",
         repo=[], flatpak="", snap="snap-store",
@@ -501,6 +529,10 @@ def define_packages():
         name="Gnome Tweaks", desc="", group="Utilities",
         repo=["gnome-tweaks"], flatpak="", snap="",
         repo_other={}, de="gnome")
+    packages["ksysguard"] = Package(
+        name="KSysGuard", desc="KDE System Monitor", group="Utilities",
+        repo=["ksysguard"], flatpak="", snap="",
+        repo_other={}, de="kde")
     packages["simple-scan"] = Package(
         name="Simple Scan", desc="", group="Utilities",
         repo=["simple-scan"], flatpak="", snap="",
