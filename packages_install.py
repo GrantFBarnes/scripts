@@ -586,27 +586,27 @@ def get_packages():
 
 
 def create_gui(root):
-    Button(root, text="Update", command=execute_update, height=2, width=16, bg="white").grid(row=0, column=1)
-    Button(root, text="Auto-Remove", command=execute_autoremove, height=2, width=16, bg="white").grid(row=1, column=1)
-    Button(root, text="Sync Packages", command=execute_sync_packages, height=2, width=16, bg="white").grid(row=2, column=1)
+    Button(root, text="Update", command=execute_update, height=2, width=16, fg="black", bg="white").grid(row=0, column=1)
+    Button(root, text="Auto-Remove", command=execute_autoremove, height=2, width=16, fg="black", bg="white").grid(row=1, column=1)
+    Button(root, text="Sync Packages", command=execute_sync_packages, height=2, width=16, fg="black", bg="white").grid(row=2, column=1)
 
     box = ScrolledText(root)
-    box.config(height=35, width=92, bg="white")
+    box.config(height=35, width=92, fg="black", bg="white")
     box.grid(row=0, column=0, rowspan=3)
 
     for group in groups:
         group_frame = Frame(root, bg="white")
 
         row = 0
-        Label(group_frame, text=group, font=("", 16), bg="white").grid(row=row, column=0, columnspan=6, pady=10)
+        Label(group_frame, text=group, font=("", 16), fg="black", bg="white").grid(row=row, column=0, columnspan=6, pady=10)
 
         row += 1
-        Label(group_frame, text="Package", width=24, bg="white").grid(row=row, column=0, pady=10)
-        Label(group_frame, text="Description", width=40, bg="white").grid(row=row, column=1)
-        Label(group_frame, text="Repo", width=6, bg="white").grid(row=row, column=2)
-        Label(group_frame, text="Flatpak", width=6, bg="white").grid(row=row, column=3)
-        Label(group_frame, text="Snap", width=6, bg="white").grid(row=row, column=4)
-        Label(group_frame, text="Remove", width=7, bg="white").grid(row=row, column=5)
+        Label(group_frame, text="Package", width=24, fg="black", bg="white").grid(row=row, column=0, pady=10)
+        Label(group_frame, text="Description", width=40, fg="black", bg="white").grid(row=row, column=1)
+        Label(group_frame, text="Repo", width=6, fg="black", bg="white").grid(row=row, column=2)
+        Label(group_frame, text="Flatpak", width=6, fg="black", bg="white").grid(row=row, column=3)
+        Label(group_frame, text="Snap", width=6, fg="black", bg="white").grid(row=row, column=4)
+        Label(group_frame, text="Remove", width=7, fg="black", bg="white").grid(row=row, column=5)
 
         for pkg in groups[group]:
             package = packages[pkg]
@@ -636,8 +636,8 @@ def create_gui(root):
                 de_bg = "#c7ffc3"
 
             row += 1
-            Label(group_frame, text=package.name, wraplength=180, bg=de_bg).grid(row=row, column=0, sticky="e")
-            Label(group_frame, text=package.desc, wraplength=280, bg="white").grid(row=row, column=1)
+            Label(group_frame, text=package.name, wraplength=180, fg="black", bg=de_bg).grid(row=row, column=0, sticky="e")
+            Label(group_frame, text=package.desc, wraplength=280, fg="black", bg="white").grid(row=row, column=1)
 
             if has_package:
                 Radiobutton(
@@ -645,6 +645,7 @@ def create_gui(root):
                     text="R",
                     variable=selected_installs[pkg],
                     value="repo",
+                    fg="black",
                     bg="white"
                 ).grid(row=row, column=2)
 
@@ -654,6 +655,7 @@ def create_gui(root):
                     text="F",
                     variable=selected_installs[pkg],
                     value="flatpak",
+                    fg="black",
                     bg="white"
                 ).grid(row=row, column=3)
 
@@ -663,6 +665,7 @@ def create_gui(root):
                     text="S",
                     variable=selected_installs[pkg],
                     value="snap",
+                    fg="black",
                     bg="white"
                 ).grid(row=row, column=4)
 
@@ -671,6 +674,7 @@ def create_gui(root):
                 text="X",
                 variable=selected_installs[pkg],
                 value="",
+                fg="black",
                 bg="white"
             ).grid(row=row, column=5, padx=12)
 
