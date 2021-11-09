@@ -45,6 +45,9 @@ def main():
     applet_path = "plasma-org.kde.plasma.desktop-appletsrc"
     clock_group = find_group(applet_path, "digitalclock")
     clock_groups = convert_group_to_groups(clock_group)
+    if clock_groups is not None:
+        clock_groups.append("Configuration")
+        clock_groups.append("Appearance")
     set_config(applet_path, clock_groups, "dateFormat", '"isoDate"')
     set_config(applet_path, clock_groups, "showSeconds", 'true')
 
