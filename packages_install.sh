@@ -218,7 +218,7 @@ function setupEnvironment() {
     fi
 }
 
-function selectPackages() {
+function installPackages() {
 
     packageOptions=()
     packageOptions+=("curl" "Curl Command" off)
@@ -319,9 +319,7 @@ function selectPackages() {
             ;;
         esac
     done
-}
 
-function installPackages() {
     if [ ${#packagesToInstall[@]} -gt 0 ]; then
         confirmWhiptail "Install packages individually?"
         if [ $? -eq 0 ]; then
@@ -403,7 +401,6 @@ function chooseUsage() {
     categoryOptions+=("Update" "Packages")
     categoryOptions+=("Repository" "Setup")
     categoryOptions+=("Environment" "Setup")
-    categoryOptions+=("Select" "Packages")
     categoryOptions+=("Install" "Packages")
     categoryOptions+=("Remove" "Packages")
     categoryOptions+=("Exit" "")
@@ -427,10 +424,6 @@ function chooseUsage() {
         ;;
     "Environment")
         setupEnvironment
-        defaultCategory="Select"
-        ;;
-    "Select")
-        selectPackages
         defaultCategory="Install"
         ;;
     "Install")
