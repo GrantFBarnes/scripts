@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
+from helper_functions import *
 import os
-import subprocess
 
 # ANSI Escape Sequences
 reset = "\033[0m"
@@ -22,14 +22,6 @@ def set_alias():
     file = open(bashrc, "a")
     file.write('alias ov="python3 ' + os.path.abspath(__file__) + '"\n')
     file.close()
-
-
-def has_command(command):
-    return os.system("command -v " + command + " >/dev/null 2>&1") == 0
-
-
-def run_command(command):
-    return subprocess.check_output(['bash', '-c', command]).decode("utf-8").strip()
 
 
 def get_distro():
