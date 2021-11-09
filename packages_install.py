@@ -306,6 +306,10 @@ def define_packages():
         name="Gwenview", desc="KDE Image Viewer", group="Applications",
         repo=["gwenview"], flatpak="org.kde.gwenview", snap="",
         repo_other={}, de="kde")
+    packages["kalendar"] = Package(
+        name="Kalendar", desc="KDE Calendar", group="Applications",
+        repo=["kalendar"], flatpak="", snap="",
+        repo_other={}, de="kde")
     packages["kcalc"] = Package(
         name="KCalc", desc="KDE Calculator", group="Applications",
         repo=["kcalc"], flatpak="org.kde.kcalc", snap="",
@@ -392,6 +396,18 @@ def define_packages():
         name="Gnome Sudoku", desc="", group="Games",
         repo=["gnome-sudoku"], flatpak="org.gnome.Sudoku", snap="",
         repo_other={"redhat": []}, de="gnome")
+    packages["kmines"] = Package(
+        name="KMines", desc="", group="Games",
+        repo=["kmines"], flatpak="", snap="",
+        repo_other={}, de="kde")
+    packages["knights"] = Package(
+        name="KNights", desc="", group="Games",
+        repo=["knights"], flatpak="", snap="knights",
+        repo_other={}, de="kde")
+    packages["ksudoku"] = Package(
+        name="KSudoku", desc="", group="Games",
+        repo=["ksudoku"], flatpak="org.kde.ksudoku", snap="",
+        repo_other={}, de="kde")
     packages["quadrapassel"] = Package(
         name="Quadrapassel", desc="Gnome Tetris", group="Games",
         repo=["quadrapassel"], flatpak="org.gnome.Quadrapassel", snap="",
@@ -414,6 +430,10 @@ def define_packages():
         name="Blender", desc="3D Modleler and Video Editor", group="Multi Media",
         repo=["blender"], flatpak="org.blender.Blender", snap="blender",
         repo_other={"redhat": []}, snap_classic=True)
+    packages["elisa"] = Package(
+        name="Elisa", desc="KDE Music Player", group="Multi Media",
+        repo=["elisa"], flatpak="org.kde.elisa", snap="",
+        repo_other={}, de="kde")
     packages["gimp"] = Package(
         name="GIMP", desc="GNU Image Manipulation Program", group="Multi Media",
         repo=["gimp"], flatpak="org.gimp.GIMP", snap="",
@@ -475,6 +495,10 @@ def define_packages():
     packages["kwrite"] = Package(
         name="KWrite", desc="KDE Text Editor", group="Editors",
         repo=["kwrite"], flatpak="org.kde.kwrite", snap="",
+        repo_other={}, de="kde")
+    packages["kdevelop"] = Package(
+        name="KDevelop", desc="KDE IDE", group="Editors",
+        repo=["kdevelop"], flatpak="org.kde.kdevelop", snap="",
         repo_other={}, de="kde")
     packages["libreoffice"] = Package(
         name="LibreOffice", desc="Office Suite", group="Editors",
