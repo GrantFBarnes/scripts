@@ -41,15 +41,24 @@ def set_config(file, groups, key, value):
 
 def main():
 
-    # Configure Clock
     applet_path = "plasma-org.kde.plasma.desktop-appletsrc"
-    clock_group = find_group(applet_path, "digitalclock")
+
+    # Configure Clock
+    clock_group = find_group(applet_path, "org.kde.plasma.digitalclock")
     clock_groups = convert_group_to_groups(clock_group)
     if clock_groups is not None:
         clock_groups.append("Configuration")
         clock_groups.append("Appearance")
     set_config(applet_path, clock_groups, "dateFormat", '"isoDate"')
     set_config(applet_path, clock_groups, "showSeconds", 'true')
+
+    # Show Battery Percentage
+    battery_group = find_group(applet_path, "org.kde.plasma.battery")
+    battery_groups = convert_group_to_groups(battery_group)
+    if battery_groups is not None:
+        battery_groups.append("Configuration")
+        battery_groups.append("General")
+    set_config(applet_path, battery_groups, "showPercentage", 'true')
 
     # Set Night Color
     set_config("kwinrc", ["NightColor"], "Active", 'true')

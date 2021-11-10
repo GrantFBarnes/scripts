@@ -23,7 +23,7 @@ class Distribution:
         if self.package_manager == "pacman":
             return get_command("pacman -Q | awk '{print $1}'").split("\n")
         return []
-    
+
     def setup_flatpak(self):
         if has_command("flatpak"):
             run_command("sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo")
@@ -288,8 +288,8 @@ def define_packages():
         repo_other={}, de="gnome")
     packages["gnome-passwordsafe"] = Package(
         name="Gnome Password Safe", desc="", group="Applications",
-        repo=[], flatpak="org.gnome.PasswordSafe", snap="",
-        repo_other={"fedora": ["gnome-passwordsafe"]}, de="gnome")
+        repo=["gnome-passwordsafe"], flatpak="org.gnome.PasswordSafe", snap="",
+        repo_other={"apt": []}, de="gnome")
     packages["gnome-weather"] = Package(
         name="Gnome Weather", desc="", group="Applications",
         repo=["gnome-weather"], flatpak="org.gnome.Weather", snap="",
@@ -309,7 +309,7 @@ def define_packages():
     packages["kalendar"] = Package(
         name="Kalendar", desc="KDE Calendar", group="Applications",
         repo=["kalendar"], flatpak="", snap="",
-        repo_other={}, de="kde")
+        repo_other={"pacman": []}, de="kde")
     packages["kcalc"] = Package(
         name="KCalc", desc="KDE Calculator", group="Applications",
         repo=["kcalc"], flatpak="org.kde.kcalc", snap="",
@@ -479,7 +479,7 @@ def define_packages():
     packages["codium"] = Package(
         name="Codium", desc="FOSS Visual Studio Code", group="Editors",
         repo=[], flatpak="com.vscodium.codium", snap="",
-        repo_other={})
+        repo_other={"pacman": ["code"]})
     packages["gedit"] = Package(
         name="gedit", desc="Gnome Text Editor", group="Editors",
         repo=["gedit"], flatpak="org.gnome.gedit", snap="",
@@ -508,11 +508,11 @@ def define_packages():
     packages["texstudio"] = Package(
         name="TeX Studio", desc="LaTex Editor", group="Editors",
         repo=[], flatpak="org.texstudio.TeXstudio", snap="",
-        repo_other={})
+        repo_other={"pacman": ["texstudio"]})
     packages["pycharm"] = Package(
         name="PyCharm", desc="JetBrains Python Editor", group="Editors",
         repo=[], flatpak="com.jetbrains.PyCharm-Community", snap="pycharm-community",
-        repo_other={}, snap_classic=True)
+        repo_other={"pacman": ["pycharm-community-edition"]}, snap_classic=True)
 
     # Software Group
     packages["gnome-software"] = Package(
@@ -522,7 +522,7 @@ def define_packages():
     packages["plasma-discover"] = Package(
         name="Plasma Discover", desc="", group="Software",
         repo=["plasma-discover"], flatpak="", snap="",
-        repo_other={}, de="kde")
+        repo_other={"pacman": ["discover"]}, de="kde")
     packages["snap-store"] = Package(
         name="Snap Store", desc="", group="Software",
         repo=[], flatpak="", snap="snap-store",
@@ -556,6 +556,10 @@ def define_packages():
     packages["ksysguard"] = Package(
         name="KSysGuard", desc="KDE System Monitor", group="Utilities",
         repo=["ksysguard"], flatpak="", snap="",
+        repo_other={}, de="kde")
+    packages["plasma-systemmonitor"] = Package(
+        name="Plasma System Monitor", desc="KDE System Monitor", group="Utilities",
+        repo=["plasma-systemmonitor"], flatpak="", snap="",
         repo_other={}, de="kde")
     packages["simple-scan"] = Package(
         name="Simple Scan", desc="", group="Utilities",

@@ -235,7 +235,7 @@ function installPackages() {
     packageOptions+=("neofetch" "neofetch overview display" off)
     packageOptions+=("net-tools" "Network Packages" off)
     packageOptions+=("node" "Node.js and NPM" off)
-    packageOptions+=("python3-pip" "Python PIP" off)
+    packageOptions+=("pip" "Python PIP" off)
     packageOptions+=("ssh" "SSH" off)
     packageOptions+=("tkinter" "Python Tkinter" off)
     packageOptions+=("vim" "VIM" on)
@@ -295,6 +295,13 @@ function installPackages() {
                 packagesToInstall+=(mariadb-server)
             else
                 packagesToInstall+=($pkg)
+            fi
+            ;;
+        "pip")
+            if [ "$pm" == "pacman" ]; then
+                packagesToInstall+=(python-pip)
+            else
+                packagesToInstall+=(python3-pip)
             fi
             ;;
         "tkinter")
@@ -390,7 +397,13 @@ function removePackages() {
     # Remove Packages
 
     if [ ${#packagesToRemove[@]} -gt 0 ]; then
-        packageManager remove ${packagesToRemove[*]}
+        if [ "$pm" == "pacman" ]; then
+            for i in "${packagesToRemove[@]}"; do
+                packageManager remove $i
+            done
+        else
+            packageManager remove ${packagesToRemove[*]}
+        fi
     fi
 
     packageManager autoremove
