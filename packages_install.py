@@ -328,8 +328,8 @@ def define_packages():
         repo_other={}, de="kde")
     packages["virtualbox"] = Package(
         name="Virtual Box", desc="Virtual Machine Manager", group="Applications",
-        repo=[], flatpak="", snap="",
-        repo_other={"apt": ["virtualbox"], "dnf": ["VirtualBox"], "debian": []})
+        repo=["virtualbox"], flatpak="", snap="",
+        repo_other={"dnf": ["VirtualBox"], "debian": []})
 
     # Browsers Group
     packages["chromium"] = Package(
@@ -533,6 +533,10 @@ def define_packages():
         repo_other={"apt": ["synaptic"]})
 
     # Utilities Group
+    packages["ark"] = Package(
+        name="Ark", desc="KDE Archiving Tool", group="Utilities",
+        repo=["ark"], flatpak="org.kde.ark", snap="ark",
+        repo_other={}, de="kde")
     packages["baobab"] = Package(
         name="Baobab", desc="Gnome Disk Usage", group="Utilities",
         repo=["baobab"], flatpak="", snap="",
@@ -565,6 +569,10 @@ def define_packages():
         name="Simple Scan", desc="", group="Utilities",
         repo=["simple-scan"], flatpak="", snap="",
         repo_other={})
+    packages["spectacle"] = Package(
+        name="Spectacle", desc="KDE Screenshot", group="Utilities",
+        repo=["spectacle"], flatpak="", snap="spectacle",
+        repo_other={}, de="kde")
 
 
 def define_groups():
