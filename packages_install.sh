@@ -70,6 +70,8 @@ function packageManager() {
         fi
     elif [ "$method" == "remove" ] && [ "$pm" == "apt" ]; then
         sudo apt-get remove --purge ${@:2} -y
+    elif [ "$method" == "module" ]; then
+        sudo dnf module install ${@:2} -y
     else
         sudo $pm $method ${@:2} -y
     fi
@@ -115,6 +117,7 @@ declare -a packageOptions
 declare -a packageSelections
 
 declare -a packagesToInstall
+declare -a modulesToInstall
 
 declare -a packagesToRemove
 
@@ -159,6 +162,11 @@ function setupEnvironment() {
     grep -q EDITOR $bashrc
     if [ $? -eq 1 ]; then
         sudo -u $SUDO_USER echo export EDITOR='"/usr/bin/vim"' >>$bashrc
+    fi
+
+    grep -q NODE_OPTIONS $bashrc
+    if [ $? -eq 1 ]; then
+        sudo -u $SUDO_USER echo export NODE_OPTIONS='--max_old_space_size=8192' >>$bashrc
     fi
 
     grep -q GFB_HOSTING_ENV $bashrc
@@ -283,9 +291,8 @@ function installPackages() {
         "node")
             packagesToInstall+=(nodejs)
             packagesToInstall+=(npm)
-            grep -q NODE_OPTIONS $bashrc
-            if [ $? -eq 1 ]; then
-                sudo -u $SUDO_USER echo export NODE_OPTIONS='--max_old_space_size=8192' >>$bashrc
+            if [ "$pm" == "dnf" ]; then
+                modulesToInstall+=(nodejs:14/default)
             fi
             ;;
         "mysql-server")
@@ -336,6 +343,12 @@ function installPackages() {
         else
             packageManager install ${packagesToInstall[*]}
         fi
+    fi
+
+    if [ ${#modulesToInstall[@]} -gt 0 ]; then
+        for i in "${modulesToInstall[@]}"; do
+            packageManager module $i
+        done
     fi
 }
 
