@@ -28,7 +28,7 @@ class Distribution:
         if has_command("flatpak"):
             run_command(
                 "sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo")
-            if self.name == "debian" or self.name == "fedora":
+            if self.name == "debian" or self.package_manager == "dnf":
                 run_command(
                     "flatpak install org.gtk.Gtk3theme.Adwaita-dark -y")
 
