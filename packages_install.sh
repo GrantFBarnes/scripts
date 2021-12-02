@@ -289,10 +289,13 @@ function installPackages() {
             fi
             ;;
         "node")
-            packagesToInstall+=(nodejs)
-            packagesToInstall+=(npm)
-            if [ "$pm" == "dnf" ]; then
+            if [ "$distro" == "fedora" ]; then
                 modulesToInstall+=(nodejs:14/default)
+            elif [ "$distro" == "centos" ]; then
+                modulesToInstall+=(nodejs:14)
+            else
+                packagesToInstall+=(nodejs)
+                packagesToInstall+=(npm)
             fi
             ;;
         "mysql-server")

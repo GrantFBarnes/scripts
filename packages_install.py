@@ -26,9 +26,11 @@ class Distribution:
 
     def setup_flatpak(self):
         if has_command("flatpak"):
-            run_command("sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo")
+            run_command(
+                "sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo")
             if self.name == "debian" or self.name == "fedora":
-                run_command("flatpak install org.gtk.Gtk3theme.Adwaita-dark -y")
+                run_command(
+                    "flatpak install org.gtk.Gtk3theme.Adwaita-dark -y")
 
     def install_flatpak(self):
         self.install(["flatpak"])
@@ -229,7 +231,7 @@ def define_packages():
     packages["cheese"] = Package(
         name="Cheese", desc="Webcam", group="Applications",
         repo=["cheese"], flatpak="org.gnome.Cheese", snap="",
-        repo_other={"redhat": []})
+        repo_other={})
     packages["deja-dup"] = Package(
         name="Deja-Dup", desc="Backup", group="Applications",
         repo=["deja-dup"], flatpak="org.gnome.DejaDup", snap="",
@@ -277,7 +279,7 @@ def define_packages():
     packages["gnome-connections"] = Package(
         name="Gnome Connections", desc="Network Connection Manager", group="Applications",
         repo=["gnome-connections"], flatpak="org.gnome.Connections", snap="",
-        repo_other={}, de="gnome")
+        repo_other={"redhat": []}, de="gnome")
     packages["gnome-dialect"] = Package(
         name="Gnome Dialect", desc="", group="Applications",
         repo=[], flatpak="com.github.gi_lom.dialect", snap="",
@@ -285,11 +287,11 @@ def define_packages():
     packages["gnome-maps"] = Package(
         name="Gnome Maps", desc="", group="Applications",
         repo=["gnome-maps"], flatpak="org.gnome.Maps", snap="",
-        repo_other={}, de="gnome")
+        repo_other={"redhat": []}, de="gnome")
     packages["gnome-passwordsafe"] = Package(
         name="Gnome Password Safe", desc="", group="Applications",
         repo=["gnome-passwordsafe"], flatpak="org.gnome.PasswordSafe", snap="",
-        repo_other={"apt": []}, de="gnome")
+        repo_other={"apt": [], "redhat": []}, de="gnome")
     packages["gnome-weather"] = Package(
         name="Gnome Weather", desc="", group="Applications",
         repo=["gnome-weather"], flatpak="org.gnome.Weather", snap="",
@@ -305,19 +307,19 @@ def define_packages():
     packages["gwenview"] = Package(
         name="Gwenview", desc="KDE Image Viewer", group="Applications",
         repo=["gwenview"], flatpak="org.kde.gwenview", snap="",
-        repo_other={}, de="kde")
+        repo_other={"redhat": []}, de="kde")
     packages["kalendar"] = Package(
         name="Kalendar", desc="KDE Calendar", group="Applications",
         repo=["kalendar"], flatpak="", snap="",
-        repo_other={"pacman": []}, de="kde")
+        repo_other={"pacman": [], "redhat": []}, de="kde")
     packages["kcalc"] = Package(
         name="KCalc", desc="KDE Calculator", group="Applications",
         repo=["kcalc"], flatpak="org.kde.kcalc", snap="",
-        repo_other={}, de="kde")
+        repo_other={"redhat": []}, de="kde")
     packages["okular"] = Package(
         name="Okular", desc="KDE Document Viewer", group="Applications",
         repo=["okular"], flatpak="org.kde.okular", snap="",
-        repo_other={}, de="kde")
+        repo_other={"redhat": []}, de="kde")
     packages["transmission-gtk"] = Package(
         name="Transmission (GTK)", desc="Torrent", group="Applications",
         repo=["transmission-gtk"], flatpak="", snap="",
@@ -325,7 +327,7 @@ def define_packages():
     packages["transmission-qt"] = Package(
         name="Transmission (QT)", desc="Torrent", group="Applications",
         repo=["transmission-qt"], flatpak="", snap="",
-        repo_other={}, de="kde")
+        repo_other={"redhat": []}, de="kde")
     packages["virtualbox"] = Package(
         name="Virtual Box", desc="Virtual Machine Manager", group="Applications",
         repo=["virtualbox"], flatpak="", snap="",
@@ -335,7 +337,7 @@ def define_packages():
     packages["chromium"] = Package(
         name="Chromium", desc="", group="Browsers",
         repo=["chromium"], flatpak="org.chromium.Chromium", snap="chromium",
-        repo_other={"ubuntu": []})
+        repo_other={"ubuntu": [], "redhat": []})
     packages["epiphany"] = Package(
         name="Epiphany", desc="Gnome", group="Browsers",
         repo=["epiphany"], flatpak="org.gnome.Epiphany", snap="",
@@ -399,15 +401,15 @@ def define_packages():
     packages["kmines"] = Package(
         name="KMines", desc="", group="Games",
         repo=["kmines"], flatpak="", snap="",
-        repo_other={}, de="kde")
+        repo_other={"redhat": []}, de="kde")
     packages["knights"] = Package(
         name="KNights", desc="", group="Games",
         repo=["knights"], flatpak="", snap="knights",
-        repo_other={}, de="kde")
+        repo_other={"redhat": []}, de="kde")
     packages["ksudoku"] = Package(
         name="KSudoku", desc="", group="Games",
         repo=["ksudoku"], flatpak="org.kde.ksudoku", snap="",
-        repo_other={}, de="kde")
+        repo_other={"redhat": []}, de="kde")
     packages["quadrapassel"] = Package(
         name="Quadrapassel", desc="Gnome Tetris", group="Games",
         repo=["quadrapassel"], flatpak="org.gnome.Quadrapassel", snap="",
@@ -433,7 +435,7 @@ def define_packages():
     packages["elisa"] = Package(
         name="Elisa", desc="KDE Music Player", group="Multi Media",
         repo=["elisa"], flatpak="org.kde.elisa", snap="",
-        repo_other={}, de="kde")
+        repo_other={"redhat": []}, de="kde")
     packages["gimp"] = Package(
         name="GIMP", desc="GNU Image Manipulation Program", group="Multi Media",
         repo=["gimp"], flatpak="org.gimp.GIMP", snap="",
@@ -449,7 +451,7 @@ def define_packages():
     packages["gnome-sound-recorder"] = Package(
         name="Gnome Sound Recorder", desc="", group="Multi Media",
         repo=["gnome-sound-recorder"], flatpak="org.gnome.SoundRecorder", snap="",
-        repo_other={}, de="gnome")
+        repo_other={"redhat": []}, de="gnome")
     packages["kdenlive"] = Package(
         name="KdenLive", desc="KDE Video Editor", group="Multi Media",
         repo=["kdenlive"], flatpak="org.kde.kdenlive", snap="",
@@ -491,18 +493,19 @@ def define_packages():
     packages["kate"] = Package(
         name="Kate", desc="Text Editor", group="Editors",
         repo=["kate"], flatpak="", snap="",
-        repo_other={}, de="kde")
+        repo_other={"redhat": []}, de="kde")
     packages["kwrite"] = Package(
         name="KWrite", desc="KDE Text Editor", group="Editors",
         repo=["kwrite"], flatpak="org.kde.kwrite", snap="",
-        repo_other={}, de="kde")
+        repo_other={"redhat": []}, de="kde")
     packages["kdevelop"] = Package(
         name="KDevelop", desc="KDE IDE", group="Editors",
         repo=["kdevelop"], flatpak="org.kde.kdevelop", snap="",
-        repo_other={}, de="kde")
+        repo_other={"redhat": []}, de="kde")
     packages["libreoffice"] = Package(
         name="LibreOffice", desc="Office Suite", group="Editors",
-        repo=["libreoffice-writer", "libreoffice-calc", "libreoffice-impress", "libreoffice-draw", "libreoffice-base"],
+        repo=["libreoffice-writer", "libreoffice-calc",
+              "libreoffice-impress", "libreoffice-draw", "libreoffice-base"],
         flatpak="org.libreoffice.LibreOffice", snap="libreoffice",
         repo_other={"pacman": ["libreoffice-fresh"]})
     packages["texstudio"] = Package(
@@ -522,7 +525,7 @@ def define_packages():
     packages["plasma-discover"] = Package(
         name="Plasma Discover", desc="", group="Software",
         repo=["plasma-discover"], flatpak="", snap="",
-        repo_other={"pacman": ["discover"]}, de="kde")
+        repo_other={"pacman": ["discover"], "redhat": []}, de="kde")
     packages["snap-store"] = Package(
         name="Snap Store", desc="", group="Software",
         repo=[], flatpak="", snap="snap-store",
@@ -536,7 +539,7 @@ def define_packages():
     packages["ark"] = Package(
         name="Ark", desc="KDE Archiving Tool", group="Utilities",
         repo=["ark"], flatpak="org.kde.ark", snap="ark",
-        repo_other={}, de="kde")
+        repo_other={"redhat": []}, de="kde")
     packages["baobab"] = Package(
         name="Baobab", desc="Gnome Disk Usage", group="Utilities",
         repo=["baobab"], flatpak="", snap="",
@@ -560,11 +563,11 @@ def define_packages():
     packages["ksysguard"] = Package(
         name="KSysGuard", desc="KDE System Monitor", group="Utilities",
         repo=["ksysguard"], flatpak="", snap="",
-        repo_other={}, de="kde")
+        repo_other={"redhat": []}, de="kde")
     packages["plasma-systemmonitor"] = Package(
         name="Plasma System Monitor", desc="KDE System Monitor", group="Utilities",
         repo=["plasma-systemmonitor"], flatpak="", snap="",
-        repo_other={}, de="kde")
+        repo_other={"redhat": []}, de="kde")
     packages["simple-scan"] = Package(
         name="Simple Scan", desc="", group="Utilities",
         repo=["simple-scan"], flatpak="", snap="",
@@ -572,7 +575,7 @@ def define_packages():
     packages["spectacle"] = Package(
         name="Spectacle", desc="KDE Screenshot", group="Utilities",
         repo=["spectacle"], flatpak="", snap="spectacle",
-        repo_other={}, de="kde")
+        repo_other={"redhat": []}, de="kde")
 
 
 def define_groups():
@@ -622,27 +625,37 @@ def get_packages():
 
 
 def create_gui(root):
-    Button(root, text="Update", command=execute_update, height=2, width=16, fg="black", bg="white").grid(row=0, column=1)
-    Button(root, text="Auto-Remove", command=execute_autoremove, height=2, width=16, fg="black", bg="white").grid(row=1, column=1)
-    Button(root, text="Sync Packages", command=execute_sync_packages, height=2, width=16, fg="black", bg="white").grid(row=2, column=1)
+    Button(root, text="Update", command=execute_update, height=2,
+           width=16, fg="black", bg="white").grid(row=0, column=1)
+    Button(root, text="Auto-Remove", command=execute_autoremove,
+           height=2, width=16, fg="black", bg="white").grid(row=1, column=1)
+    Button(root, text="Sync Packages", command=execute_sync_packages,
+           height=2, width=16, fg="black", bg="white").grid(row=2, column=1)
 
     box = ScrolledText(root)
-    box.config(height=35, width=92, fg="black", bg="white")
+    box.config(height=35, width=105, fg="black", bg="white")
     box.grid(row=0, column=0, rowspan=3)
 
     for group in groups:
         group_frame = Frame(root, bg="white")
 
         row = 0
-        Label(group_frame, text=group, font=("", 16), fg="black", bg="white").grid(row=row, column=0, columnspan=6, pady=10)
+        Label(group_frame, text=group, font=("", 16), fg="black",
+              bg="white").grid(row=row, column=0, columnspan=6, pady=10)
 
         row += 1
-        Label(group_frame, text="Package", width=24, fg="black", bg="white").grid(row=row, column=0, pady=10)
-        Label(group_frame, text="Description", width=40, fg="black", bg="white").grid(row=row, column=1)
-        Label(group_frame, text="Repo", width=6, fg="black", bg="white").grid(row=row, column=2)
-        Label(group_frame, text="Flatpak", width=6, fg="black", bg="white").grid(row=row, column=3)
-        Label(group_frame, text="Snap", width=6, fg="black", bg="white").grid(row=row, column=4)
-        Label(group_frame, text="Remove", width=7, fg="black", bg="white").grid(row=row, column=5)
+        Label(group_frame, text="Package", width=24, fg="black",
+              bg="white").grid(row=row, column=0, pady=10)
+        Label(group_frame, text="Description", width=40,
+              fg="black", bg="white").grid(row=row, column=1)
+        Label(group_frame, text="Repo", width=6, fg="black",
+              bg="white").grid(row=row, column=2)
+        Label(group_frame, text="Flatpak", width=6,
+              fg="black", bg="white").grid(row=row, column=3)
+        Label(group_frame, text="Snap", width=6, fg="black",
+              bg="white").grid(row=row, column=4)
+        Label(group_frame, text="Remove", width=7,
+              fg="black", bg="white").grid(row=row, column=5)
 
         for pkg in groups[group]:
             package = packages[pkg]
@@ -663,7 +676,8 @@ def create_gui(root):
                 continue
 
             row += 1
-            ttk.Separator(group_frame, orient="horizontal").grid(row=row, column=0, columnspan=6, sticky="we")
+            ttk.Separator(group_frame, orient="horizontal").grid(
+                row=row, column=0, columnspan=6, sticky="we")
 
             de_bg = "white"
             if package.de == "gnome":
@@ -672,8 +686,10 @@ def create_gui(root):
                 de_bg = "#c7ffc3"
 
             row += 1
-            Label(group_frame, text=package.name, wraplength=180, fg="black", bg=de_bg).grid(row=row, column=0, sticky="e")
-            Label(group_frame, text=package.desc, wraplength=280, fg="black", bg="white").grid(row=row, column=1)
+            Label(group_frame, text=package.name, wraplength=180,
+                  fg="black", bg=de_bg).grid(row=row, column=0, sticky="e")
+            Label(group_frame, text=package.desc, wraplength=280,
+                  fg="black", bg="white").grid(row=row, column=1)
 
             if has_package:
                 Radiobutton(
@@ -715,7 +731,8 @@ def create_gui(root):
             ).grid(row=row, column=5, padx=12)
 
         row += 1
-        ttk.Separator(group_frame, orient="horizontal").grid(row=row, column=0, columnspan=6, sticky="we")
+        ttk.Separator(group_frame, orient="horizontal").grid(
+            row=row, column=0, columnspan=6, sticky="we")
 
         box.window_create(END, window=group_frame)
         box.insert(END, "\n")
