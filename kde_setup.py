@@ -36,7 +36,7 @@ def set_config(file, groups, key, value):
         command += ' --group "' + group + '"'
     command += ' --key "' + key + '"'
     command += ' ' + value
-    run_command(command)
+    get_command(command)
 
 
 def main():

@@ -49,6 +49,9 @@ gsettings set org.gnome.settings-daemon.plugins.color night-light-schedule-to "3
 
 # Set WM Buttons
 gsettings set org.gnome.desktop.wm.preferences button-layout ":close"
+if [ "$distro" == "ubuntu" ]; then
+    gsettings set org.gnome.desktop.wm.preferences button-layout ":minimize,maximize,close"
+fi
 
 # Enable Num Lock
 gsettings set org.gnome.desktop.peripherals.keyboard numlock-state true

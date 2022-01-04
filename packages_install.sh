@@ -123,6 +123,8 @@ declare -a packagesToRemove
 
 function setupRepository() {
     if [ "$pm" == "dnf" ]; then
+        distroVersion=$(rpm -E %${distro})
+
         grep -q max_parallel_downloads /etc/dnf/dnf.conf
         if [ $? -eq 1 ]; then
             sudo sh -c 'echo max_parallel_downloads=10 >> /etc/dnf/dnf.conf'
@@ -130,20 +132,21 @@ function setupRepository() {
             update
         fi
 
-        confirmWhiptail "Enable EPEL Repositories?"
+        confirmWhiptail "Enable EPEL/RPM Fusion Repositories?"
         if [ $? -eq 0 ]; then
             if [ "$distro" == "fedora" ]; then
-                sudo dnf install https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm -y
+                sudo dnf install https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-${distroVersion}.noarch.rpm -y
             elif [ "$distro" == "centos" ]; then
-                sudo dnf install --nogpgcheck https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm -y
-                sudo dnf install --nogpgcheck https://download1.rpmfusion.org/free/el/rpmfusion-free-release-8.noarch.rpm -y
+                sudo dnf install --nogpgcheck https://dl.fedoraproject.org/pub/epel/epel-release-latest-${distroVersion}.noarch.rpm -y
+                sudo dnf install --nogpgcheck https://download1.rpmfusion.org/free/el/rpmfusion-free-release-${distroVersion}.noarch.rpm -y
+                sudo dnf config-manager --set-enabled powertools
             fi
             confirmWhiptail "Enable Non-Free EPEL Repositories?"
             if [ $? -eq 0 ]; then
                 if [ "$distro" == "fedora" ]; then
-                    sudo dnf install https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm -y
+                    sudo dnf install https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-${distroVersion}.noarch.rpm -y
                 elif [ "$distro" == "centos" ]; then
-                    sudo dnf install --nogpgcheck https://download1.rpmfusion.org/nonfree/el/rpmfusion-nonfree-release-8.noarch.rpm -y
+                    sudo dnf install --nogpgcheck https://download1.rpmfusion.org/nonfree/el/rpmfusion-nonfree-release-${distroVersion}.noarch.rpm -y
                 fi
             fi
             update
@@ -236,7 +239,7 @@ function installPackages() {
     packageOptions+=("ibus-unikey" "Vietnamese Unikey" off)
     packageOptions+=("id3v2" "Modify MP3 Meta Data" off)
     packageOptions+=("imagemagick" "Image Magick" off)
-    packageOptions+=("git" "Git" on)
+    packageOptions+=("git" "Git" off)
     packageOptions+=("mysql-server" "MySQL Server" off)
     packageOptions+=("nano" "nano" off)
     packageOptions+=("ncdu" "Command Line Disk Usage" off)
@@ -246,6 +249,7 @@ function installPackages() {
     packageOptions+=("pip" "Python PIP" off)
     packageOptions+=("ssh" "SSH" off)
     packageOptions+=("tkinter" "Python Tkinter" off)
+    packageOptions+=("unzip" "Unzip zip files" off)
     packageOptions+=("vim" "VIM" on)
     packageOptions+=("youtube-dl" "Command Line YT Downloader" off)
 

@@ -7,4 +7,8 @@ def has_command(command):
 
 
 def run_command(command):
-    return subprocess.check_output(['bash', '-c', command]).decode("utf-8").strip()
+    subprocess.run(["bash", "-c", command])
+
+
+def get_command(command):
+    return subprocess.check_output(["bash", "-c", command]).decode("utf-8").strip()

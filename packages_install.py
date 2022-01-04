@@ -3,6 +3,7 @@
 import os
 import subprocess
 import sys
+from helper_functions import *
 from tkinter import *
 from tkinter import ttk
 from tkinter.scrolledtext import ScrolledText
@@ -111,6 +112,8 @@ class Package:
 
 # Global Variables
 distribution = Distribution("", "", "")
+has_gnome = False
+has_kde = False
 packages = {}
 groups = {}
 currently_installed = {}
@@ -118,18 +121,6 @@ selected_installs = {}
 
 
 # Functions
-def has_command(command):
-    return os.system("command -v " + command + " >/dev/null 2>&1") == 0
-
-
-def get_command(command):
-    return subprocess.check_output(["bash", "-c", command]).decode("utf-8").strip()
-
-
-def run_command(command):
-    subprocess.run(["bash", "-c", command])
-
-
 def uninstall_package(pkg, method):
     package = packages[pkg]
     if method == "repo":
@@ -184,6 +175,15 @@ def execute_autoremove():
     if has_command("flatpak"):
         run_command("flatpak remove --unused -y")
     print("Auto-Remove Complete")
+
+
+def get_desktop_env():
+    global has_gnome
+    global has_kde
+    if has_command("gnome-shell"):
+        has_gnome = True
+    if has_command("kwriteconfig5"):
+        has_kde = True
 
 
 def get_distro():
@@ -743,6 +743,7 @@ def main():
         print("Must be executed as root")
         sys.exit(1)
 
+    get_desktop_env()
     get_distribution()
     define_packages()
     define_groups()

@@ -126,8 +126,8 @@ def get_memory():
 
 
 def get_uptime():
-    boot = int(run_command('date -d"$(uptime -s)" +%s'))
-    now = int(run_command("date +%s"))
+    boot = int(get_command('date -d"$(uptime -s)" +%s'))
+    now = int(get_command("date +%s"))
     uptime_count = now - boot
 
     seconds_count = int(uptime_count % 60)
@@ -175,16 +175,16 @@ def get_packages():
     flatpak = "0"
 
     if has_command("dpkg"):
-        dpkg = run_command("dpkg --list | wc -l")
+        dpkg = get_command("dpkg --list | wc -l")
     if has_command("dnf"):
-        dnf = run_command("dnf list installed | wc -l")
+        dnf = get_command("dnf list installed | wc -l")
     if has_command("pacman"):
-        pacman = run_command("pacman -Q | wc -l")
+        pacman = get_command("pacman -Q | wc -l")
 
     if has_command("snap"):
-        snap = run_command("snap list | wc -l")
+        snap = get_command("snap list | wc -l")
     if has_command("flatpak"):
-        flatpak = run_command("flatpak list | wc -l")
+        flatpak = get_command("flatpak list | wc -l")
 
     packages = ""
     if dpkg != "0":
@@ -207,10 +207,10 @@ def main():
     set_alias()
 
     print(f"{cyan}-------------------------------{reset}")
-    print(f"{bold}{cyan}    User{reset}: " + run_command("echo $USER"))
-    print(f"{bold}{cyan}Hostname{reset}: " + run_command("echo $HOSTNAME"))
+    print(f"{bold}{cyan}    User{reset}: " + get_command("echo $USER"))
+    print(f"{bold}{cyan}Hostname{reset}: " + get_command("echo $HOSTNAME"))
     print(f"{bold}{cyan}  Distro{reset}: " + get_distro())
-    print(f"{bold}{cyan}  Kernel{reset}: " + run_command("uname -rm"))
+    print(f"{bold}{cyan}  Kernel{reset}: " + get_command("uname -rm"))
     print(f"{bold}{cyan}     CPU{reset}: " + get_cpu())
     print(f"{bold}{cyan}   Speed{reset}: " + get_cpu_speed())
     print(f"{bold}{cyan}  Memory{reset}: " + get_memory())
