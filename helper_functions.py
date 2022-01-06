@@ -11,4 +11,7 @@ def run_command(command):
 
 
 def get_command(command):
-    return subprocess.check_output(["bash", "-c", command]).decode("utf-8").strip()
+    try:
+        return subprocess.check_output(["bash", "-c", command]).decode("utf-8").strip()
+    except:
+        return ""

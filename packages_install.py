@@ -30,8 +30,11 @@ class Distribution:
             run_command(
                 "sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo")
             if self.name == "debian" or self.package_manager == "dnf":
-                run_command(
-                    "flatpak install org.gtk.Gtk3theme.Adwaita-dark -y")
+                adwaita_dark = "org.gtk.Gtk3theme.Adwaita-dark"
+                has_adwaita_dark = get_command(
+                    "flatpak list --columns=application | grep '" + adwaita_dark + "'")
+                if not has_adwaita_dark:
+                    install_package(adwaita_dark, "flatpak")
 
     def install_flatpak(self):
         self.install(["flatpak"])
@@ -675,15 +678,19 @@ def create_gui(root):
             if not has_package and not has_flatpak and not has_snap:
                 continue
 
+            de_bg = "white"
+            if package.de == "gnome":
+                if not has_gnome:
+                    continue
+                de_bg = "#c3d0ff"
+            elif package.de == "kde":
+                if not has_kde:
+                    continue
+                de_bg = "#c7ffc3"
+
             row += 1
             ttk.Separator(group_frame, orient="horizontal").grid(
                 row=row, column=0, columnspan=6, sticky="we")
-
-            de_bg = "white"
-            if package.de == "gnome":
-                de_bg = "#c3d0ff"
-            elif package.de == "kde":
-                de_bg = "#c7ffc3"
 
             row += 1
             Label(group_frame, text=package.name, wraplength=180,
