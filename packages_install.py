@@ -88,7 +88,7 @@ class Distribution:
 class Package:
     def __init__(self, name, desc="", group="",
                  repo=[], flatpak="", snap="",
-                 repo_other=None, snap_classic=False, de=""):
+                 repo_other=None, snap_official=False, snap_classic=False, de=""):
 
         if repo_other is None:
             repo_other = {}
@@ -100,6 +100,7 @@ class Package:
         self.flatpak = flatpak
         self.snap = snap
         self.repo_other = repo_other
+        self.snap_official = snap_official
         self.snap_classic = snap_classic
         self.de = de
 
@@ -237,19 +238,19 @@ def define_packages():
         repo_other={})
     packages["deja-dup"] = Package(
         name="Deja-Dup", desc="Backup", group="Applications",
-        repo=["deja-dup"], flatpak="org.gnome.DejaDup", snap="",
-        repo_other={"redhat": []})
+        repo=["deja-dup"], flatpak="org.gnome.DejaDup", snap="deja-dup",
+        repo_other={"redhat": []}, snap_classic=True)
     packages["calibre"] = Package(
         name="Calibre", desc="E Book Reader/Editor", group="Applications",
         repo=["calibre"], flatpak="", snap="",
         repo_other={"redhat": []})
     packages["eog"] = Package(
         name="Eye of Gnome", desc="Gnome Image Viewer", group="Applications",
-        repo=["eog"], flatpak="org.gnome.eog", snap="",
-        repo_other={}, de="gnome")
+        repo=["eog"], flatpak="org.gnome.eog", snap="eog",
+        repo_other={}, snap_official=True, de="gnome")
     packages["evince"] = Package(
         name="Evince", desc="Gnome Document Viewer", group="Applications",
-        repo=["evince"], flatpak="org.gnome.Evince", snap="",
+        repo=["evince"], flatpak="org.gnome.Evince", snap="evince",
         repo_other={}, de="gnome")
     packages["foliate"] = Package(
         name="Foliate", desc="E Book Reader", group="Applications",
@@ -269,16 +270,16 @@ def define_packages():
         repo_other={}, de="gnome")
     packages["gnome-calculator"] = Package(
         name="Gnome Calculator", desc="", group="Applications",
-        repo=["gnome-calculator"], flatpak="org.gnome.Calculator", snap="",
-        repo_other={}, de="gnome")
+        repo=["gnome-calculator"], flatpak="org.gnome.Calculator", snap="gnome-calculator",
+        repo_other={}, snap_official=True, de="gnome")
     packages["gnome-calendar"] = Package(
         name="Gnome Calendar", desc="", group="Applications",
-        repo=["gnome-calendar"], flatpak="org.gnome.Calendar", snap="",
-        repo_other={"redhat": []}, de="gnome")
+        repo=["gnome-calendar"], flatpak="org.gnome.Calendar", snap="gnome-calendar",
+        repo_other={"redhat": []}, snap_official=True, de="gnome")
     packages["gnome-clocks"] = Package(
         name="Gnome Clocks", desc="", group="Applications",
-        repo=["gnome-clocks"], flatpak="org.gnome.clocks", snap="",
-        repo_other={"redhat": []}, de="gnome")
+        repo=["gnome-clocks"], flatpak="org.gnome.clocks", snap="gnome-clocks",
+        repo_other={"redhat": []}, snap_official=True, de="gnome")
     packages["gnome-connections"] = Package(
         name="Gnome Connections", desc="Network Connection Manager", group="Applications",
         repo=["gnome-connections"], flatpak="org.gnome.Connections", snap="",
@@ -309,20 +310,20 @@ def define_packages():
         repo_other={"redhat": []})
     packages["gwenview"] = Package(
         name="Gwenview", desc="KDE Image Viewer", group="Applications",
-        repo=["gwenview"], flatpak="org.kde.gwenview", snap="",
-        repo_other={"redhat": []}, de="kde")
+        repo=["gwenview"], flatpak="org.kde.gwenview", snap="gwenview",
+        repo_other={"redhat": []}, snap_official=True, de="kde")
     packages["kalendar"] = Package(
         name="Kalendar", desc="KDE Calendar", group="Applications",
         repo=["kalendar"], flatpak="", snap="",
         repo_other={"pacman": [], "redhat": []}, de="kde")
     packages["kcalc"] = Package(
         name="KCalc", desc="KDE Calculator", group="Applications",
-        repo=["kcalc"], flatpak="org.kde.kcalc", snap="",
-        repo_other={"redhat": []}, de="kde")
+        repo=["kcalc"], flatpak="org.kde.kcalc", snap="kcalc",
+        repo_other={"redhat": []}, snap_official=True, de="kde")
     packages["okular"] = Package(
         name="Okular", desc="KDE Document Viewer", group="Applications",
-        repo=["okular"], flatpak="org.kde.okular", snap="",
-        repo_other={"redhat": []}, de="kde")
+        repo=["okular"], flatpak="org.kde.okular", snap="okular",
+        repo_other={"redhat": []}, snap_official=True, de="kde")
     packages["transmission-gtk"] = Package(
         name="Transmission (GTK)", desc="Torrent", group="Applications",
         repo=["transmission-gtk"], flatpak="", snap="",
@@ -340,7 +341,7 @@ def define_packages():
     packages["chromium"] = Package(
         name="Chromium", desc="", group="Browsers",
         repo=["chromium"], flatpak="org.chromium.Chromium", snap="chromium",
-        repo_other={"ubuntu": [], "redhat": []})
+        repo_other={"ubuntu": [], "redhat": []}, snap_official=True)
     packages["epiphany"] = Package(
         name="Epiphany", desc="Gnome", group="Browsers",
         repo=["epiphany"], flatpak="org.gnome.Epiphany", snap="",
@@ -352,7 +353,7 @@ def define_packages():
     packages["firefox"] = Package(
         name="Firefox", desc="", group="Browsers",
         repo=["firefox"], flatpak="org.mozilla.firefox", snap="firefox",
-        repo_other={"redhat": [], "debian": []})
+        repo_other={"redhat": [], "debian": []}, snap_official=True)
     packages["firefox-esr"] = Package(
         name="Firefox ESR", desc="Extended Support Release", group="Browsers",
         repo=[], flatpak="", snap="",
@@ -373,14 +374,14 @@ def define_packages():
         repo_other={"redhat": []})
     packages["thunderbird"] = Package(
         name="Thunderbird", desc="Email", group="Communication",
-        repo=["thunderbird"], flatpak="", snap="",
-        repo_other={})
+        repo=["thunderbird"], flatpak="", snap="thunderbird",
+        repo_other={}, snap_official=True)
 
     # Games Group
     packages["0ad"] = Package(
         name="0 A.D.", desc="Ancient Warfare", group="Games",
         repo=["0ad"], flatpak="com.play0ad.zeroad", snap="0ad",
-        repo_other={"redhat": []})
+        repo_other={"redhat": []}, snap_official=True)
     packages["aisleriot"] = Package(
         name="Aisleriot", desc="Solitare", group="Games",
         repo=["aisleriot"], flatpak="org.gnome.Aisleriot", snap="",
@@ -399,24 +400,24 @@ def define_packages():
         repo_other={"redhat": []}, de="gnome")
     packages["gnome-sudoku"] = Package(
         name="Gnome Sudoku", desc="", group="Games",
-        repo=["gnome-sudoku"], flatpak="org.gnome.Sudoku", snap="",
-        repo_other={"redhat": []}, de="gnome")
+        repo=["gnome-sudoku"], flatpak="org.gnome.Sudoku", snap="gnome-sudoku",
+        repo_other={"redhat": []}, snap_official=True, de="gnome")
     packages["kmines"] = Package(
         name="KMines", desc="", group="Games",
-        repo=["kmines"], flatpak="", snap="",
-        repo_other={"redhat": []}, de="kde")
+        repo=["kmines"], flatpak="", snap="kmines",
+        repo_other={"redhat": []}, snap_official=True, de="kde")
     packages["knights"] = Package(
         name="KNights", desc="", group="Games",
         repo=["knights"], flatpak="", snap="knights",
-        repo_other={"redhat": []}, de="kde")
+        repo_other={"redhat": []}, snap_official=True, de="kde")
     packages["ksudoku"] = Package(
         name="KSudoku", desc="", group="Games",
-        repo=["ksudoku"], flatpak="org.kde.ksudoku", snap="",
-        repo_other={"redhat": []}, de="kde")
+        repo=["ksudoku"], flatpak="org.kde.ksudoku", snap="ksudoku",
+        repo_other={"redhat": []}, snap_official=True, de="kde")
     packages["quadrapassel"] = Package(
         name="Quadrapassel", desc="Gnome Tetris", group="Games",
-        repo=["quadrapassel"], flatpak="org.gnome.Quadrapassel", snap="",
-        repo_other={"redhat": []}, de="gnome")
+        repo=["quadrapassel"], flatpak="org.gnome.Quadrapassel", snap="quadrapassel",
+        repo_other={"redhat": []}, snap_official=True, de="gnome")
     packages["steam"] = Package(
         name="Steam", desc="", group="Games",
         repo=[], flatpak="com.valvesoftware.Steam", snap="",
@@ -434,14 +435,14 @@ def define_packages():
     packages["blender"] = Package(
         name="Blender", desc="3D Modleler and Video Editor", group="Multi Media",
         repo=["blender"], flatpak="org.blender.Blender", snap="blender",
-        repo_other={"redhat": []}, snap_classic=True)
+        repo_other={"redhat": []}, snap_official=True, snap_classic=True)
     packages["elisa"] = Package(
         name="Elisa", desc="KDE Music Player", group="Multi Media",
         repo=["elisa"], flatpak="org.kde.elisa", snap="",
         repo_other={"redhat": []}, de="kde")
     packages["gimp"] = Package(
         name="GIMP", desc="GNU Image Manipulation Program", group="Multi Media",
-        repo=["gimp"], flatpak="org.gimp.GIMP", snap="",
+        repo=["gimp"], flatpak="org.gimp.GIMP", snap="gimp",
         repo_other={})
     packages["gnome-music"] = Package(
         name="Gnome Music", desc="", group="Multi Media",
@@ -457,8 +458,8 @@ def define_packages():
         repo_other={"redhat": []}, de="gnome")
     packages["kdenlive"] = Package(
         name="KdenLive", desc="KDE Video Editor", group="Multi Media",
-        repo=["kdenlive"], flatpak="org.kde.kdenlive", snap="",
-        repo_other={"redhat": []}, de="kde")
+        repo=["kdenlive"], flatpak="org.kde.kdenlive", snap="kdenlive",
+        repo_other={"redhat": []}, snap_official=True, de="kde")
     packages["rhythmbox"] = Package(
         name="RhythmBox", desc="Music Player", group="Multi Media",
         repo=["rhythmbox"], flatpak="org.gnome.Rhythmbox3", snap="",
@@ -474,13 +475,13 @@ def define_packages():
     packages["vlc"] = Package(
         name="VLC", desc="Media Player", group="Multi Media",
         repo=["vlc"], flatpak="org.videolan.VLC", snap="vlc",
-        repo_other={})
+        repo_other={}, snap_official=True)
 
     # Editors Group
     packages["code"] = Package(
         name="VS Code", desc="Visual Studio Code", group="Editors",
         repo=[], flatpak="", snap="code",
-        repo_other={}, snap_classic=True)
+        repo_other={}, snap_official=True, snap_classic=True)
     packages["codium"] = Package(
         name="Codium", desc="FOSS Visual Studio Code", group="Editors",
         repo=[], flatpak="com.vscodium.codium", snap="",
@@ -503,14 +504,14 @@ def define_packages():
         repo_other={"redhat": []}, de="kde")
     packages["kdevelop"] = Package(
         name="KDevelop", desc="KDE IDE", group="Editors",
-        repo=["kdevelop"], flatpak="org.kde.kdevelop", snap="",
-        repo_other={"redhat": []}, de="kde")
+        repo=["kdevelop"], flatpak="org.kde.kdevelop", snap="kdevelop",
+        repo_other={"redhat": []}, snap_official=True, de="kde")
     packages["libreoffice"] = Package(
         name="LibreOffice", desc="Office Suite", group="Editors",
         repo=["libreoffice-writer", "libreoffice-calc",
               "libreoffice-impress", "libreoffice-draw", "libreoffice-base"],
         flatpak="org.libreoffice.LibreOffice", snap="libreoffice",
-        repo_other={"pacman": ["libreoffice-fresh"]})
+        repo_other={"pacman": ["libreoffice-fresh"]}, snap_official=True)
     packages["texstudio"] = Package(
         name="TeX Studio", desc="LaTex Editor", group="Editors",
         repo=[], flatpak="org.texstudio.TeXstudio", snap="",
@@ -518,7 +519,7 @@ def define_packages():
     packages["pycharm"] = Package(
         name="PyCharm", desc="JetBrains Python Editor", group="Editors",
         repo=[], flatpak="com.jetbrains.PyCharm-Community", snap="pycharm-community",
-        repo_other={"pacman": ["pycharm-community-edition"]}, snap_classic=True)
+        repo_other={"pacman": ["pycharm-community-edition"]}, snap_official=True, snap_classic=True)
 
     # Software Group
     packages["gnome-software"] = Package(
@@ -532,7 +533,7 @@ def define_packages():
     packages["snap-store"] = Package(
         name="Snap Store", desc="", group="Software",
         repo=[], flatpak="", snap="snap-store",
-        repo_other={})
+        repo_other={}, snap_official=True)
     packages["synaptic"] = Package(
         name="Synaptic", desc="Apt Software Manager", group="Software",
         repo=[], flatpak="", snap="",
@@ -542,7 +543,7 @@ def define_packages():
     packages["ark"] = Package(
         name="Ark", desc="KDE Archiving Tool", group="Utilities",
         repo=["ark"], flatpak="org.kde.ark", snap="ark",
-        repo_other={"redhat": []}, de="kde")
+        repo_other={"redhat": []}, snap_official=True, de="kde")
     packages["baobab"] = Package(
         name="Baobab", desc="Gnome Disk Usage", group="Utilities",
         repo=["baobab"], flatpak="", snap="",
@@ -578,7 +579,7 @@ def define_packages():
     packages["spectacle"] = Package(
         name="Spectacle", desc="KDE Screenshot", group="Utilities",
         repo=["spectacle"], flatpak="", snap="spectacle",
-        repo_other={"redhat": []}, de="kde")
+        repo_other={"redhat": []}, snap_official=True, de="kde")
 
 
 def define_groups():
@@ -705,7 +706,7 @@ def create_gui(root):
                     variable=selected_installs[pkg],
                     value="repo",
                     fg="black",
-                    bg="white"
+                    bg="#99ffb9" if currently_installed[pkg] == "repo" else "#e6ffee"
                 ).grid(row=row, column=2)
 
             if has_flatpak:
@@ -715,17 +716,23 @@ def create_gui(root):
                     variable=selected_installs[pkg],
                     value="flatpak",
                     fg="black",
-                    bg="white"
+                    bg="#99d6ff" if currently_installed[pkg] == "flatpak" else "#e6f5ff"
                 ).grid(row=row, column=3)
 
             if has_snap:
+                snap_bg = ""
+                if package.snap_official:
+                    snap_bg = "#d699ff" if currently_installed[pkg] == "snap" else "#f5e6ff"
+                else:
+                    snap_bg = "#ffd699" if currently_installed[pkg] == "snap" else "#fff5e6"
+
                 Radiobutton(
                     group_frame,
                     text="S",
                     variable=selected_installs[pkg],
                     value="snap",
                     fg="black",
-                    bg="white"
+                    bg=snap_bg
                 ).grid(row=row, column=4)
 
             Radiobutton(
