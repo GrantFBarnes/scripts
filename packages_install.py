@@ -741,7 +741,7 @@ def create_gui(root):
                 variable=selected_installs[pkg],
                 value="",
                 fg="black",
-                bg="white"
+                bg="#ff9999" if not currently_installed[pkg] else "#ffe6e6"
             ).grid(row=row, column=5, padx=12)
 
         row += 1
