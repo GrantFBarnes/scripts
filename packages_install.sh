@@ -162,14 +162,22 @@ function setupEnvironment() {
         sudo -u $SUDO_USER touch $bashrc
     fi
 
+    grep -q codium $bashrc
+    if [ $? -eq 1 ]; then
+        sudo -u $SUDO_USER echo alias codium='"flatpak run com.vscodium.codium --no-sandbox"' >>$bashrc
+        sudo -u $SUDO_USER echo '' >>$bashrc
+    fi
+
     grep -q EDITOR $bashrc
     if [ $? -eq 1 ]; then
         sudo -u $SUDO_USER echo export EDITOR='"/usr/bin/vim"' >>$bashrc
+        sudo -u $SUDO_USER echo '' >>$bashrc
     fi
 
     grep -q NODE_OPTIONS $bashrc
     if [ $? -eq 1 ]; then
         sudo -u $SUDO_USER echo export NODE_OPTIONS='--max_old_space_size=8192' >>$bashrc
+        sudo -u $SUDO_USER echo '' >>$bashrc
     fi
 
     grep -q GFB_HOSTING_ENV $bashrc
@@ -190,6 +198,7 @@ function setupEnvironment() {
     grep -q MYSQL_TU_PASSWORD $bashrc
     if [ $? -eq 1 ]; then
         sudo -u $SUDO_USER echo export MYSQL_TU_PASSWORD='""' >>$bashrc
+        sudo -u $SUDO_USER echo '' >>$bashrc
     fi
 
     # Setup up vimrc
