@@ -34,7 +34,7 @@ class Distribution:
                 has_adwaita_dark = get_command(
                     "flatpak list --columns=application | grep '" + adwaita_dark + "'")
                 if not has_adwaita_dark:
-                    install_package(adwaita_dark, "flatpak")
+                    run_command("flatpak install flathub " + adwaita_dark + " -y")
 
     def install_flatpak(self):
         self.install(["flatpak"])
@@ -283,7 +283,7 @@ def define_packages():
     packages["gnome-connections"] = Package(
         name="Gnome Connections", desc="Network Connection Manager", group="Applications",
         repo=["gnome-connections"], flatpak="org.gnome.Connections", snap="",
-        repo_other={"redhat": []}, de="gnome")
+        repo_other={"debian": [], "redhat": []}, de="gnome")
     packages["gnome-dialect"] = Package(
         name="Gnome Dialect", desc="", group="Applications",
         repo=[], flatpak="com.github.gi_lom.dialect", snap="",
@@ -295,7 +295,7 @@ def define_packages():
     packages["gnome-passwordsafe"] = Package(
         name="Gnome Password Safe", desc="", group="Applications",
         repo=["gnome-passwordsafe"], flatpak="org.gnome.PasswordSafe", snap="",
-        repo_other={"apt": [], "redhat": []}, de="gnome")
+        repo_other={"redhat": []}, de="gnome")
     packages["gnome-weather"] = Package(
         name="Gnome Weather", desc="", group="Applications",
         repo=["gnome-weather"], flatpak="org.gnome.Weather", snap="",
