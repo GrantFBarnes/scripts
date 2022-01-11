@@ -7,7 +7,7 @@ cd $(dirname "$0")
 distro=$(getDistribution)
 
 # Set Themes
-if [ "$distro" == "arch" ] || [ "$distro" == "centos" ] || [ "$distro" == "debian" ] || [ "$distro" == "fedora" ]; then
+if [ "$distro" == "centos" ] || [ "$distro" == "debian" ] || [ "$distro" == "fedora" ]; then
     gsettings set org.gnome.desktop.interface gtk-theme "Adwaita-dark"
 elif [ "$distro" == "ubuntu" ]; then
     gsettings set org.gnome.desktop.interface gtk-theme "Yaru-dark"
@@ -44,8 +44,8 @@ gsettings set org.gnome.desktop.session idle-delay 900
 gsettings set org.gnome.settings-daemon.plugins.color night-light-enabled true
 gsettings set org.gnome.settings-daemon.plugins.color night-light-schedule-automatic false
 gsettings set org.gnome.settings-daemon.plugins.color night-light-temperature "uint32 2700"
-gsettings set org.gnome.settings-daemon.plugins.color night-light-schedule-from "4.0"
-gsettings set org.gnome.settings-daemon.plugins.color night-light-schedule-to "3.9"
+gsettings set org.gnome.settings-daemon.plugins.color night-light-schedule-from "19"
+gsettings set org.gnome.settings-daemon.plugins.color night-light-schedule-to "7"
 
 # Set WM Buttons
 gsettings set org.gnome.desktop.wm.preferences button-layout ":close"
