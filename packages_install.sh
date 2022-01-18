@@ -249,6 +249,7 @@ function installPackages() {
     packageOptions+=("id3v2" "Modify MP3 Meta Data" off)
     packageOptions+=("imagemagick" "Image Magick" off)
     packageOptions+=("git" "Git" off)
+    packageOptions+=("latex" "LaTeX CLI" off)
     packageOptions+=("mysql-server" "MySQL Server" off)
     packageOptions+=("nano" "nano" off)
     packageOptions+=("ncdu" "Command Line Disk Usage" off)
@@ -299,6 +300,18 @@ function installPackages() {
                 packagesToInstall+=(ImageMagick)
             elif [ "$pm" == "apt" ]; then
                 packagesToInstall+=(imagemagick)
+            fi
+            ;;
+        "latex")
+            if [ "$pm" == "apt" ]; then
+                packagesToInstall+=(texlive-latex-base)
+                packagesToInstall+=(texlive-latex-extra)
+            elif [ "$pm" == "dnf" ]; then
+                packagesToInstall+=(texlive-latex)
+                packagesToInstall+=(texlive-collection-latexextra)
+            elif [ "$pm" == "pacman" ]; then
+                packagesToInstall+=(texlive-core)
+                packagesToInstall+=(texlive-latexextra)
             fi
             ;;
         "node")
