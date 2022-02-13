@@ -195,9 +195,9 @@ function setupEnvironment() {
         sudo -u $SUDO_USER echo export JWT_SECRET='""' >>$bashrc
     fi
 
-    grep -q MYSQL_TU_PASSWORD $bashrc
+    grep -q SQL_TU_PASSWORD $bashrc
     if [ $? -eq 1 ]; then
-        sudo -u $SUDO_USER echo export MYSQL_TU_PASSWORD='""' >>$bashrc
+        sudo -u $SUDO_USER echo export SQL_TU_PASSWORD='""' >>$bashrc
         sudo -u $SUDO_USER echo '' >>$bashrc
     fi
 
@@ -241,6 +241,8 @@ function setupEnvironment() {
 function installPackages() {
 
     packageOptions=()
+    packageOptions+=("bash-completion" "Bash Completion" off)
+    packageOptions+=("cups" "Printer Support" off)
     packageOptions+=("curl" "Curl Command" off)
     packageOptions+=("exfat" "ExFat Format Support" off)
     packageOptions+=("ffmpeg" "ffmpeg to watch videos" off)
@@ -250,7 +252,7 @@ function installPackages() {
     packageOptions+=("imagemagick" "Image Magick" off)
     packageOptions+=("git" "Git" off)
     packageOptions+=("latex" "LaTeX CLI" off)
-    packageOptions+=("mysql-server" "MySQL Server" off)
+    packageOptions+=("mariadb-server" "MariaDB Server" off)
     packageOptions+=("nano" "nano" off)
     packageOptions+=("ncdu" "Command Line Disk Usage" off)
     packageOptions+=("neofetch" "neofetch overview display" off)
@@ -324,11 +326,9 @@ function installPackages() {
                 packagesToInstall+=(npm)
             fi
             ;;
-        "mysql-server")
+        "mariadb-server")
             if [ "$pm" == "pacman" ]; then
                 packagesToInstall+=(mariadb)
-            elif [ "$distro" == "debian" ] || [ "$distro" == "fedora" ]; then
-                packagesToInstall+=(mariadb-server)
             else
                 packagesToInstall+=($pkg)
             fi
