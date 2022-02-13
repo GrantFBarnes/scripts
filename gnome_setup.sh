@@ -141,9 +141,6 @@ gsettings set ${APP_FOLDERS} folder-children "[
 
 gsettings set ${APP_FOLDERS_PATH}Apps/ name "Apps"
 gsettings set ${APP_FOLDERS_PATH}Apps/ apps "[
-    'org.gnome.Boxes.desktop',
-    'org.gnome.Connections.desktop',
-    'virtualbox.desktop',
     'gnucash.desktop',
     'org.gnucash.GnuCash.desktop',
     'org.gnome.PasswordSafe.desktop',
@@ -153,16 +150,20 @@ gsettings set ${APP_FOLDERS_PATH}Apps/ apps "[
     'org.gnome.Maps.desktop',
     'com.github.gi_lom.dialect.desktop',
     'org.gnome.Books.desktop',
+    'org.gnome.Boxes.desktop',
+    'org.gnome.Connections.desktop',
+    'virtualbox.desktop',
+    'virt-manager.desktop',
     'calibre-gui.desktop',
     'calibre-ebook-edit.desktop',
     'calibre-ebook-viewer.desktop',
     'calibre-lrfviewer.desktop',
     'foliate_foliate.desktop',
     'com.github.johnfactotum.Foliate.desktop',
-    'org.gnome.Maps.desktop',
     'org.gnome.Cheese.desktop',
     'usb-creator-gtk.desktop',
     'org.fedoraproject.MediaWriter.desktop',
+    'org.kde.korganizer.desktop',
     'org.gramps_project.Gramps.desktop',
     'gramps.desktop'
 ]"
@@ -183,7 +184,8 @@ gsettings set ${APP_FOLDERS_PATH}Internet/ apps "[
     'thunderbird.desktop',
     'mozilla-thunderbird.desktop',
     'org.mozilla.Thunderbird.desktop',
-    'transmission-gtk.desktop'
+    'transmission-gtk.desktop',
+    'transmission-qt.desktop'
 ]"
 
 gsettings set ${APP_FOLDERS_PATH}Editors/ name "Editors"
@@ -191,6 +193,8 @@ gsettings set ${APP_FOLDERS_PATH}Editors/ apps "[
     'org.gnome.gedit.desktop',
     'code_code.desktop',
     'com.vscodium.codium.desktop',
+    'org.kde.kwrite.desktop',
+    'org.kde.kate.desktop',
     'org.gnome.Builder.desktop',
     'com.jetbrains.PyCharm-Community.desktop',
     'pycharm-community_pycharm-community.desktop',
@@ -242,7 +246,8 @@ gsettings set ${APP_FOLDERS_PATH}MultiMedia/ apps "[
     'org.videolan.VLC.desktop',
     'org.gnome.SoundRecorder.desktop',
     'eog.desktop',
-    'org.gnome.eog.desktop'
+    'org.gnome.eog.desktop',
+    'org.kde.gwenview.desktop'
 ]"
 
 gsettings set ${APP_FOLDERS_PATH}Games/ name "Games"
@@ -254,6 +259,9 @@ gsettings set ${APP_FOLDERS_PATH}Games/ apps "[
     'org.gnome.Sudoku.desktop',
     'org.gnome.Mines.desktop',
     'org.gnome.Quadrapassel.desktop',
+    'org.kde.kmines.desktop',
+    'org.kde.knights.desktop',
+    'org.kde.ksudoku.desktop',
     '0ad.desktop',
     'supertuxkart.desktop',
     'xonotic.desktop'
@@ -262,11 +270,16 @@ gsettings set ${APP_FOLDERS_PATH}Games/ apps "[
 gsettings set ${APP_FOLDERS_PATH}System/ name "System"
 gsettings set ${APP_FOLDERS_PATH}System/ apps "[
     'org.gnome.Nautilus.desktop',
+    'org.kde.dolphin.desktop',
     'org.gnome.Terminal.desktop',
+    'org.kde.konsole.desktop',
     'gnome-system-monitor.desktop',
     'org.gnome.baobab.desktop',
     'org.gnome.DiskUtility.desktop',
-    'timeshift-gtk.desktop',
+    'org.kde.ksysguard.desktop',
+    'org.kde.filelight.desktop',
+    'org.kde.partitionmanager.desktop',
+    'org.kde.plasma-systemmonitor.desktop',
     'org.gnome.DejaDup.desktop',
     'htop.desktop'
 ]"
@@ -279,6 +292,7 @@ gsettings set ${APP_FOLDERS_PATH}Settings/ apps "[
     'ca.desrt.dconf-editor.desktop',
     'org.freedesktop.MalcontentControl.desktop',
     'org.gnome.Software.desktop',
+    'org.kde.discover.desktop',
     'synaptic.desktop',
     'snap-store_ubuntu-software.desktop',
     'software-properties-gnome.desktop',
@@ -286,6 +300,7 @@ gsettings set ${APP_FOLDERS_PATH}Settings/ apps "[
     'update-manager.desktop',
     'software-properties-livepatch.desktop',
     'gnome-session-properties.desktop',
+    'kdesystemsettings.desktop',
     'software-properties-drivers.desktop'
 ]"
 
@@ -301,11 +316,22 @@ gsettings set ${APP_FOLDERS_PATH}Utilities/ apps "[
     'org.gnome.PowerStats.desktop',
     'org.gnome.Logs.desktop',
     'org.gnome.FileRoller.desktop',
+    'org.kde.okular.desktop',
+    'org.kde.ark.desktop',
+    'org.kde.kcalc.desktop',
+    'org.kde.spectacle.desktop',
     'system-config-printer.desktop',
     'setroubleshoot.desktop',
     'org.gnome.font-viewer.desktop',
     'org.gnome.Characters.desktop',
     'org.gnome.Firmware.desktop',
+    'org.kde.kwalletmanager5.desktop',
+    'org.kde.klipper.desktop',
+    'org.kde.kdeconnect.app.desktop',
+    'org.kde.kdeconnect.nonplasma.desktop',
+    'org.kde.kdeconnect.settings.desktop',
+    'org.kde.kdeconnect.sms.desktop',
+    'texdoctk.desktop',
     'yelp.desktop',
     'org.freedesktop.GnomeAbrt.desktop',
     'im-config.desktop',

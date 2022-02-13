@@ -62,7 +62,9 @@ def main():
 
     # Set Night Color
     set_config("kwinrc", ["NightColor"], "Active", 'true')
-    set_config("kwinrc", ["NightColor"], "Mode", '"Constant"')
+    set_config("kwinrc", ["NightColor"], "Mode", '"Times"')
+    set_config("kwinrc", ["NightColor"], "MorningBeginFixed", '0700')
+    set_config("kwinrc", ["NightColor"], "EveningBeginFixed", '1900')
     set_config("kwinrc", ["NightColor"], "NightTemperature", '2300')
 
     # Set NumLock
@@ -76,6 +78,21 @@ def main():
 
     # Start Empty Session on Login
     set_config("ksmserverrc", ["General"], "loginMode", '"emptySession"')
+
+    # Setup Kate
+    set_config("katerc", ["General"], "Show Full Path in Title", 'true')
+    set_config("katerc", ["General"], "Show Menu Bar", 'true')
+    set_config("katerc", ["KTextEditor Renderer"], "Show Indentation Lines", 'true')
+    set_config("katerc", ["KTextEditor Renderer"], "Show Whole Bracket Expression", 'true')
+    set_config("katerc", ["KTextEditor Document"], "Show Spaces", '1')
+    set_config("katerc", ["KTextEditor View"], "Scroll Past End", 'true')
+    set_config("katerc", ["KTextEditor View"], "Show Line Count", 'true')
+    set_config("katerc", ["KTextEditor View"], "Show Word Count", 'true')
+    set_config("katerc", ["KTextEditor View"], "Line Numbers", 'true')
+    set_config("katerc", ["KTextEditor View"], "Smart Copy Cut", 'true')
+    set_config("katerc", ["KTextEditor View"], "Input Mode", '1')
+    set_config("katerc", ["KTextEditor View"], "Vi Input Mode Steal Keys", 'false')
+    set_config("katerc", ["KTextEditor View"], "Vi Relative Line Numbers", 'true')
 
 
 if __name__ == "__main__":
