@@ -189,6 +189,15 @@ def get_desktop_env():
     if has_command("kwriteconfig5"):
         has_kde = True
 
+    args = sys.argv[1:]
+    if '--both' in args:
+        has_gnome = True
+        has_kde = True
+    elif '--gnome' in args:
+        has_gnome = True
+    elif '--kde' in args:
+        has_kde = True
+
 
 def get_distro():
     for file_name in ["/etc/lsb-release", "/usr/lib/os-release", "/etc/os-release"]:
