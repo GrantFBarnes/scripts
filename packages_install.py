@@ -332,6 +332,10 @@ def define_packages():
         name="Transmission (QT)", desc="Torrent", group="Applications",
         repo=["transmission-qt"], flatpak="", snap="",
         repo_other={"redhat": []}, de="kde")
+    packages["virt-manager"] = Package(
+        name="Virt Manager", desc="Virtual Machine Manager", group="Applications",
+        repo=["virt-manager"], flatpak="", snap="",
+        repo_other={})
     packages["virtualbox"] = Package(
         name="Virtual Box", desc="Virtual Machine Manager", group="Applications",
         repo=["virtualbox"], flatpak="", snap="",
@@ -506,6 +510,10 @@ def define_packages():
         name="KDevelop", desc="KDE IDE", group="Editors",
         repo=["kdevelop"], flatpak="org.kde.kdevelop", snap="kdevelop",
         repo_other={"redhat": []}, snap_official=True, de="kde")
+    packages["kile"] = Package(
+        name="Kile", desc="LaTex Editor", group="Editors",
+        repo=["kile"], flatpak="", snap="",
+        repo_other={"redhat": []}, de="kde")
     packages["libreoffice"] = Package(
         name="LibreOffice", desc="Office Suite", group="Editors",
         repo=["libreoffice-writer", "libreoffice-calc",
@@ -552,6 +560,10 @@ def define_packages():
         name="dconf editor", desc="Gnome Environment Variables", group="Utilities",
         repo=["dconf-editor"], flatpak="", snap="",
         repo_other={}, de="gnome")
+    packages["filelight"] = Package(
+        name="FileLight", desc="KDE Disk Usage", group="Utilities",
+        repo=["filelight"], flatpak="", snap="",
+        repo_other={}, de="kde")
     packages["gnome-disk-utility"] = Package(
         name="Gnome Disk Utility", desc="", group="Utilities",
         repo=["gnome-disk-utility"], flatpak="", snap="",
