@@ -53,6 +53,8 @@ function update() {
         sudo dnf upgrade --refresh -y
     elif [ "$pm" == "pacman" ]; then
         sudo pacman -Syyu --noconfirm
+    elif [ "$pm" == "zypper" ]; then
+        sudo zypper update --no-confirm
     fi
     checkExitStatus
 }
@@ -72,6 +74,12 @@ function packageManager() {
         sudo apt-get remove --purge ${@:2} -y
     elif [ "$method" == "module" ]; then
         sudo dnf module install ${@:2} -y
+    elif [ "$pm" == "zypper" ]; then
+        if [ "$method" == "autoremove" ]; then
+            sudo zypper remove --clean-deps --no-confirm $(zypper packages --unneeded | awk -F '|' 'NR==0 || NR==1 || NR==2 || NR==3 || NR==4 {next} {print $3}')
+        else
+            sudo zypper $method --no-confirm ${@:2}
+        fi
     else
         sudo $pm $method ${@:2} -y
     fi
@@ -100,7 +108,7 @@ fi
 # Install newt to get Whiptail to work
 checkNotInstalled whiptail
 if [ $? -eq 0 ]; then
-    if [ "$pm" == "dnf" ]; then
+    if [ "$pm" == "dnf" ] || [ "$pm" == "zypper" ]; then
         packageManager install newt
     elif [ "$pm" == "pacman" ]; then
         packageManager install libnewt
@@ -286,6 +294,8 @@ function installPackages() {
                 packagesToInstall+=(http://rpmfind.net/linux/epel/7/x86_64/Packages/s/SDL2-2.0.14-2.el7.x86_64.rpm)
                 packagesToInstall+=(ffmpeg)
                 packagesToInstall+=(ffmpeg-devel)
+            elif [ "$pm" == "zypper" ]; then
+                packagesToInstall+=(ffmpeg-4)
             else
                 packagesToInstall+=(ffmpeg)
             fi
@@ -321,13 +331,16 @@ function installPackages() {
                 modulesToInstall+=(nodejs:14/default)
             elif [ "$distro" == "centos" ]; then
                 modulesToInstall+=(nodejs:14)
+            elif [ "$pm" == "zypper" ]; then
+                packagesToInstall+=(nodejs16)
+                packagesToInstall+=(npm16)
             else
                 packagesToInstall+=(nodejs)
                 packagesToInstall+=(npm)
             fi
             ;;
         "mariadb-server")
-            if [ "$pm" == "pacman" ]; then
+            if [ "$pm" == "pacman" ] || [ "$pm" == "zypper" ]; then
                 packagesToInstall+=(mariadb)
             else
                 packagesToInstall+=($pkg)
@@ -336,6 +349,8 @@ function installPackages() {
         "pip")
             if [ "$pm" == "pacman" ]; then
                 packagesToInstall+=(python-pip)
+            elif [ "$pm" == "zypper" ]; then
+                packagesToInstall+=(python38-pip)
             else
                 packagesToInstall+=(python3-pip)
             fi
@@ -347,11 +362,16 @@ function installPackages() {
                 packagesToInstall+=(python3-tkinter)
             elif [ "$pm" == "pacman" ]; then
                 packagesToInstall+=(tk)
+            elif [ "$pm" == "zypper" ]; then
+                packagesToInstall+=(python-tk)
             fi
             ;;
         "ssh")
             if [ "$pm" == "apt" ]; then
                 packagesToInstall+=(ssh)
+            elif [ "$pm" == "zypper" ]; then
+                packagesToInstall+=(libssh4)
+                packagesToInstall+=(openssh)
             else
                 packagesToInstall+=(libssh)
                 packagesToInstall+=(openssh)

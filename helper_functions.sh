@@ -20,6 +20,8 @@ function getDistribution() {
         echo "mint"
     elif [[ $distro == *"Pop!_OS"* ]]; then
         echo "pop"
+    elif [[ $distro == *"SUSE"* ]]; then
+        echo "suse"
     elif [[ $distro == *"Ubuntu"* ]]; then
         echo "ubuntu"
     else
@@ -33,6 +35,8 @@ function getPackageManager() {
         echo "pacman"
     elif [[ $distro == *"CentOS"* ]] || [[ $distro == *"Fedora"* ]]; then
         echo "dnf"
+    elif [[ $distro == *"SUSE"* ]]; then
+        echo "zypper"
     elif [[ $distro == *"Debian"* ]] || [[ $distro == *"LMDE"* ]] || [[ $distro == *"Mint"* ]] || [[ $distro == *"Pop!_OS"* ]] || [[ $distro == *"Ubuntu"* ]]; then
         echo "apt"
     else

@@ -23,6 +23,8 @@ class Distribution:
             return get_command("dnf list installed | awk -F '.' '{print $1}'").split("\n")
         if self.package_manager == "pacman":
             return get_command("pacman -Q | awk '{print $1}'").split("\n")
+        if self.package_manager == "zypper":
+            return get_command("zypper packages --installed-only | awk -F '|' '{print $3}''").split("\n")
         return []
 
     def setup_flatpak(self):
@@ -53,6 +55,8 @@ class Distribution:
             run_command("sudo dnf upgrade --refresh -y")
         elif self.package_manager == "pacman":
             run_command("sudo pacman -Syyu --noconfirm")
+        elif self.package_manager == "zypper":
+            run_command("sudo zypper update --no-confirm")
 
     def install(self, pkgs):
         if self.package_manager == "apt":
@@ -64,6 +68,9 @@ class Distribution:
         elif self.package_manager == "pacman":
             for pkg in pkgs:
                 run_command("sudo pacman -S " + pkg + " --noconfirm --needed")
+        elif self.package_manager == "zypper":
+            for pkg in pkgs:
+                run_command("sudo zypper install --no-confirm " + pkg)
 
     def uninstall(self, pkgs):
         if self.package_manager == "apt":
@@ -75,6 +82,9 @@ class Distribution:
         elif self.package_manager == "pacman":
             for pkg in pkgs:
                 run_command("sudo pacman -Rsun " + pkg + " --noconfirm")
+        elif self.package_manager == "zypper":
+            for pkg in pkgs:
+                run_command("sudo zypper remove --clean-deps --no-confirm " + pkg)
 
     def autoremove(self):
         if self.package_manager == "apt":
@@ -83,6 +93,8 @@ class Distribution:
             run_command("sudo dnf autoremove -y")
         elif self.package_manager == "pacman":
             run_command("sudo pacman -Qdtq | sudo pacman -Rs - --noconfirm")
+        elif self.package_manager == "zypper":
+            run_command("sudo zypper remove --clean-deps --no-confirm $(zypper packages --unneeded | awk -F '|' 'NR==0 || NR==1 || NR==2 || NR==3 || NR==4 {next} {print $3}')")
 
 
 class Package:
@@ -232,6 +244,8 @@ def get_distribution():
         distribution = Distribution("pop", "ubuntu", "apt")
     elif "rocky" in distro:
         distribution = Distribution("rocky", "redhat", "dnf")
+    elif "suse" in distro:
+        distribution = Distribution("suse", "suse", "zypper")
     elif "ubuntu" in distro:
         distribution = Distribution("ubuntu", "ubuntu", "apt")
     else:

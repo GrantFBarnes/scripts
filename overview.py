@@ -126,6 +126,8 @@ def get_memory():
 
 
 def get_uptime():
+    if "SUSE" in get_distro():
+        return "NA"
     boot = int(get_command('date -d"$(uptime -s)" +%s'))
     now = int(get_command("date +%s"))
     uptime_count = now - boot
@@ -168,18 +170,18 @@ def get_uptime():
 
 def get_packages():
     dpkg = "0"
-    dnf = "0"
     pacman = "0"
+    rpm = "0"
 
     snap = "0"
     flatpak = "0"
 
     if has_command("dpkg"):
         dpkg = get_command("dpkg --list | wc -l")
-    if has_command("dnf"):
-        dnf = get_command("dnf list installed | wc -l")
     if has_command("pacman"):
         pacman = get_command("pacman -Q | wc -l")
+    if has_command("rpm"):
+        rpm = get_command("rpm -qa | wc -l")
 
     if has_command("snap"):
         snap = get_command("snap list | wc -l")
@@ -189,10 +191,10 @@ def get_packages():
     packages = ""
     if dpkg != "0":
         packages += dpkg + " (dpkg), "
-    if dnf != "0":
-        packages += dnf + " (dnf), "
     if pacman != "0":
         packages += pacman + " (pacman), "
+    if rpm != "0":
+        packages += rpm + " (rpm), "
 
     if snap != "0":
         packages += snap + " (snap), "
