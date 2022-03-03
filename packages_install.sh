@@ -271,7 +271,7 @@ function installPackages() {
     packageOptions+=("tkinter" "Python Tkinter" off)
     packageOptions+=("unzip" "Unzip zip files" off)
     packageOptions+=("vim" "VIM" on)
-    packageOptions+=("youtube-dl" "Command Line YT Downloader" off)
+    packageOptions+=("yt-dlp" "Command Line YT Downloader" off)
 
     choosePackagesWhiptail
     if [ $? -eq 1 ]; then

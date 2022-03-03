@@ -198,6 +198,7 @@ gsettings set ${APP_FOLDERS_PATH}Editors/ apps "[
     'org.gnome.Builder.desktop',
     'com.jetbrains.PyCharm-Community.desktop',
     'pycharm-community_pycharm-community.desktop',
+    'org.kde.kile.desktop',
     'org.texstudio.TeXstudio.desktop',
     'vim.desktop'
 ]"
@@ -366,7 +367,6 @@ gsettings set org.gnome.shell app-picker-layout "[
 # Set Favorites
 gsettings set org.gnome.shell favorite-apps "[
     'org.gnome.Nautilus.desktop',
-    'icecat.desktop',
     'firefox.desktop',
     'firefox-esr.desktop',
     'org.mozilla.firefox.desktop',
