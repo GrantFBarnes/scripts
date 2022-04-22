@@ -6,13 +6,6 @@ cd $(dirname "$0")
 
 distro=$(getDistribution)
 
-# Set Themes
-if [ "$distro" == "centos" ] || [ "$distro" == "debian" ] || [ "$distro" == "fedora" ]; then
-    gsettings set org.gnome.desktop.interface gtk-theme "Adwaita-dark"
-elif [ "$distro" == "ubuntu" ]; then
-    gsettings set org.gnome.desktop.interface gtk-theme "Yaru-dark"
-fi
-
 # Setup Clock
 gsettings set org.gnome.desktop.interface clock-format "12h"
 gsettings set org.gnome.desktop.interface clock-show-date true
@@ -85,8 +78,7 @@ gsettings set org.gnome.desktop.notifications.application:/org/gnome/desktop/not
 
 # Set Gnome extensions
 if [ "$distro" == "ubuntu" ]; then
-    gsettings set org.gnome.shell.extensions.desktop-icons show-home false
-    gsettings set org.gnome.shell.extensions.desktop-icons show-trash false
+    gsettings set org.gnome.shell.extensions.ding show-home false
 
     screenDimensions=$(xdpyinfo | awk '/dimensions/{print $2}')
     screenWidth=$(cut -d "x" -f 1 <<<$screenDimensions)
@@ -97,27 +89,15 @@ if [ "$distro" == "ubuntu" ]; then
         screenSize="small"
     fi
 
-    gsettings set org.gnome.shell.extensions.dash-to-dock background-color "#000000"
-    gsettings set org.gnome.shell.extensions.dash-to-dock background-opacity 0.5
-    gsettings set org.gnome.shell.extensions.dash-to-dock custom-background-color true
-    gsettings set org.gnome.shell.extensions.dash-to-dock custom-theme-shrink true
-    gsettings set org.gnome.shell.extensions.dash-to-dock dash-max-icon-size 28
     if [ $screenSize == "small" ]; then
         gsettings set org.gnome.shell.extensions.dash-to-dock dock-fixed false
     else
         gsettings set org.gnome.shell.extensions.dash-to-dock dock-fixed true
     fi
-    gsettings set org.gnome.shell.extensions.dash-to-dock extend-height true
-    gsettings set org.gnome.shell.extensions.dash-to-dock hot-keys false
-    gsettings set org.gnome.shell.extensions.dash-to-dock icon-size-fixed true
-    gsettings set org.gnome.shell.extensions.dash-to-dock intellihide-mode "MAXIMIZED_WINDOWS"
-    gsettings set org.gnome.shell.extensions.dash-to-dock running-indicator-dominant-color true
-    gsettings set org.gnome.shell.extensions.dash-to-dock running-indicator-style "DASHES"
-    gsettings set org.gnome.shell.extensions.dash-to-dock preferred-monitor 0
+    gsettings set org.gnome.shell.extensions.dash-to-dock dash-max-icon-size 28
     gsettings set org.gnome.shell.extensions.dash-to-dock show-favorites true
     gsettings set org.gnome.shell.extensions.dash-to-dock show-mounts true
     gsettings set org.gnome.shell.extensions.dash-to-dock show-trash false
-    gsettings set org.gnome.shell.extensions.dash-to-dock transparency-mode "FIXED"
 fi
 
 # Set App Folders
@@ -141,6 +121,7 @@ gsettings set ${APP_FOLDERS} folder-children "[
 
 gsettings set ${APP_FOLDERS_PATH}Apps/ name "Apps"
 gsettings set ${APP_FOLDERS_PATH}Apps/ apps "[
+    'bitwarden_bitwarden.desktop',
     'gnucash.desktop',
     'org.gnucash.GnuCash.desktop',
     'org.gnome.PasswordSafe.desktop',
@@ -148,24 +129,13 @@ gsettings set ${APP_FOLDERS_PATH}Apps/ apps "[
     'org.gnome.clocks.desktop',
     'org.gnome.Weather.desktop',
     'org.gnome.Maps.desktop',
-    'com.github.gi_lom.dialect.desktop',
     'org.gnome.Books.desktop',
     'org.gnome.Boxes.desktop',
     'org.gnome.Connections.desktop',
-    'virtualbox.desktop',
     'virt-manager.desktop',
-    'calibre-gui.desktop',
-    'calibre-ebook-edit.desktop',
-    'calibre-ebook-viewer.desktop',
-    'calibre-lrfviewer.desktop',
-    'foliate_foliate.desktop',
-    'com.github.johnfactotum.Foliate.desktop',
     'org.gnome.Cheese.desktop',
     'usb-creator-gtk.desktop',
-    'org.fedoraproject.MediaWriter.desktop',
-    'org.kde.korganizer.desktop',
-    'org.gramps_project.Gramps.desktop',
-    'gramps.desktop'
+    'org.fedoraproject.MediaWriter.desktop'
 ]"
 
 gsettings set ${APP_FOLDERS_PATH}Internet/ name "Internet"
@@ -176,12 +146,15 @@ gsettings set ${APP_FOLDERS_PATH}Internet/ apps "[
     'org.chromium.Chromium.desktop',
     'icecat.desktop',
     'firefox.desktop',
+    'firefox_firefox.desktop',
     'firefox-esr.desktop',
     'org.mozilla.firefox.desktop',
+    'brave_brave.desktop',
     'torbrowser.desktop',
     'com.github.micahflee.torbrowser-launcher.desktop',
     'org.gnome.Epiphany.desktop',
     'thunderbird.desktop',
+    'thunderbird_thunderbird.desktop',
     'mozilla-thunderbird.desktop',
     'org.mozilla.Thunderbird.desktop',
     'transmission-gtk.desktop',
@@ -191,12 +164,13 @@ gsettings set ${APP_FOLDERS_PATH}Internet/ apps "[
 gsettings set ${APP_FOLDERS_PATH}Editors/ name "Editors"
 gsettings set ${APP_FOLDERS_PATH}Editors/ apps "[
     'org.gnome.gedit.desktop',
+    'org.gnome.TextEditor.desktop',
     'code_code.desktop',
     'com.vscodium.codium.desktop',
     'org.kde.kwrite.desktop',
     'org.kde.kate.desktop',
     'org.gnome.Builder.desktop',
-    'com.jetbrains.PyCharm-Community.desktop',
+    'intellij-idea-community_intellij-idea-community.desktop',
     'pycharm-community_pycharm-community.desktop',
     'org.kde.kile.desktop',
     'org.texstudio.TeXstudio.desktop',
@@ -273,6 +247,7 @@ gsettings set ${APP_FOLDERS_PATH}System/ apps "[
     'org.gnome.Nautilus.desktop',
     'org.kde.dolphin.desktop',
     'org.gnome.Terminal.desktop',
+    'org.gnome.Console.desktop',
     'org.kde.konsole.desktop',
     'gnome-system-monitor.desktop',
     'org.gnome.baobab.desktop',
@@ -326,11 +301,13 @@ gsettings set ${APP_FOLDERS_PATH}Utilities/ apps "[
     'org.gnome.font-viewer.desktop',
     'org.gnome.Characters.desktop',
     'org.gnome.Firmware.desktop',
+    'remote-viewer.desktop',
     'org.kde.kwalletmanager5.desktop',
     'org.kde.klipper.desktop',
     'org.kde.kdeconnect.app.desktop',
     'org.kde.kdeconnect.nonplasma.desktop',
     'org.kde.kdeconnect.settings.desktop',
+    'org.kde.kdeconnect-settings.desktop',
     'org.kde.kdeconnect.sms.desktop',
     'texdoctk.desktop',
     'yelp.desktop',
@@ -368,9 +345,11 @@ gsettings set org.gnome.shell app-picker-layout "[
 gsettings set org.gnome.shell favorite-apps "[
     'org.gnome.Nautilus.desktop',
     'firefox.desktop',
+    'firefox_firefox.desktop',
     'firefox-esr.desktop',
     'org.mozilla.firefox.desktop',
     'thunderbird.desktop',
+    'thunderbird_thunderbird.desktop',
     'mozilla-thunderbird.desktop',
     'org.mozilla.Thunderbird.desktop',
     'org.gnome.gedit.desktop',
