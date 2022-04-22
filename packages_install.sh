@@ -170,12 +170,6 @@ function setupEnvironment() {
         sudo -u $SUDO_USER touch $bashrc
     fi
 
-    grep -q codium $bashrc
-    if [ $? -eq 1 ]; then
-        sudo -u $SUDO_USER echo alias codium='"flatpak run com.vscodium.codium --no-sandbox"' >>$bashrc
-        sudo -u $SUDO_USER echo '' >>$bashrc
-    fi
-
     grep -q EDITOR $bashrc
     if [ $? -eq 1 ]; then
         sudo -u $SUDO_USER echo export EDITOR='"/usr/bin/vim"' >>$bashrc
@@ -230,9 +224,9 @@ function setupEnvironment() {
         sudo -u $SUDO_USER echo set scrolloff=10 >>$vimrc
     fi
 
-    grep -q "set number relativenumber" $vimrc
+    grep -q "set number" $vimrc
     if [ $? -eq 1 ]; then
-        sudo -u $SUDO_USER echo set number relativenumber >>$vimrc
+        sudo -u $SUDO_USER echo set number >>$vimrc
     fi
 
     grep -q "set ignorecase smartcase" $vimrc
@@ -268,7 +262,6 @@ function installPackages() {
     packageOptions+=("node" "Node.js and NPM" off)
     packageOptions+=("pip" "Python PIP" off)
     packageOptions+=("ssh" "SSH" off)
-    packageOptions+=("tkinter" "Python Tkinter" off)
     packageOptions+=("unzip" "Unzip zip files" off)
     packageOptions+=("vim" "VIM" on)
     packageOptions+=("yt-dlp" "Command Line YT Downloader" off)
@@ -282,11 +275,13 @@ function installPackages() {
         pkg=$(echo $pkg | sed 's/"//g')
         case ${pkg} in
         "exfat")
-            packagesToInstall+=(exfat-utils)
             if [ "$pm" == "apt" ]; then
                 packagesToInstall+=(exfat-fuse)
-            elif [ "$pm" == "dnf" ]; then
-                packagesToInstall+=(fuse-exfat)
+            else
+                packagesToInstall+=(exfat-utils)
+                if [ "$pm" == "dnf" ]; then
+                    packagesToInstall+=(fuse-exfat)
+                fi
             fi
             ;;
         "ffmpeg")
@@ -353,17 +348,6 @@ function installPackages() {
                 packagesToInstall+=(python38-pip)
             else
                 packagesToInstall+=(python3-pip)
-            fi
-            ;;
-        "tkinter")
-            if [ "$pm" == "apt" ]; then
-                packagesToInstall+=(python3-tk)
-            elif [ "$pm" == "dnf" ]; then
-                packagesToInstall+=(python3-tkinter)
-            elif [ "$pm" == "pacman" ]; then
-                packagesToInstall+=(tk)
-            elif [ "$pm" == "zypper" ]; then
-                packagesToInstall+=(python-tk)
             fi
             ;;
         "ssh")
