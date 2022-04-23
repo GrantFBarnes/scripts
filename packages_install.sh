@@ -393,6 +393,7 @@ function removePackages() {
         packagesToRemove+=(gnome-mahjongg)
         packagesToRemove+=(gnome-todo)
         packagesToRemove+=(remmina*)
+        packagesToRemove+=(seahorse)
 
         if [ "$distro" == "debian" ]; then
             packagesToRemove+=(five-or-more)
