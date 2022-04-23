@@ -246,7 +246,6 @@ function installPackages() {
     packageOptions+=("bash-completion" "Bash Completion" off)
     packageOptions+=("cups" "Printer Support" off)
     packageOptions+=("curl" "Curl Command" off)
-    packageOptions+=("exfat" "ExFat Format Support" off)
     packageOptions+=("ffmpeg" "ffmpeg to watch videos" off)
     packageOptions+=("htop" "Process Reviewer" off)
     packageOptions+=("ibus-unikey" "Vietnamese Unikey" off)
@@ -274,16 +273,6 @@ function installPackages() {
     for pkg in $packageSelections; do
         pkg=$(echo $pkg | sed 's/"//g')
         case ${pkg} in
-        "exfat")
-            if [ "$pm" == "apt" ]; then
-                packagesToInstall+=(exfat-fuse)
-            else
-                packagesToInstall+=(exfat-utils)
-                if [ "$pm" == "dnf" ]; then
-                    packagesToInstall+=(fuse-exfat)
-                fi
-            fi
-            ;;
         "ffmpeg")
             if [ "$distro" == "centos" ]; then
                 packagesToInstall+=(http://rpmfind.net/linux/epel/7/x86_64/Packages/s/SDL2-2.0.14-2.el7.x86_64.rpm)
@@ -401,22 +390,20 @@ function removePackages() {
         packagesToRemove+=(pix*)
         packagesToRemove+=(xed)
     elif [ "$distro" == "ubuntu" ] || [ "$distro" == "debian" ]; then
-        packagesToRemove+=(five-or-more)
-        packagesToRemove+=(four-in-a-row)
-        packagesToRemove+=(gnome-klotski)
         packagesToRemove+=(gnome-mahjongg)
-        packagesToRemove+=(gnome-nibbles)
-        packagesToRemove+=(gnome-robots)
-        packagesToRemove+=(gnome-taquin)
-        packagesToRemove+=(gnome-tetravex)
         packagesToRemove+=(gnome-todo)
-        packagesToRemove+=(iagno)
-        packagesToRemove+=(lightsoff)
         packagesToRemove+=(remmina*)
-        packagesToRemove+=(seahorse)
-        packagesToRemove+=(swell-foop)
 
         if [ "$distro" == "debian" ]; then
+            packagesToRemove+=(five-or-more)
+            packagesToRemove+=(four-in-a-row)
+            packagesToRemove+=(gnome-klotski)
+            packagesToRemove+=(gnome-nibbles)
+            packagesToRemove+=(gnome-robots)
+            packagesToRemove+=(gnome-taquin)
+            packagesToRemove+=(gnome-tetravex)
+            packagesToRemove+=(iagno)
+            packagesToRemove+=(lightsoff)
             packagesToRemove+=(anthy*)
             packagesToRemove+=(fcitx*)
             packagesToRemove+=(goldendict)
@@ -425,6 +412,7 @@ function removePackages() {
             packagesToRemove+=(*mozc*)
             packagesToRemove+=(mlterm*)
             packagesToRemove+=(malcontent)
+            packagesToRemove+=(swell-foop)
             packagesToRemove+=(tali)
             packagesToRemove+=(xiterm*)
             packagesToRemove+=(xterm)
