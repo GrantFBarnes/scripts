@@ -157,6 +157,7 @@ gsettings set ${APP_FOLDERS_PATH}Internet/ apps "[
     'thunderbird_thunderbird.desktop',
     'mozilla-thunderbird.desktop',
     'org.mozilla.Thunderbird.desktop',
+    'discord_discord.desktop',
     'transmission-gtk.desktop',
     'transmission-qt.desktop'
 ]"
@@ -227,6 +228,8 @@ gsettings set ${APP_FOLDERS_PATH}MultiMedia/ apps "[
 
 gsettings set ${APP_FOLDERS_PATH}Games/ name "Games"
 gsettings set ${APP_FOLDERS_PATH}Games/ apps "[
+    'com.valvesoftware.Steam.desktop',
+    'steam_steam.desktop',
     'sol.desktop',
     'org.gnome.Aisleriot.desktop',
     'org.gnome.Chess.desktop',
