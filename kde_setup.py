@@ -82,8 +82,10 @@ def main():
     # Setup Kate
     set_config("katerc", ["General"], "Show Full Path in Title", 'true')
     set_config("katerc", ["General"], "Show Menu Bar", 'true')
-    set_config("katerc", ["KTextEditor Renderer"], "Show Indentation Lines", 'true')
-    set_config("katerc", ["KTextEditor Renderer"], "Show Whole Bracket Expression", 'true')
+    set_config("katerc", ["KTextEditor Renderer"],
+               "Show Indentation Lines", 'true')
+    set_config("katerc", ["KTextEditor Renderer"],
+               "Show Whole Bracket Expression", 'true')
     set_config("katerc", ["KTextEditor Document"], "Show Spaces", '1')
     set_config("katerc", ["KTextEditor View"], "Scroll Past End", 'true')
     set_config("katerc", ["KTextEditor View"], "Show Line Count", 'true')
@@ -91,8 +93,8 @@ def main():
     set_config("katerc", ["KTextEditor View"], "Line Numbers", 'true')
     set_config("katerc", ["KTextEditor View"], "Smart Copy Cut", 'true')
     set_config("katerc", ["KTextEditor View"], "Input Mode", '1')
-    set_config("katerc", ["KTextEditor View"], "Vi Input Mode Steal Keys", 'false')
-    set_config("katerc", ["KTextEditor View"], "Vi Relative Line Numbers", 'true')
+    set_config("katerc", ["KTextEditor View"],
+               "Vi Input Mode Steal Keys", 'false')
 
 
 if __name__ == "__main__":

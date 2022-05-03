@@ -5,14 +5,6 @@ cd $(dirname "$0")
 folderLocation=$(pwd)
 . helper_functions.sh
 
-function confirmWhiptail() {
-    local height=7
-    if [ -n "$2" ]; then
-        height=$2
-    fi
-    whiptail --title "Set up GNU/Linux" --yesno --defaultno "$1" $height 50
-}
-
 function choosePackagesWhiptail() {
     packageSelections=$(whiptail --title "Set up GNU/Linux" --checklist "Select Packages to Install:" --cancel-button "Cancel" 0 0 0 "${packageOptions[@]}" 3>&1 1>&2 2>&3)
     return $?

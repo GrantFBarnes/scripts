@@ -43,3 +43,11 @@ function getPackageManager() {
         echo ""
     fi
 }
+
+function confirmWhiptail() {
+    local height=7
+    if [ -n "$2" ]; then
+        height=$2
+    fi
+    whiptail --title "Confirmation" --yesno --defaultno "$1" $height 50
+}
