@@ -15,14 +15,6 @@ function chooseCategoryWhiptail() {
     return $?
 }
 
-function checkNotInstalled() {
-    if ! command -v $1 &>/dev/null; then
-        return 0
-    fi
-    echo "$1 already installed"
-    return 1
-}
-
 function checkExitStatus() {
     if [ $? -eq 0 ]; then
         echo "Success"

@@ -51,3 +51,10 @@ function confirmWhiptail() {
     fi
     whiptail --title "Confirmation" --yesno --defaultno "$1" $height 50
 }
+
+function checkNotInstalled() {
+    if ! command -v $1 &>/dev/null; then
+        return 0
+    fi
+    return 1
+}
