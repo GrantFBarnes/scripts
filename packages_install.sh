@@ -57,7 +57,7 @@ function packageManager() {
     elif [ "$method" == "remove" ] && [ "$pm" == "apt" ]; then
         sudo apt-get remove --purge ${@:2} -y
     elif [ "$method" == "module" ]; then
-        sudo dnf module install ${@:2} -y
+        sudo dnf module enable ${@:2} -y
     elif [ "$pm" == "zypper" ]; then
         if [ "$method" == "autoremove" ]; then
             sudo zypper remove --clean-deps --no-confirm $(zypper packages --unneeded | awk -F '|' 'NR==0 || NR==1 || NR==2 || NR==3 || NR==4 {next} {print $3}')
@@ -108,8 +108,8 @@ declare -a categoryOptions
 declare -a packageOptions
 declare -a packageSelections
 
+declare -a modulesToEnable
 declare -a packagesToInstall
-declare -a modulesToInstall
 
 declare -a packagesToRemove
 
@@ -244,8 +244,8 @@ function installPackages() {
     packageOptions+=("net-tools" "Network Packages" off)
     packageOptions+=("node" "Node.js and NPM" off)
     packageOptions+=("pip" "Python PIP" off)
+    packageOptions+=("rust" "Rust Language" off)
     packageOptions+=("ssh" "SSH" off)
-    packageOptions+=("unzip" "Unzip zip files" off)
     packageOptions+=("vim" "VIM" on)
     packageOptions+=("yt-dlp" "Command Line YT Downloader" off)
 
@@ -296,10 +296,12 @@ function installPackages() {
             ;;
         "node")
             if [ "$distro" == "fedora" ]; then
-                modulesToInstall+=(nodejs:14/default)
+                modulesToEnable+=(nodejs:18)
             elif [ "$distro" == "centos" ]; then
-                modulesToInstall+=(nodejs:14)
-            elif [ "$pm" == "zypper" ]; then
+                modulesToEnable+=(nodejs:14)
+            fi
+
+            if [ "$pm" == "zypper" ]; then
                 packagesToInstall+=(nodejs16)
                 packagesToInstall+=(npm16)
             else
@@ -323,6 +325,11 @@ function installPackages() {
                 packagesToInstall+=(python3-pip)
             fi
             ;;
+        "rust")
+            packagesToInstall+=(rust)
+            packagesToInstall+=(rustfmt)
+            packagesToInstall+=(cargo)
+            ;;
         "ssh")
             if [ "$pm" == "apt" ]; then
                 packagesToInstall+=(ssh)
@@ -340,6 +347,12 @@ function installPackages() {
         esac
     done
 
+    if [ ${#modulesToEnable[@]} -gt 0 ]; then
+        for i in "${modulesToEnable[@]}"; do
+            packageManager module $i
+        done
+    fi
+
     if [ ${#packagesToInstall[@]} -gt 0 ]; then
         confirmWhiptail "Install packages individually?"
         if [ $? -eq 0 ]; then
@@ -349,12 +362,6 @@ function installPackages() {
         else
             packageManager install ${packagesToInstall[*]}
         fi
-    fi
-
-    if [ ${#modulesToInstall[@]} -gt 0 ]; then
-        for i in "${modulesToInstall[@]}"; do
-            packageManager module $i
-        done
     fi
 }
 

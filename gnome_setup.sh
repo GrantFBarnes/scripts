@@ -53,15 +53,18 @@ gsettings set org.gnome.desktop.peripherals.keyboard numlock-state true
 gsettings set org.gnome.nautilus.preferences default-folder-viewer "list-view"
 
 # Set up gedit
-gsettings set org.gnome.gedit.preferences.editor scheme "oblivion"
-gsettings set org.gnome.gedit.preferences.editor background-pattern "grid"
-gsettings set org.gnome.gedit.preferences.editor bracket-matching true
-gsettings set org.gnome.gedit.preferences.editor display-line-numbers true
-gsettings set org.gnome.gedit.preferences.editor display-right-margin true
-gsettings set org.gnome.gedit.preferences.editor right-margin-position 80
-gsettings set org.gnome.gedit.preferences.editor search-highlighting true
-gsettings set org.gnome.gedit.preferences.editor insert-spaces true
-gsettings set org.gnome.gedit.preferences.editor tabs-size 4
+checkNotInstalled gedit
+if [ $? -eq 1 ]; then
+    gsettings set org.gnome.gedit.preferences.editor scheme "oblivion"
+    gsettings set org.gnome.gedit.preferences.editor background-pattern "grid"
+    gsettings set org.gnome.gedit.preferences.editor bracket-matching true
+    gsettings set org.gnome.gedit.preferences.editor display-line-numbers true
+    gsettings set org.gnome.gedit.preferences.editor display-right-margin true
+    gsettings set org.gnome.gedit.preferences.editor right-margin-position 80
+    gsettings set org.gnome.gedit.preferences.editor search-highlighting true
+    gsettings set org.gnome.gedit.preferences.editor insert-spaces true
+    gsettings set org.gnome.gedit.preferences.editor tabs-size 4
+fi
 
 # Set up Touchpad/Mouse
 gsettings set org.gnome.desktop.peripherals.touchpad tap-to-click true
@@ -174,7 +177,9 @@ gsettings set ${APP_FOLDERS_PATH}Editors/ apps "[
     'intellij-idea-community_intellij-idea-community.desktop',
     'pycharm-community_pycharm-community.desktop',
     'org.kde.kile.desktop',
+    'texstudio.desktop',
     'org.texstudio.TeXstudio.desktop',
+    'org.gnome.gitg.desktop',
     'vim.desktop'
 ]"
 
@@ -265,6 +270,7 @@ gsettings set ${APP_FOLDERS_PATH}System/ apps "[
 
 gsettings set ${APP_FOLDERS_PATH}Settings/ name "Settings"
 gsettings set ${APP_FOLDERS_PATH}Settings/ apps "[
+    'org.gnome.Settings.desktop',
     'gnome-control-center.desktop',
     'org.gnome.tweaks.desktop',
     'org.gnome.Extensions.desktop',
@@ -356,6 +362,7 @@ gsettings set org.gnome.shell favorite-apps "[
     'mozilla-thunderbird.desktop',
     'org.mozilla.Thunderbird.desktop',
     'org.gnome.gedit.desktop',
+    'org.gnome.TextEditor.desktop',
     'org.gnome.Terminal.desktop'
 ]"
 
