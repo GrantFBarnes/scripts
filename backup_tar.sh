@@ -10,12 +10,6 @@ if [ $? -eq 0 ]; then
     exit 1
 fi
 
-checkNotInstalled pv
-if [ $? -eq 0 ]; then
-    echo "error: pv is not installed"
-    exit 1
-fi
-
 confirmWhiptail "Running this script will remove any old backups and create new ones.\nWould you like to continue?" 9
 if [ $? -eq 1 ]; then
     exit 0
@@ -60,7 +54,7 @@ for folder in $backupFolders; do
     rm -f backups/$folder.tar.gz
     rm -f backups/$folder.tar.gz.gpg
     echo "Compressing $folder..."
-    tar czf - $folder | pv -s $(du -sb $folder | awk '{print $1}') | gzip >backups/$folder.tar.gz
+    tar --exclude='**/.git' -czf backups/$folder.tar.gz $folder
 done
 
 for folder in $encryptFolders; do
