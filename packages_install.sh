@@ -224,30 +224,23 @@ function setupEnvironment() {
     fi
 }
 
-function installPackages() {
+function installServerPackages() {
 
     packageOptions=()
     packageOptions+=("bash-completion" "Bash Completion" off)
-    packageOptions+=("cups" "Printer Support" off)
+    packageOptions+=("cockpit" "Cockpit" off)
     packageOptions+=("curl" "Curl Command" off)
-    packageOptions+=("ffmpeg" "ffmpeg to watch videos" off)
     packageOptions+=("htop" "Process Reviewer" off)
-    packageOptions+=("ibus-unikey" "Vietnamese Unikey" off)
-    packageOptions+=("id3v2" "Modify MP3 Meta Data" off)
-    packageOptions+=("imagemagick" "Image Magick" off)
     packageOptions+=("git" "Git" off)
-    packageOptions+=("latex" "LaTeX CLI" off)
     packageOptions+=("mariadb-server" "MariaDB Server" off)
     packageOptions+=("nano" "nano" off)
     packageOptions+=("ncdu" "Command Line Disk Usage" off)
-    packageOptions+=("neofetch" "neofetch overview display" off)
-    packageOptions+=("net-tools" "Network Packages" off)
     packageOptions+=("node" "Node.js and NPM" off)
     packageOptions+=("pip" "Python PIP" off)
+    packageOptions+=("podman" "Podman Containers" off)
     packageOptions+=("rust" "Rust Language" off)
     packageOptions+=("ssh" "SSH" off)
     packageOptions+=("vim" "VIM" on)
-    packageOptions+=("yt-dlp" "Command Line YT Downloader" off)
 
     choosePackagesWhiptail
     if [ $? -eq 1 ]; then
@@ -257,43 +250,6 @@ function installPackages() {
     for pkg in $packageSelections; do
         pkg=$(echo $pkg | sed 's/"//g')
         case ${pkg} in
-        "ffmpeg")
-            if [ "$distro" == "centos" ]; then
-                packagesToInstall+=(http://rpmfind.net/linux/epel/7/x86_64/Packages/s/SDL2-2.0.14-2.el7.x86_64.rpm)
-                packagesToInstall+=(ffmpeg)
-                packagesToInstall+=(ffmpeg-devel)
-            elif [ "$pm" == "zypper" ]; then
-                packagesToInstall+=(ffmpeg-4)
-            else
-                packagesToInstall+=(ffmpeg)
-            fi
-            ;;
-        "ibus-unikey")
-            if [ "$distro" == "centos" ]; then
-                packagesToInstall+=(http://rpmfind.net/linux/fedora/linux/releases/34/Everything/x86_64/os/Packages/i/ibus-unikey-0.6.1-26.20190311git46b5b9e.fc34.x86_64.rpm)
-            else
-                packagesToInstall+=($pkg)
-            fi
-            ;;
-        "imagemagick")
-            if [ "$pm" == "dnf" ]; then
-                packagesToInstall+=(ImageMagick)
-            elif [ "$pm" == "apt" ]; then
-                packagesToInstall+=(imagemagick)
-            fi
-            ;;
-        "latex")
-            if [ "$pm" == "apt" ]; then
-                packagesToInstall+=(texlive-latex-base)
-                packagesToInstall+=(texlive-latex-extra)
-            elif [ "$pm" == "dnf" ]; then
-                packagesToInstall+=(texlive-latex)
-                packagesToInstall+=(texlive-collection-latexextra)
-            elif [ "$pm" == "pacman" ]; then
-                packagesToInstall+=(texlive-core)
-                packagesToInstall+=(texlive-latexextra)
-            fi
-            ;;
         "node")
             if [ "$distro" == "fedora" ]; then
                 modulesToEnable+=(nodejs:18)
@@ -339,6 +295,77 @@ function installPackages() {
             else
                 packagesToInstall+=(libssh)
                 packagesToInstall+=(openssh)
+            fi
+            ;;
+        *)
+            packagesToInstall+=($pkg)
+            ;;
+        esac
+    done
+
+    if [ ${#modulesToEnable[@]} -gt 0 ]; then
+        for i in "${modulesToEnable[@]}"; do
+            packageManager module $i
+        done
+    fi
+
+    if [ ${#packagesToInstall[@]} -gt 0 ]; then
+        confirmWhiptail "Install packages individually?"
+        if [ $? -eq 0 ]; then
+            for i in "${packagesToInstall[@]}"; do
+                packageManager install $i
+            done
+        else
+            packageManager install ${packagesToInstall[*]}
+        fi
+    fi
+}
+
+function installDesktopPackages() {
+
+    packageOptions=()
+    packageOptions+=("cups" "Printer Support" off)
+    if [ "$distro" != "centos" ]; then
+        packageOptions+=("ffmpeg" "ffmpeg to watch videos" off)
+        packageOptions+=("ibus-unikey" "Vietnamese Unikey" off)
+    fi
+    packageOptions+=("id3v2" "Modify MP3 Meta Data" off)
+    packageOptions+=("imagemagick" "Image Magick" off)
+    packageOptions+=("latex" "LaTeX CLI" off)
+    packageOptions+=("yt-dlp" "Command Line YT Downloader" off)
+
+    choosePackagesWhiptail
+    if [ $? -eq 1 ]; then
+        return
+    fi
+
+    for pkg in $packageSelections; do
+        pkg=$(echo $pkg | sed 's/"//g')
+        case ${pkg} in
+        "ffmpeg")
+            if [ "$pm" == "zypper" ]; then
+                packagesToInstall+=(ffmpeg-4)
+            else
+                packagesToInstall+=(ffmpeg)
+            fi
+            ;;
+        "imagemagick")
+            if [ "$pm" == "dnf" ]; then
+                packagesToInstall+=(ImageMagick)
+            elif [ "$pm" == "apt" ]; then
+                packagesToInstall+=(imagemagick)
+            fi
+            ;;
+        "latex")
+            if [ "$pm" == "apt" ]; then
+                packagesToInstall+=(texlive-latex-base)
+                packagesToInstall+=(texlive-latex-extra)
+            elif [ "$pm" == "dnf" ]; then
+                packagesToInstall+=(texlive-latex)
+                packagesToInstall+=(texlive-collection-latexextra)
+            elif [ "$pm" == "pacman" ]; then
+                packagesToInstall+=(texlive-core)
+                packagesToInstall+=(texlive-latexextra)
             fi
             ;;
         *)
@@ -440,12 +467,12 @@ function chooseUsage() {
     categoryOptions+=("Update" "Packages")
     categoryOptions+=("Repository" "Setup")
     categoryOptions+=("Environment" "Setup")
-    categoryOptions+=("Install" "Packages")
+    categoryOptions+=("Server" "Packages")
+    categoryOptions+=("Desktop" "Packages")
     categoryOptions+=("Remove" "Packages")
     categoryOptions+=("Exit" "")
 
-    # Remove duplicate values in install arrays
-    packagesToInstall=($(echo "${packagesToInstall[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' '))
+    packagesToInstall=()
 
     chooseCategoryWhiptail
     if [ $? -eq 1 ]; then
@@ -463,10 +490,14 @@ function chooseUsage() {
         ;;
     "Environment")
         setupEnvironment
-        defaultCategory="Install"
+        defaultCategory="Server"
         ;;
-    "Install")
-        installPackages
+    "Server")
+        installServerPackages
+        defaultCategory="Desktop"
+        ;;
+    "Desktop")
+        installDesktopPackages
         defaultCategory="Remove"
         ;;
     "Remove")
