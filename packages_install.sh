@@ -253,8 +253,6 @@ function installServerPackages() {
         "node")
             if [ "$distro" == "fedora" ]; then
                 modulesToEnable+=(nodejs:18)
-            elif [ "$distro" == "centos" ]; then
-                modulesToEnable+=(nodejs:14)
             fi
 
             if [ "$pm" == "zypper" ]; then
@@ -325,14 +323,16 @@ function installDesktopPackages() {
 
     packageOptions=()
     packageOptions+=("cups" "Printer Support" off)
+    packageOptions+=("ffmpeg" "ffmpeg to watch videos" off)
     if [ "$distro" != "centos" ]; then
-        packageOptions+=("ffmpeg" "ffmpeg to watch videos" off)
         packageOptions+=("ibus-unikey" "Vietnamese Unikey" off)
+        packageOptions+=("id3v2" "Modify MP3 Meta Data" off)
     fi
-    packageOptions+=("id3v2" "Modify MP3 Meta Data" off)
     packageOptions+=("imagemagick" "Image Magick" off)
     packageOptions+=("latex" "LaTeX CLI" off)
-    packageOptions+=("yt-dlp" "Command Line YT Downloader" off)
+    if [ "$distro" != "centos" ]; then
+        packageOptions+=("yt-dlp" "Command Line YT Downloader" off)
+    fi
 
     choosePackagesWhiptail
     if [ $? -eq 1 ]; then
@@ -362,7 +362,9 @@ function installDesktopPackages() {
                 packagesToInstall+=(texlive-latex-extra)
             elif [ "$pm" == "dnf" ]; then
                 packagesToInstall+=(texlive-latex)
-                packagesToInstall+=(texlive-collection-latexextra)
+                if [ "$distro" == "fedora" ]; then
+                    packagesToInstall+=(texlive-collection-latexextra)
+                fi
             elif [ "$pm" == "pacman" ]; then
                 packagesToInstall+=(texlive-core)
                 packagesToInstall+=(texlive-latexextra)
