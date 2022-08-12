@@ -124,10 +124,12 @@ gsettings set ${APP_FOLDERS} folder-children "[
 
 gsettings set ${APP_FOLDERS_PATH}Apps/ name "Apps"
 gsettings set ${APP_FOLDERS_PATH}Apps/ apps "[
+    'bitwarden.desktop',
     'bitwarden_bitwarden.desktop',
     'gnucash.desktop',
     'org.gnucash.GnuCash.desktop',
     'org.gnome.PasswordSafe.desktop',
+    'org.gnome.World.Secrets.desktop',
     'org.gnome.Calendar.desktop',
     'org.gnome.clocks.desktop',
     'org.gnome.Weather.desktop',
@@ -160,6 +162,7 @@ gsettings set ${APP_FOLDERS_PATH}Internet/ apps "[
     'thunderbird_thunderbird.desktop',
     'mozilla-thunderbird.desktop',
     'org.mozilla.Thunderbird.desktop',
+    'discord.desktop',
     'discord_discord.desktop',
     'transmission-gtk.desktop',
     'transmission-qt.desktop'
@@ -174,7 +177,9 @@ gsettings set ${APP_FOLDERS_PATH}Editors/ apps "[
     'org.kde.kwrite.desktop',
     'org.kde.kate.desktop',
     'org.gnome.Builder.desktop',
+    'idea.desktop',
     'intellij-idea-community_intellij-idea-community.desktop',
+    'pycharm.desktop',
     'pycharm-community_pycharm-community.desktop',
     'org.kde.kile.desktop',
     'texstudio.desktop',
@@ -218,6 +223,7 @@ gsettings set ${APP_FOLDERS_PATH}MultiMedia/ apps "[
     'rhythmbox.desktop',
     'org.gnome.Rhythmbox3.desktop',
     'org.gnome.Music.desktop',
+    'org.kde.elisa.desktop',
     'org.gnome.Photos.desktop',
     'shotwell.desktop',
     'org.gnome.Shotwell.desktop',
@@ -247,7 +253,9 @@ gsettings set ${APP_FOLDERS_PATH}Games/ apps "[
     'org.kde.ksudoku.desktop',
     '0ad.desktop',
     'supertuxkart.desktop',
-    'xonotic.desktop'
+    'xonotic.desktop',
+    'xonotic-glx.desktop',
+    'xonotic-sdl.desktop'
 ]"
 
 gsettings set ${APP_FOLDERS_PATH}System/ name "System"
@@ -306,7 +314,12 @@ gsettings set ${APP_FOLDERS_PATH}Utilities/ apps "[
     'org.kde.kcalc.desktop',
     'org.kde.spectacle.desktop',
     'system-config-printer.desktop',
+    'cups.desktop',
+    'electron18.desktop',
+    'electron19.desktop',
+    'electron.desktop',
     'setroubleshoot.desktop',
+    'org.cockpit_project.CockpitClient.desktop',
     'org.gnome.font-viewer.desktop',
     'org.gnome.Characters.desktop',
     'org.gnome.Firmware.desktop',
@@ -318,6 +331,10 @@ gsettings set ${APP_FOLDERS_PATH}Utilities/ apps "[
     'org.kde.kdeconnect.settings.desktop',
     'org.kde.kdeconnect-settings.desktop',
     'org.kde.kdeconnect.sms.desktop',
+    'assistant.desktop',
+    'designer.desktop',
+    'linguist.desktop',
+    'qdbusviewer.desktop',
     'texdoctk.desktop',
     'yelp.desktop',
     'org.freedesktop.GnomeAbrt.desktop',
@@ -331,6 +348,12 @@ gsettings set ${APP_FOLDERS_PATH}Utilities/ apps "[
     'lstopo.desktop',
     'qv412.desktop',
     'qvidcap.desktop',
+    'jconsole-java11-openjdk.desktop',
+    'jshell-java11-openjdk.desktop',
+    'qv4l2.desktop',
+    'org.kde.kuserfeedback-console.desktop',
+    'xdvi.desktop',
+    'org.kde.drkonqi.coredump.gui.desktop',
     'torbrowser-settings.desktop',
     'com.github.micahflee.torbrowser-launcher.settings.desktop'
 ]"

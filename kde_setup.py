@@ -73,6 +73,9 @@ def main():
     # Set File Click to Double
     set_config("kdeglobals", ["KDE"], "SingleClick", 'false')
 
+    # Set Dolphin to always open home
+    set_config("dolphinrc", ["General"], "RememberOpenedTabs", 'false')
+
     # Set Screen Lock Timeout
     set_config("kscreenlockerrc", ["Daemon"], "Timeout", '15')
 
