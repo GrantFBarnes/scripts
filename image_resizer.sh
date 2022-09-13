@@ -9,6 +9,10 @@ declare -a makeSmall=()
 
 # loop through all files in Pictures
 for file in $(find ~/Pictures -name '*.*'); do
+    if [[ $file == *".git"* ]]; then
+        continue;
+    fi
+
     echo "Processing file $file"
 
     # convert file to extension jpeg
