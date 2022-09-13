@@ -131,7 +131,6 @@ function setupRepository() {
             elif [ "$distro" == "centos" ]; then
                 sudo dnf install --nogpgcheck https://dl.fedoraproject.org/pub/epel/epel-release-latest-${distroVersion}.noarch.rpm -y
                 sudo dnf install --nogpgcheck https://download1.rpmfusion.org/free/el/rpmfusion-free-release-${distroVersion}.noarch.rpm -y
-                sudo dnf config-manager --set-enabled powertools
             fi
             confirmWhiptail "Enable Non-Free EPEL Repositories?"
             if [ $? -eq 0 ]; then
@@ -251,7 +250,7 @@ function installServerPackages() {
         pkg=$(echo $pkg | sed 's/"//g')
         case ${pkg} in
         "node")
-            if [ "$distro" == "fedora" ]; then
+            if [ "$pm" == "dnf" ]; then
                 modulesToEnable+=(nodejs:18)
             fi
 
@@ -402,7 +401,7 @@ function removePackages() {
     packagesToRemove+=(kmail)
     packagesToRemove+=(mpv)
 
-    if [ "$distro" == "mint" ] || [ "$distro" == "lmde" ]; then
+    if [ "$distro" == "mint" ]; then
         packagesToRemove+=(celluloid)
         packagesToRemove+=(drawing)
         packagesToRemove+=(hexchat*)
