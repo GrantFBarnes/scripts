@@ -50,9 +50,15 @@ function packageManager() {
     echo "---------------------------------------------------------------------"
     if [ "$pm" == "pacman" ]; then
         if [ "$method" == "install" ]; then
-            sudo $pm -S ${@:2} --noconfirm --needed
+            sudo pacman -S ${@:2} --noconfirm --needed
         elif [ "$method" == "remove" ]; then
-            sudo $pm -Rsun ${@:2} --noconfirm
+            sudo pacman -Rsun ${@:2} --noconfirm
+        elif [ "$method" == "autoremove" ]; then
+            pacman -Qdttq > pacmanorphans
+            if [[ $(wc -l < pacmanorphans) -gt 0 ]]; then
+                sudo pacman -Rs $(pacman -Qdttq)
+            fi
+            rm pacmanorphans
         fi
     elif [ "$method" == "remove" ] && [ "$pm" == "apt" ]; then
         sudo apt-get remove --purge ${@:2} -y
@@ -279,9 +285,13 @@ function installServerPackages() {
             fi
             ;;
         "rust")
-            packagesToInstall+=(rust)
-            packagesToInstall+=(rustfmt)
-            packagesToInstall+=(cargo)
+            if [ "$pm" == "pacman" ]; then
+                packagesToInstall+=(rustup)
+            else
+                packagesToInstall+=(rust)
+                packagesToInstall+=(rustfmt)
+                packagesToInstall+=(cargo)
+            fi
             ;;
         "ssh")
             if [ "$pm" == "apt" ]; then
@@ -307,14 +317,12 @@ function installServerPackages() {
     fi
 
     if [ ${#packagesToInstall[@]} -gt 0 ]; then
-        confirmWhiptail "Install packages individually?"
-        if [ $? -eq 0 ]; then
-            for i in "${packagesToInstall[@]}"; do
+        for i in "${packagesToInstall[@]}"; do
+            checkNotInstalled $i
+            if [ $? -eq 0 ]; then
                 packageManager install $i
-            done
-        else
-            packageManager install ${packagesToInstall[*]}
-        fi
+            fi
+        done
     fi
 }
 
@@ -382,21 +390,18 @@ function installDesktopPackages() {
     fi
 
     if [ ${#packagesToInstall[@]} -gt 0 ]; then
-        confirmWhiptail "Install packages individually?"
-        if [ $? -eq 0 ]; then
-            for i in "${packagesToInstall[@]}"; do
+        for i in "${packagesToInstall[@]}"; do
+            checkNotInstalled $i
+            if [ $? -eq 0 ]; then
                 packageManager install $i
-            done
-        else
-            packageManager install ${packagesToInstall[*]}
-        fi
+            fi
+        done
     fi
 }
 
 function removePackages() {
     packagesToRemove+=(akregator)
     packagesToRemove+=(evolution)
-    packagesToRemove+=(gnome-contacts)
     packagesToRemove+=(konqueror)
     packagesToRemove+=(kmail)
     packagesToRemove+=(mpv)
@@ -444,20 +449,17 @@ function removePackages() {
             packagesToRemove+=(aspell-*)
             packagesToRemove+=(task-*-desktop)
         fi
-    elif [ "$distro" == "centos" ]; then
-        packagesToRemove+=(pidgin)
     fi
 
     # Remove Packages
 
     if [ ${#packagesToRemove[@]} -gt 0 ]; then
-        if [ "$pm" == "pacman" ]; then
-            for i in "${packagesToRemove[@]}"; do
+        for i in "${packagesToRemove[@]}"; do
+            checkNotInstalled $i
+            if [ $? -eq 1 ]; then
                 packageManager remove $i
-            done
-        else
-            packageManager remove ${packagesToRemove[*]}
-        fi
+            fi
+        done
     fi
 
     packageManager autoremove
