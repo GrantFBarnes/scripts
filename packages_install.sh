@@ -56,7 +56,7 @@ function packageManager() {
         elif [ "$method" == "autoremove" ]; then
             pacman -Qdttq > pacmanorphans
             if [[ $(wc -l < pacmanorphans) -gt 0 ]]; then
-                sudo pacman -Rs $(pacman -Qdttq)
+                sudo pacman -Rs $(pacman -Qdttq) --noconfirm
             fi
             rm pacmanorphans
         fi
