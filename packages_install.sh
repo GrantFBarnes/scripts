@@ -54,8 +54,8 @@ function packageManager() {
         elif [ "$method" == "remove" ]; then
             sudo pacman -Rsun ${@:2} --noconfirm
         elif [ "$method" == "autoremove" ]; then
-            pacman -Qdttq > pacmanorphans
-            if [[ $(wc -l < pacmanorphans) -gt 0 ]]; then
+            pacman -Qdttq >pacmanorphans
+            if [[ $(wc -l <pacmanorphans) -gt 0 ]]; then
                 sudo pacman -Rs $(pacman -Qdttq) --noconfirm
             fi
             rm pacmanorphans
@@ -337,7 +337,10 @@ function installDesktopPackages() {
     fi
     packageOptions+=("imagemagick" "Image Magick" off)
     packageOptions+=("latex" "LaTeX CLI" off)
-    if [ "$distro" != "centos" ]; then
+    if [ "$distro" == "arch" ]; then
+        packageOptions+=("qtile" "Qtile WM" off)
+    fi
+    if [ "$distro" != "centos" ] && [ "$distro" != "debian" ]; then
         packageOptions+=("yt-dlp" "Command Line YT Downloader" off)
     fi
 
@@ -376,6 +379,13 @@ function installDesktopPackages() {
                 packagesToInstall+=(texlive-core)
                 packagesToInstall+=(texlive-latexextra)
             fi
+            ;;
+        "qtile")
+            packagesToInstall+=(qtile)
+            packagesToInstall+=(alacritty)
+            packagesToInstall+=(rofi)
+            packagesToInstall+=(numlockx)
+            packagesToInstall+=(playerctl)
             ;;
         *)
             packagesToInstall+=($pkg)
@@ -454,12 +464,13 @@ function removePackages() {
     # Remove Packages
 
     if [ ${#packagesToRemove[@]} -gt 0 ]; then
-        for i in "${packagesToRemove[@]}"; do
-            checkNotInstalled $i
-            if [ $? -eq 1 ]; then
+        if [ "$pm" == "pacman" ]; then
+            for i in "${packagesToRemove[@]}"; do
                 packageManager remove $i
-            fi
-        done
+            done
+        else
+            packageManager remove ${packagesToRemove[*]}
+        fi
     fi
 
     packageManager autoremove
