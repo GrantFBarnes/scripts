@@ -11,15 +11,19 @@ gsettings set org.gnome.desktop.interface clock-format "12h"
 gsettings set org.gnome.desktop.interface clock-show-date true
 gsettings set org.gnome.desktop.interface clock-show-seconds true
 gsettings set org.gnome.desktop.interface clock-show-weekday true
-gsettings set org.gnome.clocks world-clocks "[
-    {'location': <(uint32 2, <('Honolulu', 'PHNL', true, [(0.37223509621909062, -2.7566263578617853)], [(0.37187632633805073, -2.7551476625596174)])>)>},
-    {'location': <(uint32 2, <('Los Angeles', 'KCQT', true, [(0.59370283970450188, -2.0644336110828618)], [(0.59432360095955872, -2.063741622941031)])>)>},
-    {'location': <(uint32 2, <('Denver', 'KBKF', true, [(0.69307024596694822, -1.8283729951886007)], [(0.69357907925707463, -1.8323287315783685)])>)>},
-    {'location': <(uint32 2, <('Rochester', 'KRST', true, [(0.76627226949544125, -1.6142841198081861)], [(0.76832240304800381, -1.6139041965366119)])>)>},
-    {'location': <(uint32 2, <('New York City', 'KNYC', false, [(0.71180344078725644, -1.2909618758762367)], @a(dd) [])>)>},
-    {'location': <(uint32 2, <('Oslo', 'ENGM', true, [(1.0506882097005865, 0.19344065294494067)], [(1.0457431159710333, 0.18762289458939041)])>)>},
-    {'location': <(uint32 2, <('Ho Chi Minh City', 'VVTS', true, [(0.18878645324181748, 1.8616845412783825)], [(0.18762289458939041, 1.8616845412783825)])>)>}
-]"
+
+checkNotInstalled gnome-clocks
+if [ $? -eq 1 ]; then
+    gsettings set org.gnome.clocks world-clocks "[
+        {'location': <(uint32 2, <('Honolulu', 'PHNL', true, [(0.37223509621909062, -2.7566263578617853)], [(0.37187632633805073, -2.7551476625596174)])>)>},
+        {'location': <(uint32 2, <('Los Angeles', 'KCQT', true, [(0.59370283970450188, -2.0644336110828618)], [(0.59432360095955872, -2.063741622941031)])>)>},
+        {'location': <(uint32 2, <('Denver', 'KBKF', true, [(0.69307024596694822, -1.8283729951886007)], [(0.69357907925707463, -1.8323287315783685)])>)>},
+        {'location': <(uint32 2, <('Rochester', 'KRST', true, [(0.76627226949544125, -1.6142841198081861)], [(0.76832240304800381, -1.6139041965366119)])>)>},
+        {'location': <(uint32 2, <('New York City', 'KNYC', false, [(0.71180344078725644, -1.2909618758762367)], @a(dd) [])>)>},
+        {'location': <(uint32 2, <('Oslo', 'ENGM', true, [(1.0506882097005865, 0.19344065294494067)], [(1.0457431159710333, 0.18762289458939041)])>)>},
+        {'location': <(uint32 2, <('Ho Chi Minh City', 'VVTS', true, [(0.18878645324181748, 1.8616845412783825)], [(0.18762289458939041, 1.8616845412783825)])>)>}
+    ]"
+fi
 
 # Show Battery Percentage
 gsettings set org.gnome.desktop.interface show-battery-percentage true
@@ -177,12 +181,15 @@ gsettings set ${APP_FOLDERS_PATH}Editors/ apps "[
     'org.kde.kwrite.desktop',
     'org.kde.kate.desktop',
     'org.gnome.Builder.desktop',
+    'jetbrains-idea-ce.desktop',
     'idea.desktop',
     'intellij-idea-community_intellij-idea-community.desktop',
     'com.jetbrains.IntelliJ-IDEA-Community.desktop',
+    'jetbrains-pycharm-ce.desktop',
     'pycharm.desktop',
     'pycharm-community_pycharm-community.desktop',
     'com.jetbrains.PyCharm-Community.desktop',
+    'jetbrains-toolbox.desktop',
     'org.kde.kile.desktop',
     'texstudio.desktop',
     'org.texstudio.TeXstudio.desktop',
