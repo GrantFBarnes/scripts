@@ -126,7 +126,6 @@ function setupRepository() {
         grep -q max_parallel_downloads /etc/dnf/dnf.conf
         if [ $? -eq 1 ]; then
             sudo sh -c 'echo max_parallel_downloads=10 >> /etc/dnf/dnf.conf'
-            sudo sh -c 'echo fastestmirror=true >> /etc/dnf/dnf.conf'
             update
         fi
 
@@ -137,6 +136,7 @@ function setupRepository() {
             elif [ "$distro" == "centos" ]; then
                 sudo dnf install --nogpgcheck https://dl.fedoraproject.org/pub/epel/epel-release-latest-${distroVersion}.noarch.rpm -y
                 sudo dnf install --nogpgcheck https://download1.rpmfusion.org/free/el/rpmfusion-free-release-${distroVersion}.noarch.rpm -y
+                sudo dnf config-manager --set-enabled crb
             fi
             confirmWhiptail "Enable Non-Free EPEL Repositories?"
             if [ $? -eq 0 ]; then
@@ -331,8 +331,8 @@ function installDesktopPackages() {
     packageOptions=()
     packageOptions+=("cups" "Printer Support" off)
     packageOptions+=("ffmpeg" "ffmpeg to watch videos" off)
+    packageOptions+=("ibus-unikey" "Vietnamese Unikey" off)
     if [ "$distro" != "centos" ]; then
-        packageOptions+=("ibus-unikey" "Vietnamese Unikey" off)
         packageOptions+=("id3v2" "Modify MP3 Meta Data" off)
     fi
     packageOptions+=("imagemagick" "Image Magick" off)
@@ -340,7 +340,7 @@ function installDesktopPackages() {
     if [ "$distro" == "arch" ]; then
         packageOptions+=("qtile" "Qtile WM" off)
     fi
-    if [ "$distro" != "centos" ] && [ "$distro" != "debian" ]; then
+    if [ "$distro" != "debian" ]; then
         packageOptions+=("yt-dlp" "Command Line YT Downloader" off)
     fi
 
@@ -357,6 +357,13 @@ function installDesktopPackages() {
                 packagesToInstall+=(ffmpeg-4)
             else
                 packagesToInstall+=(ffmpeg)
+            fi
+            ;;
+        "ibus-unikey")
+            if [ "$distro" == "centos" ]; then
+                packagesToInstall+=(https://rpmfind.net/linux/fedora/linux/releases/34/Everything/x86_64/os/Packages/i/ibus-unikey-0.6.1-26.20190311git46b5b9e.fc34.x86_64.rpm)
+            else
+                packagesToInstall+=(ibus-unikey)
             fi
             ;;
         "imagemagick")
