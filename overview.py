@@ -3,25 +3,10 @@
 from helper_functions import *
 import os
 
-# ANSI Escape Sequences
-reset = "\033[0m"
-bold = "\033[1m"
-red = "\033[31m"
-green = "\033[32m"
-yellow = "\033[33m"
-cyan = "\033[36m"
-red_bg = "\033[41m"
-
 
 def set_alias():
     bashrc = os.path.expanduser("~") + "/.bashrc"
-    with open(bashrc) as file:
-        if "alias ov=" in file.read():
-            return
-
-    file = open(bashrc, "a")
-    file.write('alias ov="python3 ' + os.path.abspath(__file__) + '"\n')
-    file.close()
+    add_to_file_if_not_found(bashrc, "alias ov=", 'alias ov="python3 ' + os.path.abspath(__file__) + '"\n')
 
 
 def get_distro():
@@ -77,13 +62,13 @@ def get_cpu_speed():
         if percent != 0:
             result += " (" + str(percent) + "%)"
             if percent < 25:
-                result = f"{green}" + result + f"{reset}"
+                result = f"{ansi_green}" + result + f"{ansi_reset}"
             elif percent < 50:
-                result = f"{yellow}" + result + f"{reset}"
+                result = f"{ansi_yellow}" + result + f"{ansi_reset}"
             elif percent < 75:
-                result = f"{red}" + result + f"{reset}"
+                result = f"{ansi_red}" + result + f"{ansi_reset}"
             else:
-                result = f"{red_bg}" + result + f"{reset}"
+                result = f"{ansi_red_bg}" + result + f"{ansi_reset}"
 
     return result
 
@@ -114,13 +99,13 @@ def get_memory():
         if percent != 0:
             result += " (" + str(percent) + "%)"
             if percent < 25:
-                result = f"{green}" + result + f"{reset}"
+                result = f"{ansi_green}" + result + f"{ansi_reset}"
             elif percent < 50:
-                result = f"{yellow}" + result + f"{reset}"
+                result = f"{ansi_yellow}" + result + f"{ansi_reset}"
             elif percent < 75:
-                result = f"{red}" + result + f"{reset}"
+                result = f"{ansi_red}" + result + f"{ansi_reset}"
             else:
-                result = f"{red_bg}" + result + f"{reset}"
+                result = f"{ansi_red_bg}" + result + f"{ansi_reset}"
 
     return result
 
@@ -208,17 +193,17 @@ def get_packages():
 def main():
     set_alias()
 
-    print(f"{cyan}-------------------------------{reset}")
-    print(f"{bold}{cyan}    User{reset}: " + get_command("echo $USER"))
-    print(f"{bold}{cyan}Hostname{reset}: " + get_command("echo $HOSTNAME"))
-    print(f"{bold}{cyan}  Distro{reset}: " + get_distro())
-    print(f"{bold}{cyan}  Kernel{reset}: " + get_command("uname -rm"))
-    print(f"{bold}{cyan}     CPU{reset}: " + get_cpu())
-    print(f"{bold}{cyan}   Speed{reset}: " + get_cpu_speed())
-    print(f"{bold}{cyan}  Memory{reset}: " + get_memory())
-    print(f"{bold}{cyan}  Uptime{reset}: " + get_uptime())
-    print(f"{bold}{cyan}Packages{reset}: " + get_packages())
-    print(f"{cyan}-------------------------------{reset}")
+    print(f"{ansi_cyan}-------------------------------{ansi_reset}")
+    print(f"{ansi_bold}{ansi_cyan}    User{ansi_reset}: " + get_command("echo $USER"))
+    print(f"{ansi_bold}{ansi_cyan}Hostname{ansi_reset}: " + get_command("echo $HOSTNAME"))
+    print(f"{ansi_bold}{ansi_cyan}  Distro{ansi_reset}: " + get_distro())
+    print(f"{ansi_bold}{ansi_cyan}  Kernel{ansi_reset}: " + get_command("uname -rm"))
+    print(f"{ansi_bold}{ansi_cyan}     CPU{ansi_reset}: " + get_cpu())
+    print(f"{ansi_bold}{ansi_cyan}   Speed{ansi_reset}: " + get_cpu_speed())
+    print(f"{ansi_bold}{ansi_cyan}  Memory{ansi_reset}: " + get_memory())
+    print(f"{ansi_bold}{ansi_cyan}  Uptime{ansi_reset}: " + get_uptime())
+    print(f"{ansi_bold}{ansi_cyan}Packages{ansi_reset}: " + get_packages())
+    print(f"{ansi_cyan}-------------------------------{ansi_reset}")
 
 
 if __name__ == "__main__":
