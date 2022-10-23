@@ -114,6 +114,12 @@ class Repo:
                 return ["nodejs:18"]
         return []
 
+    def is_available(self) -> bool:
+        packages = self.get_packages()
+        if len(packages) > 0:
+            return True
+        return False
+
     def is_installed(self) -> bool:
         global repository_installed
         packages = self.get_packages()
@@ -205,6 +211,28 @@ class Package:
         self.snap: Snap | None = snap
         self.desktop_environment: str | None = desktop_environment
 
+    def is_available(self) -> bool:
+        if self.repository is not None:
+            if self.repository.is_available():
+                return True
+        if self.flatpak is not None:
+            return True
+        if self.snap is not None:
+            return True
+        return False
+
+    def get_installed_method(self) -> str:
+        if self.repository is not None:
+            if self.repository.is_installed():
+                return "Repository"
+        if self.flatpak is not None:
+            if self.flatpak.is_installed():
+                return "Flatpak"
+        if self.snap is not None:
+            if self.snap.is_installed():
+                return "Snap"
+        return "Not"
+
 
 all_packages: dict[str, dict[str, Package]] = {
     "Server": {
@@ -286,28 +314,18 @@ def setup_environment() -> None:
 
 
 def handle_package(pkg: str, package: Package) -> None:
-    current_installed = ""
     menu_entries: list[str] = []
     if package.repository is not None:
         menu_entries.append("[r] repository install")
-        if package.repository.is_installed():
-            current_installed = "Repository"
     if package.flatpak is not None:
         menu_entries.append("[f] flatpak install")
-        if package.flatpak.is_installed():
-            current_installed = "Flatpak"
     if package.snap is not None:
         menu_entries.append(f"[s] snap {'official ' if package.snap.is_official else ''}install")
-        if package.snap.is_installed():
-            current_installed = "Snap"
     menu_entries.append("[u] uninstall")
     menu_entries.append("[c] cancel")
 
-    title = f"\n(Press Q or Esc to go back)\nPackage: {pkg}\n"
-    if current_installed != "":
-        title += f"({current_installed} Currently Installed)\n"
     term_menu = TerminalMenu(
-        title=title,
+        title=f"\n(Press Q or Esc to go back)\nPackage: {pkg}\n{package.get_installed_method()} Installed\n",
         menu_entries=menu_entries,
         cycle_cursor=True,
         clear_screen=False
@@ -348,14 +366,20 @@ def handle_package(pkg: str, package: Package) -> None:
 def select_package(category: str) -> None:
     menu_entries: list[str] = []
     for pkg in all_packages[category]:
-        if all_packages[category][pkg].desktop_environment == "gnome":
-            if has_command("gnome-shell"):
-                menu_entries.append(pkg)
-        elif all_packages[category][pkg].desktop_environment == "plasma":
-            if has_command("plasmashell"):
-                menu_entries.append(pkg)
-        else:
-            menu_entries.append(pkg)
+        package = all_packages[category][pkg]
+        if not package.is_available():
+            continue
+
+        if package.desktop_environment == "gnome":
+            if not has_command("gnome-shell"):
+                continue
+
+        if package.desktop_environment == "plasma":
+            if not has_command("plasmashell"):
+                continue
+
+        menu_entries.append(pkg)
+
     menu_entries.append("Exit")
 
     cursor_index = 0
