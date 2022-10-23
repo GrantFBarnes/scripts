@@ -12,23 +12,29 @@ class Repo:
 
     def get_packages(self) -> list[str]:
         # Check distribution exceptions
-        if distribution.name == "":
-            return []
+        if distribution.name == "pop":
+            if self.name == "gnome-software":
+                return []
 
         # Check repository exceptions
         if distribution.repository != "fedora":
             if self.name == "icecat":
                 return []
+            elif self.name == "mediawriter":
+                return []
 
         if distribution.repository != "pacman":
-            if self.name == "discord":
+            if self.name == "code":
                 return []
-            if self.name == "steam":
+            elif self.name == "discord":
+                return []
+            elif self.name == "steam":
                 return []
 
         if distribution.repository == "debian":
             missing = {
                 "gnome-connections",
+                "gnome-text-editor",
                 "yt-dlp"
             }
             if self.name in missing:
@@ -40,25 +46,38 @@ class Repo:
             missing = {
                 "0ad",
                 "aisleriot",
+                "blender",
                 "deja-dup",
+                "elisa",
                 "epiphany",
                 "gnome-2048",
                 "gnome-books",
                 "gnome-boxes",
+                "gnome-builder",
                 "gnome-calendar",
                 "gnome-chess",
                 "gnome-clocks",
                 "gnome-contacts",
                 "gnome-maps",
                 "gnome-mines",
+                "gnome-music",
                 "gnome-passwordsafe",
+                "gnome-sound-recorder",
                 "gnome-sudoku",
+                "gnome-text-editor",
                 "gnome-weather",
                 "gnucash",
                 "gwenview",
                 "id3v2",
+                "kdenlive",
+                "kdevelop",
+                "kile",
                 "knights",
                 "okular",
+                "plasma-discover",
+                "rhythmbox",
+                "shotwell",
+                "simple-scan",
                 "supertuxkart",
                 "transmission-gtk",
                 "transmission-qt",
@@ -76,8 +95,13 @@ class Repo:
             if self.name == "epiphany":
                 return ["epiphany-browser"]
         elif distribution.package_manager == "dnf":
-            if self.name == "imagemagick":
+            if self.name == "gnome-shell-extensions":
+                return ["gnome-extensions-app"]
+            elif self.name == "imagemagick":
                 return ["ImageMagick"]
+        elif distribution.package_manager == "pacman":
+            if self.name == "plasma-discover":
+                return ["discover"]
         elif distribution.package_manager == "zypper":
             if self.name == "ffmpeg":
                 return ["ffmpeg-4"]
@@ -109,6 +133,17 @@ class Repo:
                 return ["texlive-latex-base", "texlive-latex-extra"]
             elif distribution.package_manager == "pacman":
                 return ["texlive-core", "texlive-latexextra"]
+        elif self.name == "libreoffice":
+            if distribution.package_manager == "pacman":
+                return ["libreoffice-fresh"]
+            else:
+                return [
+                    "libreoffice-writer",
+                    "libreoffice-calc",
+                    "libreoffice-impress",
+                    "libreoffice-draw",
+                    "libreoffice-base",
+                ]
         elif self.name == "mariadb":
             if distribution.package_manager == "pacman" or distribution.package_manager == "zypper":
                 return ["mariadb"]
@@ -124,6 +159,8 @@ class Repo:
                 return ["rustup"]
             else:
                 return ["rust", "rustfmt", "cargo"]
+        elif self.name == "snap-store":
+            return []
         elif self.name == "ssh":
             if distribution.package_manager == "apt":
                 return ["ssh"]
@@ -141,6 +178,8 @@ class Repo:
                 return ["qtile", "alacritty", "rofi", "numlockx", "playerctl"]
             else:
                 return []
+        elif self.name == "vscode":
+            return []
         elif self.name == "xonotic":
             if distribution.package_manager == "pacman" or distribution.repository == "fedora":
                 return ["xonotic"]
@@ -352,6 +391,57 @@ all_packages: dict[str, dict[str, Package]] = {
         "Steam": Package(Repo("steam"), Flatpak("com.valvesoftware.Steam"), Snap("steam", True)),
         "Super Tux Kart": Package(Repo("supertuxkart"), Flatpak("net.supertuxkart.SuperTuxKart"), Snap("supertuxkart")),
         "Xonotic": Package(Repo("xonotic"), Flatpak("org.xonotic.Xonotic"), Snap("xonotic"))
+    },
+    "Multi Media": {
+        "Blender": Package(Repo("blender"), Flatpak("org.blender.Blender"), Snap("blender", True, True)),
+        "Elisa Music Player": Package(Repo("elisa"), Flatpak("org.kde.elisa"), None, "plasma"),
+        "GIMP": Package(Repo("gimp"), Flatpak("org.gimp.GIMP"), Snap("gimp")),
+        "Gnome Music": Package(Repo("gnome-music"), Flatpak("org.gnome.Music"), None, "gnome"),
+        "Gnome Photos": Package(Repo("gnome-photos"), Flatpak("org.gnome.Photos"), None, "gnome"),
+        "Gnome Sound Recorder": Package(Repo("gnome-sound-recorder"), Flatpak("org.gnome.SoundRecorder"), None,
+                                        "gnome"),
+        "KdenLive Video Editor": Package(Repo("kdenlive"), Flatpak("org.kde.kdenlive"), Snap("kdenlive", True),
+                                         "plasma"),
+        "RhythmBox": Package(Repo("rhythmbox"), Flatpak("org.gnome.Rhythmbox3"), None, "gnome"),
+        "Shotwell": Package(Repo("shotwell"), Flatpak("org.gnome.Shotwell"), None, "gnome"),
+        "Totem Video Player": Package(Repo("totem"), Flatpak("org.gnome.Totem"), None, "gnome"),
+        "VLC": Package(Repo("vlc"), Flatpak("org.videolan.VLC"), Snap("vlc", True)),
+    },
+    "Editors": {
+        "VS Code": Package(Repo("vscode"), None, Snap("code", True, True)),
+        "VS Codium": Package(Repo("code"), Flatpak("com.vscodium.codium"), Snap("codium", False, True)),
+        "gedit": Package(Repo("gedit"), Flatpak("org.gnome.gedit"), Snap("gedit", True), "gnome"),
+        "Gnome Builder": Package(Repo("gnome-builder"), Flatpak("org.gnome.Builder"), None, "gnome"),
+        "Gnome Text Editor": Package(Repo("gnome-text-editor"), Flatpak("org.gnome.TextEditor"), None, "gnome"),
+        "Intellij": Package(Repo("intellij-idea-community-edition"), Flatpak("com.jetbrains.IntelliJ-IDEA-Community"),
+                            Snap("intellij-idea-community", True, True)),
+        "Kate": Package(Repo("kate"), None, Snap("kate", True, True), "plasma"),
+        "KWrite": Package(Repo("kwrite"), Flatpak("org.kde.kwrite"), None, "plasma"),
+        "KDevelop": Package(Repo("kdevelop"), Flatpak("org.kde.kdevelop"), Snap("kdevelop", True, True), "plasma"),
+        "Kile - LaTex Editor": Package(Repo("kile"), None, None, "plasma"),
+        "LibreOffice": Package(Repo("libreoffice"), Flatpak("org.libreoffice.LibreOffice"), Snap("libreoffice", True)),
+        "Pycharm": Package(Repo("pycharm-community-edition"), Flatpak("com.jetbrains.PyCharm-Community"),
+                           Snap("pycharm-community", True, True))
+    },
+    "Software": {
+        "Gnome Software": Package(Repo("gnome-software"), None, None, "gnome"),
+        "Plasma Discover": Package(Repo("plasma-discover"), None, None, "plasma"),
+        "Snap Store": Package(Repo("snap-store"), None, Snap("snap-store", True)),
+    },
+    "Utilities": {
+        "Ark Archiving": Package(Repo("ark"), Flatpak("org.kde.ark"), Snap("ark", True), "plasma"),
+        "Gnome Disk Usage": Package(Repo("baobab"), Flatpak("org.gnome.baobab"), None, "gnome"),
+        "dconf Editor": Package(Repo("dconf-editor"), None, None, "gnome"),
+        "Fedora Media Writer": Package(Repo("mediawriter"), Flatpak("org.fedoraproject.MediaWriter"), None),
+        "FileLight Disk Usage": Package(Repo("filelight"), None, None, "plasma"),
+        "Gnome Disk Utility": Package(Repo("gnome-disk-utility"), None, None, "gnome"),
+        "Gnome Shell Extension": Package(Repo("gnome-shell-extensions"), None, None, "gnome"),
+        "Gnome System Monitor": Package(Repo("gnome-system-monitor"), None, None, "gnome"),
+        "Gnome Tweaks": Package(Repo("gnome-tweaks"), None, None, "gnome"),
+        "KSysGuard": Package(Repo("ksysguard"), None, None, "plasma"),
+        "Plasma System Monitor": Package(Repo("plasma-systemmonitor"), None, None, "plasma"),
+        "Simple Scan": Package(Repo("simple-scan")),
+        "Spectacle Screenshot": Package(Repo("spectacle"), None, None, "plasma")
     }
 }
 
