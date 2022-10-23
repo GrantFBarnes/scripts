@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Imports
+from __future__ import annotations
 from helpers.helper_functions import *
 import os
 

@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 
-# Imports
-from simple_term_menu import TerminalMenu
+from __future__ import annotations
 from helpers.helper_functions import *
+from simple_term_menu import TerminalMenu
 import os
 
 
@@ -277,7 +277,7 @@ def run() -> None:
         if menu_selection_idx == len(menu_entries) - 1:
             break
 
-        cursor_index += 1
+        cursor_index = menu_selection_idx + 1
 
         if menu_selection_idx == 0:
             distribution.repository_update()
