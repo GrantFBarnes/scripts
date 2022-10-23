@@ -16,8 +16,22 @@ class Repo:
             return []
 
         # Check repository exceptions
-        if distribution.repository == "redhat":
+        if distribution.repository != "fedora":
+            if self.name == "icecat":
+                return []
+
+        if distribution.repository == "debian":
+            if self.name == "gnome-connections":
+                return []
+            elif self.name == "yt-dlp":
+                return []
+        elif distribution.repository == "fedora":
+            if self.name == "gnome-passwordsafe":
+                return ["secrets"]
+        elif distribution.repository == "redhat":
             if self.name == "deja-dup":
+                return []
+            elif self.name == "epiphany":
                 return []
             elif self.name == "gnome-books":
                 return []
@@ -50,17 +64,12 @@ class Repo:
                 return []
             elif self.name == "transmission-qt":
                 return []
-        elif distribution.repository == "fedora":
-            if self.name == "gnome-passwordsafe":
-                return ["secrets"]
-        elif distribution.repository == "debian":
-            if self.name == "gnome-connections":
-                return []
-            elif self.name == "yt-dlp":
-                return []
 
         # Check self.name manager exceptions
-        if distribution.package_manager == "dnf":
+        if distribution.package_manager == "apt":
+            if self.name == "epiphany":
+                return ["epiphany-browser"]
+        elif distribution.package_manager == "dnf":
             if self.name == "imagemagick":
                 return ["ImageMagick"]
         elif distribution.package_manager == "zypper":
@@ -68,7 +77,24 @@ class Repo:
                 return ["ffmpeg-4"]
 
         # Check self.name exceptions
-        if self.name == "latex":
+        if self.name == "chromium":
+            if distribution.name == "ubuntu":
+                return []
+            if distribution.repository == "redhat":
+                return []
+        elif self.name == "firefox":
+            if distribution.name == "ubuntu":
+                return []
+            if distribution.repository == "debian":
+                return []
+            elif distribution.repository == "redhat":
+                return []
+        elif self.name == "firefox-esr":
+            if distribution.repository == "redhat":
+                return ["firefox"]
+            if distribution.repository != "debian":
+                return []
+        elif self.name == "latex":
             if distribution.repository == "fedora":
                 return ["texlive-latex", "texlive-collection-latexextra"]
 
@@ -100,6 +126,11 @@ class Repo:
                 return ["libssh4", "openssh"]
             else:
                 return ["libssh", "openssh"]
+        elif self.name == "tor":
+            if distribution.package_manager == "pacman" or distribution.repository == "fedora":
+                return ["torbrowser-launcher"]
+            else:
+                return []
         elif self.name == "qtile":
             if distribution.package_manager == "arch":
                 return ["qtile", "alacritty", "rofi", "numlockx", "playerctl"]
@@ -282,7 +313,15 @@ all_packages: dict[str, dict[str, Package]] = {
         "Okular - Document Viewer": Package(Repo("okular"), Flatpak("org.kde.okular"), Snap("ocular", True), "plasma"),
         "Transmission (GTK) - Torrent": Package(Repo("transmission-gtk"), None, None, "gnome"),
         "Transmission (QT) - Torrent": Package(Repo("transmission-qt"), None, None, "plasma"),
-        "Virt Manager": Package(Repo("virt-manager")),
+        "Virt Manager": Package(Repo("virt-manager"))
+    },
+    "Browsers": {
+        "Chromium": Package(Repo("chromium"), Flatpak("org.chromium.Chromium"), Snap("chromium", True)),
+        "Epiphany - Gnome Web": Package(Repo("epiphany"), Flatpak("org.gnome.Epiphany"), None, "gnome"),
+        "IceCat - GNU Browser": Package(Repo("icecat")),
+        "Firefox": Package(Repo("firefox"), Flatpak("org.mozilla.firefox"), Snap("firefox", True)),
+        "Firefox ESR": Package(Repo("firefox-esr"), None, Snap("firefox", True, False, "esr/stable")),
+        "TOR - The Onion Router": Package(Repo("tor"), Flatpak("com.github.micahflee.torbrowser-launcher"))
     }
 }
 
@@ -316,7 +355,8 @@ def setup_environment() -> None:
 def handle_package(pkg: str, package: Package) -> None:
     menu_entries: list[str] = []
     if package.repository is not None:
-        menu_entries.append("[r] repository install")
+        if package.repository.is_available():
+            menu_entries.append("[r] repository install")
     if package.flatpak is not None:
         menu_entries.append("[f] flatpak install")
     if package.snap is not None:
