@@ -31,7 +31,7 @@ all_packages: dict[str, dict[str, Package]] = {
         "mariadb": Package(True, None, None),
         "nano": Package(True, None, None),
         "ncdu": Package(True, None, None),
-        "node": Package(True, None, None),
+        "node": Package(True, None, SnapPackage("node", True, True, "18/stable")),
         "podman": Package(True, None, None),
         "rust": Package(True, None, None),
         "ssh": Package(True, None, None),
@@ -76,104 +76,83 @@ def setup_environment() -> None:
     os.chown(vimrc, user_uid, user_gid)
 
 
-def install_packages(category: str) -> None:
+def handle_package(pkg: str, package: Package) -> None:
     menu_entries: list[str] = []
-    for pkg in all_packages[category]:
-        menu_entries.append(pkg)
+    if package.repository:
+        menu_entries.append("[r] repository install")
+    if package.flatpak is not None:
+        menu_entries.append("[f] flatpak install")
+    if package.snap is not None:
+        menu_entries.append("[s] snap install")
+    menu_entries.append("[u] uninstall")
+    menu_entries.append("[c] cancel")
 
     term_menu = TerminalMenu(
-        title="\nInstall " + category + " Packages (Press Q or Esc to quit)\n",
+        title="\n" + pkg + " (Press Q or Esc to go back)\n",
         menu_entries=menu_entries,
         cycle_cursor=True,
-        multi_select=True,
-        show_multi_select_hint=True,
         clear_screen=False
     )
 
-    term_menu.show()
-    if term_menu.chosen_menu_entries is None:
+    menu_selection_idx: int = term_menu.show()
+
+    if menu_selection_idx is None:
         return
 
-    modules_to_enable: list[str] = []
-    packages_to_install: list[str] = []
+    if menu_selection_idx == len(menu_entries) - 1:
+        return
 
-    for pkg in term_menu.chosen_menu_entries:
+    action: str = menu_entries[menu_selection_idx][1]
+    if action == "r":
         if pkg == "node":
             if distribution.package_manager == "dnf":
-                modules_to_enable.append("nodejs:18")
-        packages_to_install += distribution.repository_get_package_names(pkg)
+                distribution.repository_module(["nodejs:18"])
+        distribution.repository_install(distribution.repository_get_package_names(pkg))
+    # elif action == "f":
+    #     distribution.install_flatpak()
+    # elif action == "s":
+    #     distribution.install_snap()
+    elif action == "u":
+        distribution.repository_remove(distribution.repository_get_package_names(pkg))
 
-    distribution.repository_module(modules_to_enable)
-    distribution.repository_install(packages_to_install)
 
+def select_package(category: str) -> None:
+    menu_entries: list[str] = []
+    for pkg in all_packages[category]:
+        menu_entries.append(pkg)
+    menu_entries.append("Exit")
 
-def remove_packages() -> None:
-    packages_to_remove: list[str] = [
-        "akregator",
-        "evolution",
-        "konqueror",
-        "kmail",
-        "mpv"
-    ]
+    cursor_index = 0
+    while True:
+        menu_selection_idx: int = TerminalMenu(
+            title="\nSelect " + category + " Package (Press Q or Esc to go back)\n",
+            menu_entries=menu_entries,
+            cycle_cursor=False,
+            clear_screen=False,
+            cursor_index=cursor_index
+        ).show()
 
-    if distribution == "mint":
-        packages_to_remove.append("celluloid")
-        packages_to_remove.append("drawing")
-        packages_to_remove.append("hexchat*")
-        packages_to_remove.append("mintbackup")
-        packages_to_remove.append("pix*")
-        packages_to_remove.append("xed")
-    elif distribution == "ubuntu" or distribution == "debian":
-        packages_to_remove.append("gnome-mahjongg")
-        packages_to_remove.append("gnome-todo")
-        packages_to_remove.append("remmina*")
-        packages_to_remove.append("seahorse")
+        if menu_selection_idx is None:
+            break
 
-        if distribution == "debian":
-            packages_to_remove.append("five-or-more")
-            packages_to_remove.append("four-in-a-row")
-            packages_to_remove.append("gnome-klotski")
-            packages_to_remove.append("gnome-nibbles")
-            packages_to_remove.append("gnome-robots")
-            packages_to_remove.append("gnome-taquin")
-            packages_to_remove.append("gnome-tetravex")
-            packages_to_remove.append("iagno")
-            packages_to_remove.append("lightsoff")
-            packages_to_remove.append("anthy*")
-            packages_to_remove.append("fcitx*")
-            packages_to_remove.append("goldendict")
-            packages_to_remove.append("hitori")
-            packages_to_remove.append("hdate-applet")
-            packages_to_remove.append("*mozc*")
-            packages_to_remove.append("mlterm*")
-            packages_to_remove.append("malcontent")
-            packages_to_remove.append("swell-foop")
-            packages_to_remove.append("tali")
-            packages_to_remove.append("xiterm*")
-            packages_to_remove.append("xterm")
+        if menu_selection_idx == len(menu_entries) - 1:
+            break
 
-            # Remove Languages
-            packages_to_remove.append("firefox-esr-l10n-*")
-            packages_to_remove.append("libreoffice-l10n-*")
-            packages_to_remove.append("hunspell-*")
-            packages_to_remove.append("aspell-*")
-            packages_to_remove.append("task-*-desktop")
+        cursor_index = menu_selection_idx + 1
 
-    distribution.repository_remove(packages_to_remove)
-    distribution.repository_autoremove()
+        pkg = menu_entries[menu_selection_idx]
+        handle_package(pkg, all_packages[category][pkg])
 
 
 def run() -> None:
     menu_entries: list[str] = [
-        "Update Packages",
+        "Environment Setup",
         "Repository Setup",
-        "Environment Setup"
+        "Update Packages",
+        "Autoremove Packages"
     ]
     menu_entries += all_packages.keys()
-    menu_entries += [
-        "Remove Packages",
-        "Exit"
-    ]
+    menu_entries.append("Exit")
 
     cursor_index = 0
     while True:
@@ -194,15 +173,15 @@ def run() -> None:
         cursor_index = menu_selection_idx + 1
 
         if menu_selection_idx == 0:
-            distribution.repository_update()
+            setup_environment()
         elif menu_selection_idx == 1:
             distribution.repository_setup()
         elif menu_selection_idx == 2:
-            setup_environment()
-        elif menu_selection_idx == len(menu_entries) - 2:
-            remove_packages()
+            distribution.repository_update()
+        elif menu_selection_idx == 3:
+            distribution.repository_autoremove()
         else:
-            install_packages(menu_entries[menu_selection_idx])
+            select_package(menu_entries[menu_selection_idx])
 
 
 # Global Variables
