@@ -20,50 +20,56 @@ class Repo:
             if self.name == "icecat":
                 return []
 
-        if distribution.repository == "debian":
-            if self.name == "gnome-connections":
+        if distribution.repository != "pacman":
+            if self.name == "discord":
                 return []
-            elif self.name == "yt-dlp":
+            if self.name == "steam":
+                return []
+
+        if distribution.repository == "debian":
+            missing = {
+                "gnome-connections",
+                "yt-dlp"
+            }
+            if self.name in missing:
                 return []
         elif distribution.repository == "fedora":
             if self.name == "gnome-passwordsafe":
                 return ["secrets"]
         elif distribution.repository == "redhat":
-            if self.name == "deja-dup":
+            missing = {
+                "0ad",
+                "aisleriot",
+                "deja-dup",
+                "epiphany",
+                "gnome-2048",
+                "gnome-books",
+                "gnome-boxes",
+                "gnome-calendar",
+                "gnome-chess",
+                "gnome-clocks",
+                "gnome-contacts",
+                "gnome-maps",
+                "gnome-mines",
+                "gnome-passwordsafe",
+                "gnome-sudoku",
+                "gnome-weather",
+                "gnucash",
+                "gwenview",
+                "id3v2",
+                "knights",
+                "okular",
+                "supertuxkart",
+                "transmission-gtk",
+                "transmission-qt",
+                "quadrapassel"
+            }
+            if self.name in missing:
                 return []
-            elif self.name == "epiphany":
-                return []
-            elif self.name == "gnome-books":
-                return []
-            elif self.name == "gnome-boxes":
-                return []
-            elif self.name == "gnome-calendar":
-                return []
-            elif self.name == "gnome-clocks":
-                return []
-            elif self.name == "gnome-contacts":
-                return []
-            elif self.name == "gnome-maps":
-                return []
-            elif self.name == "gnome-passwordsafe":
-                return []
-            elif self.name == "gnome-weather":
-                return []
-            elif self.name == "gnucash":
-                return []
-            elif self.name == "gwenview":
-                return []
-            elif self.name == "ibus-unikey":
+
+            if self.name == "ibus-unikey":
                 return ["https://rpmfind.net/linux/fedora/linux/releases/34/Everything/x86_64/os/Packages"
                         "/i/ibus-unikey-0.6.1-26.20190311git46b5b9e.fc34.x86_64.rpm"]
-            elif self.name == "id3v2":
-                return []
-            elif self.name == "okular":
-                return []
-            elif self.name == "transmission-gtk":
-                return []
-            elif self.name == "transmission-qt":
-                return []
 
         # Check self.name manager exceptions
         if distribution.package_manager == "apt":
@@ -97,7 +103,6 @@ class Repo:
         elif self.name == "latex":
             if distribution.repository == "fedora":
                 return ["texlive-latex", "texlive-collection-latexextra"]
-
             if distribution.package_manager == "dnf":
                 return ["texlive-latex"]
             elif distribution.package_manager == "apt":
@@ -134,6 +139,11 @@ class Repo:
         elif self.name == "qtile":
             if distribution.package_manager == "arch":
                 return ["qtile", "alacritty", "rofi", "numlockx", "playerctl"]
+            else:
+                return []
+        elif self.name == "xonotic":
+            if distribution.package_manager == "pacman" or distribution.repository == "fedora":
+                return ["xonotic"]
             else:
                 return []
 
@@ -322,6 +332,26 @@ all_packages: dict[str, dict[str, Package]] = {
         "Firefox": Package(Repo("firefox"), Flatpak("org.mozilla.firefox"), Snap("firefox", True)),
         "Firefox ESR": Package(Repo("firefox-esr"), None, Snap("firefox", True, False, "esr/stable")),
         "TOR - The Onion Router": Package(Repo("tor"), Flatpak("com.github.micahflee.torbrowser-launcher"))
+    },
+    "Communication": {
+        "Discord": Package(Repo("discord"), Flatpak("com.discordapp.Discord"), Snap("discord")),
+        "Thunderbird": Package(Repo("thunderbird"), Flatpak("org.mozilla.Thunderbird"), Snap("thunderbird", True))
+    },
+    "Games": {
+        "0 A.D.": Package(Repo("0ad"), Flatpak("com.play0ad.zeroad"), Snap("0ad", True)),
+        "Gnome 2048": Package(Repo("gnome-2048"), Flatpak("org.gnome.TwentyFortyEight"), None, "gnome"),
+        "Gnome Chess": Package(Repo("gnome-chess"), Flatpak("org.gnome.Chess"), None, "gnome"),
+        "Gnome Mines": Package(Repo("gnome-mines"), Flatpak("org.gnome.Mines"), None, "gnome"),
+        "Gnome Sudoku": Package(Repo("gnome-sudoku"), Flatpak("org.gnome.Sudoku"), Snap("gnome-sudoku", True), "gnome"),
+        "Gnome Solitaire": Package(Repo("aisleriot"), Flatpak("org.gnome.Aisleriot"), None, "gnome"),
+        "Gnome Tetris": Package(Repo("quadrapassel"), Flatpak("org.gnome.Quadrapassel"), Snap("quadrapassel", True),
+                                "gnome"),
+        "KDE Chess": Package(Repo("knights"), None, Snap("knights", True), "plasma"),
+        "KDE Mines": Package(Repo("kmines"), None, Snap("kmines", True), "plasma"),
+        "KDE Sudoku": Package(Repo("ksudoku"), Flatpak("org.kde.ksudoku"), Snap("ksudoku", True), "plasma"),
+        "Steam": Package(Repo("steam"), Flatpak("com.valvesoftware.Steam"), Snap("steam", True)),
+        "Super Tux Kart": Package(Repo("supertuxkart"), Flatpak("net.supertuxkart.SuperTuxKart"), Snap("supertuxkart")),
+        "Xonotic": Package(Repo("xonotic"), Flatpak("org.xonotic.Xonotic"), Snap("xonotic"))
     }
 }
 
