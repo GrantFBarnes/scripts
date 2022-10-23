@@ -6,19 +6,41 @@ from simple_term_menu import TerminalMenu
 import os
 
 
-class SnapPackage:
-    def __init__(self, name: str, is_official: bool, is_classic: bool, channel: str | None):
+class Flatpak:
+    def __init__(self, name: str):
+        self.name: str = name
+
+    def install(self):
+        run_command("flatpak install flathub " + self.name + " -y")
+
+    def remove(self):
+        run_command("flatpak remove " + self.name + " -y")
+
+
+class Snap:
+    def __init__(self, name: str, is_official: bool = False, is_classic: bool = False, channel: str | None = None):
         self.name: str = name
         self.is_official: bool = is_official
         self.is_classic: bool = is_classic
         self.channel: str = channel
 
+    def install(self):
+        command = "sudo snap install " + self.name
+        if self.is_classic:
+            command += " --classic"
+        if self.channel is not None:
+            command += " --channel=" + self.channel
+        run_command(command)
+
+    def remove(self):
+        run_command("sudo snap remove " + self.name)
+
 
 class Package:
-    def __init__(self, repository: bool, flatpak: str | None, snap: SnapPackage | None):
+    def __init__(self, repository: bool, flatpak: Flatpak | None, snap: Snap | None):
         self.repository: bool = repository
-        self.flatpak: str | None = flatpak
-        self.snap: SnapPackage | None = snap
+        self.flatpak: Flatpak | None = flatpak
+        self.snap: Snap | None = snap
 
 
 all_packages: dict[str, dict[str, Package]] = {
@@ -31,7 +53,7 @@ all_packages: dict[str, dict[str, Package]] = {
         "mariadb": Package(True, None, None),
         "nano": Package(True, None, None),
         "ncdu": Package(True, None, None),
-        "node": Package(True, None, SnapPackage("node", True, True, "18/stable")),
+        "node": Package(True, None, Snap("node", True, True, "18/stable")),
         "podman": Package(True, None, None),
         "rust": Package(True, None, None),
         "ssh": Package(True, None, None),
@@ -46,6 +68,9 @@ all_packages: dict[str, dict[str, Package]] = {
         "latex": Package(True, None, None),
         "qtile": Package(True, None, None),
         "yt-dlp": Package(True, None, None)
+    },
+    "Applications": {
+        "gnome-clocks": Package(True, Flatpak("org.gnome.clocks"), Snap("gnome-clocks", True))
     }
 }
 
@@ -103,17 +128,30 @@ def handle_package(pkg: str, package: Package) -> None:
         return
 
     action: str = menu_entries[menu_selection_idx][1]
+
+    # Uninstall non-selected options
+    if action != "r":
+        if package.repository:
+            distribution.repository_remove(distribution.repository_get_package_names(pkg))
+    if action != "f":
+        if package.flatpak is not None:
+            package.flatpak.remove()
+    if action != "s":
+        if package.snap is not None:
+            package.snap.remove()
+
+    # Install selected option
     if action == "r":
         if pkg == "node":
             if distribution.package_manager == "dnf":
                 distribution.repository_module(["nodejs:18"])
         distribution.repository_install(distribution.repository_get_package_names(pkg))
-    # elif action == "f":
-    #     distribution.install_flatpak()
-    # elif action == "s":
-    #     distribution.install_snap()
-    elif action == "u":
-        distribution.repository_remove(distribution.repository_get_package_names(pkg))
+    elif action == "f":
+        distribution.install_flatpak()
+        package.flatpak.install()
+    elif action == "s":
+        distribution.install_snap()
+        package.snap.install()
 
 
 def select_package(category: str) -> None:
@@ -176,6 +214,8 @@ def run() -> None:
             setup_environment()
         elif menu_selection_idx == 1:
             distribution.repository_setup()
+            if has_command("flatpak"):
+                run_command("flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo")
         elif menu_selection_idx == 2:
             distribution.repository_update()
         elif menu_selection_idx == 3:

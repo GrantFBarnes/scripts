@@ -95,10 +95,12 @@ class Distribution:
 
         # Check repository exceptions
         if self.repository == "redhat":
-            if package == "ibus-unikey":
+            if package == "gnome-clocks":
+                return []
+            elif package == "ibus-unikey":
                 return ["https://rpmfind.net/linux/fedora/linux/releases/34/Everything/x86_64/os/Packages"
                         "/i/ibus-unikey-0.6.1-26.20190311git46b5b9e.fc34.x86_64.rpm"]
-            if package == "id3v2":
+            elif package == "id3v2":
                 return []
         elif self.repository == "debian":
             if package == "yt-dlp":
@@ -116,6 +118,7 @@ class Distribution:
         if package == "latex":
             if self.repository == "fedora":
                 return ["texlive-latex", "texlive-collection-latexextra"]
+
             if self.package_manager == "dnf":
                 return ["texlive-latex"]
             elif self.package_manager == "apt":
@@ -262,7 +265,7 @@ class Distribution:
     def install_flatpak(self) -> None:
         if not has_command("flatpak"):
             self.repository_install(["flatpak"])
-        run_command("flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo")
+            run_command("flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo")
 
     def install_snap(self) -> None:
         if not has_command("snap"):
