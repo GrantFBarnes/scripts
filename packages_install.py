@@ -166,39 +166,41 @@ class Snap:
 
 
 class Package:
-    def __init__(self, repository: Repo | None, flatpak: Flatpak | None, snap: Snap | None):
+    def __init__(self, repository: Repo | None, flatpak: Flatpak | None = None, snap: Snap | None = None,
+                 desktop_environment: str | None = None):
         self.repository: Repo | None = repository
         self.flatpak: Flatpak | None = flatpak
         self.snap: Snap | None = snap
+        self.desktop_environment: str | None = desktop_environment
 
 
 all_packages: dict[str, dict[str, Package]] = {
     "Server": {
-        "Cockpit - Web Interface": Package(Repo("cockpit"), None, None),
-        "cURL - Client URL": Package(Repo("curl"), None, None),
-        "htop - Process Reviewer": Package(Repo("htop"), None, None),
-        "git - Version Control": Package(Repo("git"), None, None),
-        "MariaDB - Database": Package(Repo("mariadb"), None, None),
-        "nano - Text Editor": Package(Repo("nano"), None, None),
-        "ncdu - Disk Usage": Package(Repo("ncdu"), None, None),
+        "Cockpit - Web Interface": Package(Repo("cockpit")),
+        "cURL - Client URL": Package(Repo("curl")),
+        "htop - Process Reviewer": Package(Repo("htop")),
+        "git - Version Control": Package(Repo("git")),
+        "MariaDB - Database": Package(Repo("mariadb")),
+        "nano - Text Editor": Package(Repo("nano")),
+        "ncdu - Disk Usage": Package(Repo("ncdu")),
         "Node.js - JavaScript RE": Package(Repo("node"), None, Snap("node", True, "18/stable")),
-        "Podman - Containers": Package(Repo("podman"), None, None),
-        "Rust Language": Package(Repo("rust"), None, None),
-        "SSH - Secure Shell Protocol": Package(Repo("ssh"), None, None),
-        "VIM - Text Editor": Package(Repo("vim"), None, None)
+        "Podman - Containers": Package(Repo("podman")),
+        "Rust Language": Package(Repo("rust")),
+        "SSH - Secure Shell Protocol": Package(Repo("ssh")),
+        "VIM - Text Editor": Package(Repo("vim"))
     },
     "Desktop": {
-        "cups - Printer Support": Package(Repo("cups"), None, None),
-        "ffmpeg - Media Codecs": Package(Repo("ffmpeg"), None, None),
-        "Vietnamese Keyboard": Package(Repo("ibus-unikey"), None, None),
-        "MP3 Metadata Editor": Package(Repo("id3v2"), None, None),
-        "imagemagick": Package(Repo("imagemagick"), None, None),
-        "LaTex - Compiler": Package(Repo("latex"), None, None),
-        "qtile - Window Manager": Package(Repo("qtile"), None, None),
-        "yt-dlp - Download YouTube": Package(Repo("yt-dlp"), None, None)
+        "cups - Printer Support": Package(Repo("cups")),
+        "ffmpeg - Media Codecs": Package(Repo("ffmpeg")),
+        "Vietnamese Keyboard": Package(Repo("ibus-unikey")),
+        "MP3 Metadata Editor": Package(Repo("id3v2")),
+        "imagemagick": Package(Repo("imagemagick")),
+        "LaTex - Compiler": Package(Repo("latex")),
+        "qtile - Window Manager": Package(Repo("qtile")),
+        "yt-dlp - Download YouTube": Package(Repo("yt-dlp"))
     },
     "Applications": {
-        "gnome-clocks": Package(Repo("gnome-clocks"), Flatpak("org.gnome.clocks"), Snap("gnome-clocks", True))
+        "gnome-clocks": Package(Repo("gnome-clocks"), Flatpak("org.gnome.clocks"), Snap("gnome-clocks", True), "gnome")
     }
 }
 
@@ -292,7 +294,14 @@ def handle_package(pkg: str, package: Package) -> None:
 def select_package(category: str) -> None:
     menu_entries: list[str] = []
     for pkg in all_packages[category]:
-        menu_entries.append(pkg)
+        if all_packages[category][pkg].desktop_environment == "gnome":
+            if has_command("gnome-shell"):
+                menu_entries.append(pkg)
+        elif all_packages[category][pkg].desktop_environment == "plasma":
+            if has_command("plasmashell"):
+                menu_entries.append(pkg)
+        else:
+            menu_entries.append(pkg)
     menu_entries.append("Exit")
 
     cursor_index = 0
