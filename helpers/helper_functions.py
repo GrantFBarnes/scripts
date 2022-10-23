@@ -78,118 +78,42 @@ class Distribution:
         self.repository: str = repository
         self.package_manager: str = package_manager
 
-    def repository_get_installed(self) -> list[str]:
+    def get_installed(self) -> set[str]:
         if self.package_manager == "apt":
-            return get_command("apt list --installed | awk -F '/' '{print $1}'").split("\n")
+            return set(get_command("apt list --installed | awk -F '/' '{print $1}'").split("\n"))
         elif self.package_manager == "dnf":
-            return get_command("dnf list installed | awk -F '.' '{print $1}'").split("\n")
+            return set(get_command("dnf list installed | awk -F '.' '{print $1}'").split("\n"))
         elif self.package_manager == "pacman":
-            return get_command("pacman -Q | awk '{print $1}'").split("\n")
+            return set(get_command("pacman -Q | awk '{print $1}'").split("\n"))
         elif self.package_manager == "zypper":
-            return get_command("zypper packages --installed-only | awk -F '|' '{print $3}'").split("\n")
+            return set(get_command("zypper packages --installed-only | awk -F '|' '{print $3}'").split("\n"))
+        return set()
 
-    def repository_get_package_names(self, package: str) -> list[str]:
-        # Check distribution exceptions
-        if self.name == "":
-            return []
-
-        # Check repository exceptions
-        if self.repository == "redhat":
-            if package == "gnome-clocks":
-                return []
-            elif package == "ibus-unikey":
-                return ["https://rpmfind.net/linux/fedora/linux/releases/34/Everything/x86_64/os/Packages"
-                        "/i/ibus-unikey-0.6.1-26.20190311git46b5b9e.fc34.x86_64.rpm"]
-            elif package == "id3v2":
-                return []
-        elif self.repository == "debian":
-            if package == "yt-dlp":
-                return []
-
-        # Check package manager exceptions
-        if self.package_manager == "dnf":
-            if package == "imagemagick":
-                return ["ImageMagick"]
-        elif self.package_manager == "zypper":
-            if package == "ffmpeg":
-                return ["ffmpeg-4"]
-
-        # Check package exceptions
-        if package == "latex":
-            if self.repository == "fedora":
-                return ["texlive-latex", "texlive-collection-latexextra"]
-
-            if self.package_manager == "dnf":
-                return ["texlive-latex"]
-            elif self.package_manager == "apt":
-                return ["texlive-latex-base", "texlive-latex-extra"]
-            elif self.package_manager == "pacman":
-                return ["texlive-core", "texlive-latexextra"]
-        elif package == "mariadb":
-            if self.package_manager == "pacman" or self.package_manager == "zypper":
-                return ["mariadb"]
-            else:
-                return ["mariadb-server"]
-        elif package == "node":
-            if self.package_manager == "zypper":
-                return ["nodejs16", "npm16"]
-            else:
-                return ["nodejs", "npm"]
-        elif package == "rust":
-            if self.package_manager == "pacman":
-                return ["rustup"]
-            else:
-                return ["rust", "rustfmt", "cargo"]
-        elif package == "ssh":
-            if self.package_manager == "apt":
-                return ["ssh"]
-            elif self.package_manager == "zypper":
-                return ["libssh4", "openssh"]
-            else:
-                return ["libssh", "openssh"]
-        elif package == "qtile":
-            if self.package_manager == "arch":
-                return ["qtile", "alacritty", "rofi", "numlockx", "playerctl"]
-            else:
-                return []
-
-        return [package]
-
-    def repository_install(self, packages: list[str]) -> None:
-        if len(packages) == 0:
-            return
-
-        packages: str = " ".join(packages)
-
-        print_info(f"{self.package_manager} install {packages}", True)
+    def install(self, package: str) -> None:
+        print_info(f"{self.package_manager} install {package}", True)
 
         if self.package_manager == "apt":
-            run_command("sudo apt install " + packages + " -Vy")
+            run_command("sudo apt install " + package + " -Vy")
         elif self.package_manager == "dnf":
-            run_command("sudo dnf install " + packages + " -y")
+            run_command("sudo dnf install " + package + " -y")
         elif self.package_manager == "pacman":
-            run_command("sudo pacman -S " + packages + " --noconfirm --needed")
+            run_command("sudo pacman -S " + package + " --noconfirm --needed")
         elif self.package_manager == "zypper":
-            run_command("sudo zypper install --no-confirm " + packages)
+            run_command("sudo zypper install --no-confirm " + package)
 
-    def repository_remove(self, packages: list[str]) -> None:
-        if len(packages) == 0:
-            return
-
-        packages: str = " ".join(packages)
-
-        print_info(f"{self.package_manager} remove {packages}", True)
+    def remove(self, package: str) -> None:
+        print_info(f"{self.package_manager} remove {package}", True)
 
         if self.package_manager == "apt":
-            run_command("sudo apt remove " + packages + " -Vy")
+            run_command("sudo apt remove " + package + " -Vy")
         elif self.package_manager == "dnf":
-            run_command("sudo dnf remove " + packages + " -y")
+            run_command("sudo dnf remove " + package + " -y")
         elif self.package_manager == "pacman":
-            run_command("sudo pacman -Rsun " + packages + " --noconfirm")
+            run_command("sudo pacman -Rsun " + package + " --noconfirm")
         elif self.package_manager == "zypper":
-            run_command("sudo zypper remove --no-confirm " + packages)
+            run_command("sudo zypper remove --no-confirm " + package)
 
-    def repository_autoremove(self) -> None:
+    def autoremove(self) -> None:
         print_info(f"{self.package_manager} autoremove", True)
 
         if self.package_manager == "apt":
@@ -203,7 +127,7 @@ class Distribution:
                 "sudo zypper remove --clean-deps --no-confirm $(zypper packages --unneeded | awk -F '|' 'NR==0 || "
                 "NR==1 || NR==2 || NR==3 || NR==4 {next} {print $3}')")
 
-    def repository_update(self) -> None:
+    def update(self) -> None:
         print_info(f"{self.package_manager} update", True)
 
         if self.package_manager == "apt":
@@ -215,18 +139,13 @@ class Distribution:
         elif self.package_manager == "zypper":
             run_command("sudo zypper update --no-confirm")
 
-    def repository_module(self, packages: list[str]) -> None:
-        if len(packages) == 0:
-            return
-
-        packages: str = " ".join(packages)
-
-        print_info(f"{self.package_manager} module {packages}", True)
+    def module_enable(self, module: str) -> None:
+        print_info(f"{self.package_manager} module enable {module}", True)
 
         if self.package_manager == "dnf":
-            run_command("sudo dnf module enable " + packages + " -y")
+            run_command("sudo dnf module enable " + module + " -y")
 
-    def repository_setup(self) -> None:
+    def setup(self) -> None:
         print_info(f"{self.package_manager} setup", True)
 
         if self.package_manager == "dnf":
@@ -260,16 +179,16 @@ class Distribution:
                                     "https://download1.rpmfusion.org/nonfree/el/rpmfusion-nonfree-release-" +
                                     distro_version + ".noarch.rpm -y")
 
-                self.repository_update()
+                self.update()
 
     def install_flatpak(self) -> None:
         if not has_command("flatpak"):
-            self.repository_install(["flatpak"])
+            self.install("flatpak")
             run_command("flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo")
 
     def install_snap(self) -> None:
         if not has_command("snap"):
-            self.repository_install(["snapd"])
+            self.install("snapd")
             if self.package_manager == "dnf":
                 run_command("sudo systemctl enable --now snapd.socket")
                 run_command("sudo ln -s /var/lib/snapd/snap /snap")
@@ -277,13 +196,13 @@ class Distribution:
     def install_pip(self) -> None:
         if not has_command("pip3"):
             if self.package_manager == "apt":
-                self.repository_install(["python3-pip"])
+                self.install("python3-pip")
             elif self.package_manager == "dnf":
-                self.repository_install(["python3-pip"])
+                self.install("python3-pip")
             elif self.package_manager == "pacman":
-                self.repository_install(["python-pip"])
+                self.install("python-pip")
             elif self.package_manager == "zypper":
-                self.repository_install(["python38-pip"])
+                self.install("python38-pip")
 
 
 def get_distribution() -> Distribution | None:

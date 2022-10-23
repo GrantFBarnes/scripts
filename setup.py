@@ -15,7 +15,7 @@ def main():
         print_error("Distribution not recognized", True)
         exit()
 
-    distribution.repository_update()
+    distribution.update()
     distribution.install_pip()
 
     run_command("python3 -m pip install -r helpers/requirements.txt")

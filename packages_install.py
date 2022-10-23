@@ -6,71 +6,179 @@ from simple_term_menu import TerminalMenu
 import os
 
 
+class Repo:
+    def __init__(self, name: str):
+        self.name: str = name
+
+    def get_packages(self) -> list[str]:
+        # Check distribution exceptions
+        if distribution.name == "":
+            return []
+
+        # Check repository exceptions
+        if distribution.repository == "redhat":
+            if self.name == "gnome-clocks":
+                return []
+            elif self.name == "ibus-unikey":
+                return ["https://rpmfind.net/linux/fedora/linux/releases/34/Everything/x86_64/os/Packages"
+                        "/i/ibus-unikey-0.6.1-26.20190311git46b5b9e.fc34.x86_64.rpm"]
+            elif self.name == "id3v2":
+                return []
+        elif distribution.repository == "debian":
+            if self.name == "yt-dlp":
+                return []
+
+        # Check self.name manager exceptions
+        if distribution.package_manager == "dnf":
+            if self.name == "imagemagick":
+                return ["ImageMagick"]
+        elif distribution.package_manager == "zypper":
+            if self.name == "ffmpeg":
+                return ["ffmpeg-4"]
+
+        # Check self.name exceptions
+        if self.name == "latex":
+            if distribution.repository == "fedora":
+                return ["texlive-latex", "texlive-collection-latexextra"]
+
+            if distribution.package_manager == "dnf":
+                return ["texlive-latex"]
+            elif distribution.package_manager == "apt":
+                return ["texlive-latex-base", "texlive-latex-extra"]
+            elif distribution.package_manager == "pacman":
+                return ["texlive-core", "texlive-latexextra"]
+        elif self.name == "mariadb":
+            if distribution.package_manager == "pacman" or distribution.package_manager == "zypper":
+                return ["mariadb"]
+            else:
+                return ["mariadb-server"]
+        elif self.name == "node":
+            if distribution.package_manager == "zypper":
+                return ["nodejs16", "npm16"]
+            else:
+                return ["nodejs", "npm"]
+        elif self.name == "rust":
+            if distribution.package_manager == "pacman":
+                return ["rustup"]
+            else:
+                return ["rust", "rustfmt", "cargo"]
+        elif self.name == "ssh":
+            if distribution.package_manager == "apt":
+                return ["ssh"]
+            elif distribution.package_manager == "zypper":
+                return ["libssh4", "openssh"]
+            else:
+                return ["libssh", "openssh"]
+        elif self.name == "qtile":
+            if distribution.package_manager == "arch":
+                return ["qtile", "alacritty", "rofi", "numlockx", "playerctl"]
+            else:
+                return []
+
+        return [self.name]
+
+    def get_modules(self) -> list[str]:
+        if self.name == "node":
+            if distribution.package_manager == "dnf":
+                return ["nodejs:18"]
+        return []
+
+    def install(self):
+        modules = self.get_modules()
+        for module in modules:
+            distribution.module_enable(module)
+
+        global repository_installed
+        packages = self.get_packages()
+        for pkg in packages:
+            if pkg not in repository_installed:
+                distribution.install(pkg)
+                repository_installed.add(pkg)
+
+    def remove(self):
+        global repository_installed
+        packages = self.get_packages()
+        for pkg in packages:
+            if pkg in repository_installed:
+                distribution.remove(pkg)
+                repository_installed.remove(pkg)
+
+
 class Flatpak:
     def __init__(self, name: str):
         self.name: str = name
 
     def install(self):
-        run_command("flatpak install flathub " + self.name + " -y")
+        global flatpak_installed
+        if self.name not in flatpak_installed:
+            run_command("flatpak install flathub " + self.name + " -y")
+            flatpak_installed.add(self.name)
 
     def remove(self):
-        run_command("flatpak remove " + self.name + " -y")
+        global flatpak_installed
+        if self.name in flatpak_installed:
+            run_command("flatpak remove " + self.name + " -y")
+            flatpak_installed.remove(self.name)
 
 
 class Snap:
-    def __init__(self, name: str, is_official: bool = False, is_classic: bool = False, channel: str | None = None):
+    def __init__(self, name: str, is_classic: bool = False, channel: str | None = None):
         self.name: str = name
-        self.is_official: bool = is_official
         self.is_classic: bool = is_classic
         self.channel: str = channel
 
     def install(self):
-        command = "sudo snap install " + self.name
-        if self.is_classic:
-            command += " --classic"
-        if self.channel is not None:
-            command += " --channel=" + self.channel
-        run_command(command)
+        global snap_installed
+        if self.name not in snap_installed:
+            command = "sudo snap install " + self.name
+            if self.is_classic:
+                command += " --classic"
+            if self.channel is not None:
+                command += " --channel=" + self.channel
+            run_command(command)
+            snap_installed.add(self.name)
 
     def remove(self):
-        run_command("sudo snap remove " + self.name)
+        global snap_installed
+        if self.name in snap_installed:
+            run_command("sudo snap remove " + self.name)
+            snap_installed.remove(self.name)
 
 
 class Package:
-    def __init__(self, repository: bool, flatpak: Flatpak | None, snap: Snap | None):
-        self.repository: bool = repository
+    def __init__(self, repository: Repo | None, flatpak: Flatpak | None, snap: Snap | None):
+        self.repository: Repo | None = repository
         self.flatpak: Flatpak | None = flatpak
         self.snap: Snap | None = snap
 
 
 all_packages: dict[str, dict[str, Package]] = {
     "Server": {
-        "bash-completion": Package(True, None, None),
-        "cockpit": Package(True, None, None),
-        "curl": Package(True, None, None),
-        "htop": Package(True, None, None),
-        "git": Package(True, None, None),
-        "mariadb": Package(True, None, None),
-        "nano": Package(True, None, None),
-        "ncdu": Package(True, None, None),
-        "node": Package(True, None, Snap("node", True, True, "18/stable")),
-        "podman": Package(True, None, None),
-        "rust": Package(True, None, None),
-        "ssh": Package(True, None, None),
-        "vim": Package(True, None, None)
+        "cockpit": Package(Repo("cockpit"), None, None),
+        "curl": Package(Repo("curl"), None, None),
+        "htop": Package(Repo("htop"), None, None),
+        "git": Package(Repo("git"), None, None),
+        "mariadb": Package(Repo("mariadb"), None, None),
+        "nano": Package(Repo("nano"), None, None),
+        "ncdu": Package(Repo("ncdu"), None, None),
+        "node": Package(Repo("node"), None, Snap("node", True, "18/stable")),
+        "podman": Package(Repo("podman"), None, None),
+        "rust": Package(Repo("rust"), None, None),
+        "ssh": Package(Repo("ssh"), None, None),
+        "vim": Package(Repo("vim"), None, None)
     },
     "Desktop": {
-        "cups": Package(True, None, None),
-        "ffmpeg": Package(True, None, None),
-        "ibus-unikey": Package(True, None, None),
-        "id3v2": Package(True, None, None),
-        "imagemagick": Package(True, None, None),
-        "latex": Package(True, None, None),
-        "qtile": Package(True, None, None),
-        "yt-dlp": Package(True, None, None)
+        "cups": Package(Repo("cups"), None, None),
+        "ffmpeg": Package(Repo("ffmpeg"), None, None),
+        "ibus-unikey": Package(Repo("ibus-unikey"), None, None),
+        "id3v2": Package(Repo("id3v2"), None, None),
+        "imagemagick": Package(Repo("imagemagick"), None, None),
+        "latex": Package(Repo("latex"), None, None),
+        "qtile": Package(Repo("qtile"), None, None),
+        "yt-dlp": Package(Repo("yt-dlp"), None, None)
     },
     "Applications": {
-        "gnome-clocks": Package(True, Flatpak("org.gnome.clocks"), Snap("gnome-clocks", True))
+        "gnome-clocks": Package(Repo("gnome-clocks"), Flatpak("org.gnome.clocks"), Snap("gnome-clocks", True))
     }
 }
 
@@ -103,7 +211,7 @@ def setup_environment() -> None:
 
 def handle_package(pkg: str, package: Package) -> None:
     menu_entries: list[str] = []
-    if package.repository:
+    if package.repository is not None:
         menu_entries.append("[r] repository install")
     if package.flatpak is not None:
         menu_entries.append("[f] flatpak install")
@@ -131,8 +239,8 @@ def handle_package(pkg: str, package: Package) -> None:
 
     # Uninstall non-selected options
     if action != "r":
-        if package.repository:
-            distribution.repository_remove(distribution.repository_get_package_names(pkg))
+        if package.repository is not None:
+            package.repository.remove()
     if action != "f":
         if package.flatpak is not None:
             package.flatpak.remove()
@@ -142,10 +250,7 @@ def handle_package(pkg: str, package: Package) -> None:
 
     # Install selected option
     if action == "r":
-        if pkg == "node":
-            if distribution.package_manager == "dnf":
-                distribution.repository_module(["nodejs:18"])
-        distribution.repository_install(distribution.repository_get_package_names(pkg))
+        package.repository.install()
     elif action == "f":
         distribution.install_flatpak()
         package.flatpak.install()
@@ -213,20 +318,41 @@ def run() -> None:
         if menu_selection_idx == 0:
             setup_environment()
         elif menu_selection_idx == 1:
-            distribution.repository_setup()
+            distribution.setup()
             if has_command("flatpak"):
                 run_command("flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo")
         elif menu_selection_idx == 2:
-            distribution.repository_update()
+            distribution.update()
+            if has_command("flatpak"):
+                run_command("flatpak update -y")
+            if has_command("snap"):
+                run_command("sudo snap refresh")
         elif menu_selection_idx == 3:
-            distribution.repository_autoremove()
+            distribution.autoremove()
+            if has_command("flatpak"):
+                run_command("flatpak remove --unused -y")
         else:
             select_package(menu_entries[menu_selection_idx])
 
 
+def flatpak_get_installed() -> set[str]:
+    if has_command("flatpak"):
+        return set(get_command("flatpak list --app | awk -F '\t' '{print $2}'").split("\n"))
+    return set()
+
+
+def snap_get_installed() -> set[str]:
+    if has_command("snap"):
+        return set(get_command("snap list | awk '{print $1}'").split("\n"))
+    return set()
+
+
 # Global Variables
 
-distribution: Distribution | None = None
+distribution: Distribution = Distribution("", "", "")
+repository_installed: set[str] = set()
+flatpak_installed: set[str] = set()
+snap_installed: set[str] = set()
 
 
 def main():
@@ -239,6 +365,15 @@ def main():
     if distribution is None:
         print_error("Distribution not recognized", True)
         exit()
+
+    global repository_installed
+    repository_installed = distribution.get_installed()
+
+    global flatpak_installed
+    flatpak_installed = flatpak_get_installed()
+
+    global snap_installed
+    snap_installed = snap_get_installed()
 
     run()
 
