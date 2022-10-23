@@ -83,6 +83,14 @@ class Repo:
                 return ["nodejs:18"]
         return []
 
+    def is_installed(self) -> bool:
+        global repository_installed
+        packages = self.get_packages()
+        for pkg in packages:
+            if pkg in repository_installed:
+                return True
+        return False
+
     def install(self):
         modules = self.get_modules()
         for module in modules:
@@ -108,6 +116,12 @@ class Flatpak:
     def __init__(self, name: str):
         self.name: str = name
 
+    def is_installed(self) -> bool:
+        global flatpak_installed
+        if self.name in flatpak_installed:
+            return True
+        return False
+
     def install(self):
         global flatpak_installed
         if self.name not in flatpak_installed:
@@ -126,6 +140,12 @@ class Snap:
         self.name: str = name
         self.is_classic: bool = is_classic
         self.channel: str = channel
+
+    def is_installed(self) -> bool:
+        global snap_installed
+        if self.name in snap_installed:
+            return True
+        return False
 
     def install(self):
         global snap_installed
@@ -154,28 +174,28 @@ class Package:
 
 all_packages: dict[str, dict[str, Package]] = {
     "Server": {
-        "cockpit": Package(Repo("cockpit"), None, None),
-        "curl": Package(Repo("curl"), None, None),
-        "htop": Package(Repo("htop"), None, None),
-        "git": Package(Repo("git"), None, None),
-        "mariadb": Package(Repo("mariadb"), None, None),
-        "nano": Package(Repo("nano"), None, None),
-        "ncdu": Package(Repo("ncdu"), None, None),
-        "node": Package(Repo("node"), None, Snap("node", True, "18/stable")),
-        "podman": Package(Repo("podman"), None, None),
-        "rust": Package(Repo("rust"), None, None),
-        "ssh": Package(Repo("ssh"), None, None),
-        "vim": Package(Repo("vim"), None, None)
+        "Cockpit - Web Interface": Package(Repo("cockpit"), None, None),
+        "cURL - Client URL": Package(Repo("curl"), None, None),
+        "htop - Process Reviewer": Package(Repo("htop"), None, None),
+        "git - Version Control": Package(Repo("git"), None, None),
+        "MariaDB - Database": Package(Repo("mariadb"), None, None),
+        "nano - Text Editor": Package(Repo("nano"), None, None),
+        "ncdu - Disk Usage": Package(Repo("ncdu"), None, None),
+        "Node.js - JavaScript RE": Package(Repo("node"), None, Snap("node", True, "18/stable")),
+        "Podman - Containers": Package(Repo("podman"), None, None),
+        "Rust Language": Package(Repo("rust"), None, None),
+        "SSH - Secure Shell Protocol": Package(Repo("ssh"), None, None),
+        "VIM - Text Editor": Package(Repo("vim"), None, None)
     },
     "Desktop": {
-        "cups": Package(Repo("cups"), None, None),
-        "ffmpeg": Package(Repo("ffmpeg"), None, None),
-        "ibus-unikey": Package(Repo("ibus-unikey"), None, None),
-        "id3v2": Package(Repo("id3v2"), None, None),
+        "cups - Printer Support": Package(Repo("cups"), None, None),
+        "ffmpeg - Media Codecs": Package(Repo("ffmpeg"), None, None),
+        "Vietnamese Keyboard": Package(Repo("ibus-unikey"), None, None),
+        "MP3 Metadata Editor": Package(Repo("id3v2"), None, None),
         "imagemagick": Package(Repo("imagemagick"), None, None),
-        "latex": Package(Repo("latex"), None, None),
-        "qtile": Package(Repo("qtile"), None, None),
-        "yt-dlp": Package(Repo("yt-dlp"), None, None)
+        "LaTex - Compiler": Package(Repo("latex"), None, None),
+        "qtile - Window Manager": Package(Repo("qtile"), None, None),
+        "yt-dlp - Download YouTube": Package(Repo("yt-dlp"), None, None)
     },
     "Applications": {
         "gnome-clocks": Package(Repo("gnome-clocks"), Flatpak("org.gnome.clocks"), Snap("gnome-clocks", True))
@@ -210,18 +230,28 @@ def setup_environment() -> None:
 
 
 def handle_package(pkg: str, package: Package) -> None:
+    current_installed = ""
     menu_entries: list[str] = []
     if package.repository is not None:
         menu_entries.append("[r] repository install")
+        if package.repository.is_installed():
+            current_installed = "Repository"
     if package.flatpak is not None:
         menu_entries.append("[f] flatpak install")
+        if package.flatpak.is_installed():
+            current_installed = "Flatpak"
     if package.snap is not None:
         menu_entries.append("[s] snap install")
+        if package.snap.is_installed():
+            current_installed = "Snap"
     menu_entries.append("[u] uninstall")
     menu_entries.append("[c] cancel")
 
+    title = f"\n(Press Q or Esc to go back)\nPackage: {pkg}\n"
+    if current_installed != "":
+        title += f"({current_installed} Currently Installed)\n"
     term_menu = TerminalMenu(
-        title="\n" + pkg + " (Press Q or Esc to go back)\n",
+        title=title,
         menu_entries=menu_entries,
         cycle_cursor=True,
         clear_screen=False
@@ -268,7 +298,7 @@ def select_package(category: str) -> None:
     cursor_index = 0
     while True:
         menu_selection_idx: int = TerminalMenu(
-            title="\nSelect " + category + " Package (Press Q or Esc to go back)\n",
+            title=f"\n(Press Q or Esc to go back)\nSelect {category} Package\n",
             menu_entries=menu_entries,
             cycle_cursor=False,
             clear_screen=False,
