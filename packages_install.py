@@ -6,127 +6,47 @@ from simple_term_menu import TerminalMenu
 import os
 
 
-class RepositoryPackage:
-    def __init__(self, name: str | None, special_cases: dict[str, [str]] | None):
-        self.name: str | None = name
-        self.special_cases: dict[str, [str]] | None = special_cases
-
-    def get_package_names(self) -> [str]:
-        if self.special_cases is not None:
-            if distribution.name in self.special_cases:
-                return self.special_cases[distribution.name]
-
-            if distribution.repository in self.special_cases:
-                return self.special_cases[distribution.repository]
-
-            if distribution.package_manager in self.special_cases:
-                return self.special_cases[distribution.package_manager]
-
-            if "all" in self.special_cases:
-                return self.special_cases["all"]
-
-        if self.name is not None:
-            return [self.name]
-
-        return []
-
-
-class FlatpakPackage:
-    def __init__(self, name: str):
-        self.name: str = name
-
-
 class SnapPackage:
-    def __init__(self, name: str, is_official: bool, is_classic: bool):
+    def __init__(self, name: str, is_official: bool, is_classic: bool, channel: str | None):
         self.name: str = name
         self.is_official: bool = is_official
         self.is_classic: bool = is_classic
+        self.channel: str = channel
 
 
 class Package:
-    def __init__(self, category: str, repository: RepositoryPackage | None,
-                 flatpak: FlatpakPackage | None, snap: SnapPackage | None):
-        self.category: str = category
-        self.repository: RepositoryPackage | None = repository
-        self.flatpak: FlatpakPackage | None = flatpak
+    def __init__(self, repository: bool, flatpak: str | None, snap: SnapPackage | None):
+        self.repository: bool = repository
+        self.flatpak: str | None = flatpak
         self.snap: SnapPackage | None = snap
 
 
-all_linux_packages: dict[str, Package] = {
-    # Server
-    "bash-completion": Package("Server",
-                               RepositoryPackage("bash-completion", None),
-                               None, None),
-    "cockpit": Package("Server",
-                       RepositoryPackage("cockpit", None),
-                       None, None),
-    "curl": Package("Server",
-                    RepositoryPackage("curl", None),
-                    None, None),
-    "htop": Package("Server",
-                    RepositoryPackage("htop", None),
-                    None, None),
-    "git": Package("Server",
-                   RepositoryPackage("git", None),
-                   None, None),
-    "mariadb": Package("Server",
-                       RepositoryPackage("mariadb-server", {"pacman": ["mariadb"], "zypper": ["mariadb"]}),
-                       None, None),
-    "nano": Package("Server",
-                    RepositoryPackage("nano", None),
-                    None, None),
-    "ncdu": Package("Server",
-                    RepositoryPackage("ncdu", None),
-                    None, None),
-    "node": Package("Server",
-                    RepositoryPackage(None, {"all": ["nodejs", "npm"], "zypper": ["nodejs16", "npm16"]}),
-                    None, None),
-    "podman": Package("Server",
-                      RepositoryPackage("podman", None),
-                      None, None),
-    "rust": Package("Server",
-                    RepositoryPackage(None, {"all": ["rust", "rustfmt", "cargo"], "pacman": ["rustup"]}),
-                    None, None),
-    "ssh": Package("Server",
-                   RepositoryPackage(None, {"apt": ["ssh"],
-                                            "zypper": ["libssh4", "openssh"],
-                                            "all": ["libssh", "openssh"]}),
-                   None, None),
-    "vim": Package("Server",
-                   RepositoryPackage("vim", None),
-                   None, None),
-
-    # Desktop
-    "cups": Package("Desktop",
-                    RepositoryPackage("cups", None),
-                    None, None),
-    "ffmpeg": Package("Desktop",
-                      RepositoryPackage("ffmpeg", {"zypper": ["ffmpeg-4"]}),
-                      None, None),
-    "ibus-unikey": Package("Desktop",
-                           RepositoryPackage("ibus-unikey", {"redhat": [
-                               "https://rpmfind.net/linux/fedora/linux/releases/34/Everything/x86_64/os/Packages/i"
-                               "/ibus-unikey-0.6.1-26.20190311git46b5b9e.fc34.x86_64.rpm"]}),
-                           None, None),
-    "id3v2": Package("Desktop",
-                     RepositoryPackage("id3v2", {"redhat": []}),
-                     None, None),
-    "imagemagick": Package("Desktop",
-                           RepositoryPackage(None, {"dnf": ["ImageMagick"], "apt": ["imagemagick"]}),
-                           None, None),
-    "latex": Package("Desktop",
-                     RepositoryPackage(None, {"apt": ["texlive-latex-base", "texlive-latex-extra"],
-                                              "dnf": ["texlive-latex"],
-                                              "fedora": ["texlive-latex", "texlive-collection-latexextra"],
-                                              "pacman": ["texlive-core", "texlive-latexextra"]}),
-                     None, None),
-    "qtile": Package("Desktop",
-                     RepositoryPackage(None, {"all": [],
-                                              "arch": ["qtile", "alacritty", "rofi", "numlockx", "playerctl"]}),
-                     None, None),
-    "yt-dlp": Package("Desktop",
-                      RepositoryPackage("yt-dlp", {"debian": []}),
-                      None, None),
+all_packages: dict[str, dict[str, Package]] = {
+    "Server": {
+        "bash-completion": Package(True, None, None),
+        "cockpit": Package(True, None, None),
+        "curl": Package(True, None, None),
+        "htop": Package(True, None, None),
+        "git": Package(True, None, None),
+        "mariadb": Package(True, None, None),
+        "nano": Package(True, None, None),
+        "ncdu": Package(True, None, None),
+        "node": Package(True, None, None),
+        "podman": Package(True, None, None),
+        "rust": Package(True, None, None),
+        "ssh": Package(True, None, None),
+        "vim": Package(True, None, None)
+    },
+    "Desktop": {
+        "cups": Package(True, None, None),
+        "ffmpeg": Package(True, None, None),
+        "ibus-unikey": Package(True, None, None),
+        "id3v2": Package(True, None, None),
+        "imagemagick": Package(True, None, None),
+        "latex": Package(True, None, None),
+        "qtile": Package(True, None, None),
+        "yt-dlp": Package(True, None, None)
+    }
 }
 
 
@@ -158,12 +78,11 @@ def setup_environment() -> None:
 
 def install_packages(category: str) -> None:
     menu_entries: list[str] = []
-    for pkg in all_linux_packages:
-        if all_linux_packages[pkg].category == category:
-            menu_entries.append(pkg)
+    for pkg in all_packages[category]:
+        menu_entries.append(pkg)
 
     term_menu = TerminalMenu(
-        title="\n" + category + " Packages (Press Q or Esc to quit)\n",
+        title="\nInstall " + category + " Packages (Press Q or Esc to quit)\n",
         menu_entries=menu_entries,
         cycle_cursor=True,
         multi_select=True,
@@ -182,7 +101,7 @@ def install_packages(category: str) -> None:
         if pkg == "node":
             if distribution.package_manager == "dnf":
                 modules_to_enable.append("nodejs:18")
-        packages_to_install += all_linux_packages[pkg].repository.get_package_names()
+        packages_to_install += distribution.repository_get_package_names(pkg)
 
     distribution.repository_module(modules_to_enable)
     distribution.repository_install(packages_to_install)
@@ -245,21 +164,16 @@ def remove_packages() -> None:
 
 
 def run() -> None:
-    menu_entries: list[str | None] = [
+    menu_entries: list[str] = [
         "Update Packages",
         "Repository Setup",
         "Environment Setup"
     ]
-
-    package_categories = set()
-    for pkg in all_linux_packages:
-        package_categories.add(all_linux_packages[pkg].category)
-
-    for category in package_categories:
-        menu_entries.append(category)
-
-    menu_entries.append("Remove Packages")
-    menu_entries.append("Exit")
+    menu_entries += all_packages.keys()
+    menu_entries += [
+        "Remove Packages",
+        "Exit"
+    ]
 
     cursor_index = 0
     while True:

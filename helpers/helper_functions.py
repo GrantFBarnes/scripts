@@ -88,6 +88,70 @@ class Distribution:
         elif self.package_manager == "zypper":
             return get_command("zypper packages --installed-only | awk -F '|' '{print $3}'").split("\n")
 
+    def repository_get_package_names(self, package: str) -> list[str]:
+        # Check distribution exceptions
+        if self.name == "":
+            return []
+
+        # Check repository exceptions
+        if self.repository == "redhat":
+            if package == "ibus-unikey":
+                return ["https://rpmfind.net/linux/fedora/linux/releases/34/Everything/x86_64/os/Packages"
+                        "/i/ibus-unikey-0.6.1-26.20190311git46b5b9e.fc34.x86_64.rpm"]
+            if package == "id3v2":
+                return []
+        elif self.repository == "debian":
+            if package == "yt-dlp":
+                return []
+
+        # Check package manager exceptions
+        if self.package_manager == "dnf":
+            if package == "imagemagick":
+                return ["ImageMagick"]
+        elif self.package_manager == "zypper":
+            if package == "ffmpeg":
+                return ["ffmpeg-4"]
+
+        # Check package exceptions
+        if package == "latex":
+            if self.repository == "fedora":
+                return ["texlive-latex", "texlive-collection-latexextra"]
+            if self.package_manager == "dnf":
+                return ["texlive-latex"]
+            elif self.package_manager == "apt":
+                return ["texlive-latex-base", "texlive-latex-extra"]
+            elif self.package_manager == "pacman":
+                return ["texlive-core", "texlive-latexextra"]
+        elif package == "mariadb":
+            if self.package_manager == "pacman" or self.package_manager == "zypper":
+                return ["mariadb"]
+            else:
+                return ["mariadb-server"]
+        elif package == "node":
+            if self.package_manager == "zypper":
+                return ["nodejs16", "npm16"]
+            else:
+                return ["nodejs", "npm"]
+        elif package == "rust":
+            if self.package_manager == "pacman":
+                return ["rustup"]
+            else:
+                return ["rust", "rustfmt", "cargo"]
+        elif package == "ssh":
+            if self.package_manager == "apt":
+                return ["ssh"]
+            elif self.package_manager == "zypper":
+                return ["libssh4", "openssh"]
+            else:
+                return ["libssh", "openssh"]
+        elif package == "qtile":
+            if self.package_manager == "arch":
+                return ["qtile", "alacritty", "rofi", "numlockx", "playerctl"]
+            else:
+                return []
+
+        return [package]
+
     def repository_install(self, packages: list[str]) -> None:
         if len(packages) == 0:
             return
