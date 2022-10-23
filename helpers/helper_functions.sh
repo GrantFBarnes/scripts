@@ -18,25 +18,12 @@ function getDistribution() {
         echo "mint"
     elif [[ $distro == *"Pop!_OS"* ]]; then
         echo "pop"
+    elif [[ $distro == *"Rocky"* ]]; then
+        echo "rocky"
     elif [[ $distro == *"SUSE"* ]]; then
         echo "suse"
     elif [[ $distro == *"Ubuntu"* ]]; then
         echo "ubuntu"
-    else
-        echo ""
-    fi
-}
-
-function getPackageManager() {
-    distro=$(head -n 1 /etc/os-release)
-    if [[ $distro == *"Arch"* ]]; then
-        echo "pacman"
-    elif [[ $distro == *"Alma"* ]] || [[ $distro == *"CentOS"* ]] || [[ $distro == *"Fedora"* ]]; then
-        echo "dnf"
-    elif [[ $distro == *"SUSE"* ]]; then
-        echo "zypper"
-    elif [[ $distro == *"Debian"* ]] || [[ $distro == *"Mint"* ]] || [[ $distro == *"Pop!_OS"* ]] || [[ $distro == *"Ubuntu"* ]]; then
-        echo "apt"
     else
         echo ""
     fi

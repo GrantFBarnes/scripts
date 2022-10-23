@@ -2,7 +2,7 @@
 # Purpose: tar home files into backup folder (optional encryption)
 ################################################################################
 cd $(dirname "$0")
-. helper_functions.sh
+. helpers/helper_functions.sh
 
 checkNotInstalled whiptail
 if [ $? -eq 0 ]; then

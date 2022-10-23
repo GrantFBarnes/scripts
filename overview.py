@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from helper_functions import *
+from helpers.helper_functions import *
 import os
 
 

@@ -2,7 +2,7 @@
 # Purpose: Setup Gnome Desktop
 ################################################################################
 cd $(dirname "$0")
-. helper_functions.sh
+. helpers/helper_functions.sh
 
 distro=$(getDistribution)
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from helper_functions import *
+from helpers.helper_functions import *
 import os
 
 
@@ -15,14 +15,14 @@ def find_group(path, plugin):
     if not os.path.exists(full_path):
         return None
 
-    lastGroup = ""
+    last_group = ""
     file = open(full_path, "r")
     for line in file:
         if line.startswith("["):
-            lastGroup = line
+            last_group = line
         elif line.startswith("plugin"):
             if plugin in line:
-                return lastGroup
+                return last_group
     return None
 
 
