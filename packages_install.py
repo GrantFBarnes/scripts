@@ -17,15 +17,46 @@ class Repo:
 
         # Check repository exceptions
         if distribution.repository == "redhat":
-            if self.name == "gnome-clocks":
+            if self.name == "deja-dup":
+                return []
+            elif self.name == "gnome-books":
+                return []
+            elif self.name == "gnome-boxes":
+                return []
+            elif self.name == "gnome-calendar":
+                return []
+            elif self.name == "gnome-clocks":
+                return []
+            elif self.name == "gnome-contacts":
+                return []
+            elif self.name == "gnome-maps":
+                return []
+            elif self.name == "gnome-passwordsafe":
+                return []
+            elif self.name == "gnome-weather":
+                return []
+            elif self.name == "gnucash":
+                return []
+            elif self.name == "gwenview":
                 return []
             elif self.name == "ibus-unikey":
                 return ["https://rpmfind.net/linux/fedora/linux/releases/34/Everything/x86_64/os/Packages"
                         "/i/ibus-unikey-0.6.1-26.20190311git46b5b9e.fc34.x86_64.rpm"]
             elif self.name == "id3v2":
                 return []
+            elif self.name == "okular":
+                return []
+            elif self.name == "transmission-gtk":
+                return []
+            elif self.name == "transmission-qt":
+                return []
+        elif distribution.repository == "fedora":
+            if self.name == "gnome-passwordsafe":
+                return ["secrets"]
         elif distribution.repository == "debian":
-            if self.name == "yt-dlp":
+            if self.name == "gnome-connections":
+                return []
+            elif self.name == "yt-dlp":
                 return []
 
         # Check self.name manager exceptions
@@ -136,8 +167,9 @@ class Flatpak:
 
 
 class Snap:
-    def __init__(self, name: str, is_classic: bool = False, channel: str | None = None):
+    def __init__(self, name: str, is_official: bool = False, is_classic: bool = False, channel: str | None = None):
         self.name: str = name
+        self.is_official: bool = is_official
         self.is_classic: bool = is_classic
         self.channel: str = channel
 
@@ -183,7 +215,7 @@ all_packages: dict[str, dict[str, Package]] = {
         "MariaDB - Database": Package(Repo("mariadb")),
         "nano - Text Editor": Package(Repo("nano")),
         "ncdu - Disk Usage": Package(Repo("ncdu")),
-        "Node.js - JavaScript RE": Package(Repo("node"), None, Snap("node", True, "18/stable")),
+        "Node.js - JavaScript RE": Package(Repo("node"), None, Snap("node", True, True, "18/stable")),
         "Podman - Containers": Package(Repo("podman")),
         "Rust Language": Package(Repo("rust")),
         "SSH - Secure Shell Protocol": Package(Repo("ssh")),
@@ -200,7 +232,29 @@ all_packages: dict[str, dict[str, Package]] = {
         "yt-dlp - Download YouTube": Package(Repo("yt-dlp"))
     },
     "Applications": {
-        "gnome-clocks": Package(Repo("gnome-clocks"), Flatpak("org.gnome.clocks"), Snap("gnome-clocks", True), "gnome")
+        "Cheese - Webcam": Package(Repo("cheese"), Flatpak("org.gnome.Cheese"), None, "gnome"),
+        "Deja Dup - Backups": Package(Repo("deja-dup"), Flatpak("org.gnome.DejaDup")),
+        "Eye of Gnome - Image Viewer": Package(Repo("eog"), Flatpak("org.gnome.eog"), Snap("eog", True), "gnome"),
+        "Evince - Document Viewer": Package(Repo("evince"), Flatpak("org.gnome.Evince"), None, "gnome"),
+        "Gnome Books": Package(Repo("gnome-books"), Flatpak("org.gnome.Books"), None, "gnome"),
+        "Gnome Boxes - VM Manager": Package(Repo("gnome-boxes"), Flatpak("org.gnome.Boxes"), None, "gnome"),
+        "Gnome Calculator": Package(Repo("gnome-calculator"), Flatpak("org.gnome.Calculator"),
+                                    Snap("gnome-calculator", True), "gnome"),
+        "Gnome Calendar": Package(Repo("gnome-calendar"), Flatpak("org.gnome.Calendar"), None, "gnome"),
+        "Gnome Clocks": Package(Repo("gnome-clocks"), Flatpak("org.gnome.clocks"), Snap("gnome-clocks", True), "gnome"),
+        "Gnome Connections": Package(Repo("gnome-connections"), Flatpak("org.gnome.Connections"), None, "gnome"),
+        "Gnome Contacts": Package(Repo("gnome-contacts"), Flatpak("org.gnome.Contacts"), None, "gnome"),
+        "Gnome Maps": Package(Repo("gnome-maps"), Flatpak("org.gnome.Maps"), None, "gnome"),
+        "Gnome Password Safe": Package(Repo("gnome-passwordsafe"), Flatpak("org.gnome.PasswordSafe")),
+        "Gnome Weather": Package(Repo("gnome-weather"), Flatpak("org.gnome.Weather"), None, "gnome"),
+        "GNU Cash - Accounting": Package(Repo("gnucash"), Flatpak("org.gnucash.GnuCash")),
+        "Gwenview - Image Viewer": Package(Repo("gwenview"), Flatpak("org.kde.gwenview"), Snap("gwenview", True),
+                                           "plasma"),
+        "KCalc - Calculator": Package(Repo("kcalc"), Flatpak("org.kde.kcalc"), Snap("kcalc", True), "plasma"),
+        "Okular - Document Viewer": Package(Repo("okular"), Flatpak("org.kde.okular"), Snap("ocular", True), "plasma"),
+        "Transmission (GTK) - Torrent": Package(Repo("transmission-gtk"), None, None, "gnome"),
+        "Transmission (QT) - Torrent": Package(Repo("transmission-qt"), None, None, "plasma"),
+        "Virt Manager": Package(Repo("virt-manager")),
     }
 }
 
@@ -243,7 +297,7 @@ def handle_package(pkg: str, package: Package) -> None:
         if package.flatpak.is_installed():
             current_installed = "Flatpak"
     if package.snap is not None:
-        menu_entries.append("[s] snap install")
+        menu_entries.append(f"[s] snap {'official ' if package.snap.is_official else ''}install")
         if package.snap.is_installed():
             current_installed = "Snap"
     menu_entries.append("[u] uninstall")
