@@ -140,10 +140,12 @@ gsettings set ${APP_FOLDERS_PATH}Apps/ apps "[
     'org.gnome.Weather.desktop',
     'org.gnome.Maps.desktop',
     'org.gnome.Books.desktop',
-    'org.gnome.Boxes.desktop',
+    'org.remmina.Remmina.desktop',
     'org.gnome.Connections.desktop',
+    'org.gnome.Boxes.desktop',
     'virt-manager.desktop',
     'org.gnome.Cheese.desktop',
+    'org.gnome.Todo.desktop',
     'usb-creator-gtk.desktop',
     'org.fedoraproject.MediaWriter.desktop'
 ]"
@@ -260,6 +262,7 @@ gsettings set ${APP_FOLDERS_PATH}Games/ apps "[
     'org.gnome.Sudoku.desktop',
     'org.gnome.Mines.desktop',
     'org.gnome.Quadrapassel.desktop',
+    'org.gnome.Mahjongg.desktop',
     'org.kde.kmines.desktop',
     'org.kde.knights.desktop',
     'org.kde.ksudoku.desktop',
@@ -285,6 +288,7 @@ gsettings set ${APP_FOLDERS_PATH}System/ apps "[
     'org.kde.partitionmanager.desktop',
     'org.kde.plasma-systemmonitor.desktop',
     'org.gnome.DejaDup.desktop',
+    'org.gnome.seahorse.Application.desktop',
     'htop.desktop'
 ]"
 

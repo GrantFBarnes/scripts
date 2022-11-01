@@ -23,14 +23,6 @@ class Repo:
             elif self.name == "mediawriter":
                 return []
 
-        if distribution.repository != "pacman":
-            if self.name == "code":
-                return []
-            elif self.name == "discord":
-                return []
-            elif self.name == "steam":
-                return []
-
         if distribution.repository == "debian":
             missing = {
                 "gnome-connections",
@@ -91,6 +83,18 @@ class Repo:
                         "/i/ibus-unikey-0.6.1-26.20190311git46b5b9e.fc34.x86_64.rpm"]
 
         # Check self.name manager exceptions
+        if distribution.package_manager != "pacman":
+            if self.name == "code":
+                return []
+            elif self.name == "discord":
+                return []
+            elif self.name == "intellij-idea-community-edition":
+                return []
+            elif self.name == "pycharm-community-edition":
+                return []
+            elif self.name == "steam":
+                return []
+
         if distribution.package_manager == "apt":
             if self.name == "epiphany":
                 return ["epiphany-browser"]
@@ -174,7 +178,7 @@ class Repo:
             else:
                 return []
         elif self.name == "qtile":
-            if distribution.package_manager == "arch":
+            if distribution.package_manager == "pacman":
                 return ["qtile", "alacritty", "rofi", "numlockx", "playerctl"]
             else:
                 return []
