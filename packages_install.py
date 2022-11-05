@@ -16,6 +16,10 @@ class Repo:
             if self.name == "gnome-software":
                 return []
 
+        if distribution.name != "ubuntu":
+            if self.name == "gnome-shell-extension-manager":
+                return []
+
         # Check repository exceptions
         if distribution.repository != "fedora":
             if self.name == "icecat":
@@ -172,11 +176,6 @@ class Repo:
                 return ["libssh4", "openssh"]
             else:
                 return ["libssh", "openssh"]
-        elif self.name == "tor":
-            if distribution.package_manager == "pacman" or distribution.repository == "fedora":
-                return ["torbrowser-launcher"]
-            else:
-                return []
         elif self.name == "qtile":
             if distribution.package_manager == "pacman":
                 return ["qtile", "alacritty", "rofi", "numlockx", "playerctl"]
@@ -374,7 +373,8 @@ all_packages: dict[str, dict[str, Package]] = {
         "IceCat - GNU Browser": Package(Repo("icecat")),
         "Firefox": Package(Repo("firefox"), Flatpak("org.mozilla.firefox"), Snap("firefox", True)),
         "Firefox ESR": Package(Repo("firefox-esr"), None, Snap("firefox", True, False, "esr/stable")),
-        "TOR - The Onion Router": Package(Repo("tor"), Flatpak("com.github.micahflee.torbrowser-launcher"))
+        "TOR - The Onion Router": Package(Repo("torbrowser-launcher"),
+                                          Flatpak("com.github.micahflee.torbrowser-launcher"))
     },
     "Communication": {
         "Discord": Package(Repo("discord"), Flatpak("com.discordapp.Discord"), Snap("discord")),
@@ -440,6 +440,7 @@ all_packages: dict[str, dict[str, Package]] = {
         "FileLight Disk Usage": Package(Repo("filelight"), None, None, "plasma"),
         "Gnome Disk Utility": Package(Repo("gnome-disk-utility"), None, None, "gnome"),
         "Gnome Shell Extension": Package(Repo("gnome-shell-extensions"), None, None, "gnome"),
+        "Gnome Shell Extension Manager": Package(Repo("gnome-shell-extension-manager"), None, None, "gnome"),
         "Gnome System Monitor": Package(Repo("gnome-system-monitor"), None, None, "gnome"),
         "Gnome Tweaks": Package(Repo("gnome-tweaks"), None, None, "gnome"),
         "KSysGuard": Package(Repo("ksysguard"), None, None, "plasma"),

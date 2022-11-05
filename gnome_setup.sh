@@ -1,7 +1,7 @@
 #!/bin/bash
 # Purpose: Setup Gnome Desktop
 ################################################################################
-cd $(dirname "$0")
+cd "$(dirname "$0")" || exit 0
 . helpers/helper_functions.sh
 
 distro=$(getDistribution)
@@ -88,11 +88,11 @@ if [ "$distro" == "ubuntu" ]; then
     gsettings set org.gnome.shell.extensions.ding show-home false
 
     screenDimensions=$(xdpyinfo | awk '/dimensions/{print $2}')
-    screenWidth=$(cut -d "x" -f 1 <<<$screenDimensions)
+    screenWidth=$(cut -d "x" -f 1 <<<"$screenDimensions")
     screenSize="large"
-    if [ $screenWidth \< 1800 ]; then
+    if [ "$screenWidth" -lt 1800 ]; then
         screenSize="medium"
-    elif [ $screenWidth \< 1300 ]; then
+    elif [ "$screenWidth" -lt 1300 ]; then
         screenSize="small"
     fi
 
@@ -298,6 +298,7 @@ gsettings set ${APP_FOLDERS_PATH}Settings/ apps "[
     'gnome-control-center.desktop',
     'org.gnome.tweaks.desktop',
     'org.gnome.Extensions.desktop',
+    'com.mattjakeman.ExtensionManager.desktop',
     'ca.desrt.dconf-editor.desktop',
     'org.freedesktop.MalcontentControl.desktop',
     'org.gnome.Software.desktop',

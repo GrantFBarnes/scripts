@@ -6,17 +6,14 @@ import os
 
 
 def main():
-    if os.geteuid() != 0:
-        print_error("Must be run as root", True)
-        exit()
-
     distribution: Distribution | None = get_distribution()
     if distribution is None:
         print_error("Distribution not recognized", True)
         exit()
 
-    distribution.update()
-    distribution.install_pip()
+    if os.geteuid() == 0:
+        distribution.update()
+        distribution.install_pip()
 
     run_command("python3 -m pip install -r helpers/requirements.txt")
 
