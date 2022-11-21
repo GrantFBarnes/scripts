@@ -18,6 +18,7 @@ fi
 declare -a folderOptions
 folderOptions=()
 folderOptions+=("home-page" "" on)
+folderOptions+=("crm" "" off)
 folderOptions+=("learn-vietnamese" "" off)
 folderOptions+=("tractor-pulling" "" off)
 folderOptions+=("vehicle-ownership-cost" "" off)
