@@ -192,6 +192,7 @@ gsettings set ${APP_FOLDERS_PATH}Editors/ apps "[
     'com.jetbrains.IntelliJ-IDEA-Community.desktop',
     'jetbrains-pycharm-ce.desktop',
     'pycharm.desktop',
+    'pycharm-community.desktop',
     'pycharm-community_pycharm-community.desktop',
     'com.jetbrains.PyCharm-Community.desktop',
     'jetbrains-toolbox.desktop',
