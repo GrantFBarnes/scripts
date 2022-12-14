@@ -1,3 +1,4 @@
-.vscode/*
-/.idea
+.vscode
+.idea
+target
 __pycache__
