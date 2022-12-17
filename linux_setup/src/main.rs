@@ -5,6 +5,7 @@ use std::process::Command;
 
 mod distribution;
 mod flatpak;
+mod gnome;
 mod helper;
 mod snap;
 
@@ -959,14 +960,17 @@ fn run_install_packages(start_idx: usize, distribution: &Distribution, info: &mu
 }
 
 fn run_menu(start_idx: usize, distribution: &Distribution, info: &mut Info) {
-    let options: [&str; 6] = [
-        "Environment Setup",
-        "Repository Setup",
-        "Update Packages",
-        "Auto Remove Packages",
-        "Install Packages",
-        "Exit",
-    ];
+    let mut options: Vec<&str> = vec!["Environment Setup", "Repository Setup"];
+    if info.has_gnome {
+        options.push("GNOME Setup");
+    }
+    if info.has_kde {
+        options.push("KDE Setup");
+    }
+    options.push("Update Packages");
+    options.push("Auto Remove Packages");
+    options.push("Install Packages");
+    options.push("Exit");
 
     let selection: std::io::Result<Option<usize>> = Select::new()
         .items(&options)
@@ -984,6 +988,7 @@ fn run_menu(start_idx: usize, distribution: &Distribution, info: &mut Info) {
     match options[selection] {
         "Environment Setup" => environment_setup(),
         "Repository Setup" => repository_setup(distribution, info),
+        "GNOME Setup" => gnome::setup(distribution),
         "Update Packages" => {
             distribution.update();
             if info.has_flatpak {
