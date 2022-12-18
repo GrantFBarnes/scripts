@@ -7,6 +7,7 @@ mod distribution;
 mod flatpak;
 mod gnome;
 mod helper;
+mod kde;
 mod snap;
 
 use crate::distribution::Distribution;
@@ -989,6 +990,7 @@ fn run_menu(start_idx: usize, distribution: &Distribution, info: &mut Info) {
         "Environment Setup" => environment_setup(),
         "Repository Setup" => repository_setup(distribution, info),
         "GNOME Setup" => gnome::setup(distribution),
+        "KDE Setup" => kde::setup(),
         "Update Packages" => {
             distribution.update();
             if info.has_flatpak {
