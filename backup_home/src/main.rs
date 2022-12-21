@@ -3,6 +3,7 @@ use dialoguer::MultiSelect;
 use dialoguer::Password;
 use std::env;
 use std::env::VarError;
+use std::fs;
 use std::io::Result;
 use std::process::{Command, Stdio};
 
@@ -31,6 +32,12 @@ fn remove_file(file: &String) {
         .expect("failed to remove file");
 }
 
+fn create_directory(path: &String) {
+    match fs::create_dir_all(path) {
+        _ => (),
+    }
+}
+
 fn main() {
     let home_dir: std::result::Result<String, VarError> = env::var("HOME");
     if home_dir.is_err() {
@@ -38,13 +45,12 @@ fn main() {
         return;
     }
     let home_dir: String = home_dir.unwrap();
-    let backup_dir: String = format!("{}/backups/", home_dir);
 
-    let _ = Command::new("mkdir")
-        .arg("-p")
-        .arg(&backup_dir)
-        .status()
-        .expect("failed to make backup directory");
+    let backup_dir: String = format!("{}/backups", home_dir);
+    create_directory(&backup_dir);
+
+    let backup_dir: String = format!("{}/home", backup_dir);
+    create_directory(&backup_dir);
 
     let all_folders: Vec<&str> = vec!["Documents", "Music", "Pictures", "Videos"];
 
@@ -84,8 +90,8 @@ fn main() {
     }
 
     for folder in backup_folders {
-        let tar_file: String = format!("{backup_dir}{folder}.tar.gz");
-        let crypt_file: String = format!("{backup_dir}{folder}.tar.gz.gpg");
+        let tar_file: String = format!("{backup_dir}/{folder}.tar.gz");
+        let crypt_file: String = format!("{backup_dir}/{folder}.tar.gz.gpg");
 
         remove_file(&tar_file);
         remove_file(&crypt_file);
