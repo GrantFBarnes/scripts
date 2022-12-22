@@ -98,7 +98,7 @@ fn main() {
 
     let now: String = Local::now().format("%Y-%m-%d").to_string();
 
-    const DATABASES: [&str; 3] = ["crm", "learn-vietnamese", "tractor-pulling"];
+    const DATABASES: [&str; 3] = ["crm", "learn_vietnamese", "tractor_pulling"];
     for db in DATABASES {
         let db_backup_dir: String = format!("{}/{}", backup_dir, db);
         create_directory(&db_backup_dir);
