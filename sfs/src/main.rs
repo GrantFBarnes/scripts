@@ -2,9 +2,13 @@ use std::collections::HashMap;
 use std::env;
 use std::fs;
 use std::fs::{DirEntry, FileType, Metadata, ReadDir};
-use std::io::Result;
+use std::io;
+use std::io::{Result, Write};
 use std::ops::Add;
 use std::path::PathBuf;
+use std::thread;
+use std::thread::{sleep, JoinHandle};
+use std::time::Duration;
 
 const ANSI_RESET: &str = "\x1b[0m";
 const ANSI_RED: &str = "\x1b[31m";
@@ -71,12 +75,13 @@ fn get_entry_size(entry: &DirEntry) -> u64 {
     0
 }
 
-fn process_dir(path: &String) {
+fn get_directory_sizes(path: &String) -> Vec<String> {
     let dir: Result<ReadDir> = fs::read_dir(path);
     if dir.is_err() {
-        print_help();
-        println!("Could not find folder {}{}{}", ANSI_RED, path, ANSI_RESET);
-        return;
+        return vec![format!(
+            "Could not find folder {}{}{}",
+            ANSI_RED, path, ANSI_RESET
+        )];
     }
 
     let mut sizes: HashMap<String, u64> = HashMap::new();
@@ -105,6 +110,7 @@ fn process_dir(path: &String) {
     let mut sorted_sizes: Vec<(&String, &u64)> = sizes.iter().collect();
     sorted_sizes.sort_by(|a, b| b.1.cmp(a.1));
 
+    let mut result: Vec<String> = vec![];
     for entry in sorted_sizes {
         let mut size: String = format!("{} B", (entry.1));
         if entry.1 > &(1024 * 1024 * 1024 * 1024) {
@@ -116,11 +122,12 @@ fn process_dir(path: &String) {
         } else if entry.1 > &1024 {
             size = format!("{} KB", (entry.1 / 1024));
         }
-        println!(
+        result.push(format!(
             "{}{}{} {}{}{}",
             path, ANSI_BLUE, entry.0, ANSI_CYAN, size, ANSI_RESET
-        );
+        ));
     }
+    result
 }
 
 fn main() {
@@ -130,12 +137,37 @@ fn main() {
         return;
     }
 
-    let arg: &String = &args[1];
+    let arg: String = args[1].to_string();
 
     if arg == "-h" || arg == "--help" {
         print_help();
         return;
     }
 
-    process_dir(arg);
+    let process: JoinHandle<Vec<String>> = thread::spawn(move || get_directory_sizes(&arg));
+
+    let min_dot_count: usize = 0;
+    let max_dot_count: usize = 10;
+    let mut dot_count: usize = 0;
+    while !process.is_finished() {
+        print!("\rProcessing Files{}", ".".repeat(dot_count));
+        io::stdout().flush().unwrap();
+        sleep(Duration::from_millis(250));
+        dot_count += 1;
+        if dot_count == max_dot_count {
+            dot_count = min_dot_count;
+        }
+    }
+    println!(
+        "{}Processing Complete",
+        ".".repeat(max_dot_count - dot_count)
+    );
+
+    let results: thread::Result<Vec<String>> = process.join();
+    if results.is_ok() {
+        let results: Vec<String> = results.unwrap();
+        for line in results {
+            println!("{}", line);
+        }
+    }
 }
