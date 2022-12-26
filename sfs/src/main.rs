@@ -1,3 +1,4 @@
+use dialoguer::Select;
 use std::collections::HashMap;
 use std::env;
 use std::fs;
@@ -13,6 +14,7 @@ use std::time::Duration;
 const ANSI_RESET: &str = "\x1b[0m";
 const ANSI_RED: &str = "\x1b[31m";
 const ANSI_BLUE: &str = "\x1b[34m";
+const ANSI_MAGENTA: &str = "\x1b[35m";
 const ANSI_CYAN: &str = "\x1b[36m";
 
 fn print_help() {
@@ -75,13 +77,10 @@ fn get_entry_size(entry: &DirEntry) -> u64 {
     0
 }
 
-fn get_directory_sizes(path: &String) -> Vec<String> {
+fn get_directory_sizes(path: &String) -> Option<HashMap<String, u64>> {
     let dir: Result<ReadDir> = fs::read_dir(path);
     if dir.is_err() {
-        return vec![format!(
-            "Could not find folder {}{}{}",
-            ANSI_RED, path, ANSI_RESET
-        )];
+        return None;
     }
 
     let mut sizes: HashMap<String, u64> = HashMap::new();
@@ -107,10 +106,16 @@ fn get_directory_sizes(path: &String) -> Vec<String> {
         sizes.insert(entry_path, entry_size);
     }
 
+    Some(sizes)
+}
+
+fn select_directory(path: &String, sizes: HashMap<String, u64>) {
     let mut sorted_sizes: Vec<(&String, &u64)> = sizes.iter().collect();
     sorted_sizes.sort_by(|a, b| b.1.cmp(a.1));
 
-    let mut result: Vec<String> = vec![];
+    let mut options_display: Vec<String> = vec![];
+    let mut options_value: Vec<String> = vec![];
+
     for entry in sorted_sizes {
         let mut size: String = format!("{} B", (entry.1));
         if entry.1 > &(1024 * 1024 * 1024 * 1024) {
@@ -122,29 +127,50 @@ fn get_directory_sizes(path: &String) -> Vec<String> {
         } else if entry.1 > &1024 {
             size = format!("{} KB", (entry.1 / 1024));
         }
-        result.push(format!(
+        options_display.push(format!(
             "{}{}{} {}{}{}",
             path, ANSI_BLUE, entry.0, ANSI_CYAN, size, ANSI_RESET
         ));
+        options_value.push(format!("{}{}", path, entry.0));
     }
-    result
+
+    if path != "/" {
+        let up_dir: Result<PathBuf> = fs::canonicalize(PathBuf::from(format!("{}{}", path, "/..")));
+        if up_dir.is_err() {
+            return;
+        }
+        let up_dir: PathBuf = up_dir.unwrap();
+        let up_dir: Option<&str> = up_dir.to_str();
+        if up_dir.is_none() {
+            return;
+        }
+        let up_dir: &str = up_dir.unwrap();
+
+        options_display.push("..".to_string());
+        options_value.push(up_dir.to_string());
+    }
+
+    let selection: Result<Option<usize>> = Select::new()
+        .with_prompt(format!("  {}{}{}", ANSI_MAGENTA, path, ANSI_RESET))
+        .items(&options_display)
+        .default(0)
+        .max_length(10)
+        .interact_opt();
+    if selection.is_err() {
+        return;
+    }
+    let selection: Option<usize> = selection.unwrap();
+    if selection.is_none() {
+        return;
+    }
+    let selection = selection.unwrap();
+    process_directory(&options_value[selection]);
 }
 
-fn main() {
-    let args: Vec<String> = env::args().collect();
-    if args.len() != 2 {
-        print_help();
-        return;
-    }
-
-    let arg: String = args[1].to_string();
-
-    if arg == "-h" || arg == "--help" {
-        print_help();
-        return;
-    }
-
-    let process: JoinHandle<Vec<String>> = thread::spawn(move || get_directory_sizes(&arg));
+fn process_directory(path: &String) {
+    let owned_path: String = path.clone();
+    let process: JoinHandle<Option<HashMap<String, u64>>> =
+        thread::spawn(move || get_directory_sizes(&owned_path));
 
     let min_dot_count: usize = 0;
     let max_dot_count: usize = 10;
@@ -163,11 +189,32 @@ fn main() {
         ".".repeat(max_dot_count - dot_count)
     );
 
-    let results: thread::Result<Vec<String>> = process.join();
-    if results.is_ok() {
-        let results: Vec<String> = results.unwrap();
-        for line in results {
-            println!("{}", line);
-        }
+    let process_results: thread::Result<Option<HashMap<String, u64>>> = process.join();
+    if process_results.is_err() {
+        println!("Thread failed to join");
+        return;
     }
+    let process_results: Option<HashMap<String, u64>> = process_results.unwrap();
+    if process_results.is_none() {
+        println!("{}{}{} could not be scanned...", ANSI_RED, path, ANSI_RESET);
+        return;
+    }
+    select_directory(&path, process_results.unwrap());
+}
+
+fn main() {
+    let args: Vec<String> = env::args().collect();
+    if args.len() != 2 {
+        print_help();
+        return;
+    }
+
+    let arg: &String = &args[1];
+
+    if arg == "-h" || arg == "--help" {
+        print_help();
+        return;
+    }
+
+    process_directory(arg);
 }
