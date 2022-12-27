@@ -5,7 +5,6 @@ use std::fs;
 use std::fs::{DirEntry, FileType, Metadata, ReadDir};
 use std::io;
 use std::io::{Result, Write};
-use std::ops::Add;
 use std::path::PathBuf;
 use std::thread;
 use std::thread::{sleep, JoinHandle};
@@ -48,7 +47,7 @@ fn get_dir_size(path: &String) -> u64 {
         }
 
         let entry: DirEntry = entry.unwrap();
-        total_size = total_size.add(get_entry_size(&entry));
+        total_size += get_entry_size(&entry);
     }
     total_size
 }
@@ -110,6 +109,18 @@ fn get_directory_sizes(path: &String) -> Option<HashMap<String, u64>> {
 }
 
 fn select_directory(path: &String, sizes: HashMap<String, u64>) {
+    let mut max_path: usize = 0;
+    let mut max_size: u64 = 0;
+    for entry in &sizes {
+        let full_path: String = format!("{}{}{}{}", path, ANSI_BLUE, entry.0, ANSI_RESET);
+        if full_path.len() > max_path {
+            max_path = full_path.len();
+        }
+        if entry.1 > &max_size {
+            max_size = entry.1.to_owned();
+        }
+    }
+
     let mut sorted_sizes: Vec<(&String, &u64)> = sizes.iter().collect();
     sorted_sizes.sort_by(|a, b| b.1.cmp(a.1));
 
@@ -117,7 +128,19 @@ fn select_directory(path: &String, sizes: HashMap<String, u64>) {
     let mut options_value: Vec<String> = vec![];
 
     for entry in sorted_sizes {
-        let mut size: String = format!("{} B", (entry.1));
+        let full_path: String = format!("{}{}{}{}", path, ANSI_BLUE, entry.0, ANSI_RESET);
+
+        let percent_bar_len: usize = 20;
+        let percent: f64 = entry.1.to_owned() as f64 / max_size as f64;
+        let percent_bar: f64 = percent * percent_bar_len as f64;
+        let percent_bar: usize = percent_bar as usize;
+        let full_percentage: String = format!(
+            "[{}{}]",
+            "#".repeat(percent_bar),
+            ".".repeat(percent_bar_len - percent_bar)
+        );
+
+        let mut size: String = format!("{} B ", (entry.1));
         if entry.1 > &(1024 * 1024 * 1024 * 1024) {
             size = format!("{} TB", (entry.1 / (1024 * 1024 * 1024 * 1024)));
         } else if entry.1 > &(1024 * 1024 * 1024) {
@@ -127,9 +150,14 @@ fn select_directory(path: &String, sizes: HashMap<String, u64>) {
         } else if entry.1 > &1024 {
             size = format!("{} KB", (entry.1 / 1024));
         }
+        let full_size: String = format!("{}{: >7}{}", ANSI_CYAN, size, ANSI_RESET);
+
         options_display.push(format!(
-            "{}{}{} {}{}{}",
-            path, ANSI_BLUE, entry.0, ANSI_CYAN, size, ANSI_RESET
+            "{:width$} {} {}",
+            full_path,
+            full_percentage,
+            full_size,
+            width = max_path
         ));
         options_value.push(format!("{}{}", path, entry.0));
     }
@@ -151,10 +179,13 @@ fn select_directory(path: &String, sizes: HashMap<String, u64>) {
     }
 
     let selection: Result<Option<usize>> = Select::new()
-        .with_prompt(format!("  {}{}{}", ANSI_MAGENTA, path, ANSI_RESET))
+        .with_prompt(format!(
+            "Select Directory to Scan From {}{}{}",
+            ANSI_MAGENTA, path, ANSI_RESET
+        ))
         .items(&options_display)
         .default(0)
-        .max_length(10)
+        .max_length(15)
         .interact_opt();
     if selection.is_err() {
         return;
@@ -176,7 +207,7 @@ fn process_directory(path: &String) {
     let max_dot_count: usize = 10;
     let mut dot_count: usize = 0;
     while !process.is_finished() {
-        print!("\rProcessing Files{}", ".".repeat(dot_count));
+        print!("\rScanning Files{}", ".".repeat(dot_count));
         io::stdout().flush().unwrap();
         sleep(Duration::from_millis(250));
         dot_count += 1;
@@ -184,10 +215,7 @@ fn process_directory(path: &String) {
             dot_count = min_dot_count;
         }
     }
-    println!(
-        "{}Processing Complete",
-        ".".repeat(max_dot_count - dot_count)
-    );
+    println!("{}Scan Complete", ".".repeat(max_dot_count - dot_count));
 
     let process_results: thread::Result<Option<HashMap<String, u64>>> = process.join();
     if process_results.is_err() {
