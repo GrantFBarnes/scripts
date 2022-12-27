@@ -239,7 +239,7 @@ fn get_memory() -> String {
     }
 
     format!(
-        "{}{:.2}/{:.2} MB ({:.0}%){}",
+        "{}{:.2}/{:.2} GB ({:.0}%){}",
         color,
         used_memory / 1024.0 / 1024.0,
         total_memory / 1024.0 / 1024.0,
