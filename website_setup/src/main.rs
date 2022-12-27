@@ -147,6 +147,6 @@ fn main() {
 
         let tar_file: String = format!("{}/{}.tar.gz", &tar_dir, project);
         remove_folder(&tar_file);
-        tar_folder(&tar_file, &project_dir, &git_dir);
+        tar_folder(&tar_file, &project.to_string(), &git_dir);
     }
 }
