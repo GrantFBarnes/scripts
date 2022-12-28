@@ -672,26 +672,32 @@ fn environment_setup() {
         );
         helper::append_to_file_if_not_found(
             &bashrc,
-            "export GFB_HOSTING_ENV",
-            "export GFB_HOSTING_ENV=\"dev\"",
-            false,
-        );
-        helper::append_to_file_if_not_found(
-            &bashrc,
             "export GFB_MANAGER_SECRET",
             "export GFB_MANAGER_SECRET=\"\"",
             false,
         );
         helper::append_to_file_if_not_found(
             &bashrc,
-            "export JWT_SECRET",
-            "export JWT_SECRET=\"\"",
+            "export GFB_JWT_SECRET",
+            "export GFB_JWT_SECRET=\"\"",
             false,
         );
         helper::append_to_file_if_not_found(
             &bashrc,
-            "export SQL_TU_PASSWORD",
-            "export SQL_TU_PASSWORD=\"\"\n",
+            "export GFB_SQL_HOST",
+            "export GFB_SQL_HOST=\"\"\n",
+            false,
+        );
+        helper::append_to_file_if_not_found(
+            &bashrc,
+            "export GFB_SQL_USER",
+            "export GFB_SQL_USER=\"\"\n",
+            false,
+        );
+        helper::append_to_file_if_not_found(
+            &bashrc,
+            "export GFB_SQL_PASSWORD",
+            "export GFB_SQL_PASSWORD=\"\"\n",
             false,
         );
 
