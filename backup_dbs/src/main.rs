@@ -1,5 +1,6 @@
 use chrono::prelude::Local;
 use regex::Regex;
+use std::collections::HashSet;
 use std::env::VarError;
 use std::ffi::OsString;
 use std::fs::{DirEntry, ReadDir};
@@ -19,6 +20,13 @@ fn get_command_output(mut command: Command) -> Option<String> {
         }
     }
     None
+}
+
+fn get_file_diff(file1: &String, file2: &String) -> Option<String> {
+    let mut cmd: Command = Command::new("diff");
+    cmd.arg(file1);
+    cmd.arg(file2);
+    get_command_output(cmd)
 }
 
 fn get_database_backup(db: &str) -> Option<String> {
@@ -72,7 +80,29 @@ fn get_backup_files(path: &String) -> Vec<String> {
     backup_files
 }
 
-fn cleanup_backups(backup_files: Vec<String>, db_backup_dir: &String) {
+fn remove_unchanged_backups(backup_files: Vec<String>, db_backup_dir: &String) {
+    let mut backups_to_remove: HashSet<String> = HashSet::new();
+    for i in 0..backup_files.len() - 1 {
+        for j in i + 1..backup_files.len() {
+            let file1: String = format!("{}/{}", db_backup_dir, &backup_files[i]);
+            let file2: String = format!("{}/{}", db_backup_dir, &backup_files[j]);
+            let diff: Option<String> = get_file_diff(&file1, &file2);
+            if diff.is_some() {
+                let diff: String = diff.unwrap();
+                let lines: Vec<&str> = diff.split("\n").collect::<Vec<&str>>();
+                if lines.len() <= 5 {
+                    backups_to_remove.insert(file2);
+                }
+            }
+        }
+    }
+
+    for file in backups_to_remove {
+        remove_file(&file);
+    }
+}
+
+fn remove_excess_backups(backup_files: Vec<String>, db_backup_dir: &String) {
     const COUNT: usize = 30;
     if backup_files.len() > COUNT {
         let files_to_remove: &[String] = &backup_files[COUNT..];
@@ -112,6 +142,9 @@ fn main() {
         }
 
         let backup_files: Vec<String> = get_backup_files(&db_backup_dir);
-        cleanup_backups(backup_files, &db_backup_dir);
+        remove_unchanged_backups(backup_files, &db_backup_dir);
+
+        let backup_files: Vec<String> = get_backup_files(&db_backup_dir);
+        remove_excess_backups(backup_files, &db_backup_dir);
     }
 }
