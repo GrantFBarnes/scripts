@@ -56,7 +56,7 @@ fn create_directory(path: &String) {
 fn get_backup_files(path: &String) -> Vec<String> {
     let mut backup_files: Vec<String> = vec![];
 
-    let file_name_regex = Regex::new(r"^\d{4}-\d{2}-\d{2}-backup-.*\.sql$").unwrap();
+    let file_name_regex: Regex = Regex::new(r"^\d{8}_\d{6}_backup_.*\.sql$").unwrap();
     let dir: Result<ReadDir> = fs::read_dir(path);
     if dir.is_ok() {
         let dir: ReadDir = dir.unwrap();
@@ -103,7 +103,7 @@ fn remove_unchanged_backups(backup_files: Vec<String>, db_backup_dir: &String) {
 }
 
 fn remove_excess_backups(backup_files: Vec<String>, db_backup_dir: &String) {
-    const COUNT: usize = 30;
+    const COUNT: usize = 100;
     if backup_files.len() > COUNT {
         let files_to_remove: &[String] = &backup_files[COUNT..];
         for file in files_to_remove {
@@ -126,14 +126,14 @@ fn main() {
     let backup_dir: String = format!("{}/databases", backup_dir);
     create_directory(&backup_dir);
 
-    let now: String = Local::now().format("%Y-%m-%d").to_string();
+    let now: String = Local::now().format("%Y%m%d_%H%M%S").to_string();
 
     const DATABASES: [&str; 3] = ["crm", "learn_vietnamese", "tractor_pulling"];
     for db in DATABASES {
         let db_backup_dir: String = format!("{}/{}", backup_dir, db);
         create_directory(&db_backup_dir);
 
-        let file_name: String = format!("{}/{}-backup-{}.sql", db_backup_dir, now, db);
+        let file_name: String = format!("{}/{}_backup_{}.sql", db_backup_dir, now, db);
 
         let backup: Option<String> = get_database_backup(db);
         if backup.is_some() {
@@ -142,9 +142,13 @@ fn main() {
         }
 
         let backup_files: Vec<String> = get_backup_files(&db_backup_dir);
-        remove_unchanged_backups(backup_files, &db_backup_dir);
+        if backup_files.len() > 0 {
+            remove_unchanged_backups(backup_files, &db_backup_dir);
+        }
 
         let backup_files: Vec<String> = get_backup_files(&db_backup_dir);
-        remove_excess_backups(backup_files, &db_backup_dir);
+        if backup_files.len() > 0 {
+            remove_excess_backups(backup_files, &db_backup_dir);
+        }
     }
 }
