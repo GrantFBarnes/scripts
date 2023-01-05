@@ -1,6 +1,7 @@
 use dialoguer::Select;
 use std::env;
 use std::env::VarError;
+use std::fs;
 use std::process::Command;
 
 mod distribution;
@@ -701,27 +702,65 @@ fn environment_setup() {
             false,
         );
 
-        let vimrc: String = format!("{}{}", &home_dir, "/.vimrc");
-        helper::append_to_file_if_not_found(&vimrc, "syntax on", "syntax on", false);
-        helper::append_to_file_if_not_found(
-            &vimrc,
-            "filetype plugin indent on",
-            "filetype plugin indent on",
-            false,
-        );
-        helper::append_to_file_if_not_found(&vimrc, "set scrolloff", "set scrolloff=10", false);
-        helper::append_to_file_if_not_found(&vimrc, "set number", "set number", false);
-        helper::append_to_file_if_not_found(
-            &vimrc,
-            "set ignorecase smartcase",
-            "set ignorecase smartcase",
-            false,
-        );
-        helper::append_to_file_if_not_found(
-            &vimrc,
-            "set incsearch hlsearch",
-            "set incsearch hlsearch",
-            false,
+        let _ = fs::write(
+            format!("{}{}", &home_dir, "/.vimrc"),
+            r#"
+set nocompatible
+
+set encoding=utf-8
+
+set noswapfile
+set nobackup
+set nowritebackup
+
+set mouse=a
+set updatetime=300
+set scrolloff=10
+set number
+set ignorecase smartcase
+set incsearch hlsearch
+
+syntax on
+filetype plugin indent on
+
+call plug#begin()
+Plug 'neoclide/coc.nvim', {'branch': 'release'}
+Plug 'rust-lang/rust.vim'
+call plug#end()
+
+let g:rustfmt_autosave = 1
+let g:ale_linters = { "rust": ["analyzer"] }
+let g:ale_fixers = { "rust": ["rustfmt"] }
+
+" -----------------------------------------------------------------------------
+"  NERDTree
+
+nnoremap <C-n> :NERDTreeToggle<CR>
+
+" -----------------------------------------------------------------------------
+"  CoC
+
+" Use tab for trigger completion with characters ahead and navigate
+" NOTE: There's always complete item selected by default, you may want to enable
+" no select by `"suggest.noselect": true` in your configuration file
+" NOTE: Use command ':verbose imap <tab>' to make sure tab is not mapped by
+" other plugin before putting this into your config
+inoremap <silent><expr> <TAB>
+      \ coc#pum#visible() ? coc#pum#next(1) :
+      \ CheckBackspace() ? "\<Tab>" :
+      \ coc#refresh()
+inoremap <expr><S-TAB> coc#pum#visible() ? coc#pum#prev(1) : "\<C-h>"
+
+" Make <CR> to accept selected completion item or notify coc.nvim to format
+" <C-g>u breaks current undo, please make your own choice
+inoremap <silent><expr> <CR> coc#pum#visible() ? coc#pum#confirm()
+                              \: "\<C-g>u\<CR>\<c-r>=coc#on_enter()\<CR>"
+
+function! CheckBackspace() abort
+  let col = col('.') - 1
+  return !col || getline('.')[col - 1]  =~# '\s'
+endfunction
+"#,
         );
     }
 }

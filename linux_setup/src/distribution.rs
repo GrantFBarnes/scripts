@@ -466,6 +466,9 @@ impl Distribution {
                     }
                 }
                 if self.package_manager == "dnf" {
+                    if self.repository == "fedora" {
+                        return Option::from(vec!["rust", "rustfmt", "cargo", "rust-analyzer"]);
+                    }
                     return Option::from(vec!["rust", "rustfmt", "cargo"]);
                 }
                 if self.package_manager == "pacman" {
@@ -521,8 +524,44 @@ impl Distribution {
                 Option::from(vec!["transmission-qt"])
             }
             "vim" => {
+                if self.package_manager == "apt" {
+                    return Option::from(vec![
+                        "vim",
+                        "vim-ale",
+                        "vim-syntastic",
+                        "vim-ctrlp",
+                        "vim-airline",
+                        "vim-fugitive",
+                        "vim-gitgutter",
+                    ]);
+                }
                 if self.package_manager == "dnf" {
+                    if self.repository == "fedora" {
+                        return Option::from(vec![
+                            "vim-enhanced",
+                            "vim-ale",
+                            "vim-syntastic",
+                            "vim-nerdtree",
+                            "vim-ctrlp",
+                            "vim-airline",
+                            "vim-trailing-whitespace",
+                            "vim-fugitive",
+                            "vim-gitgutter",
+                        ]);
+                    }
                     return Option::from(vec!["vim-enhanced"]);
+                }
+                if self.package_manager == "pacman" {
+                    return Option::from(vec![
+                        "vim",
+                        "vim-ale",
+                        "vim-syntastic",
+                        "vim-nerdtree",
+                        "vim-ctrlp",
+                        "vim-airline",
+                        "vim-fugitive",
+                        "vim-gitgutter",
+                    ]);
                 }
                 Option::from(vec!["vim"])
             }
