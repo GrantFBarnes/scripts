@@ -2,7 +2,7 @@ use dialoguer::Select;
 use std::env;
 use std::env::VarError;
 use std::fs;
-use std::process::Command;
+use std::process::{Command, Stdio};
 
 mod distribution;
 mod flatpak;
@@ -724,44 +724,48 @@ syntax on
 filetype plugin indent on
 
 call plug#begin()
-Plug 'neoclide/coc.nvim', {'branch': 'release'}
+" See more at https://vimawesome.com/
+
+" Languages
 Plug 'rust-lang/rust.vim'
+Plug 'davidhalter/jedi-vim'
+
+" Syntax
+Plug 'w0rp/ale'
+Plug 'valloric/youcompleteme'
+Plug 'scrooloose/syntastic'
+Plug 'bronson/vim-trailing-whitespace'
+
+" Features
+Plug 'scrooloose/nerdtree'
+Plug 'kien/ctrlp.vim'
+Plug 'vim-airline/vim-airline'
+Plug 'kien/rainbow_parentheses.vim'
+Plug 'airblade/vim-gitgutter'
+
 call plug#end()
 
 let g:rustfmt_autosave = 1
 let g:ale_linters = { "rust": ["analyzer"] }
 let g:ale_fixers = { "rust": ["rustfmt"] }
 
-" -----------------------------------------------------------------------------
-"  NERDTree
-
 nnoremap <C-n> :NERDTreeToggle<CR>
 
-" -----------------------------------------------------------------------------
-"  CoC
-
-" Use tab for trigger completion with characters ahead and navigate
-" NOTE: There's always complete item selected by default, you may want to enable
-" no select by `"suggest.noselect": true` in your configuration file
-" NOTE: Use command ':verbose imap <tab>' to make sure tab is not mapped by
-" other plugin before putting this into your config
-inoremap <silent><expr> <TAB>
-      \ coc#pum#visible() ? coc#pum#next(1) :
-      \ CheckBackspace() ? "\<Tab>" :
-      \ coc#refresh()
-inoremap <expr><S-TAB> coc#pum#visible() ? coc#pum#prev(1) : "\<C-h>"
-
-" Make <CR> to accept selected completion item or notify coc.nvim to format
-" <C-g>u breaks current undo, please make your own choice
-inoremap <silent><expr> <CR> coc#pum#visible() ? coc#pum#confirm()
-                              \: "\<C-g>u\<CR>\<c-r>=coc#on_enter()\<CR>"
-
-function! CheckBackspace() abort
-  let col = col('.') - 1
-  return !col || getline('.')[col - 1]  =~# '\s'
-endfunction
+au VimEnter * RainbowParenthesesToggle
+au Syntax * RainbowParenthesesLoadRound
+au Syntax * RainbowParenthesesLoadSquare
+au Syntax * RainbowParenthesesLoadBraces
 "#,
         );
+
+        let _ = Command::new("vim")
+            .arg("+PlugInstall")
+            .arg("+qa")
+            .stdout(Stdio::inherit())
+            .stderr(Stdio::inherit())
+            .spawn()
+            .expect("vim plug install failed")
+            .wait();
     }
 }
 
