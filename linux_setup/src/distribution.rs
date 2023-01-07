@@ -413,7 +413,6 @@ impl Distribution {
                 None
             }
             "nano" => Option::from(vec!["nano"]),
-            "ncdu" => Option::from(vec!["ncdu"]),
             "node" => Option::from(vec!["nodejs", "npm"]),
             "okular" => {
                 if self.repository == "redhat" {

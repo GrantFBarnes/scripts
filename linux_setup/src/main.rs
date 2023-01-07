@@ -46,7 +46,7 @@ const CATEGORIES: [&str; 10] = [
     "Utilities",
 ];
 
-const ALL_PACKAGES: [Package; 102] = [
+const ALL_PACKAGES: [Package; 101] = [
     Package {
         display: "0 A.D.",
         key: "0ad",
@@ -480,12 +480,6 @@ const ALL_PACKAGES: [Package; 102] = [
         desktop_environment: "",
     },
     Package {
-        display: "ncdu - Disk Usage",
-        key: "ncdu",
-        category: "Server",
-        desktop_environment: "",
-    },
-    Package {
         display: "Node.js - JavaScript RE",
         key: "node",
         category: "Server",
@@ -789,6 +783,7 @@ fn pre_install(package: &str, distribution: &Distribution, info: &mut Info, meth
                         .arg("module")
                         .arg("enable")
                         .arg("nodejs:18")
+                        .arg("-y")
                         .stdout(Stdio::inherit())
                         .stderr(Stdio::inherit())
                         .spawn()
@@ -895,7 +890,6 @@ Plug 'davidhalter/jedi-vim'
 " Syntax
 Plug 'w0rp/ale'
 Plug 'valloric/youcompleteme'
-Plug 'neoclide/coc.nvim', {'branch': 'release'}
 Plug 'scrooloose/syntastic'
 Plug 'bronson/vim-trailing-whitespace'
 
@@ -918,23 +912,6 @@ au VimEnter * RainbowParenthesesToggle
 au Syntax * RainbowParenthesesLoadRound
 au Syntax * RainbowParenthesesLoadSquare
 au Syntax * RainbowParenthesesLoadBraces
-
-" Use tab for trigger completion with characters ahead and navigate.
-inoremap <silent><expr> <TAB>
-      \ pumvisible() ? "\<C-n>" :
-      \ <SID>check_back_space() ? "\<TAB>" :
-      \ coc#refresh()
-inoremap <expr><S-TAB> pumvisible() ? "\<C-p>" : "\<C-h>"
-
-function! s:check_back_space() abort
-  let col = col('.') - 1
-  return !col || getline('.')[col - 1]  =~# '\s'
-endfunction
-
-" Make <CR> auto-select the first completion item and notify coc.nvim to
-" format on enter, <cr> could be remapped by other vim plugin
-inoremap <silent><expr> <cr> pumvisible() ? coc#_select_confirm()
-                              \: "\<C-g>u\<CR>\<c-r>=coc#on_enter()\<CR>"
 "#,
                 );
 
