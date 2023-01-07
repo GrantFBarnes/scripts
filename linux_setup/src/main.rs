@@ -716,6 +716,19 @@ fn post_uninstall(package: &str, distribution: &Distribution, method: &str) {
                 }
             }
         }
+        "rust" => {
+            if method != "other" {
+                let _ = Command::new("sudo")
+                    .arg("rm")
+                    .arg("-r")
+                    .arg(format!("{}{}", &home_dir, "/.cargo/bin/rustup"))
+                    .stdout(Stdio::inherit())
+                    .stderr(Stdio::inherit())
+                    .spawn()
+                    .expect("remove rust failed")
+                    .wait();
+            }
+        }
         "vim" => {
             if method != "repository" {
                 let _ = Command::new("sudo")
@@ -735,7 +748,7 @@ fn post_uninstall(package: &str, distribution: &Distribution, method: &str) {
     }
 }
 
-fn pre_install(package: &str, distribution: &Distribution, method: &str) {
+fn pre_install(package: &str, distribution: &Distribution, info: &mut Info, method: &str) {
     match package {
         "code" => {
             if distribution.package_manager == "dnf" {
@@ -798,6 +811,16 @@ fn pre_install(package: &str, distribution: &Distribution, method: &str) {
                         .expect("enable pycharm repo failed")
                         .wait();
                 }
+            }
+        }
+        "rust" => {
+            if method == "other" {
+                distribution.install("curl", info);
+            }
+        }
+        "vim" => {
+            if method == "repository" {
+                distribution.install("curl", info);
             }
         }
         _ => (),
@@ -872,7 +895,7 @@ Plug 'davidhalter/jedi-vim'
 " Syntax
 Plug 'w0rp/ale'
 Plug 'valloric/youcompleteme'
-Plug 'neoclide/coc.nvim'
+Plug 'neoclide/coc.nvim', {'branch': 'release'}
 Plug 'scrooloose/syntastic'
 Plug 'bronson/vim-trailing-whitespace'
 
@@ -1029,7 +1052,7 @@ fn run_package_select(package: &str, distribution: &Distribution, info: &mut Inf
     }
     post_uninstall(package, distribution, options_value[selection]);
 
-    pre_install(package, distribution, options_value[selection]);
+    pre_install(package, distribution, info, options_value[selection]);
     match options_value[selection] {
         "repository" => distribution.install(package, info),
         "flatpak" => flatpak::install(package, distribution, info),
