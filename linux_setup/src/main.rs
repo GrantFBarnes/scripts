@@ -670,6 +670,31 @@ fn repository_setup(distribution: &Distribution, info: &mut Info) {
 
 fn pre_install(package: &str, distribution: &Distribution, method: &str) {
     match package {
+        "code" => {
+            if distribution.package_manager == "dnf" {
+                if method == "repository" {
+                    let _ = Command::new("sudo")
+                        .arg("rpm")
+                        .arg("--import")
+                        .arg("https://packages.microsoft.com/keys/microsoft.asc")
+                        .stdout(Stdio::inherit())
+                        .stderr(Stdio::inherit())
+                        .spawn()
+                        .expect("import microsoft package keys failed")
+                        .wait();
+
+                    let _ = fs::write(
+                        "/etc/yum.repos.d/vscode.repo",
+                        r#"[code]
+name=Visual Studio Code
+baseurl=https://packages.microsoft.com/yumrepos/vscode
+enabled=1
+gpgcheck=1
+gpgkey=https://packages.microsoft.com/keys/microsoft.asc"#,
+                    );
+                }
+            }
+        }
         "pycharm" => {
             if distribution.repository == "fedora" {
                 if method == "repository" {

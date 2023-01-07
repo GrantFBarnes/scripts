@@ -101,6 +101,12 @@ impl Distribution {
                 return Option::from(vec!["chromium"]);
             }
             "cockpit" => Option::from(vec!["cockpit"]),
+            "code" => {
+                if self.package_manager == "dnf" {
+                    return Option::from(vec!["code"]);
+                }
+                None
+            }
             "codium" => {
                 if self.package_manager == "pacman" {
                     return Option::from(vec!["code"]);
