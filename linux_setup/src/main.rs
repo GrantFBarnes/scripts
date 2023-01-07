@@ -695,6 +695,22 @@ gpgkey=https://packages.microsoft.com/keys/microsoft.asc"#,
                 }
             }
         }
+        "nodejs" => {
+            if distribution.package_manager == "dnf" {
+                if method == "repository" {
+                    let _ = Command::new("sudo")
+                        .arg("dnf")
+                        .arg("module")
+                        .arg("enable")
+                        .arg("nodejs:18")
+                        .stdout(Stdio::inherit())
+                        .stderr(Stdio::inherit())
+                        .spawn()
+                        .expect("enable nodejs module failed")
+                        .wait();
+                }
+            }
+        }
         "pycharm" => {
             if distribution.repository == "fedora" {
                 if method == "repository" {
