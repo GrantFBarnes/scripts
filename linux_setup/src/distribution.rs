@@ -430,6 +430,9 @@ impl Distribution {
                 if self.package_manager == "pacman" {
                     return Option::from(vec!["pycharm-community-edition"]);
                 }
+                if self.repository == "fedora" {
+                    return Option::from(vec!["pycharm-community"]);
+                }
                 None
             }
             "qtile" => {

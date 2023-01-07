@@ -73,22 +73,24 @@ pub fn uninstall(package: &str, info: &mut Info) {
     }
 }
 
-pub fn update() {
+pub fn update(info: &Info) {
     println!("Update other...");
 
     for pkg in PACKAGES {
-        match pkg {
-            "rust" => {
-                let _ = Command::new("rustup")
-                    .arg("self")
-                    .arg("update")
-                    .stdout(Stdio::inherit())
-                    .stderr(Stdio::inherit())
-                    .spawn()
-                    .expect("update rust failed")
-                    .wait();
+        if is_installed(pkg, info) {
+            match pkg {
+                "rust" => {
+                    let _ = Command::new("rustup")
+                        .arg("self")
+                        .arg("update")
+                        .stdout(Stdio::inherit())
+                        .stderr(Stdio::inherit())
+                        .spawn()
+                        .expect("update rust failed")
+                        .wait();
+                }
+                _ => (),
             }
-            _ => (),
         }
     }
 }

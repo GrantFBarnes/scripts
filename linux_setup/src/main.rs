@@ -661,52 +661,68 @@ const ALL_PACKAGES: [Package; 102] = [
     },
 ];
 
-fn environment_setup() {
+fn repository_setup(distribution: &Distribution, info: &mut Info) {
+    distribution.setup(info);
+    if info.has_flatpak {
+        flatpak::setup();
+    }
+}
+
+fn pre_install(package: &str, distribution: &Distribution, method: &str) {
+    match package {
+        "pycharm" => {
+            if distribution.repository == "fedora" {
+                if method == "repository" {
+                    let _ = Command::new("sudo")
+                        .arg("dnf")
+                        .arg("config-manager")
+                        .arg("--set-enabled")
+                        .arg("phracek-PyCharm")
+                        .stdout(Stdio::inherit())
+                        .stderr(Stdio::inherit())
+                        .spawn()
+                        .expect("enable pycharm repo failed")
+                        .wait();
+                }
+            }
+        }
+        _ => (),
+    }
+}
+
+fn post_install(package: &str, method: &str) {
     let home_dir: Result<String, VarError> = env::var("HOME");
-    if home_dir.is_ok() {
-        let home_dir: String = home_dir.unwrap();
+    if home_dir.is_err() {
+        return;
+    }
+    let home_dir: String = home_dir.unwrap();
 
-        let bashrc: String = format!("{}{}", &home_dir, "/.bashrc");
-        helper::append_to_file_if_not_found(
-            &bashrc,
-            "export EDITOR",
-            "export EDITOR=\"/usr/bin/vim\"\n",
-            false,
-        );
-        helper::append_to_file_if_not_found(
-            &bashrc,
-            "export GFB_MANAGER_SECRET",
-            "export GFB_MANAGER_SECRET=\"\"",
-            false,
-        );
-        helper::append_to_file_if_not_found(
-            &bashrc,
-            "export GFB_JWT_SECRET",
-            "export GFB_JWT_SECRET=\"\"",
-            false,
-        );
-        helper::append_to_file_if_not_found(
-            &bashrc,
-            "export GFB_SQL_HOST",
-            "export GFB_SQL_HOST=\"\"\n",
-            false,
-        );
-        helper::append_to_file_if_not_found(
-            &bashrc,
-            "export GFB_SQL_USER",
-            "export GFB_SQL_USER=\"\"\n",
-            false,
-        );
-        helper::append_to_file_if_not_found(
-            &bashrc,
-            "export GFB_SQL_PASSWORD",
-            "export GFB_SQL_PASSWORD=\"\"\n",
-            false,
-        );
+    match package {
+        "rust" => {
+            if method == "other" {
+                let _ = Command::new(format!("{}{}", home_dir, "/.cargo/bin/rustup"))
+                    .arg("component")
+                    .arg("add")
+                    .arg("rust-analyzer")
+                    .stdout(Stdio::inherit())
+                    .stderr(Stdio::inherit())
+                    .spawn()
+                    .expect("install rust analyzer failed")
+                    .wait();
+            }
+        }
+        "vim" => {
+            let bashrc: String = format!("{}{}", &home_dir, "/.bashrc");
+            helper::append_to_file_if_not_found(
+                &bashrc,
+                "export EDITOR",
+                "export EDITOR=\"/usr/bin/vim\"\n",
+                false,
+            );
 
-        let _ = fs::write(
-            format!("{}{}", &home_dir, "/.vimrc"),
-            r#"
+            let _ = fs::write(
+                format!("{}{}", &home_dir, "/.vimrc"),
+                r#"
 set nocompatible
 
 set encoding=utf-8
@@ -764,23 +780,18 @@ au Syntax * RainbowParenthesesLoadRound
 au Syntax * RainbowParenthesesLoadSquare
 au Syntax * RainbowParenthesesLoadBraces
 "#,
-        );
+            );
 
-        let _ = Command::new("vim")
-            .arg("+PlugInstall")
-            .arg("+qa")
-            .stdout(Stdio::inherit())
-            .stderr(Stdio::inherit())
-            .spawn()
-            .expect("vim plug install failed")
-            .wait();
-    }
-}
-
-fn repository_setup(distribution: &Distribution, info: &mut Info) {
-    distribution.setup(info);
-    if info.has_flatpak {
-        flatpak::setup();
+            let _ = Command::new("vim")
+                .arg("+PlugInstall")
+                .arg("+qa")
+                .stdout(Stdio::inherit())
+                .stderr(Stdio::inherit())
+                .spawn()
+                .expect("vim plug install failed")
+                .wait();
+        }
+        _ => (),
     }
 }
 
@@ -883,6 +894,7 @@ fn run_package_select(package: &str, distribution: &Distribution, info: &mut Inf
         other::uninstall(package, info);
     }
 
+    pre_install(package, distribution, options_value[selection]);
     match options_value[selection] {
         "repository" => distribution.install(package, info),
         "flatpak" => flatpak::install(package, distribution, info),
@@ -890,6 +902,7 @@ fn run_package_select(package: &str, distribution: &Distribution, info: &mut Inf
         "other" => other::install(package, info),
         _ => (),
     }
+    post_install(package, options_value[selection]);
 }
 
 fn run_category_select(
@@ -1032,7 +1045,7 @@ fn run_install_packages(start_idx: usize, distribution: &Distribution, info: &mu
 }
 
 fn run_menu(start_idx: usize, distribution: &Distribution, info: &mut Info) {
-    let mut options: Vec<&str> = vec!["Environment Setup", "Repository Setup"];
+    let mut options: Vec<&str> = vec!["Repository Setup"];
     if info.has_gnome {
         options.push("GNOME Setup");
     }
@@ -1058,7 +1071,6 @@ fn run_menu(start_idx: usize, distribution: &Distribution, info: &mut Info) {
     let selection: usize = selection.unwrap();
 
     match options[selection] {
-        "Environment Setup" => environment_setup(),
         "Repository Setup" => repository_setup(distribution, info),
         "GNOME Setup" => gnome::setup(distribution),
         "KDE Setup" => kde::setup(),
@@ -1070,7 +1082,7 @@ fn run_menu(start_idx: usize, distribution: &Distribution, info: &mut Info) {
             if info.has_snap {
                 snap::update();
             }
-            other::update();
+            other::update(info);
         }
         "Auto Remove Packages" => {
             distribution.auto_remove();
