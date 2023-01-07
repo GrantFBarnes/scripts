@@ -9,6 +9,7 @@ mod flatpak;
 mod gnome;
 mod helper;
 mod kde;
+mod other;
 mod snap;
 
 use crate::distribution::Distribution;
@@ -22,6 +23,7 @@ pub struct Info {
     repository_installed: Vec<String>,
     flatpak_installed: Vec<String>,
     snap_installed: Vec<String>,
+    other_installed: Vec<String>,
 }
 
 struct Package {
@@ -792,6 +794,9 @@ fn get_install_method(package: &str, distribution: &Distribution, info: &Info) -
     if snap::is_installed(package, info) {
         return helper::get_colored_string("Snap", "magenta");
     }
+    if other::is_installed(package, info) {
+        return helper::get_colored_string("Other", "yellow");
+    }
     return helper::get_colored_string("Uninstalled", "red");
 }
 
@@ -823,6 +828,11 @@ fn run_package_select(package: &str, distribution: &Distribution, info: &mut Inf
         }
         options_display.push(helper::get_colored_string(display, "magenta"));
         options_value.push("snap");
+    }
+
+    if other::is_available(package) {
+        options_display.push(helper::get_colored_string("Install Other", "yellow"));
+        options_value.push("other");
     }
 
     options_display.push(helper::get_colored_string("Uninstall", "red"));
@@ -869,10 +879,15 @@ fn run_package_select(package: &str, distribution: &Distribution, info: &mut Inf
         }
     }
 
+    if options_value[selection] != "other" {
+        other::uninstall(package, info);
+    }
+
     match options_value[selection] {
         "repository" => distribution.install(package, info),
         "flatpak" => flatpak::install(package, distribution, info),
         "snap" => snap::install(package, distribution, info),
+        "other" => other::install(package, info),
         _ => (),
     }
 }
@@ -897,6 +912,7 @@ fn run_category_select(
         if !distribution.is_available(pkg.key)
             && !flatpak::is_available(pkg.key)
             && !snap::is_available(pkg.key)
+            && !other::is_available(pkg.key)
         {
             continue;
         }
@@ -1054,6 +1070,7 @@ fn run_menu(start_idx: usize, distribution: &Distribution, info: &mut Info) {
             if info.has_snap {
                 snap::update();
             }
+            other::update();
         }
         "Auto Remove Packages" => {
             distribution.auto_remove();
@@ -1110,6 +1127,8 @@ fn main() {
         _ => (),
     }
 
+    let other_installed: Vec<String> = other::get_installed();
+
     let mut info: Info = Info {
         has_gnome,
         has_kde,
@@ -1118,6 +1137,7 @@ fn main() {
         repository_installed,
         flatpak_installed,
         snap_installed,
+        other_installed,
     };
     run_menu(0, &distribution, &mut info);
 }
