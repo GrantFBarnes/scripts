@@ -668,6 +668,73 @@ fn repository_setup(distribution: &Distribution, info: &mut Info) {
     }
 }
 
+fn post_uninstall(package: &str, distribution: &Distribution, method: &str) {
+    let home_dir: Result<String, VarError> = env::var("HOME");
+    if home_dir.is_err() {
+        return;
+    }
+    let home_dir: String = home_dir.unwrap();
+
+    match package {
+        "code" => {
+            if distribution.package_manager == "dnf" {
+                if method != "repository" {
+                    let _ = Command::new("sudo")
+                        .arg("dnf")
+                        .arg("config-manager")
+                        .arg("--set-disabled")
+                        .arg("code")
+                        .stdout(Stdio::inherit())
+                        .stderr(Stdio::inherit())
+                        .spawn()
+                        .expect("disable code repo failed")
+                        .wait();
+                    let _ = Command::new("sudo")
+                        .arg("rm")
+                        .arg("/etc/yum.repos.d/vscode.repo")
+                        .stdout(Stdio::inherit())
+                        .stderr(Stdio::inherit())
+                        .spawn()
+                        .expect("remove code repo failed")
+                        .wait();
+                }
+            }
+        }
+        "pycharm" => {
+            if distribution.repository == "fedora" {
+                if method != "repository" {
+                    let _ = Command::new("sudo")
+                        .arg("dnf")
+                        .arg("config-manager")
+                        .arg("--set-disabled")
+                        .arg("phracek-PyCharm")
+                        .stdout(Stdio::inherit())
+                        .stderr(Stdio::inherit())
+                        .spawn()
+                        .expect("disable pycharm repo failed")
+                        .wait();
+                }
+            }
+        }
+        "vim" => {
+            if method != "repository" {
+                let _ = Command::new("sudo")
+                    .arg("rm")
+                    .arg("-r")
+                    .arg(format!("{}{}", &home_dir, "/.vim"))
+                    .arg(format!("{}{}", &home_dir, "/.viminfo"))
+                    .arg(format!("{}{}", &home_dir, "/.vimrc"))
+                    .stdout(Stdio::inherit())
+                    .stderr(Stdio::inherit())
+                    .spawn()
+                    .expect("remove vim files failed")
+                    .wait();
+            }
+        }
+        _ => (),
+    }
+}
+
 fn pre_install(package: &str, distribution: &Distribution, method: &str) {
     match package {
         "code" => {
@@ -683,15 +750,21 @@ fn pre_install(package: &str, distribution: &Distribution, method: &str) {
                         .expect("import microsoft package keys failed")
                         .wait();
 
-                    let _ = fs::write(
-                        "/etc/yum.repos.d/vscode.repo",
-                        r#"[code]
-name=Visual Studio Code
-baseurl=https://packages.microsoft.com/yumrepos/vscode
-enabled=1
-gpgcheck=1
-gpgkey=https://packages.microsoft.com/keys/microsoft.asc"#,
-                    );
+                    let echo_cmd = Command::new("echo")
+                        .arg("-e")
+                        .arg("[code]\nname=Visual Studio Code\nbaseurl=https://packages.microsoft.com/yumrepos/vscode\nenabled=1\ngpgcheck=1\ngpgkey=https://packages.microsoft.com/keys/microsoft.asc")
+                        .stdout(Stdio::piped())
+                        .spawn()
+                        .unwrap();
+                    let _ = Command::new("sudo")
+                        .arg("tee")
+                        .arg("/etc/yum.repos.d/vscode.repo")
+                        .stdin(Stdio::from(echo_cmd.stdout.unwrap()))
+                        .stdout(Stdio::inherit())
+                        .stderr(Stdio::inherit())
+                        .spawn()
+                        .expect("add code repo failed")
+                        .wait();
                 }
             }
         }
@@ -753,17 +826,18 @@ fn post_install(package: &str, method: &str) {
             }
         }
         "vim" => {
-            let bashrc: String = format!("{}{}", &home_dir, "/.bashrc");
-            helper::append_to_file_if_not_found(
-                &bashrc,
-                "export EDITOR",
-                "export EDITOR=\"/usr/bin/vim\"\n",
-                false,
-            );
+            if method == "repository" {
+                let bashrc: String = format!("{}{}", &home_dir, "/.bashrc");
+                helper::append_to_file_if_not_found(
+                    &bashrc,
+                    "export EDITOR",
+                    "export EDITOR=\"/usr/bin/vim\"\n",
+                    false,
+                );
 
-            let _ = fs::write(
-                format!("{}{}", &home_dir, "/.vimrc"),
-                r#"
+                let _ = fs::write(
+                    format!("{}{}", &home_dir, "/.vimrc"),
+                    r#"
 set nocompatible
 
 set encoding=utf-8
@@ -839,16 +913,17 @@ endfunction
 inoremap <silent><expr> <cr> pumvisible() ? coc#_select_confirm()
                               \: "\<C-g>u\<CR>\<c-r>=coc#on_enter()\<CR>"
 "#,
-            );
+                );
 
-            let _ = Command::new("vim")
-                .arg("+PlugInstall")
-                .arg("+qa")
-                .stdout(Stdio::inherit())
-                .stderr(Stdio::inherit())
-                .spawn()
-                .expect("vim plug install failed")
-                .wait();
+                let _ = Command::new("vim")
+                    .arg("+PlugInstall")
+                    .arg("+qa")
+                    .stdout(Stdio::inherit())
+                    .stderr(Stdio::inherit())
+                    .spawn()
+                    .expect("vim plug install failed")
+                    .wait();
+            }
         }
         _ => (),
     }
@@ -952,6 +1027,7 @@ fn run_package_select(package: &str, distribution: &Distribution, info: &mut Inf
     if options_value[selection] != "other" {
         other::uninstall(package, info);
     }
+    post_uninstall(package, distribution, options_value[selection]);
 
     pre_install(package, distribution, options_value[selection]);
     match options_value[selection] {
