@@ -1,4 +1,5 @@
 use chrono::prelude::Local;
+use chrono::{Duration, NaiveDateTime, ParseResult};
 use regex::Regex;
 use std::collections::HashSet;
 use std::env::VarError;
@@ -102,8 +103,79 @@ fn remove_unchanged_backups(backup_files: Vec<String>, db_backup_dir: &String) {
     }
 }
 
+fn remove_old_backups(backup_files: Vec<String>, db_backup_dir: &String) {
+    let mut backups_to_remove: HashSet<String> = HashSet::new();
+
+    let mut days_backed_up: HashSet<i64> = HashSet::new();
+    let mut weeks_backed_up: HashSet<i64> = HashSet::new();
+    let mut months_backed_up: HashSet<i64> = HashSet::new();
+
+    let fmt: &str = "%Y-%m-%d %H:%M:%S";
+    let now: String = Local::now().format(fmt).to_string();
+    let now: ParseResult<NaiveDateTime> = NaiveDateTime::parse_from_str(&now, fmt);
+    if now.is_err() {
+        return;
+    }
+    let now: NaiveDateTime = now.unwrap();
+
+    for file in &backup_files {
+        let file_date: ParseResult<NaiveDateTime> = NaiveDateTime::parse_from_str(
+            &format!(
+                "{}-{}-{} {}:{}:{}",
+                &file[0..4],
+                &file[4..6],
+                &file[6..8],
+                &file[9..11],
+                &file[11..13],
+                &file[13..15]
+            ),
+            fmt,
+        );
+        if file_date.is_err() {
+            continue;
+        }
+        let file_date: NaiveDateTime = file_date.unwrap();
+
+        let diff: Duration = now - file_date;
+
+        let days_old: i64 = diff.num_days();
+        if days_old == 0 {
+            continue;
+        }
+        if days_backed_up.contains(&days_old) {
+            backups_to_remove.insert(file.to_string());
+            continue;
+        }
+        days_backed_up.insert(days_old);
+
+        let weeks_old: i64 = diff.num_weeks();
+        if weeks_old == 0 {
+            continue;
+        }
+        if weeks_backed_up.contains(&weeks_old) {
+            backups_to_remove.insert(file.to_string());
+            continue;
+        }
+        weeks_backed_up.insert(weeks_old);
+
+        let months_old: i64 = diff.num_weeks() / 4;
+        if months_old == 0 {
+            continue;
+        }
+        if months_backed_up.contains(&months_old) {
+            backups_to_remove.insert(file.to_string());
+            continue;
+        }
+        months_backed_up.insert(months_old);
+    }
+
+    for file in backups_to_remove {
+        remove_file(&format!("{}/{}", db_backup_dir, file));
+    }
+}
+
 fn remove_excess_backups(backup_files: Vec<String>, db_backup_dir: &String) {
-    const COUNT: usize = 100;
+    const COUNT: usize = 50;
     if backup_files.len() > COUNT {
         let files_to_remove: &[String] = &backup_files[COUNT..];
         for file in files_to_remove {
@@ -144,6 +216,11 @@ fn main() {
         let backup_files: Vec<String> = get_backup_files(&db_backup_dir);
         if backup_files.len() > 0 {
             remove_unchanged_backups(backup_files, &db_backup_dir);
+        }
+
+        let backup_files: Vec<String> = get_backup_files(&db_backup_dir);
+        if backup_files.len() > 0 {
+            remove_old_backups(backup_files, &db_backup_dir);
         }
 
         let backup_files: Vec<String> = get_backup_files(&db_backup_dir);
