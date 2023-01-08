@@ -885,11 +885,9 @@ call plug#begin()
 
 " Languages
 Plug 'rust-lang/rust.vim'
-Plug 'davidhalter/jedi-vim'
 
 " Syntax
 Plug 'w0rp/ale'
-Plug 'valloric/youcompleteme'
 Plug 'scrooloose/syntastic'
 Plug 'bronson/vim-trailing-whitespace'
 

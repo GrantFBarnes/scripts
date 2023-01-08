@@ -98,7 +98,7 @@ fn get_directory_sizes(path: &String) -> Option<HashMap<String, u64>> {
             continue;
         }
         let entry_path: &str = entry_path.unwrap();
-        let entry_path: String = entry_path.replace(path, "");
+        let entry_path: String = entry_path.replacen(path, "", 1);
 
         let entry_size: u64 = get_entry_size(&entry);
 
