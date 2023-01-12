@@ -56,6 +56,30 @@ pub fn get_package(package: &str) -> Option<Snap> {
             is_classic: false,
             channel: "",
         }),
+        "dotnet-runtime-6" => Option::from(Snap {
+            name: "dotnet-runtime-60",
+            is_official: true,
+            is_classic: false,
+            channel: "",
+        }),
+        "dotnet-sdk-6" => Option::from(Snap {
+            name: "dotnet-sdk",
+            is_official: true,
+            is_classic: true,
+            channel: "6.0/stable",
+        }),
+        "dotnet-runtime-7" => Option::from(Snap {
+            name: "dotnet-runtime-70",
+            is_official: true,
+            is_classic: false,
+            channel: "",
+        }),
+        "dotnet-sdk-7" => Option::from(Snap {
+            name: "dotnet-sdk",
+            is_official: true,
+            is_classic: true,
+            channel: "7.0/stable",
+        }),
         "eog" => Option::from(Snap {
             name: "eog",
             is_official: true,

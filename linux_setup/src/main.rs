@@ -46,7 +46,7 @@ const CATEGORIES: [&str; 10] = [
     "Utilities",
 ];
 
-const ALL_PACKAGES: [Package; 101] = [
+const ALL_PACKAGES: [Package; 105] = [
     Package {
         display: "0 A.D.",
         key: "0ad",
@@ -111,6 +111,30 @@ const ALL_PACKAGES: [Package; 101] = [
         display: "Discord",
         key: "discord",
         category: "Communication",
+        desktop_environment: "",
+    },
+    Package {
+        display: "dotnet - C# runtime 6.0 LTS",
+        key: "dotnet-runtime-6",
+        category: "Server",
+        desktop_environment: "",
+    },
+    Package {
+        display: "dotnet - C# SDK 6.0 LTS",
+        key: "dotnet-sdk-6",
+        category: "Server",
+        desktop_environment: "",
+    },
+    Package {
+        display: "dotnet - C# runtime 7.0",
+        key: "dotnet-runtime-7",
+        category: "Server",
+        desktop_environment: "",
+    },
+    Package {
+        display: "dotnet - C# SDK 7.0",
+        key: "dotnet-sdk-7",
+        category: "Server",
         desktop_environment: "",
     },
     Package {

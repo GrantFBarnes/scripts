@@ -1,7 +1,7 @@
 use dialoguer::Confirm;
 use std::fs;
 use std::process::{Command, Stdio};
-use std::str::Split;
+use std::str::{Split, SplitWhitespace};
 
 use crate::flatpak;
 use crate::helper;
@@ -125,6 +125,48 @@ impl Distribution {
             "discord" => {
                 if self.package_manager == "pacman" {
                     return Option::from(vec!["discord"]);
+                }
+                None
+            }
+            "dotnet-runtime-6" => {
+                if self.package_manager == "dnf" {
+                    return Option::from(vec!["dotnet-runtime-6.0"]);
+                }
+                if self.package_manager == "pacman" {
+                    return Option::from(vec!["dotnet-runtime-6.0"]);
+                }
+                if self.repository == "ubuntu" {
+                    return Option::from(vec!["dotnet-runtime-6.0"]);
+                }
+                None
+            }
+            "dotnet-sdk-6" => {
+                if self.package_manager == "dnf" {
+                    return Option::from(vec!["dotnet-sdk-6.0"]);
+                }
+                if self.package_manager == "pacman" {
+                    return Option::from(vec!["dotnet-sdk-6.0"]);
+                }
+                if self.repository == "ubuntu" {
+                    return Option::from(vec!["dotnet6"]);
+                }
+                None
+            }
+            "dotnet-runtime-7" => {
+                if self.package_manager == "pacman" {
+                    return Option::from(vec!["dotnet-runtime"]);
+                }
+                if self.repository == "redhat" {
+                    return Option::from(vec!["dotnet-runtime-7.0"]);
+                }
+                None
+            }
+            "dotnet-sdk-7" => {
+                if self.package_manager == "pacman" {
+                    return Option::from(vec!["dotnet-sdk"]);
+                }
+                if self.repository == "redhat" {
+                    return Option::from(vec!["dotnet-sdk-7.0"]);
                 }
                 None
             }
@@ -842,9 +884,14 @@ impl Distribution {
                         package = columns[0].to_owned();
                     }
                     "dnf" => {
-                        let columns: Split<&str> = line.split(".");
+                        let columns: SplitWhitespace = line.split_whitespace();
                         let columns: Vec<&str> = columns.collect::<Vec<&str>>();
-                        package = columns[0].to_owned();
+                        let full_package: String = columns[0].to_owned();
+                        let full_package_split: Option<(&str, &str)> =
+                            full_package.rsplit_once(".");
+                        if full_package_split.is_some() {
+                            package = full_package_split.unwrap().0.to_owned();
+                        }
                     }
                     "pacman" => {
                         let columns: Split<&str> = line.split(" ");
