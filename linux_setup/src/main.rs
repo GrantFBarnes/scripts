@@ -717,6 +717,18 @@ fn post_uninstall(package: &str, distribution: &Distribution, method: &str) {
                         .wait();
                 }
             }
+            if method == "uninstall" {
+                let _ = Command::new("sudo")
+                    .arg("rm")
+                    .arg("-r")
+                    .arg(format!("{}{}", &home_dir, "/.vscode"))
+                    .arg(format!("{}{}", &home_dir, "/.config/Code"))
+                    .stdout(Stdio::inherit())
+                    .stderr(Stdio::inherit())
+                    .spawn()
+                    .expect("remove code files failed")
+                    .wait();
+            }
         }
         "pycharm" => {
             if distribution.repository == "fedora" {
@@ -854,6 +866,59 @@ fn post_install(package: &str, method: &str) {
     let home_dir: String = home_dir.unwrap();
 
     match package {
+        "code" => {
+            if method != "uninstall" {
+                let extensions: Vec<&str> = Vec::from([
+                    "esbenp.prettier-vscode",
+                    "rust-lang.rust-analyzer",
+                    "vscodevim.vim",
+                ]);
+                for ext in extensions {
+                    let _ = Command::new("code")
+                        .arg("--install-extension")
+                        .arg(ext)
+                        .stdout(Stdio::inherit())
+                        .stderr(Stdio::inherit())
+                        .spawn()
+                        .expect("install code extension failed")
+                        .wait();
+                }
+
+                let _ = fs::write(
+                    format!("{}{}", &home_dir, "/.config/Code/User/settings.json"),
+                    r#"
+{
+  "telemetry.telemetryLevel": "off",
+  "editor.formatOnSave": true,
+  "editor.rulers": [80, 160],
+  "workbench.startupEditor": "none",
+  "vim.useCtrlKeys": false,
+  "[css]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[scss]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[html]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[json]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[jsonc]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  }
+}
+"#,
+                );
+            }
+        }
         "rust" => {
             if method == "other" {
                 let _ = Command::new(format!("{}{}", home_dir, "/.cargo/bin/rustup"))
@@ -1019,41 +1084,42 @@ fn run_package_select(package: &str, distribution: &Distribution, info: &mut Inf
         return;
     }
     let selection: usize = selection.unwrap();
+    let method: &str = options_value[selection];
 
-    if options_value[selection] == "cancel" {
+    if method == "cancel" {
         return;
     }
 
-    if options_value[selection] != "repository" {
+    if method != "repository" {
         distribution.uninstall(package, info);
     }
 
-    if options_value[selection] != "flatpak" {
+    if method != "flatpak" {
         if info.has_flatpak {
             flatpak::uninstall(package, info);
         }
     }
 
-    if options_value[selection] != "snap" {
+    if method != "snap" {
         if info.has_snap {
             snap::uninstall(package, info);
         }
     }
 
-    if options_value[selection] != "other" {
+    if method != "other" {
         other::uninstall(package, info);
     }
-    post_uninstall(package, distribution, options_value[selection]);
+    post_uninstall(package, distribution, method);
 
-    pre_install(package, distribution, info, options_value[selection]);
-    match options_value[selection] {
+    pre_install(package, distribution, info, method);
+    match method {
         "repository" => distribution.install(package, info),
         "flatpak" => flatpak::install(package, distribution, info),
         "snap" => snap::install(package, distribution, info),
         "other" => other::install(package, info),
         _ => (),
     }
-    post_install(package, options_value[selection]);
+    post_install(package, method);
 }
 
 fn run_category_select(
