@@ -888,7 +888,6 @@ set noswapfile
 set nobackup
 set nowritebackup
 
-set mouse=a
 set updatetime=300
 set scrolloff=10
 set number
@@ -919,21 +918,16 @@ Plug 'bronson/vim-trailing-whitespace'
 Plug 'scrooloose/nerdtree'
 Plug 'kien/ctrlp.vim'
 Plug 'vim-airline/vim-airline'
-Plug 'kien/rainbow_parentheses.vim'
 Plug 'airblade/vim-gitgutter'
 
 call plug#end()
 
 let g:rustfmt_autosave = 1
+let g:ale_completion_enabled = 1
 let g:ale_linters = { "rust": ["analyzer"] }
 let g:ale_fixers = { "rust": ["rustfmt"] }
 
 nnoremap <C-n> :NERDTreeToggle<CR>
-
-au VimEnter * RainbowParenthesesToggle
-au Syntax * RainbowParenthesesLoadRound
-au Syntax * RainbowParenthesesLoadSquare
-au Syntax * RainbowParenthesesLoadBraces
 "#,
                 );
 
