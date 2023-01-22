@@ -81,27 +81,24 @@ fn get_backup_files(path: &String) -> Vec<String> {
     backup_files
 }
 
-fn remove_unchanged_backups(backup_files: Vec<String>, db_backup_dir: &String) {
-    let mut backups_to_remove: HashSet<String> = HashSet::new();
-    for i in 0..backup_files.len() - 1 {
-        for j in i + 1..backup_files.len() {
-            let file1: String = format!("{}/{}", db_backup_dir, &backup_files[i]);
-            let file2: String = format!("{}/{}", db_backup_dir, &backup_files[j]);
-            let diff: Option<String> = get_file_diff(&file1, &file2);
-            if diff.is_some() {
-                let diff: String = diff.unwrap();
-                let lines: Vec<&str> = diff.split("\n").collect::<Vec<&str>>();
-                if lines.len() <= 5 {
-                    // remove the newer of the two files
-                    backups_to_remove.insert(file1);
-                }
+fn remove_latest_backup(backup_files: Vec<String>, db_backup_dir: &String) -> bool {
+    let latest: Option<&String> = backup_files.get(0);
+    let last: Option<&String> = backup_files.get(1);
+    if latest.is_some() && last.is_some() {
+        let latest: String = format!("{}/{}", db_backup_dir, latest.unwrap());
+        let last: String = format!("{}/{}", db_backup_dir, last.unwrap());
+
+        let diff: Option<String> = get_file_diff(&latest, &last);
+        if diff.is_some() {
+            let diff: String = diff.unwrap();
+            let lines: Vec<&str> = diff.split("\n").collect();
+            if lines.len() <= 5 {
+                remove_file(&latest);
+                return true;
             }
         }
     }
-
-    for file in backups_to_remove {
-        remove_file(&file);
-    }
+    false
 }
 
 fn remove_old_backups(backup_files: Vec<String>, db_backup_dir: &String) {
@@ -140,7 +137,7 @@ fn remove_old_backups(backup_files: Vec<String>, db_backup_dir: &String) {
         let diff: Duration = now - file_date;
 
         let days_old: i64 = diff.num_days();
-        if days_old < 5 {
+        if days_old < 7 {
             continue;
         }
         if days_backed_up.contains(&days_old) {
@@ -150,7 +147,7 @@ fn remove_old_backups(backup_files: Vec<String>, db_backup_dir: &String) {
         days_backed_up.insert(days_old);
 
         let weeks_old: i64 = diff.num_weeks();
-        if weeks_old < 5 {
+        if weeks_old < 4 {
             continue;
         }
         if weeks_backed_up.contains(&weeks_old) {
@@ -160,7 +157,7 @@ fn remove_old_backups(backup_files: Vec<String>, db_backup_dir: &String) {
         weeks_backed_up.insert(weeks_old);
 
         let months_old: i64 = diff.num_weeks() / 4;
-        if months_old < 5 {
+        if months_old < 6 {
             continue;
         }
         if months_backed_up.contains(&months_old) {
@@ -176,7 +173,7 @@ fn remove_old_backups(backup_files: Vec<String>, db_backup_dir: &String) {
 }
 
 fn remove_excess_backups(backup_files: Vec<String>, db_backup_dir: &String) {
-    const COUNT: usize = 50;
+    const COUNT: usize = 100;
     if backup_files.len() > COUNT {
         let files_to_remove: &[String] = &backup_files[COUNT..];
         for file in files_to_remove {
@@ -216,7 +213,9 @@ fn main() {
 
         let backup_files: Vec<String> = get_backup_files(&db_backup_dir);
         if backup_files.len() > 0 {
-            remove_unchanged_backups(backup_files, &db_backup_dir);
+            if remove_latest_backup(backup_files, &db_backup_dir) {
+                continue;
+            }
         }
 
         let backup_files: Vec<String> = get_backup_files(&db_backup_dir);
