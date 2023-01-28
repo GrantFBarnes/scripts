@@ -46,7 +46,7 @@ const CATEGORIES: [&str; 10] = [
     "Utilities",
 ];
 
-const ALL_PACKAGES: [Package; 105] = [
+const ALL_PACKAGES: [Package; 107] = [
     Package {
         display: "0 A.D.",
         key: "0ad",
@@ -189,6 +189,12 @@ const ALL_PACKAGES: [Package; 105] = [
         display: "Firefox ESR",
         key: "firefox-esr",
         category: "Browsers",
+        desktop_environment: "",
+    },
+    Package {
+        display: "Flutter",
+        key: "flutter",
+        category: "Server",
         desktop_environment: "",
     },
     Package {
@@ -570,6 +576,12 @@ const ALL_PACKAGES: [Package; 105] = [
         desktop_environment: "",
     },
     Package {
+        display: "Snap",
+        key: "snapd",
+        category: "Server",
+        desktop_environment: "",
+    },
+    Package {
         display: "Snap Store",
         key: "snap-store",
         category: "Software",
@@ -858,7 +870,7 @@ fn pre_install(package: &str, distribution: &Distribution, info: &mut Info, meth
     }
 }
 
-fn post_install(package: &str, method: &str) {
+fn post_install(package: &str, distribution: &Distribution, method: &str) {
     let home_dir: Result<String, VarError> = env::var("HOME");
     if home_dir.is_err() {
         return;
@@ -930,6 +942,11 @@ fn post_install(package: &str, method: &str) {
                     .spawn()
                     .expect("install rust analyzer failed")
                     .wait();
+            }
+        }
+        "snapd" => {
+            if method == "repository" {
+                distribution.setup_snap();
             }
         }
         "vim" => {
@@ -1122,7 +1139,7 @@ fn run_package_select(package: &str, distribution: &Distribution, info: &mut Inf
         "other" => other::install(package, info),
         _ => (),
     }
-    post_install(package, method);
+    post_install(package, distribution, method);
 }
 
 fn run_category_select(

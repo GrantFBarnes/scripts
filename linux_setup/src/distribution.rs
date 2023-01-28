@@ -818,32 +818,36 @@ impl Distribution {
         }
     }
 
+    pub fn setup_snap(&self) {
+        if self.package_manager == "dnf" {
+            let _ = Command::new("sudo")
+                .arg("systemctl")
+                .arg("enable")
+                .arg("--now")
+                .arg("snapd.socket")
+                .stdout(Stdio::inherit())
+                .stderr(Stdio::inherit())
+                .spawn()
+                .expect("start snap failed")
+                .wait();
+
+            let _ = Command::new("sudo")
+                .arg("ln")
+                .arg("-s")
+                .arg("/var/lib/snapd/snap")
+                .arg("/snap")
+                .stdout(Stdio::inherit())
+                .stderr(Stdio::inherit())
+                .spawn()
+                .expect("link snap failed")
+                .wait();
+        }
+    }
+
     pub fn install_snap(&self, info: &mut Info) {
         if !info.has_snap {
             self.install("snapd", info);
-            if self.package_manager == "dnf" {
-                let _ = Command::new("sudo")
-                    .arg("systemctl")
-                    .arg("enable")
-                    .arg("--now")
-                    .arg("snapd.socket")
-                    .stdout(Stdio::inherit())
-                    .stderr(Stdio::inherit())
-                    .spawn()
-                    .expect("start snap failed")
-                    .wait();
-
-                let _ = Command::new("sudo")
-                    .arg("ln")
-                    .arg("-s")
-                    .arg("/var/lib/snapd/snap")
-                    .arg("/snap")
-                    .stdout(Stdio::inherit())
-                    .stderr(Stdio::inherit())
-                    .spawn()
-                    .expect("link snap failed")
-                    .wait();
-            }
+            self.setup_snap();
         }
     }
 

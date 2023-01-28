@@ -98,6 +98,12 @@ pub fn get_package(package: &str) -> Option<Snap> {
             is_classic: false,
             channel: "esr-stable",
         }),
+        "flutter" => Option::from(Snap {
+            name: "flutter",
+            is_official: true,
+            is_classic: true,
+            channel: "",
+        }),
         "gedit" => Option::from(Snap {
             name: "gedit",
             is_official: true,
