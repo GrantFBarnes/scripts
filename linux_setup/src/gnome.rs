@@ -440,6 +440,7 @@ pub fn setup(distribution: &Distribution) {
             'electron18.desktop',
             'electron19.desktop',
             'electron.desktop',
+            'flutter_openurl.desktop',
             'setroubleshoot.desktop',
             'org.cockpit_project.CockpitClient.desktop',
             'org.gnome.font-viewer.desktop',
