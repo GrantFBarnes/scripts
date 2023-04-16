@@ -591,7 +591,7 @@ impl Distribution {
                 }
                 if self.repository == "ubuntu" {
                     return Option::from(vec![
-                        "vim-enhanced",
+                        "vim",
                         "vim-ale",
                         "vim-syntastic",
                         "vim-ctrlp",
