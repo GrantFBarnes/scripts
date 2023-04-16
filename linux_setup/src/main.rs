@@ -861,11 +861,6 @@ fn pre_install(package: &str, distribution: &Distribution, info: &mut Info, meth
                 distribution.install("curl", info);
             }
         }
-        "vim" => {
-            if method == "repository" {
-                distribution.install("curl", info);
-            }
-        }
         _ => (),
     }
 }
@@ -979,32 +974,6 @@ set incsearch hlsearch
 syntax on
 filetype plugin indent on
 
-let data_dir = has('nvim') ? stdpath('data') . '/site' : '~/.vim'
-if empty(glob(data_dir . '/autoload/plug.vim'))
-  silent execute '!curl -fLo '.data_dir.'/autoload/plug.vim --create-dirs  https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
-  autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
-endif
-
-call plug#begin()
-" See more at https://vimawesome.com/
-
-" Languages
-Plug 'rust-lang/rust.vim'
-
-" Syntax
-Plug 'w0rp/ale'
-Plug 'scrooloose/syntastic'
-Plug 'bronson/vim-trailing-whitespace'
-
-" Features
-Plug 'scrooloose/nerdtree'
-Plug 'kien/ctrlp.vim'
-Plug 'vim-airline/vim-airline'
-Plug 'airblade/vim-gitgutter'
-
-call plug#end()
-
-let g:rustfmt_autosave = 1
 let g:ale_completion_enabled = 1
 let g:ale_linters = { "rust": ["analyzer"] }
 let g:ale_fixers = { "rust": ["rustfmt"] }
