@@ -984,15 +984,6 @@ inoremap <silent><expr> <Tab> pumvisible() ? "\<C-n>" : "\<TAB>"
 inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-n>" : "\<S-TAB>"
 "#,
                 );
-
-                let _ = Command::new("vim")
-                    .arg("+PlugInstall")
-                    .arg("+qa")
-                    .stdout(Stdio::inherit())
-                    .stderr(Stdio::inherit())
-                    .spawn()
-                    .expect("vim plug install failed")
-                    .wait();
             }
         }
         _ => (),

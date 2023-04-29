@@ -32,7 +32,7 @@ impl Distribution {
             {
                 match self.repository {
                     "fedora" => {
-                        self.install("https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-37.noarch.rpm",info);
+                        self.install("https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-38.noarch.rpm",info);
                     }
                     "redhat" => {
                         self.install("https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm",info);
@@ -57,7 +57,7 @@ impl Distribution {
                 {
                     match self.repository {
                         "fedora" => {
-                            self.install("https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-37.noarch.rpm",info);
+                            self.install("https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-38.noarch.rpm",info);
                         }
                         "redhat" => {
                             self.install("https://download1.rpmfusion.org/nonfree/el/rpmfusion-nonfree-release-9.noarch.rpm",info);
@@ -254,12 +254,7 @@ impl Distribution {
                 }
                 Option::from(vec!["gnome-clocks"])
             }
-            "gnome-connections" => {
-                if self.repository == "debian" {
-                    return None;
-                }
-                Option::from(vec!["gnome-connections"])
-            }
+            "gnome-connections" => Option::from(vec!["gnome-connections"]),
             "gnome-contacts" => {
                 if self.repository == "redhat" {
                     return None;
@@ -296,7 +291,7 @@ impl Distribution {
             }
             "gnome-photos" => Option::from(vec!["gnome-photos"]),
             "gnome-shell-extension-manager" => {
-                if self.name == "ubuntu" {
+                if self.package_manager == "apt" {
                     return Option::from(vec!["gnome-shell-extension-manager"]);
                 }
                 None
@@ -327,7 +322,7 @@ impl Distribution {
             }
             "gnome-system-monitor" => Option::from(vec!["gnome-system-monitor"]),
             "gnome-text-editor" => {
-                if self.repository == "redhat" || self.repository == "debian" {
+                if self.repository == "redhat" {
                     return None;
                 }
                 Option::from(vec!["gnome-text-editor"])
@@ -508,12 +503,7 @@ impl Distribution {
             }
             "rust" => {
                 if self.package_manager == "apt" {
-                    if self.repository == "ubuntu" {
-                        return Option::from(vec!["rustc", "rustfmt", "cargo"]);
-                    }
-                    if self.repository == "debian" {
-                        return Option::from(vec!["rustc", "cargo"]);
-                    }
+                    return Option::from(vec!["rustc", "rustfmt", "cargo"]);
                 }
                 if self.package_manager == "dnf" {
                     if self.repository == "fedora" {
@@ -589,7 +579,7 @@ impl Distribution {
                 if self.package_manager == "dnf" {
                     return Option::from(vec!["vim-enhanced"]);
                 }
-                if self.repository == "ubuntu" {
+                if self.package_manager == "apt" {
                     return Option::from(vec![
                         "vim",
                         "vim-ale",
@@ -609,12 +599,7 @@ impl Distribution {
                 }
                 None
             }
-            "yt-dlp" => {
-                if self.repository == "debian" {
-                    return None;
-                }
-                Option::from(vec!["yt-dlp"])
-            }
+            "yt-dlp" => Option::from(vec!["yt-dlp"]),
             x if x.contains("http") => Option::from(vec![package]),
             _ => None,
         }
