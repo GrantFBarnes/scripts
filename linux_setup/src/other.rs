@@ -86,6 +86,15 @@ pub fn update(info: &Info) {
                         .stdout(Stdio::inherit())
                         .stderr(Stdio::inherit())
                         .spawn()
+                        .expect("update rustup failed")
+                        .wait();
+
+                    let _ = Command::new("rustup")
+                        .arg("update")
+                        .arg("stable")
+                        .stdout(Stdio::inherit())
+                        .stderr(Stdio::inherit())
+                        .spawn()
                         .expect("update rust failed")
                         .wait();
                 }
