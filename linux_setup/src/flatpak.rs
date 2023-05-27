@@ -29,7 +29,6 @@ fn get_package(package: &str) -> Option<&str> {
         "blender" => Option::from("org.blender.Blender"),
         "cheese" => Option::from("org.gnome.Cheese"),
         "chromium" => Option::from("org.chromium.Chromium"),
-        "codium" => Option::from("com.vscodium.codium"),
         "deja-dup" => Option::from("org.gnome.DejaDup"),
         "discord" => Option::from("com.discordapp.Discord"),
         "elisa" => Option::from("org.kde.elisa"),
@@ -99,7 +98,7 @@ pub fn is_installed(package: &str, info: &Info) -> bool {
 }
 
 pub fn install(package: &str, distribution: &Distribution, info: &mut Info) {
-    distribution.install_flatpak(info);
+    distribution.install("flatpak", info);
 
     let pkg: Option<&str> = get_package(package);
     if pkg.is_some() {

@@ -44,12 +44,6 @@ pub fn get_package(package: &str) -> Option<Snap> {
             is_classic: true,
             channel: "",
         }),
-        "codium" => Option::from(Snap {
-            name: "codium",
-            is_official: false,
-            is_classic: true,
-            channel: "",
-        }),
         "discord" => Option::from(Snap {
             name: "discord",
             is_official: false,
@@ -273,7 +267,7 @@ pub fn is_installed(package: &str, info: &Info) -> bool {
 }
 
 pub fn install(package: &str, distribution: &Distribution, info: &mut Info) {
-    distribution.install_snap(info);
+    distribution.install("snap", info);
 
     let pkg: Option<Snap> = get_package(package);
     if pkg.is_some() {

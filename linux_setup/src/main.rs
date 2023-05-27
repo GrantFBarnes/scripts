@@ -216,6 +216,12 @@ const ALL_PACKAGES: [Package; 107] = [
         desktop_environment: "",
     },
     Package {
+        display: "GParted",
+        key: "gparted",
+        category: "Utilities",
+        desktop_environment: "gnome",
+    },
+    Package {
         display: "Gnome 2048",
         key: "gnome-2048",
         category: "Games",
@@ -672,12 +678,6 @@ const ALL_PACKAGES: [Package; 107] = [
         desktop_environment: "",
     },
     Package {
-        display: "VS Codium",
-        key: "codium",
-        category: "Editors",
-        desktop_environment: "",
-    },
-    Package {
         display: "Xonotic",
         key: "xonotic",
         category: "Games",
@@ -877,6 +877,8 @@ fn post_install(package: &str, distribution: &Distribution, method: &str) {
             if method != "uninstall" {
                 let extensions: Vec<&str> = Vec::from([
                     "esbenp.prettier-vscode",
+                    "James-Yu.latex-workshop",
+                    "ms-dotnettools.csharp",
                     "rust-lang.rust-analyzer",
                     "vscodevim.vim",
                 ]);
@@ -925,6 +927,12 @@ fn post_install(package: &str, distribution: &Distribution, method: &str) {
 "#,
                 );
             }
+        }
+        "intellij" | "pycharm" => {
+            let _ = fs::write(
+                format!("{}{}", &home_dir, "/.ideavimrc"),
+                "sethandler a:ide",
+            );
         }
         "rust" => {
             if method == "other" {

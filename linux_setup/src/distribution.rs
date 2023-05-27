@@ -3,7 +3,6 @@ use std::fs;
 use std::process::{Command, Stdio};
 use std::str::{Split, SplitWhitespace};
 
-use crate::flatpak;
 use crate::helper;
 use crate::Info;
 
@@ -105,9 +104,6 @@ impl Distribution {
                 if self.package_manager == "dnf" {
                     return Option::from(vec!["code"]);
                 }
-                None
-            }
-            "codium" => {
                 if self.package_manager == "pacman" {
                     return Option::from(vec!["code"]);
                 }
@@ -159,6 +155,9 @@ impl Distribution {
                 if self.repository == "redhat" {
                     return Option::from(vec!["dotnet-runtime-7.0"]);
                 }
+                if self.repository == "ubuntu" {
+                    return Option::from(vec!["dotnet-runtime-7.0"]);
+                }
                 None
             }
             "dotnet-sdk-7" => {
@@ -167,6 +166,9 @@ impl Distribution {
                 }
                 if self.repository == "redhat" {
                     return Option::from(vec!["dotnet-sdk-7.0"]);
+                }
+                if self.repository == "ubuntu" {
+                    return Option::from(vec!["dotnet7"]);
                 }
                 None
             }
@@ -211,6 +213,7 @@ impl Distribution {
             "gedit" => Option::from(vec!["gedit"]),
             "gimp" => Option::from(vec!["gimp"]),
             "git" => Option::from(vec!["git"]),
+            "gparted" => Option::from(vec!["gparted"]),
             "gnome-2048" => {
                 if self.repository == "redhat" {
                     return None;
@@ -528,7 +531,12 @@ impl Distribution {
                 }
                 Option::from(vec!["simple-scan"])
             }
-            "snapd" => Option::from(vec!["snapd"]),
+            "snapd" => {
+                if self.package_manager == "pacman" {
+                    return None;
+                }
+                Option::from(vec!["snapd"])
+            }
             "spectacle" => Option::from(vec!["spectacle"]),
             "ssh" => {
                 if self.package_manager == "apt" {
@@ -584,6 +592,17 @@ impl Distribution {
                         "vim",
                         "vim-ale",
                         "vim-syntastic",
+                        "vim-ctrlp",
+                        "vim-airline",
+                        "vim-gitgutter",
+                    ]);
+                }
+                if self.package_manager == "pacman" {
+                    return Option::from(vec![
+                        "vim-enhanced",
+                        "vim-ale",
+                        "vim-syntastic",
+                        "vim-nerdtree",
                         "vim-ctrlp",
                         "vim-airline",
                         "vim-gitgutter",
@@ -653,6 +672,12 @@ impl Distribution {
                         cmd.arg("--noconfirm");
                         cmd.arg("--needed");
                     }
+                    "rpm-ostree" => {
+                        cmd.arg("rpm-ostree");
+                        cmd.arg("install");
+                        cmd.arg(pkg);
+                        cmd.arg("-y");
+                    }
                     _ => continue,
                 }
                 let _ = cmd
@@ -698,6 +723,12 @@ impl Distribution {
                         cmd.arg("-Rsun");
                         cmd.arg(pkg);
                         cmd.arg("--noconfirm");
+                    }
+                    "rpm-ostree" => {
+                        cmd.arg("rpm-ostree");
+                        cmd.arg("uninstall");
+                        cmd.arg(pkg);
+                        cmd.arg("-y");
                     }
                     _ => continue,
                 }
@@ -756,6 +787,15 @@ impl Distribution {
                     .stderr(Stdio::inherit())
                     .spawn()
                     .expect("pacman update failed")
+                    .wait();
+            }
+            "rpm-ostree" => {
+                let _ = Command::new("rpm-ostree")
+                    .arg("upgrade")
+                    .stdout(Stdio::inherit())
+                    .stderr(Stdio::inherit())
+                    .spawn()
+                    .expect("rpm-ostree upgrade failed")
                     .wait();
             }
             _ => (),
@@ -818,13 +858,6 @@ impl Distribution {
         }
     }
 
-    pub fn install_flatpak(&self, info: &mut Info) {
-        if !info.has_flatpak {
-            self.install("flatpak", info);
-            flatpak::setup();
-        }
-    }
-
     pub fn setup_snap(&self) {
         if self.package_manager == "dnf" {
             let _ = Command::new("sudo")
@@ -851,13 +884,6 @@ impl Distribution {
         }
     }
 
-    pub fn install_snap(&self, info: &mut Info) {
-        if !info.has_snap {
-            self.install("snapd", info);
-            self.setup_snap();
-        }
-    }
-
     pub fn get_installed(&self) -> Vec<String> {
         let mut packages: Vec<String> = vec![];
 
@@ -876,6 +902,10 @@ impl Distribution {
             "pacman" => {
                 cmd = Command::new("pacman");
                 cmd.arg("-Q");
+            }
+            "rpm-ostree" => {
+                cmd = Command::new("rpm");
+                cmd.arg("-qa");
             }
             _ => (),
         }
@@ -908,6 +938,20 @@ impl Distribution {
                         let columns: Split<&str> = line.split(" ");
                         let columns: Vec<&str> = columns.collect::<Vec<&str>>();
                         package = columns[0].to_owned();
+                    }
+                    "rpm-ostree" => {
+                        let first_numeric: Option<usize> = line.find(|c: char| c.is_numeric());
+                        if first_numeric.is_some() {
+                            let first_numeric: usize = first_numeric.unwrap();
+                            if first_numeric > 0 {
+                                let prev_char: Option<char> = line.chars().nth(first_numeric - 1);
+                                if prev_char.is_some() {
+                                    if prev_char.unwrap() == '-' {
+                                        package = line.chars().take(first_numeric - 1).collect();
+                                    }
+                                }
+                            }
+                        }
                     }
                     _ => (),
                 }
@@ -944,6 +988,11 @@ pub fn get_distribution() -> Option<Distribution> {
             name: "debian",
             repository: "debian",
             package_manager: "apt",
+        }),
+        x if x.contains("Silverblue") => Option::from(Distribution {
+            name: "silverblue",
+            repository: "fedora",
+            package_manager: "rpm-ostree",
         }),
         x if x.contains("Fedora") => Option::from(Distribution {
             name: "fedora",
