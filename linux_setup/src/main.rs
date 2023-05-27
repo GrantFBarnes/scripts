@@ -698,6 +698,41 @@ fn repository_setup(distribution: &Distribution, info: &mut Info) {
     }
 }
 
+fn run_flatpak_remote_select(package: &str, distribution: &Distribution, info: &mut Info) {
+    let mut options: Vec<&str> = vec![];
+
+    let remotes: Option<Vec<&str>> = flatpak::get_remotes(package);
+    if remotes.is_none() {
+        return;
+    }
+    let remotes: Vec<&str> = remotes.unwrap();
+    for remote in remotes {
+        options.push(remote);
+    }
+    options.push("Cancel");
+
+    let selection: std::io::Result<Option<usize>> = Select::new()
+        .with_prompt(format!("Flatpak Remote: {}", package))
+        .items(&options)
+        .default(0)
+        .interact_opt();
+    if selection.is_err() {
+        return;
+    }
+    let selection: Option<usize> = selection.unwrap();
+    if selection.is_none() {
+        return;
+    }
+    let selection: usize = selection.unwrap();
+    let remote: &str = options[selection];
+
+    if remote == "Cancel" {
+        return;
+    }
+
+    flatpak::install(package, remote, distribution, info);
+}
+
 fn post_uninstall(package: &str, distribution: &Distribution, method: &str) {
     let home_dir: Result<String, VarError> = env::var("HOME");
     if home_dir.is_err() {
@@ -1102,7 +1137,7 @@ fn run_package_select(package: &str, distribution: &Distribution, info: &mut Inf
     pre_install(package, distribution, info, method);
     match method {
         "repository" => distribution.install(package, info),
-        "flatpak" => flatpak::install(package, distribution, info),
+        "flatpak" => run_flatpak_remote_select(package, distribution, info),
         "snap" => snap::install(package, distribution, info),
         "other" => other::install(package, info),
         _ => (),
