@@ -211,6 +211,7 @@ pub fn setup(distribution: &Distribution) {
             'org.mozilla.Thunderbird.desktop',
             'discord.desktop',
             'discord_discord.desktop',
+            'com.transmissionbt.Transmission.desktop',
             'transmission-gtk.desktop',
             'transmission-qt.desktop'
         ]"
@@ -230,6 +231,7 @@ pub fn setup(distribution: &Distribution) {
             'org.gnome.TextEditor.desktop',
             'code.desktop',
             'code_code.desktop',
+            'com.visualstudio.code.desktop',
             'org.kde.kwrite.desktop',
             'org.kde.kate.desktop',
             'org.gnome.Builder.desktop',
@@ -446,6 +448,7 @@ pub fn setup(distribution: &Distribution) {
             'org.gnome.font-viewer.desktop',
             'org.gnome.Characters.desktop',
             'org.gnome.Firmware.desktop',
+            'org.gnome.Shotwell-Profile-Browser.desktop',
             'remote-viewer.desktop',
             'org.kde.kwalletmanager5.desktop',
             'org.kde.klipper.desktop',
