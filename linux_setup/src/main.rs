@@ -46,7 +46,7 @@ const CATEGORIES: [&str; 10] = [
     "Utilities",
 ];
 
-const ALL_PACKAGES: [Package; 107] = [
+const ALL_PACKAGES: [Package; 106] = [
     Package {
         display: "0 A.D.",
         key: "0ad",
@@ -225,12 +225,6 @@ const ALL_PACKAGES: [Package; 107] = [
         display: "Gnome 2048",
         key: "gnome-2048",
         category: "Games",
-        desktop_environment: "gnome",
-    },
-    Package {
-        display: "Gnome Books",
-        key: "gnome-books",
-        category: "Applications",
         desktop_environment: "gnome",
     },
     Package {
@@ -778,7 +772,7 @@ fn post_uninstall(package: &str, distribution: &Distribution, method: &str) {
             }
         }
         "pycharm" => {
-            if distribution.repository == "fedora" {
+            if distribution.name == "fedora" {
                 if method != "repository" {
                     let _ = Command::new("sudo")
                         .arg("dnf")

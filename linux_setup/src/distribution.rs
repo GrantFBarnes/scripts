@@ -220,12 +220,6 @@ impl Distribution {
                 }
                 Option::from(vec!["gnome-2048"])
             }
-            "gnome-books" => {
-                if self.repository == "redhat" {
-                    return None;
-                }
-                Option::from(vec!["gnome-books"])
-            }
             "gnome-boxes" => {
                 if self.repository == "redhat" {
                     return None;

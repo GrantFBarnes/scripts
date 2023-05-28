@@ -170,7 +170,6 @@ pub fn setup(distribution: &Distribution) {
             'org.gnome.clocks.desktop',
             'org.gnome.Weather.desktop',
             'org.gnome.Maps.desktop',
-            'org.gnome.Books.desktop',
             'org.remmina.Remmina.desktop',
             'org.gnome.Connections.desktop',
             'org.gnome.Boxes.desktop',
