@@ -688,7 +688,7 @@ const ALL_PACKAGES: [Package; 106] = [
 fn repository_setup(distribution: &Distribution, info: &mut Info) {
     distribution.setup(info);
     if info.has_flatpak {
-        flatpak::setup();
+        flatpak::setup(distribution);
     }
 }
 

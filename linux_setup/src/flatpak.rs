@@ -5,19 +5,8 @@ use crate::distribution::Distribution;
 use crate::helper;
 use crate::Info;
 
-pub fn setup() {
+pub fn setup(distribution: &Distribution) {
     println!("Setup flatpak...");
-
-    let _ = Command::new("flatpak")
-        .arg("remote-add")
-        .arg("--if-not-exists")
-        .arg("fedora")
-        .arg("oci+https://registry.fedoraproject.org")
-        .stdout(Stdio::inherit())
-        .stderr(Stdio::inherit())
-        .spawn()
-        .expect("flatpak fedora setup failed")
-        .wait();
 
     let _ = Command::new("flatpak")
         .arg("remote-add")
@@ -29,6 +18,19 @@ pub fn setup() {
         .spawn()
         .expect("flatpak flathub setup failed")
         .wait();
+
+    if distribution.package_manager == "dnf" {
+        let _ = Command::new("flatpak")
+            .arg("remote-add")
+            .arg("--if-not-exists")
+            .arg("fedora")
+            .arg("oci+https://registry.fedoraproject.org")
+            .stdout(Stdio::inherit())
+            .stderr(Stdio::inherit())
+            .spawn()
+            .expect("flatpak fedora setup failed")
+            .wait();
+    }
 }
 
 fn get_package(package: &str) -> Option<&str> {
@@ -179,6 +181,7 @@ pub fn is_installed(package: &str, info: &Info) -> bool {
 
 pub fn install(package: &str, remote: &str, distribution: &Distribution, info: &mut Info) {
     distribution.install("flatpak", info);
+    setup(distribution);
 
     let pkg: Option<&str> = get_package(package);
     if pkg.is_some() {
