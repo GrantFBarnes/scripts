@@ -991,6 +991,17 @@ fn post_install(package: &str, distribution: &Distribution, method: &str) {
                     false,
                 );
 
+                if distribution.repository == "debian" {
+                    let _ = Command::new("vim-addon-manager")
+                        .arg("install")
+                        .arg("ctrlp")
+                        .stdout(Stdio::inherit())
+                        .stderr(Stdio::inherit())
+                        .spawn()
+                        .expect("install ctrlp addon failed")
+                        .wait();
+                }
+
                 let _ = fs::write(
                     format!("{}{}", &home_dir, "/.vimrc"),
                     r#"
@@ -1005,17 +1016,35 @@ set nowritebackup
 set updatetime=300
 set scrolloff=10
 set number
+set relativenumber
 set ignorecase smartcase
 set incsearch hlsearch
 
 syntax on
 filetype plugin indent on
 
+let mapleader = " "
+
 let g:ale_completion_enabled = 1
 let g:ale_linters = { "rust": ["analyzer"] }
 let g:ale_fixers = { "rust": ["rustfmt"] }
 
+""""""""""""""""""""""""""""""""""""""""
+" normal mode remaps
+
+nnoremap <Leader>ex :Explore<CR>
 nnoremap <C-n> :NERDTreeToggle<CR>
+" window split
+nnoremap <Leader>vs <C-w>v
+nnoremap <Leader>hs <C-w>s
+" window navigation
+nnoremap <C-h> <C-w>h
+nnoremap <C-j> <C-w>j
+nnoremap <C-k> <C-w>k
+nnoremap <C-l> <C-w>l
+
+""""""""""""""""""""""""""""""""""""""""
+" insert mode remaps
 
 inoremap <silent><expr> <Tab> pumvisible() ? "\<C-n>" : "\<TAB>"
 inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-n>" : "\<S-TAB>"

@@ -589,6 +589,7 @@ impl Distribution {
                         "vim-ctrlp",
                         "vim-airline",
                         "vim-gitgutter",
+                        "vim-addon-manager",
                     ]);
                 }
                 if self.package_manager == "pacman" {
