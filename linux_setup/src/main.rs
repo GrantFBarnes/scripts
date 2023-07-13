@@ -991,17 +991,6 @@ fn post_install(package: &str, distribution: &Distribution, method: &str) {
                     false,
                 );
 
-                if distribution.repository == "debian" {
-                    let _ = Command::new("vim-addon-manager")
-                        .arg("install")
-                        .arg("ctrlp")
-                        .stdout(Stdio::inherit())
-                        .stderr(Stdio::inherit())
-                        .spawn()
-                        .expect("install ctrlp addon failed")
-                        .wait();
-                }
-
                 let _ = fs::write(
                     format!("{}{}", &home_dir, "/.vimrc"),
                     r#"
@@ -1023,11 +1012,35 @@ set incsearch hlsearch
 syntax on
 filetype plugin indent on
 
+""""""""""""""""""""""""""""""""""""""""
+" Install VIM Plug
+
+let data_dir = has('nvim') ? stdpath('data') . '/site' : '~/.vim'
+if empty(glob(data_dir . '/autoload/plug.vim'))
+  silent execute '!curl -fLo '.data_dir.'/autoload/plug.vim --create-dirs  https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
+  autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
+endif
+
+" Install plugins
+
+call plug#begin()
+
+Plug 'airblade/vim-gitgutter'
+Plug 'kien/ctrlp.vim'
+Plug 'scrooloose/nerdtree'
+Plug 'scrooloose/syntastic'
+Plug 'rust-lang/rust.vim'
+Plug 'vim-airline/vim-airline'
+Plug 'w0rp/ale'
+
+call plug#end()
+
 let mapleader = " "
 
 let g:ale_completion_enabled = 1
 let g:ale_linters = { "rust": ["analyzer"] }
 let g:ale_fixers = { "rust": ["rustfmt"] }
+let g:rustfmt_autosave = 1
 
 """"""""""""""""""""""""""""""""""""""""
 " normal mode remaps

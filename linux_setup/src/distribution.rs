@@ -566,42 +566,8 @@ impl Distribution {
                 Option::from(vec!["transmission-qt"])
             }
             "vim" => {
-                if self.repository == "fedora" {
-                    return Option::from(vec![
-                        "vim-enhanced",
-                        "vim-ale",
-                        "vim-syntastic",
-                        "vim-trailing-whitespace",
-                        "vim-nerdtree",
-                        "vim-ctrlp",
-                        "vim-airline",
-                        "vim-gitgutter",
-                    ]);
-                }
-                if self.package_manager == "dnf" {
+                if self.package_manager == "dnf" || self.package_manager == "pacman" {
                     return Option::from(vec!["vim-enhanced"]);
-                }
-                if self.package_manager == "apt" {
-                    return Option::from(vec![
-                        "vim",
-                        "vim-ale",
-                        "vim-syntastic",
-                        "vim-ctrlp",
-                        "vim-airline",
-                        "vim-gitgutter",
-                        "vim-addon-manager",
-                    ]);
-                }
-                if self.package_manager == "pacman" {
-                    return Option::from(vec![
-                        "vim-enhanced",
-                        "vim-ale",
-                        "vim-syntastic",
-                        "vim-nerdtree",
-                        "vim-ctrlp",
-                        "vim-airline",
-                        "vim-gitgutter",
-                    ]);
                 }
                 Option::from(vec!["vim"])
             }
