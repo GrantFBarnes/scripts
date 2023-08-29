@@ -110,6 +110,12 @@ pub fn get_package(package: &str) -> Option<Snap> {
             is_classic: false,
             channel: "",
         }),
+        "golang" => Option::from(Snap {
+            name: "go",
+            is_official: true,
+            is_classic: true,
+            channel: "",
+        }),
         "gnome-calculator" => Option::from(Snap {
             name: "gnome-calculator",
             is_official: true,

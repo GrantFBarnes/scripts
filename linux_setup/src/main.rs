@@ -46,7 +46,7 @@ const CATEGORIES: [&str; 10] = [
     "Utilities",
 ];
 
-const ALL_PACKAGES: [Package; 106] = [
+const ALL_PACKAGES: [Package; 107] = [
     Package {
         display: "0 A.D.",
         key: "0ad",
@@ -212,6 +212,12 @@ const ALL_PACKAGES: [Package; 106] = [
     Package {
         display: "git - Version Control",
         key: "git",
+        category: "Server",
+        desktop_environment: "",
+    },
+    Package {
+        display: "Go Language",
+        key: "golang",
         category: "Server",
         desktop_environment: "",
     },
@@ -771,6 +777,19 @@ fn post_uninstall(package: &str, distribution: &Distribution, method: &str) {
                     .wait();
             }
         }
+        "golang" => {
+            if method == "uninstall" {
+                let _ = Command::new("sudo")
+                    .arg("rm")
+                    .arg("-rf")
+                    .arg(format!("{}{}", &home_dir, "/go"))
+                    .stdout(Stdio::inherit())
+                    .stderr(Stdio::inherit())
+                    .spawn()
+                    .expect("remove go failed")
+                    .wait();
+            }
+        }
         "pycharm" => {
             if distribution.name == "fedora" {
                 if method != "repository" {
@@ -904,13 +923,7 @@ fn post_install(package: &str, distribution: &Distribution, method: &str) {
     match package {
         "code" => {
             if method != "uninstall" {
-                let extensions: Vec<&str> = Vec::from([
-                    "esbenp.prettier-vscode",
-                    "James-Yu.latex-workshop",
-                    "ms-dotnettools.csharp",
-                    "rust-lang.rust-analyzer",
-                    "vscodevim.vim",
-                ]);
+                let extensions: Vec<&str> = Vec::from(["esbenp.prettier-vscode", "vscodevim.vim"]);
                 for ext in extensions {
                     let _ = Command::new("code")
                         .arg("--install-extension")
@@ -955,6 +968,18 @@ fn post_install(package: &str, distribution: &Distribution, method: &str) {
 }
 "#,
                 );
+            }
+        }
+        "golang" => {
+            if method != "uninstall" {
+                let _ = Command::new("go")
+                    .arg("install")
+                    .arg("golang.org/x/tools/gopls@latest")
+                    .stdout(Stdio::inherit())
+                    .stderr(Stdio::inherit())
+                    .spawn()
+                    .expect("install gopls failed")
+                    .wait();
             }
         }
         "intellij" | "pycharm" => {

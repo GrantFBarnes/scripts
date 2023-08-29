@@ -149,11 +149,11 @@ impl Distribution {
                 None
             }
             "dotnet-runtime-7" => {
+                if self.package_manager == "dnf" {
+                    return Option::from(vec!["dotnet-runtime-7.0"]);
+                }
                 if self.package_manager == "pacman" {
                     return Option::from(vec!["dotnet-runtime"]);
-                }
-                if self.repository == "redhat" {
-                    return Option::from(vec!["dotnet-runtime-7.0"]);
                 }
                 if self.repository == "ubuntu" {
                     return Option::from(vec!["dotnet-runtime-7.0"]);
@@ -161,11 +161,11 @@ impl Distribution {
                 None
             }
             "dotnet-sdk-7" => {
+                if self.package_manager == "dnf" {
+                    return Option::from(vec!["dotnet-sdk-7.0"]);
+                }
                 if self.package_manager == "pacman" {
                     return Option::from(vec!["dotnet-sdk"]);
-                }
-                if self.repository == "redhat" {
-                    return Option::from(vec!["dotnet-sdk-7.0"]);
                 }
                 if self.repository == "ubuntu" {
                     return Option::from(vec!["dotnet7"]);
@@ -213,6 +213,18 @@ impl Distribution {
             "gedit" => Option::from(vec!["gedit"]),
             "gimp" => Option::from(vec!["gimp"]),
             "git" => Option::from(vec!["git"]),
+            "golang" => {
+                if self.package_manager == "apt" {
+                    return Option::from(vec!["golang"]);
+                }
+                if self.package_manager == "dnf" {
+                    return Option::from(vec!["golang"]);
+                }
+                if self.package_manager == "pacman" {
+                    return Option::from(vec!["go"]);
+                }
+                None
+            }
             "gparted" => Option::from(vec!["gparted"]),
             "gnome-2048" => {
                 if self.repository == "redhat" {
