@@ -970,18 +970,6 @@ fn post_install(package: &str, distribution: &Distribution, method: &str) {
                 );
             }
         }
-        "golang" => {
-            if method != "uninstall" {
-                let _ = Command::new("go")
-                    .arg("install")
-                    .arg("golang.org/x/tools/gopls@latest")
-                    .stdout(Stdio::inherit())
-                    .stderr(Stdio::inherit())
-                    .spawn()
-                    .expect("install gopls failed")
-                    .wait();
-            }
-        }
         "intellij" | "pycharm" => {
             let _ = fs::write(
                 format!("{}{}", &home_dir, "/.ideavimrc"),
@@ -1051,6 +1039,7 @@ endif
 call plug#begin()
 
 Plug 'airblade/vim-gitgutter'
+Plug 'fatih/vim-go', { 'do': ':GoUpdateBinaries' }
 Plug 'kien/ctrlp.vim'
 Plug 'scrooloose/nerdtree'
 Plug 'scrooloose/syntastic'
