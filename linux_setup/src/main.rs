@@ -1015,6 +1015,7 @@ set noswapfile
 set nobackup
 set nowritebackup
 
+set mouse=a
 set updatetime=300
 set scrolloff=10
 set number
