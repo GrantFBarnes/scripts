@@ -782,7 +782,7 @@ fn post_uninstall(package: &str, distribution: &Distribution, method: &str) {
                 let _ = Command::new("sudo")
                     .arg("rm")
                     .arg("-rf")
-                    .arg(format!("{}{}", &home_dir, "/go"))
+                    .arg(format!("{}{}", &home_dir, "/.go"))
                     .stdout(Stdio::inherit())
                     .stderr(Stdio::inherit())
                     .spawn()
@@ -968,6 +968,19 @@ fn post_install(package: &str, distribution: &Distribution, method: &str) {
 }
 "#,
                 );
+            }
+        }
+        "go" => {
+            if method != "uninstall" {
+                let _ = Command::new("go")
+                    .arg("env")
+                    .arg("-w")
+                    .arg("GOPATH=$HOME/.go")
+                    .stdout(Stdio::inherit())
+                    .stderr(Stdio::inherit())
+                    .spawn()
+                    .expect("set go path failed")
+                    .wait();
             }
         }
         "intellij" | "pycharm" => {
