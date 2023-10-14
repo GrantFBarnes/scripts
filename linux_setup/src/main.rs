@@ -821,10 +821,8 @@ fn pre_install(package: &str, distribution: &Distribution, info: &mut Info, meth
                     .expect("get microsoft key failed");
                     fs::write("packages.microsoft", key).expect("save microsoft key failed");
 
-                    let gpg: String =
-                        rust_cli::commands::output("gpg --dearmor packages.microsoft")
-                            .expect("gpg microsoft key failed");
-                    fs::write("packages.microsoft.gpg", gpg).expect("gpg microsoft key failed");
+                    rust_cli::commands::run("gpg --dearmor packages.microsoft")
+                        .expect("gpg microsoft key failed");
 
                     rust_cli::commands::run("sudo install -D -o root -g root -m 644 packages.microsoft.gpg /etc/apt/keyrings/packages.microsoft.gpg").expect("install microsoft key failed");
 
