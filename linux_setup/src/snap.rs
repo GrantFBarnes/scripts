@@ -316,30 +316,15 @@ pub fn uninstall(package: &str, info: &mut Info) {
 
             println!("Uninstalling snap {}...", pkg.name);
 
-            let _ = Command::new("sudo")
-                .arg("snap")
-                .arg("remove")
-                .arg(pkg.name)
-                .stdout(Stdio::inherit())
-                .stderr(Stdio::inherit())
-                .spawn()
-                .expect("uninstall snap failed")
-                .wait();
+            rust_cli::commands::run(format!("sudo snap remove {}", pkg.name).as_str())
+                .expect("uninstall snap failed");
         }
     }
 }
 
 pub fn update() {
     println!("Update snap...");
-
-    let _ = Command::new("sudo")
-        .arg("snap")
-        .arg("refresh")
-        .stdout(Stdio::inherit())
-        .stderr(Stdio::inherit())
-        .spawn()
-        .expect("update snap failed")
-        .wait();
+    rust_cli::commands::run("sudo snap refresh").expect("update snap failed");
 }
 
 pub fn get_installed() -> Vec<String> {

@@ -1,4 +1,4 @@
-use std::process::{Command, Stdio};
+use std::process::Command;
 use std::str::Split;
 
 use crate::distribution::Distribution;
@@ -8,28 +8,16 @@ use crate::Info;
 pub fn setup(distribution: &Distribution) {
     println!("Setup flatpak...");
 
-    let _ = Command::new("flatpak")
-        .arg("remote-add")
-        .arg("--if-not-exists")
-        .arg("flathub")
-        .arg("https://flathub.org/repo/flathub.flatpakrepo")
-        .stdout(Stdio::inherit())
-        .stderr(Stdio::inherit())
-        .spawn()
-        .expect("flatpak flathub setup failed")
-        .wait();
+    rust_cli::commands::run(
+        "flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo",
+    )
+    .expect("flatpak flathub setup failed");
 
     if distribution.package_manager == "dnf" {
-        let _ = Command::new("flatpak")
-            .arg("remote-add")
-            .arg("--if-not-exists")
-            .arg("fedora")
-            .arg("oci+https://registry.fedoraproject.org")
-            .stdout(Stdio::inherit())
-            .stderr(Stdio::inherit())
-            .spawn()
-            .expect("flatpak fedora setup failed")
-            .wait();
+        rust_cli::commands::run(
+            "flatpak remote-add --if-not-exists fedora oci+https://registry.fedoraproject.org",
+        )
+        .expect("flatpak fedora setup failed");
     }
 }
 
@@ -191,16 +179,8 @@ pub fn install(package: &str, remote: &str, distribution: &Distribution, info: &
 
             println!("Installing flatpak {} from {}...", pkg, remote);
 
-            let _ = Command::new("flatpak")
-                .arg("install")
-                .arg(remote)
-                .arg(pkg)
-                .arg("-y")
-                .stdout(Stdio::inherit())
-                .stderr(Stdio::inherit())
-                .spawn()
-                .expect("install flatpak failed")
-                .wait();
+            rust_cli::commands::run(format!("flatpak install {} {} -y", remote, pkg).as_str())
+                .expect("install flatpak failed");
         }
     }
 }
@@ -217,44 +197,20 @@ pub fn uninstall(package: &str, info: &mut Info) {
 
             println!("Uninstalling flatpak {}...", pkg);
 
-            let _ = Command::new("flatpak")
-                .arg("remove")
-                .arg(pkg)
-                .arg("-y")
-                .stdout(Stdio::inherit())
-                .stderr(Stdio::inherit())
-                .spawn()
-                .expect("uninstall flatpak failed")
-                .wait();
+            rust_cli::commands::run(format!("flatpak remove {} -y", pkg).as_str())
+                .expect("uninstall flatpak failed");
         }
     }
 }
 
 pub fn update() {
     println!("Update flatpak...");
-
-    let _ = Command::new("flatpak")
-        .arg("update")
-        .arg("-y")
-        .stdout(Stdio::inherit())
-        .stderr(Stdio::inherit())
-        .spawn()
-        .expect("update flatpak failed")
-        .wait();
+    rust_cli::commands::run("flatpak update -y").expect("update flatpak failed");
 }
 
 pub fn auto_remove() {
     println!("Auto removing flatpak...");
-
-    let _ = Command::new("flatpak")
-        .arg("remove")
-        .arg("--unused")
-        .arg("-y")
-        .stdout(Stdio::inherit())
-        .stderr(Stdio::inherit())
-        .spawn()
-        .expect("auto remove flatpak failed")
-        .wait();
+    rust_cli::commands::run("flatpak remove --unused -y").expect("auto remove flatpak failed");
 }
 
 pub fn get_installed() -> Vec<String> {

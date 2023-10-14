@@ -80,6 +80,7 @@ name = "linux_setup"
 version = "0.1.0"
 dependencies = [
  "dialoguer",
+ "rust-cli",
 ]
 
 [[package]]
@@ -99,6 +100,11 @@ checksum = "3acd125665422973a33ac9d3dd2df85edad0f4ae9b00dafb1a05e43a9f5ef8e7"
 dependencies = [
  "winapi",
 ]
+
+[[package]]
+name = "rust-cli"
+version = "0.1.0"
+source = "git+https://github.com/GrantFBarnes/rust-cli#6e7fda67bb8edac750eeff0b80ab5b1662d31038"
 
 [[package]]
 name = "tempfile"

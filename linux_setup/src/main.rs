@@ -4,6 +4,8 @@ use std::env::VarError;
 use std::fs;
 use std::process::{Command, Stdio};
 
+extern crate rust_cli;
+
 mod distribution;
 mod flatpak;
 mod gnome;
@@ -742,96 +744,75 @@ fn post_uninstall(package: &str, distribution: &Distribution, method: &str) {
 
     match package {
         "code" => {
-            if distribution.package_manager == "dnf" {
-                if method != "repository" {
-                    let _ = Command::new("sudo")
-                        .arg("dnf")
-                        .arg("config-manager")
-                        .arg("--set-disabled")
-                        .arg("code")
-                        .stdout(Stdio::inherit())
-                        .stderr(Stdio::inherit())
-                        .spawn()
-                        .expect("disable code repo failed")
-                        .wait();
-                    let _ = Command::new("sudo")
-                        .arg("rm")
-                        .arg("/etc/yum.repos.d/vscode.repo")
-                        .stdout(Stdio::inherit())
-                        .stderr(Stdio::inherit())
-                        .spawn()
-                        .expect("remove code repo failed")
-                        .wait();
+            if method != "repository" {
+                if distribution.repository == "debian" {
+                    rust_cli::commands::run("sudo rm /etc/apt/sources.list.d/vscode.list")
+                        .expect("remove vscode repo failed");
+                }
+                if distribution.package_manager == "dnf" {
+                    rust_cli::commands::run("sudo dnf config-manager --set-disabled code")
+                        .expect("disable code repo failed");
+                    rust_cli::commands::run("sudo rm /etc/yum.repos.d/vscode.repo")
+                        .expect("remove code repo failed");
                 }
             }
             if method == "uninstall" {
-                let _ = Command::new("sudo")
-                    .arg("rm")
-                    .arg("-r")
-                    .arg(format!("{}{}", &home_dir, "/.vscode"))
-                    .arg(format!("{}{}", &home_dir, "/.config/Code"))
-                    .stdout(Stdio::inherit())
-                    .stderr(Stdio::inherit())
-                    .spawn()
-                    .expect("remove code files failed")
-                    .wait();
+                rust_cli::commands::run(
+                    format!(
+                        "sudo rm -r {}{} {}{}",
+                        &home_dir, "/.vscode", &home_dir, "/.config/Code"
+                    )
+                    .as_str(),
+                )
+                .expect("remove code files failed");
             }
         }
         "golang" => {
             if method == "uninstall" {
-                let _ = Command::new("sudo")
-                    .arg("rm")
-                    .arg("-rf")
-                    .arg(format!("{}{}", &home_dir, "/.go"))
-                    .stdout(Stdio::inherit())
-                    .stderr(Stdio::inherit())
-                    .spawn()
-                    .expect("remove go failed")
-                    .wait();
+                rust_cli::commands::run(format!("sudo rm -r {}{}", &home_dir, "/.go").as_str())
+                    .expect("remove go failed");
+            }
+        }
+        "dotnet-runtime-6" | "dotnet-sdk-6" | "dotnet-runtime-7" | "dotnet-sdk-7" => {
+            if method != "repository" {
+                if distribution.repository == "debian" {
+                    rust_cli::commands::run("sudo rm /etc/apt/sources.list.d/microsoft-prod.list")
+                        .expect("remove microsoft repo failed");
+                }
+            }
+            if method == "uninstall" {
+                rust_cli::commands::run(format!("sudo rm -r {}{}", &home_dir, "/.dotnet").as_str())
+                    .expect("remove dotnet files failed");
             }
         }
         "pycharm" => {
-            if distribution.name == "fedora" {
-                if method != "repository" {
-                    let _ = Command::new("sudo")
-                        .arg("dnf")
-                        .arg("config-manager")
-                        .arg("--set-disabled")
-                        .arg("phracek-PyCharm")
-                        .stdout(Stdio::inherit())
-                        .stderr(Stdio::inherit())
-                        .spawn()
-                        .expect("disable pycharm repo failed")
-                        .wait();
+            if method != "repository" {
+                if distribution.name == "fedora" {
+                    rust_cli::commands::run(
+                        "sudo dnf config-manager --set-disabled phracek-PyCharm",
+                    )
+                    .expect("disable pycharm repo failed");
                 }
             }
         }
         "rust" => {
             if method != "other" {
-                let _ = Command::new("sudo")
-                    .arg("rm")
-                    .arg("-r")
-                    .arg(format!("{}{}", &home_dir, "/.cargo/bin/rustup"))
-                    .stdout(Stdio::inherit())
-                    .stderr(Stdio::inherit())
-                    .spawn()
-                    .expect("remove rust failed")
-                    .wait();
+                rust_cli::commands::run(
+                    format!("sudo rm -r {}{}", &home_dir, "/.cargo/bin/rustup").as_str(),
+                )
+                .expect("remove rust failed");
             }
         }
         "vim" => {
             if method != "repository" {
-                let _ = Command::new("sudo")
-                    .arg("rm")
-                    .arg("-r")
-                    .arg(format!("{}{}", &home_dir, "/.vim"))
-                    .arg(format!("{}{}", &home_dir, "/.viminfo"))
-                    .arg(format!("{}{}", &home_dir, "/.vimrc"))
-                    .stdout(Stdio::inherit())
-                    .stderr(Stdio::inherit())
-                    .spawn()
-                    .expect("remove vim files failed")
-                    .wait();
+                rust_cli::commands::run(
+                    format!(
+                        "sudo rm -r {}{} {}{} {}{}",
+                        &home_dir, "/.vim", &home_dir, "/.viminfo", &home_dir, "/.vimrc"
+                    )
+                    .as_str(),
+                )
+                .expect("remove vim files failed");
             }
         }
         _ => (),
@@ -841,8 +822,17 @@ fn post_uninstall(package: &str, distribution: &Distribution, method: &str) {
 fn pre_install(package: &str, distribution: &Distribution, info: &mut Info, method: &str) {
     match package {
         "code" => {
-            if distribution.package_manager == "dnf" {
-                if method == "repository" {
+            if method == "repository" {
+                if distribution.repository == "debian" {
+                    distribution.install("wget", info);
+                    distribution.install("gpg", info);
+                    rust_cli::commands::run("wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > packages.microsoft.gpg").expect("get microsoft key failed");
+                    rust_cli::commands::run("sudo install -D -o root -g root -m 644 packages.microsoft.gpg /etc/apt/keyrings/packages.microsoft.gpg").expect("install microsoft key failed");
+                    rust_cli::commands::run("sudo sh -c 'echo \"deb [arch=amd64,arm64,armhf signed-by=/etc/apt/keyrings/packages.microsoft.gpg] https://packages.microsoft.com/repos/code stable main\" > /etc/apt/sources.list.d/vscode.list'").expect("adding microsoft repo failed");
+                    rust_cli::commands::run("rm -f packages.microsoft.gpg")
+                        .expect("remove microsoft key failed");
+                }
+                if distribution.package_manager == "dnf" {
                     let _ = Command::new("sudo")
                         .arg("rpm")
                         .arg("--import")
@@ -871,36 +861,33 @@ fn pre_install(package: &str, distribution: &Distribution, info: &mut Info, meth
                 }
             }
         }
+        "dotnet-runtime-6" | "dotnet-sdk-6" | "dotnet-runtime-7" | "dotnet-sdk-7" => {
+            if method == "repository" {
+                if distribution.repository == "debian" {
+                    distribution.install("wget", info);
+                    rust_cli::commands::run("wget https://packages.microsoft.com/config/debian/12/packages-microsoft-prod.deb -O packages-microsoft-prod.deb").expect("get microsoft deb failed");
+                    rust_cli::commands::run("sudo dpkg -i packages-microsoft-prod.deb")
+                        .expect("install microsoft deb failed");
+                    rust_cli::commands::run("rm packages-microsoft-prod.deb")
+                        .expect("remove microsoft deb failed");
+                }
+            }
+        }
         "nodejs" => {
-            if distribution.package_manager == "dnf" {
-                if method == "repository" {
-                    let _ = Command::new("sudo")
-                        .arg("dnf")
-                        .arg("module")
-                        .arg("enable")
-                        .arg("nodejs:18")
-                        .arg("-y")
-                        .stdout(Stdio::inherit())
-                        .stderr(Stdio::inherit())
-                        .spawn()
-                        .expect("enable nodejs module failed")
-                        .wait();
+            if method == "repository" {
+                if distribution.package_manager == "dnf" {
+                    rust_cli::commands::run("sudo dnf module enable nodejs:18 -y")
+                        .expect("enable nodejs module failed");
                 }
             }
         }
         "pycharm" => {
-            if distribution.repository == "fedora" {
-                if method == "repository" {
-                    let _ = Command::new("sudo")
-                        .arg("dnf")
-                        .arg("config-manager")
-                        .arg("--set-enabled")
-                        .arg("phracek-PyCharm")
-                        .stdout(Stdio::inherit())
-                        .stderr(Stdio::inherit())
-                        .spawn()
-                        .expect("enable pycharm repo failed")
-                        .wait();
+            if method == "repository" {
+                if distribution.repository == "fedora" {
+                    rust_cli::commands::run(
+                        "sudo dnf config-manager --set-enabled phracek-PyCharm",
+                    )
+                    .expect("enable pycharm repo failed");
                 }
             }
         }
@@ -925,14 +912,8 @@ fn post_install(package: &str, distribution: &Distribution, method: &str) {
             if method != "uninstall" {
                 let extensions: Vec<&str> = Vec::from(["esbenp.prettier-vscode", "vscodevim.vim"]);
                 for ext in extensions {
-                    let _ = Command::new("code")
-                        .arg("--install-extension")
-                        .arg(ext)
-                        .stdout(Stdio::inherit())
-                        .stderr(Stdio::inherit())
-                        .spawn()
-                        .expect("install code extension failed")
-                        .wait();
+                    rust_cli::commands::run(format!("code --install-extension {}", ext).as_str())
+                        .expect("install code extension failed");
                 }
 
                 let _ = fs::write(
@@ -942,6 +923,8 @@ fn post_install(package: &str, distribution: &Distribution, method: &str) {
   "telemetry.telemetryLevel": "off",
   "editor.formatOnSave": true,
   "editor.rulers": [80, 160],
+  "extensions.ignoreRecommendations": true,
+  "git.openRepositoryInParentFolders": "always",
   "workbench.startupEditor": "none",
   "vim.useCtrlKeys": false,
   "[css]": {
@@ -972,15 +955,7 @@ fn post_install(package: &str, distribution: &Distribution, method: &str) {
         }
         "go" => {
             if method != "uninstall" {
-                let _ = Command::new("go")
-                    .arg("env")
-                    .arg("-w")
-                    .arg("GOPATH=$HOME/.go")
-                    .stdout(Stdio::inherit())
-                    .stderr(Stdio::inherit())
-                    .spawn()
-                    .expect("set go path failed")
-                    .wait();
+                rust_cli::commands::run("go env -w GOPATH=$HOME/.go").expect("set go path failed");
             }
         }
         "intellij" | "pycharm" => {
@@ -991,15 +966,14 @@ fn post_install(package: &str, distribution: &Distribution, method: &str) {
         }
         "rust" => {
             if method == "other" {
-                let _ = Command::new(format!("{}{}", home_dir, "/.cargo/bin/rustup"))
-                    .arg("component")
-                    .arg("add")
-                    .arg("rust-analyzer")
-                    .stdout(Stdio::inherit())
-                    .stderr(Stdio::inherit())
-                    .spawn()
-                    .expect("install rust analyzer failed")
-                    .wait();
+                rust_cli::commands::run(
+                    format!(
+                        "{}{} component add rust-analyzer",
+                        home_dir, "/.cargo/bin/rustup"
+                    )
+                    .as_str(),
+                )
+                .expect("install rust analyzer failed");
             }
         }
         "snapd" => {

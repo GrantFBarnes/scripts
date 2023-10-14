@@ -58,14 +58,8 @@ pub fn uninstall(package: &str, info: &mut Info) {
 
             match package {
                 "rust" => {
-                    let _ = Command::new("rustup")
-                        .arg("self")
-                        .arg("uninstall")
-                        .stdout(Stdio::inherit())
-                        .stderr(Stdio::inherit())
-                        .spawn()
-                        .expect("uninstall rust failed")
-                        .wait();
+                    rust_cli::commands::run("rustup self uninstall")
+                        .expect("uninstall rust failed");
                 }
                 _ => (),
             }
@@ -80,23 +74,8 @@ pub fn update(info: &Info) {
         if is_installed(pkg, info) {
             match pkg {
                 "rust" => {
-                    let _ = Command::new("rustup")
-                        .arg("self")
-                        .arg("update")
-                        .stdout(Stdio::inherit())
-                        .stderr(Stdio::inherit())
-                        .spawn()
-                        .expect("update rustup failed")
-                        .wait();
-
-                    let _ = Command::new("rustup")
-                        .arg("update")
-                        .arg("stable")
-                        .stdout(Stdio::inherit())
-                        .stderr(Stdio::inherit())
-                        .spawn()
-                        .expect("update rust failed")
-                        .wait();
+                    rust_cli::commands::run("rustup self update").expect("update rustup failed");
+                    rust_cli::commands::run("rustup update stable").expect("update rust failed");
                 }
                 _ => (),
             }

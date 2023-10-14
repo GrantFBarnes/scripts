@@ -7,3 +7,4 @@ edition = "2021"
 
 [dependencies]
 dialoguer = "0.10.2"
+rust-cli = { git = "https://github.com/GrantFBarnes/rust-cli", version = "0.1.0" }

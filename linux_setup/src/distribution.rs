@@ -3,6 +3,8 @@ use std::fs;
 use std::process::{Command, Stdio};
 use std::str::{Split, SplitWhitespace};
 
+extern crate rust_cli;
+
 use crate::helper;
 use crate::Info;
 
@@ -36,16 +38,8 @@ impl Distribution {
                     "redhat" => {
                         self.install("https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm",info);
                         self.install("https://download1.rpmfusion.org/free/el/rpmfusion-free-release-9.noarch.rpm",info);
-                        let _ = Command::new("sudo")
-                            .arg("dnf")
-                            .arg("config-manager")
-                            .arg("--set-enabled")
-                            .arg("crb")
-                            .stdout(Stdio::inherit())
-                            .stderr(Stdio::inherit())
-                            .spawn()
-                            .expect("enable crb failed")
-                            .wait();
+                        rust_cli::commands::run("sudo dnf config-manager --set-enabled crb")
+                            .expect("enable crb failed");
                     }
                     _ => (),
                 }
@@ -107,6 +101,9 @@ impl Distribution {
                 if self.package_manager == "pacman" {
                     return Option::from(vec!["code"]);
                 }
+                if self.repository == "debian" {
+                    return Option::from(vec!["code"]);
+                }
                 None
             }
             "cups" => Option::from(vec!["cups"]),
@@ -131,6 +128,9 @@ impl Distribution {
                 if self.package_manager == "pacman" {
                     return Option::from(vec!["dotnet-runtime-6.0"]);
                 }
+                if self.repository == "debian" {
+                    return Option::from(vec!["dotnet-runtime-6.0"]);
+                }
                 if self.repository == "ubuntu" {
                     return Option::from(vec!["dotnet-runtime-6.0"]);
                 }
@@ -141,6 +141,9 @@ impl Distribution {
                     return Option::from(vec!["dotnet-sdk-6.0"]);
                 }
                 if self.package_manager == "pacman" {
+                    return Option::from(vec!["dotnet-sdk-6.0"]);
+                }
+                if self.repository == "debian" {
                     return Option::from(vec!["dotnet-sdk-6.0"]);
                 }
                 if self.repository == "ubuntu" {
@@ -155,6 +158,9 @@ impl Distribution {
                 if self.package_manager == "pacman" {
                     return Option::from(vec!["dotnet-runtime"]);
                 }
+                if self.repository == "debian" {
+                    return Option::from(vec!["dotnet-runtime-7.0"]);
+                }
                 if self.repository == "ubuntu" {
                     return Option::from(vec!["dotnet-runtime-7.0"]);
                 }
@@ -166,6 +172,9 @@ impl Distribution {
                 }
                 if self.package_manager == "pacman" {
                     return Option::from(vec!["dotnet-sdk"]);
+                }
+                if self.repository == "debian" {
+                    return Option::from(vec!["dotnet-sdk-7.0"]);
                 }
                 if self.repository == "ubuntu" {
                     return Option::from(vec!["dotnet7"]);
@@ -578,7 +587,7 @@ impl Distribution {
                 Option::from(vec!["transmission-qt"])
             }
             "vim" => {
-                if self.package_manager == "dnf" || self.package_manager == "pacman" {
+                if self.package_manager == "dnf" {
                     return Option::from(vec!["vim-enhanced"]);
                 }
                 Option::from(vec!["vim"])
@@ -720,56 +729,19 @@ impl Distribution {
 
         match self.package_manager {
             "apt" => {
-                let _ = Command::new("sudo")
-                    .arg("apt")
-                    .arg("update")
-                    .stdout(Stdio::inherit())
-                    .stderr(Stdio::inherit())
-                    .spawn()
-                    .expect("apt update failed")
-                    .wait();
-
-                let _ = Command::new("sudo")
-                    .arg("apt")
-                    .arg("upgrade")
-                    .arg("-Vy")
-                    .stdout(Stdio::inherit())
-                    .stderr(Stdio::inherit())
-                    .spawn()
-                    .expect("apt upgrade failed")
-                    .wait();
+                rust_cli::commands::run("sudo apt update").expect("apt update failed");
+                rust_cli::commands::run("sudo apt upgrade -Vy").expect("apt upgrade failed");
             }
             "dnf" => {
-                let _ = Command::new("sudo")
-                    .arg("dnf")
-                    .arg("upgrade")
-                    .arg("--refresh")
-                    .arg("-y")
-                    .stdout(Stdio::inherit())
-                    .stderr(Stdio::inherit())
-                    .spawn()
-                    .expect("dnf upgrade failed")
-                    .wait();
+                rust_cli::commands::run("sudo dnf upgrade --refresh -y")
+                    .expect("dnf upgrade failed");
             }
             "pacman" => {
-                let _ = Command::new("sudo")
-                    .arg("pacman")
-                    .arg("-Syu")
-                    .arg("--noconfirm")
-                    .stdout(Stdio::inherit())
-                    .stderr(Stdio::inherit())
-                    .spawn()
-                    .expect("pacman update failed")
-                    .wait();
+                rust_cli::commands::run("sudo pacman -Syu --noconfirm")
+                    .expect("pacman update failed");
             }
             "rpm-ostree" => {
-                let _ = Command::new("rpm-ostree")
-                    .arg("upgrade")
-                    .stdout(Stdio::inherit())
-                    .stderr(Stdio::inherit())
-                    .spawn()
-                    .expect("rpm-ostree upgrade failed")
-                    .wait();
+                rust_cli::commands::run("rpm-ostree upgrade").expect("rpm-ostree upgrade failed");
             }
             _ => (),
         }
@@ -780,26 +752,10 @@ impl Distribution {
 
         match self.package_manager {
             "apt" => {
-                let _ = Command::new("sudo")
-                    .arg("apt")
-                    .arg("autoremove")
-                    .arg("-Vy")
-                    .stdout(Stdio::inherit())
-                    .stderr(Stdio::inherit())
-                    .spawn()
-                    .expect("apt auto remove failed")
-                    .wait();
+                rust_cli::commands::run("sudo apt autoremove -Vy").expect("apt auto remove failed");
             }
             "dnf" => {
-                let _ = Command::new("sudo")
-                    .arg("dnf")
-                    .arg("autoremove")
-                    .arg("-y")
-                    .stdout(Stdio::inherit())
-                    .stderr(Stdio::inherit())
-                    .spawn()
-                    .expect("dnf auto remove failed")
-                    .wait();
+                rust_cli::commands::run("sudo dnf autoremove -y").expect("dnf auto remove failed");
             }
             "pacman" => {
                 let mut list_cmd: Command = Command::new("pacman");
@@ -833,27 +789,10 @@ impl Distribution {
 
     pub fn setup_snap(&self) {
         if self.package_manager == "dnf" {
-            let _ = Command::new("sudo")
-                .arg("systemctl")
-                .arg("enable")
-                .arg("--now")
-                .arg("snapd.socket")
-                .stdout(Stdio::inherit())
-                .stderr(Stdio::inherit())
-                .spawn()
-                .expect("start snap failed")
-                .wait();
-
-            let _ = Command::new("sudo")
-                .arg("ln")
-                .arg("-s")
-                .arg("/var/lib/snapd/snap")
-                .arg("/snap")
-                .stdout(Stdio::inherit())
-                .stderr(Stdio::inherit())
-                .spawn()
-                .expect("link snap failed")
-                .wait();
+            rust_cli::commands::run("sudo systemctl enable --now snapd.socket")
+                .expect("start snap failed");
+            rust_cli::commands::run("sudo ln -s /var/lib/snapd/snap /snap")
+                .expect("link snap failed");
         }
     }
 
