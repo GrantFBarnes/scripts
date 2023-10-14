@@ -773,18 +773,6 @@ fn post_uninstall(package: &str, distribution: &Distribution, method: &str) {
                     .expect("remove go failed");
             }
         }
-        "dotnet-runtime-6" | "dotnet-sdk-6" | "dotnet-runtime-7" | "dotnet-sdk-7" => {
-            if method != "repository" {
-                if distribution.repository == "debian" {
-                    rust_cli::commands::run("sudo rm /etc/apt/sources.list.d/microsoft-prod.list")
-                        .expect("remove microsoft repo failed");
-                }
-            }
-            if method == "uninstall" {
-                rust_cli::commands::run(format!("sudo rm -r {}{}", &home_dir, "/.dotnet").as_str())
-                    .expect("remove dotnet files failed");
-            }
-        }
         "pycharm" => {
             if method != "repository" {
                 if distribution.name == "fedora" {
@@ -826,6 +814,7 @@ fn pre_install(package: &str, distribution: &Distribution, info: &mut Info, meth
                 if distribution.package_manager == "apt" {
                     distribution.install("wget", info);
                     distribution.install("gpg", info);
+
                     rust_cli::commands::run("wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > packages.microsoft.gpg").expect("get microsoft key failed");
                     rust_cli::commands::run("sudo install -D -o root -g root -m 644 packages.microsoft.gpg /etc/apt/keyrings/packages.microsoft.gpg").expect("install microsoft key failed");
                     rust_cli::commands::run("rm -f packages.microsoft.gpg")
@@ -845,6 +834,8 @@ fn pre_install(package: &str, distribution: &Distribution, info: &mut Info, meth
                         .spawn()
                         .expect("add microsoft repo failed")
                         .wait();
+
+                    rust_cli::commands::run("sudo apt update").expect("update apt repos failed");
                 }
                 if distribution.package_manager == "dnf" {
                     rust_cli::commands::run(
@@ -874,11 +865,14 @@ fn pre_install(package: &str, distribution: &Distribution, info: &mut Info, meth
             if method == "repository" {
                 if distribution.repository == "debian" {
                     distribution.install("wget", info);
+
                     rust_cli::commands::run("wget https://packages.microsoft.com/config/debian/12/packages-microsoft-prod.deb -O packages-microsoft-prod.deb").expect("get microsoft deb failed");
                     rust_cli::commands::run("sudo dpkg -i packages-microsoft-prod.deb")
                         .expect("install microsoft deb failed");
                     rust_cli::commands::run("rm packages-microsoft-prod.deb")
                         .expect("remove microsoft deb failed");
+
+                    rust_cli::commands::run("sudo apt update").expect("update apt repos failed");
                 }
             }
         }
