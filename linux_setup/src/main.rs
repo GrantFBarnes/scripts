@@ -745,7 +745,7 @@ fn post_uninstall(package: &str, distribution: &Distribution, method: &str) {
     match package {
         "code" => {
             if method != "repository" {
-                if distribution.repository == "debian" {
+                if distribution.package_manager == "apt" {
                     rust_cli::commands::run("sudo rm /etc/apt/sources.list.d/vscode.list")
                         .expect("remove vscode repo failed");
                 }
@@ -823,25 +823,34 @@ fn pre_install(package: &str, distribution: &Distribution, info: &mut Info, meth
     match package {
         "code" => {
             if method == "repository" {
-                if distribution.repository == "debian" {
+                if distribution.package_manager == "apt" {
                     distribution.install("wget", info);
                     distribution.install("gpg", info);
                     rust_cli::commands::run("wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > packages.microsoft.gpg").expect("get microsoft key failed");
                     rust_cli::commands::run("sudo install -D -o root -g root -m 644 packages.microsoft.gpg /etc/apt/keyrings/packages.microsoft.gpg").expect("install microsoft key failed");
-                    rust_cli::commands::run("sudo sh -c 'echo \"deb [arch=amd64,arm64,armhf signed-by=/etc/apt/keyrings/packages.microsoft.gpg] https://packages.microsoft.com/repos/code stable main\" > /etc/apt/sources.list.d/vscode.list'").expect("adding microsoft repo failed");
                     rust_cli::commands::run("rm -f packages.microsoft.gpg")
                         .expect("remove microsoft key failed");
-                }
-                if distribution.package_manager == "dnf" {
+
+                    let echo_cmd = Command::new("echo")
+                        .arg("deb [arch=amd64,arm64,armhf signed-by=/etc/apt/keyrings/packages.microsoft.gpg] https://packages.microsoft.com/repos/code stable main")
+                        .stdout(Stdio::piped())
+                        .spawn()
+                        .unwrap();
                     let _ = Command::new("sudo")
-                        .arg("rpm")
-                        .arg("--import")
-                        .arg("https://packages.microsoft.com/keys/microsoft.asc")
+                        .arg("tee")
+                        .arg("/etc/apt/sources.list.d/vscode.list")
+                        .stdin(Stdio::from(echo_cmd.stdout.unwrap()))
                         .stdout(Stdio::inherit())
                         .stderr(Stdio::inherit())
                         .spawn()
-                        .expect("import microsoft package keys failed")
+                        .expect("add microsoft repo failed")
                         .wait();
+                }
+                if distribution.package_manager == "dnf" {
+                    rust_cli::commands::run(
+                        "sudo rpm --import https://packages.microsoft.com/keys/microsoft.asc",
+                    )
+                    .expect("import microsoft package keys failed");
 
                     let echo_cmd = Command::new("echo")
                         .arg("-e")
