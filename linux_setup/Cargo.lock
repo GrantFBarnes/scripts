@@ -103,8 +103,8 @@ dependencies = [
 
 [[package]]
 name = "rust-cli"
-version = "0.1.0"
-source = "git+https://github.com/GrantFBarnes/rust-cli#6e7fda67bb8edac750eeff0b80ab5b1662d31038"
+version = "0.1.1"
+source = "git+https://github.com/GrantFBarnes/rust-cli#b1f222ae87120b2603b44accad075b20f64c7374"
 
 [[package]]
 name = "tempfile"
