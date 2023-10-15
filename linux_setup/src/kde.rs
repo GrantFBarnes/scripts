@@ -63,9 +63,10 @@ pub fn setup() {
         set_config(
             APPLET_PATH,
             &groups,
-            "dateFormat",
-            format!("\"{}\"", "isoDate"),
+            "dateDisplayFormat",
+            "BesideTime".to_string(),
         );
+        set_config(APPLET_PATH, &groups, "dateFormat", "isoDate".to_string());
         set_config(APPLET_PATH, &groups, "showSeconds", true.to_string());
     }
 
@@ -78,14 +79,6 @@ pub fn setup() {
         groups.push("General");
         set_config(APPLET_PATH, &groups, "showPercentage", true.to_string());
     }
-
-    // Set Night Color
-    let groups: Vec<&str> = vec!["NightColor"];
-    set_config("kwinrc", &groups, "Active", true.to_string());
-    set_config("kwinrc", &groups, "Mode", format!("\"{}\"", "Times"));
-    set_config("kwinrc", &groups, "MorningBeginFixed", "0700".to_string());
-    set_config("kwinrc", &groups, "EveningBeginFixed", "1900".to_string());
-    set_config("kwinrc", &groups, "NightTemperature", "2300".to_string());
 
     // Set NumLock
     let groups: Vec<&str> = vec!["Keyboard"];
@@ -114,7 +107,7 @@ pub fn setup() {
         "ksmserverrc",
         &groups,
         "loginMode",
-        format!("\"{}\"", "emptySession"),
+        "emptySession".to_string(),
     );
 
     // Set Kate
