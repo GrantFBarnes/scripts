@@ -1,20 +1,28 @@
+use std::process::Command;
+
 use crate::distribution::Distribution;
 
 fn settings_set<S>(path: S, key: S, value: String)
 where
     S: Into<String>,
 {
-    rust_cli::commands::run_silent(
-        format!("gsettings set {} {} {}", path.into(), key.into(), value).as_str(),
-    )
-    .expect("failed to set gnome settings");
+    let _ = Command::new("gsettings")
+        .arg("set")
+        .arg(path.into())
+        .arg(key.into())
+        .arg(value)
+        .status()
+        .expect("failed to set gnome settings");
 }
 
 fn settings_reset<S>(path: S)
 where
     S: Into<String>,
 {
-    rust_cli::commands::run_silent(format!("gsettings reset-recursively {}", path.into()).as_str())
+    let _ = Command::new("gsettings")
+        .arg("reset-recursively")
+        .arg(path.into())
+        .status()
         .expect("failed to reset gnome settings");
 }
 
