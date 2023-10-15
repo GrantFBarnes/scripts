@@ -1099,6 +1099,13 @@ fn get_install_method(package: &str, distribution: &Distribution, info: &Info) -
     return helper::get_colored_string("Uninstalled", "red");
 }
 
+fn is_installed(package: &str, distribution: &Distribution, info: &Info) -> bool {
+    distribution.is_installed(package, info)
+        || flatpak::is_installed(package, info)
+        || snap::is_installed(package, info)
+        || other::is_installed(package, info)
+}
+
 fn run_package_select(package: &str, distribution: &Distribution, info: &mut Info) {
     let mut options_display: Vec<String> = vec![];
     let mut options_value: Vec<&str> = vec![];
@@ -1226,7 +1233,7 @@ fn run_category_select(
             || (pkg.desktop_environment == "kde" && !info.has_kde)
         {
             missing_desktop_environment = true;
-            if !show_all_desktop_environments {
+            if !show_all_desktop_environments && !is_installed(pkg.key, distribution, info) {
                 continue;
             }
             missing_pkg_desktop_environment = true;
