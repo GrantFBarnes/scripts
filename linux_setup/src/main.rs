@@ -14,7 +14,7 @@ mod kde;
 mod other;
 mod snap;
 
-use crate::distribution::Distribution;
+use crate::distribution::{Distribution, DistributionName, PackageManager, Repository};
 use crate::snap::Snap;
 
 pub struct Info {
@@ -745,11 +745,11 @@ fn post_uninstall(package: &str, distribution: &Distribution, method: &str) {
     match package {
         "code" => {
             if method != "repository" {
-                if distribution.package_manager == "apt" {
+                if distribution.package_manager == PackageManager::APT {
                     rust_cli::commands::run("sudo rm /etc/apt/sources.list.d/vscode.list")
                         .expect("remove vscode repo failed");
                 }
-                if distribution.package_manager == "dnf" {
+                if distribution.package_manager == PackageManager::DNF {
                     rust_cli::commands::run("sudo dnf config-manager --set-disabled code")
                         .expect("disable code repo failed");
                     rust_cli::commands::run("sudo rm /etc/yum.repos.d/vscode.repo")
@@ -775,7 +775,7 @@ fn post_uninstall(package: &str, distribution: &Distribution, method: &str) {
         }
         "pycharm" => {
             if method != "repository" {
-                if distribution.name == "fedora" {
+                if distribution.name == DistributionName::Fedora {
                     rust_cli::commands::run(
                         "sudo dnf config-manager --set-disabled phracek-PyCharm",
                     )
@@ -811,7 +811,7 @@ fn pre_install(package: &str, distribution: &Distribution, info: &mut Info, meth
     match package {
         "code" => {
             if method == "repository" {
-                if distribution.package_manager == "apt" {
+                if distribution.package_manager == PackageManager::APT {
                     distribution.install("wget", info);
                     distribution.install("gpg", info);
 
@@ -846,7 +846,7 @@ fn pre_install(package: &str, distribution: &Distribution, info: &mut Info, meth
 
                     rust_cli::commands::run("sudo apt update").expect("update apt repos failed");
                 }
-                if distribution.package_manager == "dnf" {
+                if distribution.package_manager == PackageManager::DNF {
                     rust_cli::commands::run(
                         "sudo rpm --import https://packages.microsoft.com/keys/microsoft.asc",
                     )
@@ -872,7 +872,7 @@ fn pre_install(package: &str, distribution: &Distribution, info: &mut Info, meth
         }
         "dotnet-runtime-6" | "dotnet-sdk-6" | "dotnet-runtime-7" | "dotnet-sdk-7" => {
             if method == "repository" {
-                if distribution.repository == "debian" {
+                if distribution.repository == Repository::Debian {
                     distribution.install("wget", info);
 
                     rust_cli::commands::run("wget https://packages.microsoft.com/config/debian/12/packages-microsoft-prod.deb -O packages-microsoft-prod.deb").expect("get microsoft deb failed");
@@ -887,7 +887,7 @@ fn pre_install(package: &str, distribution: &Distribution, info: &mut Info, meth
         }
         "nodejs" => {
             if method == "repository" {
-                if distribution.package_manager == "dnf" {
+                if distribution.package_manager == PackageManager::DNF {
                     rust_cli::commands::run("sudo dnf module enable nodejs:18 -y")
                         .expect("enable nodejs module failed");
                 }
@@ -895,7 +895,7 @@ fn pre_install(package: &str, distribution: &Distribution, info: &mut Info, meth
         }
         "pycharm" => {
             if method == "repository" {
-                if distribution.repository == "fedora" {
+                if distribution.repository == Repository::Fedora {
                     rust_cli::commands::run(
                         "sudo dnf config-manager --set-enabled phracek-PyCharm",
                     )

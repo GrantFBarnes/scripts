@@ -1,6 +1,6 @@
 use std::process::Command;
 
-use crate::distribution::Distribution;
+use crate::distribution::{Distribution, DistributionName};
 
 fn settings_set<S>(path: S, key: S, value: String)
 where
@@ -95,7 +95,7 @@ pub fn setup(distribution: &Distribution) {
     );
 
     // Set Ubuntu Settings
-    if distribution.name == "ubuntu" {
+    if distribution.name == DistributionName::Ubuntu {
         settings_set(
             "org.gnome.shell.extensions.ding",
             "show-home",

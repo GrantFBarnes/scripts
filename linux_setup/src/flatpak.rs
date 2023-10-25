@@ -1,7 +1,7 @@
 use std::process::Command;
 use std::str::Split;
 
-use crate::distribution::Distribution;
+use crate::distribution::{Distribution, PackageManager};
 use crate::helper;
 use crate::Info;
 
@@ -13,7 +13,7 @@ pub fn setup(distribution: &Distribution) {
     )
     .expect("flatpak flathub setup failed");
 
-    if distribution.package_manager == "dnf" {
+    if distribution.package_manager == PackageManager::DNF {
         rust_cli::commands::run(
             "flatpak remote-add --if-not-exists fedora oci+https://registry.fedoraproject.org",
         )
