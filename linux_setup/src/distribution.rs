@@ -838,24 +838,28 @@ impl Distribution {
     pub fn get_installed(&self) -> Vec<String> {
         let mut packages: Vec<String> = vec![];
 
-        let mut cmd: Command = Command::new("");
+        let mut cmd: Command = match self.package_manager {
+            PackageManager::APT => Command::new(get_package_manager_name(PackageManager::APT)),
+            PackageManager::DNF => Command::new(get_package_manager_name(PackageManager::DNF)),
+            PackageManager::PACMAN => {
+                Command::new(get_package_manager_name(PackageManager::PACMAN))
+            }
+            PackageManager::RPMOSTree => Command::new("rpm"),
+        };
+
         match self.package_manager {
             PackageManager::APT => {
-                cmd.arg(get_package_manager_name(PackageManager::APT));
                 cmd.arg("list");
                 cmd.arg("--installed");
             }
             PackageManager::DNF => {
-                cmd.arg(get_package_manager_name(PackageManager::DNF));
                 cmd.arg("list");
                 cmd.arg("installed");
             }
             PackageManager::PACMAN => {
-                cmd.arg(get_package_manager_name(PackageManager::PACMAN));
                 cmd.arg("-Q");
             }
             PackageManager::RPMOSTree => {
-                cmd = Command::new("rpm");
                 cmd.arg("-qa");
             }
         }
