@@ -160,66 +160,8 @@ impl Distribution {
                 }
                 None
             }
-            "dotnet-runtime-6" => {
-                if self.package_manager == PackageManager::DNF {
-                    return Option::from(vec!["dotnet-runtime-6.0"]);
-                }
-                if self.package_manager == PackageManager::PACMAN {
-                    return Option::from(vec!["dotnet-runtime-6.0"]);
-                }
-                if self.repository == Repository::Debian {
-                    return Option::from(vec!["dotnet-runtime-6.0"]);
-                }
-                if self.repository == Repository::Ubuntu {
-                    return Option::from(vec!["dotnet-runtime-6.0"]);
-                }
-                None
-            }
-            "dotnet-sdk-6" => {
-                if self.package_manager == PackageManager::DNF {
-                    return Option::from(vec!["dotnet-sdk-6.0"]);
-                }
-                if self.package_manager == PackageManager::PACMAN {
-                    return Option::from(vec!["dotnet-sdk-6.0"]);
-                }
-                if self.repository == Repository::Debian {
-                    return Option::from(vec!["dotnet-sdk-6.0"]);
-                }
-                if self.repository == Repository::Ubuntu {
-                    return Option::from(vec!["dotnet6"]);
-                }
-                None
-            }
-            "dotnet-runtime-7" => {
-                if self.package_manager == PackageManager::DNF {
-                    return Option::from(vec!["dotnet-runtime-7.0"]);
-                }
-                if self.package_manager == PackageManager::PACMAN {
-                    return Option::from(vec!["dotnet-runtime"]);
-                }
-                if self.repository == Repository::Debian {
-                    return Option::from(vec!["dotnet-runtime-7.0"]);
-                }
-                if self.repository == Repository::Ubuntu {
-                    return Option::from(vec!["dotnet-runtime-7.0"]);
-                }
-                None
-            }
-            "dotnet-sdk-7" => {
-                if self.package_manager == PackageManager::DNF {
-                    return Option::from(vec!["dotnet-sdk-7.0"]);
-                }
-                if self.package_manager == PackageManager::PACMAN {
-                    return Option::from(vec!["dotnet-sdk"]);
-                }
-                if self.repository == Repository::Debian {
-                    return Option::from(vec!["dotnet-sdk-7.0"]);
-                }
-                if self.repository == Repository::Ubuntu {
-                    return Option::from(vec!["dotnet7"]);
-                }
-                None
-            }
+            "dotnet-runtime-8" => Option::from(vec!["dotnet-runtime-8.0"]),
+            "dotnet-sdk-8" => Option::from(vec!["dotnet-sdk-8.0"]),
             "elisa" => {
                 if self.repository == Repository::RedHat {
                     return None;

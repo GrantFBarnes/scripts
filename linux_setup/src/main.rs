@@ -48,7 +48,7 @@ const CATEGORIES: [&str; 10] = [
     "Utilities",
 ];
 
-const ALL_PACKAGES: [Package; 107] = [
+const ALL_PACKAGES: [Package; 105] = [
     Package {
         display: "0 A.D.",
         key: "0ad",
@@ -116,26 +116,14 @@ const ALL_PACKAGES: [Package; 107] = [
         desktop_environment: "",
     },
     Package {
-        display: "dotnet - C# runtime 6.0 LTS",
-        key: "dotnet-runtime-6",
+        display: "dotnet - C# runtime 8.0 LTS",
+        key: "dotnet-runtime-8",
         category: "Server",
         desktop_environment: "",
     },
     Package {
-        display: "dotnet - C# SDK 6.0 LTS",
-        key: "dotnet-sdk-6",
-        category: "Server",
-        desktop_environment: "",
-    },
-    Package {
-        display: "dotnet - C# runtime 7.0",
-        key: "dotnet-runtime-7",
-        category: "Server",
-        desktop_environment: "",
-    },
-    Package {
-        display: "dotnet - C# SDK 7.0",
-        key: "dotnet-sdk-7",
+        display: "dotnet - C# SDK 8.0 LTS",
+        key: "dotnet-sdk-8",
         category: "Server",
         desktop_environment: "",
     },
@@ -870,7 +858,7 @@ fn pre_install(package: &str, distribution: &Distribution, info: &mut Info, meth
                 }
             }
         }
-        "dotnet-runtime-6" | "dotnet-sdk-6" | "dotnet-runtime-7" | "dotnet-sdk-7" => {
+        p if p.contains("dotnet") => {
             if method == "repository" {
                 if distribution.repository == Repository::Debian {
                     distribution.install("wget", info);
