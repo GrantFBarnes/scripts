@@ -214,7 +214,8 @@ fn process_directory(path: &String) {
             dot_count = min_dot_count;
         }
     }
-    println!("{}Scan Complete", ".".repeat(max_dot_count - dot_count));
+    rust_cli::ansi::erase::line();
+    rust_cli::ansi::cursor::line_start();
 
     let process_results: thread::Result<Option<HashMap<String, u64>>> = process.join();
     if process_results.is_err() {
