@@ -189,12 +189,10 @@ fn select_directory(path: &String, sizes: HashMap<String, u64>) {
         options_value.push(up_dir.to_string());
     }
 
-    let selection = rust_cli::prompts::select::select_index(
-        "Select Directory to Scan",
-        &options_display,
-        &vec![],
-        Some(15),
-    );
+    let selection = rust_cli::prompts::select::Select::new()
+        .title("Select Directory to Scan")
+        .options(&options_display)
+        .prompt_for_index();
     if selection.is_err() {
         return;
     }
