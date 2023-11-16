@@ -1,4 +1,5 @@
 extern crate rust_cli;
+use rust_cli::ansi::font;
 
 use std::collections::HashMap;
 use std::env;
@@ -12,24 +13,30 @@ use std::thread::{sleep, JoinHandle};
 use std::time::Duration;
 
 const ANSI_RESET: &str = "\x1b[0m";
-const ANSI_RED: &str = "\x1b[31m";
 const ANSI_BLUE: &str = "\x1b[34m";
 const ANSI_CYAN: &str = "\x1b[36m";
 
 fn print_help() {
-    println!(
-        "
-SFS (Scan File System)
-Command line program that finds the disk usage of files/folders in specified path
-
-Usage: {}sfs <PATH>{}
-
-Options:
-  {}<PATH>{}        Path of folder to scan
-  {}-h, --help{}    Print help information
-        ",
-        ANSI_BLUE, ANSI_RESET, ANSI_CYAN, ANSI_RESET, ANSI_CYAN, ANSI_RESET
-    );
+    println!("SFS (Scan File System)");
+    println!("Command line program that finds the disk usage of files/folders in specified path");
+    println!();
+    print!("Usage: ");
+    font::text_color(font::Color::BLUE);
+    print!("sfs <PATH>");
+    font::reset();
+    println!();
+    println!();
+    println!("Options:");
+    font::text_color(font::Color::CYAN);
+    print!("  <PATH>");
+    font::reset();
+    print!("      Path of folder to scan");
+    println!();
+    font::text_color(font::Color::CYAN);
+    print!("  -h, --help");
+    font::reset();
+    print!("  Print help information");
+    println!();
 }
 
 fn get_dir_size(path: &String) -> u64 {
@@ -215,7 +222,10 @@ fn process_directory(path: &String) {
     }
     let process_results: Option<HashMap<String, u64>> = process_results.unwrap();
     if process_results.is_none() {
-        println!("{}{}{} could not be scanned...", ANSI_RED, path, ANSI_RESET);
+        font::text_color(font::Color::RED);
+        print!("{} could not be scanned...", path);
+        font::reset();
+        println!();
         return;
     }
     select_directory(&path, process_results.unwrap());
