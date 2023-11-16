@@ -1,12 +1,13 @@
 extern crate rust_cli;
 use rust_cli::ansi::font;
 
+use std::cmp;
 use std::collections::HashMap;
 use std::env;
 use std::fs;
 use std::fs::{DirEntry, FileType, Metadata, ReadDir};
 use std::io;
-use std::io::{Result, Write};
+use std::io::Write;
 use std::path::PathBuf;
 use std::thread;
 use std::thread::{sleep, JoinHandle};
@@ -40,7 +41,7 @@ fn print_help() {
 }
 
 fn get_dir_size(path: &String) -> u64 {
-    let dir: Result<ReadDir> = fs::read_dir(path);
+    let dir: io::Result<ReadDir> = fs::read_dir(path);
     if dir.is_err() {
         return 0;
     }
@@ -60,14 +61,14 @@ fn get_dir_size(path: &String) -> u64 {
 }
 
 fn get_entry_size(entry: &DirEntry) -> u64 {
-    let file_type: Result<FileType> = entry.file_type();
+    let file_type: io::Result<FileType> = entry.file_type();
     if file_type.is_err() {
         return 0;
     }
     let file_type: FileType = file_type.unwrap();
 
     if file_type.is_file() {
-        let meta_data: Result<Metadata> = entry.metadata();
+        let meta_data: io::Result<Metadata> = entry.metadata();
         if meta_data.is_err() {
             return 0;
         }
@@ -84,7 +85,7 @@ fn get_entry_size(entry: &DirEntry) -> u64 {
 }
 
 fn get_directory_sizes(path: &String) -> Option<HashMap<String, u64>> {
-    let dir: Result<ReadDir> = fs::read_dir(path);
+    let dir: io::Result<ReadDir> = fs::read_dir(path);
     if dir.is_err() {
         return None;
     }
@@ -170,7 +171,7 @@ fn select_directory(path: &String, sizes: HashMap<String, u64>) {
     }
 
     if path != "/" {
-        let up_dir: Result<PathBuf> = fs::canonicalize(PathBuf::from(format!("{}{}", path, "/..")));
+        let up_dir = fs::canonicalize(PathBuf::from(format!("{}{}", path, "/..")));
         if up_dir.is_err() {
             return;
         }
@@ -194,10 +195,13 @@ fn select_directory(path: &String, sizes: HashMap<String, u64>) {
     if selection.is_err() {
         return;
     }
-    process_directory(&options_value[selection.unwrap()]);
+    if process_directory(&options_value[selection.unwrap()]).is_err() {
+        rust_cli::ansi::cursor::previous_lines(cmp::min(sizes.len(), 15) + 2);
+        select_directory(path, sizes);
+    }
 }
 
-fn process_directory(path: &String) {
+fn process_directory(path: &String) -> Result<(), &str> {
     let owned_path: String = path.clone();
     let process: JoinHandle<Option<HashMap<String, u64>>> =
         thread::spawn(move || get_directory_sizes(&owned_path));
@@ -207,7 +211,10 @@ fn process_directory(path: &String) {
     let mut dot_count: usize = 0;
     while !process.is_finished() {
         print!("\rScanning Files{}", ".".repeat(dot_count));
-        io::stdout().flush().unwrap();
+        match io::stdout().flush() {
+            Err(_) => return Err("io stdout flush failed"),
+            _ => (),
+        };
         sleep(Duration::from_millis(250));
         dot_count += 1;
         if dot_count == max_dot_count {
@@ -219,18 +226,13 @@ fn process_directory(path: &String) {
 
     let process_results: thread::Result<Option<HashMap<String, u64>>> = process.join();
     if process_results.is_err() {
-        println!("Thread failed to join");
-        return;
+        return Err("thread failed to join");
     }
-    let process_results: Option<HashMap<String, u64>> = process_results.unwrap();
-    if process_results.is_none() {
-        font::text_color(font::Color::RED);
-        print!("{} could not be scanned...", path);
-        font::reset();
-        println!();
-        return;
-    }
-    select_directory(&path, process_results.unwrap());
+    let process_results: HashMap<String, u64> = process_results
+        .unwrap()
+        .ok_or("selection could not be scanned")?;
+    select_directory(&path, process_results);
+    return Ok(());
 }
 
 fn main() {
@@ -247,5 +249,5 @@ fn main() {
         return;
     }
 
-    process_directory(arg);
+    let _ = process_directory(arg);
 }
