@@ -189,6 +189,7 @@ fn select_directory(path: &String, sizes: HashMap<String, u64>) {
         "Select Directory to Scan",
         &options_display,
         &vec![],
+        Some(15),
     );
     if selection.is_err() {
         return;

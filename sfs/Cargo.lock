@@ -4,8 +4,8 @@ version = 3
 
 [[package]]
 name = "rust-cli"
-version = "0.3.0"
-source = "git+https://github.com/GrantFBarnes/rust-cli#de9f313cf92ec10abfdc243c50f8c597f7282f63"
+version = "0.4.0"
+source = "git+https://github.com/GrantFBarnes/rust-cli#3688a880a267532b81cc7d56387b429891b15be7"
 
 [[package]]
 name = "sfs"
