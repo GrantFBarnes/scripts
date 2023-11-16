@@ -1,4 +1,5 @@
-use dialoguer::Select;
+extern crate rust_cli;
+
 use std::collections::HashMap;
 use std::env;
 use std::fs;
@@ -13,7 +14,6 @@ use std::time::Duration;
 const ANSI_RESET: &str = "\x1b[0m";
 const ANSI_RED: &str = "\x1b[31m";
 const ANSI_BLUE: &str = "\x1b[34m";
-const ANSI_MAGENTA: &str = "\x1b[35m";
 const ANSI_CYAN: &str = "\x1b[36m";
 
 fn print_help() {
@@ -178,24 +178,15 @@ fn select_directory(path: &String, sizes: HashMap<String, u64>) {
         options_value.push(up_dir.to_string());
     }
 
-    let selection: Result<Option<usize>> = Select::new()
-        .with_prompt(format!(
-            "Select Directory to Scan From {}{}{}",
-            ANSI_MAGENTA, path, ANSI_RESET
-        ))
-        .items(&options_display)
-        .default(0)
-        .max_length(15)
-        .interact_opt();
+    let selection = rust_cli::prompts::select::select_index(
+        "Select Directory to Scan",
+        &options_display,
+        &vec![],
+    );
     if selection.is_err() {
         return;
     }
-    let selection: Option<usize> = selection.unwrap();
-    if selection.is_none() {
-        return;
-    }
-    let selection = selection.unwrap();
-    process_directory(&options_value[selection]);
+    process_directory(&options_value[selection.unwrap()]);
 }
 
 fn process_directory(path: &String) {
