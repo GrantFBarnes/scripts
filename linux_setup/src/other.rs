@@ -1,3 +1,4 @@
+use std::io;
 use std::process::{Command, Stdio};
 
 use crate::Info;
@@ -15,7 +16,7 @@ pub fn is_installed(package: &str, info: &Info) -> bool {
     false
 }
 
-pub fn install(package: &str, info: &mut Info) {
+pub fn install(package: &str, info: &mut Info) -> Result<(), io::Error> {
     if is_available(package) {
         if !is_installed(package, info) {
             info.other_installed.push(package.to_owned());
@@ -30,23 +31,22 @@ pub fn install(package: &str, info: &mut Info) {
                         .arg("-sSf")
                         .arg("https://sh.rustup.rs")
                         .stdout(Stdio::piped())
-                        .spawn()
-                        .unwrap();
-                    let _ = Command::new("sh")
+                        .spawn()?;
+                    Command::new("sh")
                         .stdin(Stdio::from(curl_cmd.stdout.unwrap()))
                         .stdout(Stdio::inherit())
                         .stderr(Stdio::inherit())
-                        .spawn()
-                        .expect("install rust failed")
-                        .wait();
+                        .spawn()?
+                        .wait()?;
                 }
                 _ => (),
             }
         }
     }
+    Ok(())
 }
 
-pub fn uninstall(package: &str, info: &mut Info) {
+pub fn uninstall(package: &str, info: &mut Info) -> Result<(), io::Error> {
     if is_available(package) {
         if is_installed(package, info) {
             let index: Option<usize> = info.other_installed.iter().position(|x| *x == package);
@@ -58,37 +58,50 @@ pub fn uninstall(package: &str, info: &mut Info) {
 
             match package {
                 "rust" => {
-                    rust_cli::commands::run("rustup self uninstall")
-                        .expect("uninstall rust failed");
+                    rust_cli::commands::Operation::new()
+                        .command("rustup self uninstall")
+                        .show_output(true)
+                        .run()?;
                 }
                 _ => (),
             }
         }
     }
+    Ok(())
 }
 
-pub fn update(info: &Info) {
+pub fn update(info: &Info) -> Result<(), io::Error> {
     println!("Update other...");
 
     for pkg in PACKAGES {
         if is_installed(pkg, info) {
             match pkg {
                 "rust" => {
-                    rust_cli::commands::run("rustup self update").expect("update rustup failed");
-                    rust_cli::commands::run("rustup update stable").expect("update rust failed");
+                    rust_cli::commands::Operation::new()
+                        .command("rustup self update")
+                        .show_output(true)
+                        .run()?;
+                    rust_cli::commands::Operation::new()
+                        .command("rustup update stable")
+                        .show_output(true)
+                        .run()?;
                 }
                 _ => (),
             }
         }
     }
+    Ok(())
 }
 
-pub fn get_installed() -> Vec<String> {
+pub fn get_installed() -> Result<Vec<String>, io::Error> {
     let mut packages: Vec<String> = vec![];
 
     for pkg in PACKAGES {
         match pkg {
-            "rust" => match Command::new("rustup").arg("--version").output() {
+            "rust" => match rust_cli::commands::Operation::new()
+                .command("rustup --version")
+                .run()
+            {
                 Ok(_) => packages.push(pkg.to_string()),
                 _ => (),
             },
@@ -96,5 +109,5 @@ pub fn get_installed() -> Vec<String> {
         }
     }
 
-    return packages;
+    Ok(packages)
 }

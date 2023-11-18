@@ -1,8 +1,8 @@
+use std::io;
 use std::process::{Command, Stdio};
 use std::str::SplitWhitespace;
 
 use crate::distribution::Distribution;
-use crate::helper;
 use crate::Info;
 
 pub struct Snap {
@@ -260,8 +260,12 @@ pub fn is_installed(package: &str, info: &Info) -> bool {
     false
 }
 
-pub fn install(package: &str, distribution: &Distribution, info: &mut Info) {
-    distribution.install("snap", info);
+pub fn install(
+    package: &str,
+    distribution: &Distribution,
+    info: &mut Info,
+) -> Result<(), io::Error> {
+    distribution.install("snap", info)?;
 
     let pkg: Option<Snap> = get_package(package);
     if pkg.is_some() {
@@ -282,17 +286,16 @@ pub fn install(package: &str, distribution: &Distribution, info: &mut Info) {
                 cmd.arg("--channel");
                 cmd.arg(pkg.channel);
             }
-            let _ = cmd
-                .stdout(Stdio::inherit())
+            cmd.stdout(Stdio::inherit())
                 .stderr(Stdio::inherit())
-                .spawn()
-                .expect("install snap failed")
-                .wait();
+                .spawn()?
+                .wait()?;
         }
     }
+    Ok(())
 }
 
-pub fn uninstall(package: &str, info: &mut Info) {
+pub fn uninstall(package: &str, info: &mut Info) -> Result<(), io::Error> {
     let pkg: Option<Snap> = get_package(package);
     if pkg.is_some() {
         let pkg: Snap = pkg.unwrap();
@@ -304,37 +307,40 @@ pub fn uninstall(package: &str, info: &mut Info) {
 
             println!("Uninstalling snap {}...", pkg.name);
 
-            rust_cli::commands::run(format!("sudo snap remove {}", pkg.name).as_str())
-                .expect("uninstall snap failed");
+            rust_cli::commands::Operation::new()
+                .command(format!("sudo snap remove {}", pkg.name).as_str())
+                .show_output(true)
+                .run()?;
         }
     }
+    Ok(())
 }
 
-pub fn update() {
+pub fn update() -> Result<(), io::Error> {
     println!("Update snap...");
-    rust_cli::commands::run("sudo snap refresh").expect("update snap failed");
+    rust_cli::commands::Operation::new()
+        .command("sudo snap refresh")
+        .show_output(true)
+        .run()?;
+    Ok(())
 }
 
-pub fn get_installed() -> Vec<String> {
+pub fn get_installed() -> Result<Vec<String>, io::Error> {
     let mut packages: Vec<String> = vec![];
 
-    let mut cmd: Command = Command::new("snap");
-    cmd.arg("list");
-
-    let output: Option<String> = helper::get_command_output(cmd);
-    if output.is_some() {
-        let output: String = output.unwrap();
-        for line in output.split("\n") {
-            if line.is_empty() {
-                continue;
-            }
-            let columns: SplitWhitespace = line.split_whitespace();
-            let columns: Vec<&str> = columns.collect::<Vec<&str>>();
-            if !columns.is_empty() {
-                packages.push(columns[0].to_owned());
-            }
+    let output = rust_cli::commands::Operation::new()
+        .command("snap list")
+        .run()?;
+    for line in output.split("\n") {
+        if line.is_empty() {
+            continue;
+        }
+        let columns: SplitWhitespace = line.split_whitespace();
+        let columns: Vec<&str> = columns.collect::<Vec<&str>>();
+        if !columns.is_empty() {
+            packages.push(columns[0].to_owned());
         }
     }
 
-    return packages;
+    Ok(packages)
 }

@@ -1,9 +1,7 @@
-use dialoguer::Confirm;
 use std::fs;
+use std::io;
 use std::process::{Command, Stdio};
 use std::str::{Split, SplitWhitespace};
-
-extern crate rust_cli;
 
 use crate::helper;
 use crate::Info;
@@ -54,7 +52,7 @@ pub struct Distribution {
 }
 
 impl Distribution {
-    pub fn setup(&self, info: &mut Info) {
+    pub fn setup(&self, info: &mut Info) -> Result<(), io::Error> {
         println!("Setup repository...");
 
         if self.package_manager == PackageManager::DNF {
@@ -63,44 +61,47 @@ impl Distribution {
                 "max_parallel_downloads",
                 "max_parallel_downloads=10",
                 true,
-            );
+            )?;
 
-            if Confirm::new()
-                .with_prompt("Do you want to enable EPEL/RPM Fusion Repositories?")
-                .interact()
-                .expect("confirm failed")
+            if rust_cli::prompts::Confirm::new()
+                .message("Do you want to enable EPEL/RPM Fusion Repositories?")
+                .default_no(true)
+                .confirm()?
             {
                 match self.repository {
                     Repository::Fedora => {
-                        self.install("https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-38.noarch.rpm",info);
+                        self.install("https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-38.noarch.rpm",info)?;
                     }
                     Repository::RedHat => {
-                        self.install("https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm",info);
-                        self.install("https://download1.rpmfusion.org/free/el/rpmfusion-free-release-9.noarch.rpm",info);
-                        rust_cli::commands::run("sudo dnf config-manager --set-enabled crb")
-                            .expect("enable crb failed");
+                        self.install("https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm",info)?;
+                        self.install("https://download1.rpmfusion.org/free/el/rpmfusion-free-release-9.noarch.rpm",info)?;
+                        rust_cli::commands::Operation::new()
+                            .command("sudo dnf config-manager --set-enabled crb")
+                            .run()?;
                     }
                     _ => (),
                 }
-                if Confirm::new()
-                    .with_prompt("Do you want to enable Non-Free EPEL/RPM Fusion Repositories?")
-                    .interact()
-                    .expect("confirm failed")
+                if rust_cli::prompts::Confirm::new()
+                    .message("Do you want to enable Non-Free EPEL/RPM Fusion Repositories?")
+                    .default_no(true)
+                    .confirm()?
                 {
                     match self.repository {
                         Repository::Fedora => {
-                            self.install("https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-38.noarch.rpm",info);
+                            self.install("https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-38.noarch.rpm",info)?;
                         }
                         Repository::RedHat => {
-                            self.install("https://download1.rpmfusion.org/nonfree/el/rpmfusion-nonfree-release-9.noarch.rpm",info);
+                            self.install("https://download1.rpmfusion.org/nonfree/el/rpmfusion-nonfree-release-9.noarch.rpm",info)?;
                         }
                         _ => (),
                     }
                 }
 
-                self.update();
+                self.update()?;
             }
         }
+
+        Ok(())
     }
 
     fn get_packages<'a>(&self, package: &'a str) -> Option<Vec<&'a str>> {
@@ -605,7 +606,7 @@ impl Distribution {
         false
     }
 
-    pub fn install(&self, package: &str, info: &mut Info) {
+    pub fn install(&self, package: &str, info: &mut Info) -> Result<(), io::Error> {
         let packages: Option<Vec<&str>> = self.get_packages(package);
         if packages.is_some() {
             for pkg in packages.unwrap() {
@@ -644,17 +645,16 @@ impl Distribution {
                         cmd.arg("-y");
                     }
                 }
-                let _ = cmd
-                    .stdout(Stdio::inherit())
+                cmd.stdout(Stdio::inherit())
                     .stderr(Stdio::inherit())
-                    .spawn()
-                    .expect("install repository failed")
-                    .wait();
+                    .spawn()?
+                    .wait()?;
             }
         }
+        Ok(())
     }
 
-    pub fn uninstall(&self, package: &str, info: &mut Info) {
+    pub fn uninstall(&self, package: &str, info: &mut Info) -> Result<(), io::Error> {
         let packages: Option<Vec<&str>> = self.get_packages(package);
         if packages.is_some() {
             for pkg in packages.unwrap() {
@@ -695,89 +695,110 @@ impl Distribution {
                         cmd.arg("-y");
                     }
                 }
-                let _ = cmd
-                    .stdout(Stdio::inherit())
+                cmd.stdout(Stdio::inherit())
                     .stderr(Stdio::inherit())
-                    .spawn()
-                    .expect("uninstall repository failed")
-                    .wait();
+                    .spawn()?
+                    .wait()?;
             }
         }
+        Ok(())
     }
 
-    pub fn update(&self) {
+    pub fn update(&self) -> Result<(), io::Error> {
         println!("Updating repository...");
 
         match self.package_manager {
             PackageManager::APT => {
-                rust_cli::commands::run("sudo apt update").expect("apt update failed");
-                rust_cli::commands::run("sudo apt upgrade -Vy").expect("apt upgrade failed");
+                rust_cli::commands::Operation::new()
+                    .command("sudo apt update")
+                    .show_output(true)
+                    .run()?;
+                rust_cli::commands::Operation::new()
+                    .command("sudo apt upgrade -Vy")
+                    .show_output(true)
+                    .run()?;
             }
             PackageManager::DNF => {
-                rust_cli::commands::run("sudo dnf upgrade --refresh -y")
-                    .expect("dnf upgrade failed");
+                rust_cli::commands::Operation::new()
+                    .command("sudo dnf upgrade --refresh -y")
+                    .show_output(true)
+                    .run()?;
             }
             PackageManager::PACMAN => {
-                rust_cli::commands::run("sudo pacman -Syu --noconfirm")
-                    .expect("pacman update failed");
+                rust_cli::commands::Operation::new()
+                    .command("sudo pacman -Syu --noconfirm")
+                    .show_output(true)
+                    .run()?;
             }
             PackageManager::RPMOSTree => {
-                rust_cli::commands::run("rpm-ostree upgrade").expect("rpm-ostree upgrade failed");
+                rust_cli::commands::Operation::new()
+                    .command("rpm-ostree upgrade")
+                    .show_output(true)
+                    .run()?;
             }
         }
+        Ok(())
     }
 
-    pub fn auto_remove(&self) {
+    pub fn auto_remove(&self) -> Result<(), io::Error> {
         println!("Auto removing repository...");
 
         match self.package_manager {
             PackageManager::APT => {
-                rust_cli::commands::run("sudo apt autoremove -Vy").expect("apt auto remove failed");
+                rust_cli::commands::Operation::new()
+                    .command("sudo apt autoremove -Vy")
+                    .show_output(true)
+                    .run()?;
             }
             PackageManager::DNF => {
-                rust_cli::commands::run("sudo dnf autoremove -y").expect("dnf auto remove failed");
+                rust_cli::commands::Operation::new()
+                    .command("sudo dnf autoremove -y")
+                    .show_output(true)
+                    .run()?;
             }
             PackageManager::PACMAN => {
                 let mut list_cmd: Command =
                     Command::new(get_package_manager_name(PackageManager::PACMAN));
                 list_cmd.arg("-Qdtq");
-                let orphans: Option<String> = helper::get_command_output(list_cmd);
-                if orphans.is_some() {
-                    let mut rm_cmd: Command = Command::new("sudo");
-                    rm_cmd.arg(get_package_manager_name(PackageManager::PACMAN));
-                    rm_cmd.arg("-Rsun");
-                    let orphans: String = orphans.unwrap();
-                    for line in orphans.split("\n") {
-                        if line.is_empty() {
-                            continue;
-                        }
-                        rm_cmd.arg(line);
+                let orphans = helper::get_command_output(list_cmd)?;
+                let mut rm_cmd: Command = Command::new("sudo");
+                rm_cmd.arg(get_package_manager_name(PackageManager::PACMAN));
+                rm_cmd.arg("-Rsun");
+                for line in orphans.split("\n") {
+                    if line.is_empty() {
+                        continue;
                     }
-                    if rm_cmd.get_args().len() > 2 {
-                        rm_cmd.arg("--noconfirm");
-                        let _ = rm_cmd
-                            .stdout(Stdio::inherit())
-                            .stderr(Stdio::inherit())
-                            .spawn()
-                            .expect("pacman auto remove failed")
-                            .wait();
-                    }
+                    rm_cmd.arg(line);
+                }
+                if rm_cmd.get_args().len() > 2 {
+                    rm_cmd.arg("--noconfirm");
+                    rm_cmd
+                        .stdout(Stdio::inherit())
+                        .stderr(Stdio::inherit())
+                        .spawn()?
+                        .wait()?;
                 }
             }
             _ => (),
         }
+        Ok(())
     }
 
-    pub fn setup_snap(&self) {
+    pub fn setup_snap(&self) -> Result<(), io::Error> {
         if self.package_manager == PackageManager::DNF {
-            rust_cli::commands::run("sudo systemctl enable --now snapd.socket")
-                .expect("start snap failed");
-            rust_cli::commands::run("sudo ln -s /var/lib/snapd/snap /snap")
-                .expect("link snap failed");
+            rust_cli::commands::Operation::new()
+                .command("sudo systemctl enable --now snapd.socket")
+                .show_output(true)
+                .run()?;
+            rust_cli::commands::Operation::new()
+                .command("sudo ln -s /var/lib/snapd/snap /snap")
+                .show_output(true)
+                .run()?;
         }
+        Ok(())
     }
 
-    pub fn get_installed(&self) -> Vec<String> {
+    pub fn get_installed(&self) -> Result<Vec<String>, io::Error> {
         let mut packages: Vec<String> = vec![];
 
         let mut cmd: Command = match self.package_manager {
@@ -806,109 +827,103 @@ impl Distribution {
             }
         }
 
-        let output: Option<String> = helper::get_command_output(cmd);
-        if output.is_some() {
-            let output: String = output.unwrap();
-            for line in output.split("\n") {
-                if line.is_empty() {
-                    continue;
+        let output = helper::get_command_output(cmd)?;
+        for line in output.split("\n") {
+            if line.is_empty() {
+                continue;
+            }
+            let mut package: String = String::new();
+            match self.package_manager {
+                PackageManager::APT => {
+                    let columns: Split<&str> = line.split("/");
+                    let columns: Vec<&str> = columns.collect::<Vec<&str>>();
+                    package = columns[0].to_owned();
                 }
-                let mut package: String = String::new();
-                match self.package_manager {
-                    PackageManager::APT => {
-                        let columns: Split<&str> = line.split("/");
-                        let columns: Vec<&str> = columns.collect::<Vec<&str>>();
-                        package = columns[0].to_owned();
+                PackageManager::DNF => {
+                    let columns: SplitWhitespace = line.split_whitespace();
+                    let columns: Vec<&str> = columns.collect::<Vec<&str>>();
+                    let full_package: String = columns[0].to_owned();
+                    let full_package_split: Option<(&str, &str)> = full_package.rsplit_once(".");
+                    if full_package_split.is_some() {
+                        package = full_package_split.unwrap().0.to_owned();
                     }
-                    PackageManager::DNF => {
-                        let columns: SplitWhitespace = line.split_whitespace();
-                        let columns: Vec<&str> = columns.collect::<Vec<&str>>();
-                        let full_package: String = columns[0].to_owned();
-                        let full_package_split: Option<(&str, &str)> =
-                            full_package.rsplit_once(".");
-                        if full_package_split.is_some() {
-                            package = full_package_split.unwrap().0.to_owned();
-                        }
-                    }
-                    PackageManager::PACMAN => {
-                        let columns: Split<&str> = line.split(" ");
-                        let columns: Vec<&str> = columns.collect::<Vec<&str>>();
-                        package = columns[0].to_owned();
-                    }
-                    PackageManager::RPMOSTree => {
-                        let first_numeric: Option<usize> = line.find(|c: char| c.is_numeric());
-                        if first_numeric.is_some() {
-                            let first_numeric: usize = first_numeric.unwrap();
-                            if first_numeric > 0 {
-                                let prev_char: Option<char> = line.chars().nth(first_numeric - 1);
-                                if prev_char.is_some() {
-                                    if prev_char.unwrap() == '-' {
-                                        package = line.chars().take(first_numeric - 1).collect();
-                                    }
+                }
+                PackageManager::PACMAN => {
+                    let columns: Split<&str> = line.split(" ");
+                    let columns: Vec<&str> = columns.collect::<Vec<&str>>();
+                    package = columns[0].to_owned();
+                }
+                PackageManager::RPMOSTree => {
+                    let first_numeric: Option<usize> = line.find(|c: char| c.is_numeric());
+                    if first_numeric.is_some() {
+                        let first_numeric: usize = first_numeric.unwrap();
+                        if first_numeric > 0 {
+                            let prev_char: Option<char> = line.chars().nth(first_numeric - 1);
+                            if prev_char.is_some() {
+                                if prev_char.unwrap() == '-' {
+                                    package = line.chars().take(first_numeric - 1).collect();
                                 }
                             }
                         }
                     }
                 }
-                if !package.is_empty() {
-                    packages.push(package);
-                }
+            }
+            if !package.is_empty() {
+                packages.push(package);
             }
         }
 
-        return packages;
+        Ok(packages)
     }
 }
 
-pub fn get_distribution() -> Option<Distribution> {
-    let os_release: String =
-        fs::read_to_string("/etc/os-release").expect("failed to read os release");
-    match &os_release {
-        x if x.contains("Arch") => Option::from(Distribution {
+pub fn get_distribution() -> Result<Distribution, io::Error> {
+    match fs::read_to_string("/etc/os-release")? {
+        x if x.contains("Arch") => Ok(Distribution {
             name: DistributionName::Arch,
             repository: Repository::Arch,
             package_manager: PackageManager::PACMAN,
         }),
-        x if x.contains("Alma") => Option::from(Distribution {
+        x if x.contains("Alma") => Ok(Distribution {
             name: DistributionName::Alma,
             repository: Repository::RedHat,
             package_manager: PackageManager::DNF,
         }),
-        x if x.contains("CentOS") => Option::from(Distribution {
+        x if x.contains("CentOS") => Ok(Distribution {
             name: DistributionName::CentOS,
             repository: Repository::RedHat,
             package_manager: PackageManager::DNF,
         }),
-        x if x.contains("Debian") => Option::from(Distribution {
+        x if x.contains("Debian") => Ok(Distribution {
             name: DistributionName::Debian,
             repository: Repository::Debian,
             package_manager: PackageManager::APT,
         }),
-        x if x.contains("Silverblue") => Option::from(Distribution {
+        x if x.contains("Silverblue") => Ok(Distribution {
             name: DistributionName::SilverBlue,
             repository: Repository::Fedora,
             package_manager: PackageManager::RPMOSTree,
         }),
-        x if x.contains("Fedora") => Option::from(Distribution {
+        x if x.contains("Fedora") => Ok(Distribution {
             name: DistributionName::Fedora,
             repository: Repository::Fedora,
             package_manager: PackageManager::DNF,
         }),
-        x if x.contains("Mint") => Option::from(Distribution {
+        x if x.contains("Mint") => Ok(Distribution {
             name: DistributionName::Mint,
             repository: Repository::Ubuntu,
             package_manager: PackageManager::APT,
         }),
-        x if x.contains("Pop!_OS") => Option::from(Distribution {
+        x if x.contains("Pop!_OS") => Ok(Distribution {
             name: DistributionName::PopOS,
             repository: Repository::Ubuntu,
             package_manager: PackageManager::APT,
         }),
-        x if x.contains("Ubuntu") => Option::from(Distribution {
+        x if x.contains("Ubuntu") => Ok(Distribution {
             name: DistributionName::Ubuntu,
             repository: Repository::Ubuntu,
             package_manager: PackageManager::APT,
         }),
-        _ => None,
+        _ => Err(io::Error::other("distribution not found")),
     }
 }

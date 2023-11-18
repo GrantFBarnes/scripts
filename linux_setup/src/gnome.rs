@@ -1,127 +1,117 @@
-use std::process::Command;
+use std::io;
 
 use crate::distribution::{Distribution, DistributionName};
 
-fn settings_set<S>(path: S, key: S, value: String)
-where
-    S: Into<String>,
-{
-    let _ = Command::new("gsettings")
-        .arg("set")
-        .arg(path.into())
-        .arg(key.into())
-        .arg(value)
-        .status()
-        .expect("failed to set gnome settings");
+fn settings_set(path: &str, key: &str, value: &str) -> Result<(), io::Error> {
+    rust_cli::commands::Operation::new()
+        .command(format!("gsettings set {} {} {}", path, key, value))
+        .run()?;
+    Ok(())
 }
 
-fn settings_reset<S>(path: S)
-where
-    S: Into<String>,
-{
-    let _ = Command::new("gsettings")
-        .arg("reset-recursively")
-        .arg(path.into())
-        .status()
-        .expect("failed to reset gnome settings");
+fn settings_reset(path: &str) -> Result<(), io::Error> {
+    rust_cli::commands::Operation::new()
+        .command(format!("gsettings reset-recursively {}", path))
+        .run()?;
+    Ok(())
 }
 
-pub fn setup(distribution: &Distribution) {
+pub fn setup(distribution: &Distribution) -> Result<(), io::Error> {
     // Setup Clock
     settings_set(
         "org.gnome.desktop.interface",
         "clock-format",
-        format!("\"{}\"", "12h"),
-    );
+        format!("\"{}\"", "12h").as_str(),
+    )?;
     settings_set(
         "org.gnome.desktop.interface",
         "clock-show-date",
-        true.to_string(),
-    );
+        true.to_string().as_str(),
+    )?;
     settings_set(
         "org.gnome.desktop.interface",
         "clock-show-seconds",
-        true.to_string(),
-    );
+        true.to_string().as_str(),
+    )?;
     settings_set(
         "org.gnome.desktop.interface",
         "clock-show-weekday",
-        true.to_string(),
-    );
+        true.to_string().as_str(),
+    )?;
 
     // Show Battery Percentage
     settings_set(
         "org.gnome.desktop.interface",
         "show-battery-percentage",
-        true.to_string(),
-    );
+        true.to_string().as_str(),
+    )?;
 
     // Enable Overview Hot Corner
     settings_set(
         "org.gnome.desktop.interface",
         "enable-hot-corners",
-        true.to_string(),
-    );
+        true.to_string().as_str(),
+    )?;
 
     // Set Blank Screen to 15 min (900 seconds)
     settings_set(
         "org.gnome.desktop.session",
         "idle-delay",
-        format!("{}", 900),
-    );
+        format!("{}", 900).as_str(),
+    )?;
 
     // Enable Num Lock
     settings_set(
         "org.gnome.desktop.peripherals.keyboard",
         "numlock-state",
-        true.to_string(),
-    );
+        true.to_string().as_str(),
+    )?;
 
     // Set up Touchpad/Mouse
     settings_set(
         "org.gnome.desktop.peripherals.touchpad",
         "tap-to-click",
-        true.to_string(),
-    );
+        true.to_string().as_str(),
+    )?;
     settings_set(
         "org.gnome.desktop.peripherals.touchpad",
         "natural-scroll",
-        false.to_string(),
-    );
+        false.to_string().as_str(),
+    )?;
     settings_set(
         "org.gnome.desktop.peripherals.mouse",
         "natural-scroll",
-        false.to_string(),
-    );
+        false.to_string().as_str(),
+    )?;
 
     // Set Ubuntu Settings
     if distribution.name == DistributionName::Ubuntu {
         settings_set(
             "org.gnome.shell.extensions.ding",
             "show-home",
-            false.to_string(),
-        );
+            false.to_string().as_str(),
+        )?;
 
         settings_set(
             "org.gnome.shell.extensions.dash-to-dock",
             "dash-max-icon-size",
-            format!("{}", 28),
-        );
+            format!("{}", 28).as_str(),
+        )?;
         settings_set(
             "org.gnome.shell.extensions.dash-to-dock",
             "show-favorites",
-            true.to_string(),
-        );
+            true.to_string().as_str(),
+        )?;
         settings_set(
             "org.gnome.shell.extensions.dash-to-dock",
             "show-mounts",
-            true.to_string(),
-        );
+            true.to_string().as_str(),
+        )?;
         settings_set(
             "org.gnome.shell.extensions.dash-to-dock",
             "show-trash",
-            false.to_string(),
-        );
+            false.to_string().as_str(),
+        )?;
     }
 
     // Set App Folders
@@ -130,8 +120,8 @@ pub fn setup(distribution: &Distribution) {
     const APP_FOLDERS_PATH: &str =
         "org.gnome.desktop.app-folders.folder:/org/gnome/desktop/app-folders/folders/";
 
-    settings_reset(APP_FOLDERS);
-    settings_reset(APP_FOLDERS_PATH);
+    settings_reset(APP_FOLDERS)?;
+    settings_reset(APP_FOLDERS_PATH)?;
 
     settings_set(
         APP_FOLDERS,
@@ -146,18 +136,17 @@ pub fn setup(distribution: &Distribution) {
             'System',
             'Settings',
             'Utilities'
-        ]"
-        .to_owned(),
-    );
+        ]",
+    )?;
 
     settings_set(
-        format!("{}Apps/", APP_FOLDERS_PATH),
-        "name".to_string(),
-        "Apps".to_string(),
-    );
+        format!("{}Apps/", APP_FOLDERS_PATH).as_str(),
+        "name",
+        "Apps",
+    )?;
     settings_set(
-        format!("{}Apps/", APP_FOLDERS_PATH),
-        "apps".to_string(),
+        format!("{}Apps/", APP_FOLDERS_PATH).as_str(),
+        "apps",
         "[
             'bitwarden.desktop',
             'bitwarden_bitwarden.desktop',
@@ -178,18 +167,17 @@ pub fn setup(distribution: &Distribution) {
             'org.gnome.Todo.desktop',
             'usb-creator-gtk.desktop',
             'org.fedoraproject.MediaWriter.desktop'
-        ]"
-        .to_string(),
-    );
+        ]",
+    )?;
 
     settings_set(
-        format!("{}Internet/", APP_FOLDERS_PATH),
-        "name".to_string(),
-        "Internet".to_string(),
-    );
+        format!("{}Internet/", APP_FOLDERS_PATH).as_str(),
+        "name",
+        "Internet",
+    )?;
     settings_set(
-        format!("{}Internet/", APP_FOLDERS_PATH),
-        "apps".to_string(),
+        format!("{}Internet/", APP_FOLDERS_PATH).as_str(),
+        "apps",
         "[
             'chromium_chromium.desktop',
             'chromium-browser.desktop',
@@ -213,18 +201,17 @@ pub fn setup(distribution: &Distribution) {
             'com.transmissionbt.Transmission.desktop',
             'transmission-gtk.desktop',
             'transmission-qt.desktop'
-        ]"
-        .to_string(),
-    );
+        ]",
+    )?;
 
     settings_set(
-        format!("{}Editors/", APP_FOLDERS_PATH),
-        "name".to_string(),
-        "Editors".to_string(),
-    );
+        format!("{}Editors/", APP_FOLDERS_PATH).as_str(),
+        "name",
+        "Editors",
+    )?;
     settings_set(
-        format!("{}Editors/", APP_FOLDERS_PATH),
-        "apps".to_string(),
+        format!("{}Editors/", APP_FOLDERS_PATH).as_str(),
+        "apps",
         "[
             'org.gnome.gedit.desktop',
             'org.gnome.TextEditor.desktop',
@@ -250,18 +237,17 @@ pub fn setup(distribution: &Distribution) {
             'org.texstudio.TeXstudio.desktop',
             'org.gnome.gitg.desktop',
             'vim.desktop'
-        ]"
-        .to_string(),
-    );
+        ]",
+    )?;
 
     settings_set(
-        format!("{}Office/", APP_FOLDERS_PATH),
-        "name".to_string(),
-        "Office".to_string(),
-    );
+        format!("{}Office/", APP_FOLDERS_PATH).as_str(),
+        "name",
+        "Office",
+    )?;
     settings_set(
-        format!("{}Office/", APP_FOLDERS_PATH),
-        "apps".to_string(),
+        format!("{}Office/", APP_FOLDERS_PATH).as_str(),
+        "apps",
         "[
             'libreoffice-writer.desktop',
             'libreoffice_writer.desktop',
@@ -284,18 +270,17 @@ pub fn setup(distribution: &Distribution) {
             'libreoffice_libreoffice.desktop',
             'org.libreoffice.LibreOffice.desktop',
             'libreoffice-startcenter.desktop'
-        ]"
-        .to_string(),
-    );
+        ]",
+    )?;
 
     settings_set(
-        format!("{}MultiMedia/", APP_FOLDERS_PATH),
-        "name".to_string(),
-        "Multi Media".to_string(),
-    );
+        format!("{}MultiMedia/", APP_FOLDERS_PATH).as_str(),
+        "name",
+        "Multi Media",
+    )?;
     settings_set(
-        format!("{}MultiMedia/", APP_FOLDERS_PATH),
-        "apps".to_string(),
+        format!("{}MultiMedia/", APP_FOLDERS_PATH).as_str(),
+        "apps",
         "[
             'blender.desktop',
             'blender_blender.desktop',
@@ -318,18 +303,17 @@ pub fn setup(distribution: &Distribution) {
             'eog.desktop',
             'org.gnome.eog.desktop',
             'org.kde.gwenview.desktop'
-        ]"
-        .to_string(),
-    );
+        ]",
+    )?;
 
     settings_set(
-        format!("{}Games/", APP_FOLDERS_PATH),
-        "name".to_string(),
-        "Games".to_string(),
-    );
+        format!("{}Games/", APP_FOLDERS_PATH).as_str(),
+        "name",
+        "Games",
+    )?;
     settings_set(
-        format!("{}Games/", APP_FOLDERS_PATH),
-        "apps".to_string(),
+        format!("{}Games/", APP_FOLDERS_PATH).as_str(),
+        "apps",
         "[
             'com.valvesoftware.Steam.desktop',
             'steam_steam.desktop',
@@ -349,18 +333,17 @@ pub fn setup(distribution: &Distribution) {
             'xonotic.desktop',
             'xonotic-glx.desktop',
             'xonotic-sdl.desktop'
-        ]"
-        .to_string(),
-    );
+        ]",
+    )?;
 
     settings_set(
-        format!("{}System/", APP_FOLDERS_PATH),
-        "name".to_string(),
-        "System".to_string(),
-    );
+        format!("{}System/", APP_FOLDERS_PATH).as_str(),
+        "name",
+        "System",
+    )?;
     settings_set(
-        format!("{}System/", APP_FOLDERS_PATH),
-        "apps".to_string(),
+        format!("{}System/", APP_FOLDERS_PATH).as_str(),
+        "apps",
         "[
             'org.gnome.Nautilus.desktop',
             'org.kde.dolphin.desktop',
@@ -378,18 +361,17 @@ pub fn setup(distribution: &Distribution) {
             'org.gnome.DejaDup.desktop',
             'org.gnome.seahorse.Application.desktop',
             'htop.desktop'
-        ]"
-        .to_string(),
-    );
+        ]",
+    )?;
 
     settings_set(
-        format!("{}Settings/", APP_FOLDERS_PATH),
-        "name".to_string(),
-        "Settings".to_string(),
-    );
+        format!("{}Settings/", APP_FOLDERS_PATH).as_str(),
+        "name",
+        "Settings",
+    )?;
     settings_set(
-        format!("{}Settings/", APP_FOLDERS_PATH),
-        "apps".to_string(),
+        format!("{}Settings/", APP_FOLDERS_PATH).as_str(),
+        "apps",
         "[
             'org.gnome.Settings.desktop',
             'gnome-control-center.desktop',
@@ -409,18 +391,17 @@ pub fn setup(distribution: &Distribution) {
             'gnome-session-properties.desktop',
             'kdesystemsettings.desktop',
             'software-properties-drivers.desktop'
-        ]"
-        .to_string(),
-    );
+        ]",
+    )?;
 
     settings_set(
-        format!("{}Utilities/", APP_FOLDERS_PATH),
-        "name".to_string(),
-        "Utilities".to_string(),
-    );
+        format!("{}Utilities/", APP_FOLDERS_PATH).as_str(),
+        "name",
+        "Utilities",
+    )?;
     settings_set(
-        format!("{}Utilities/", APP_FOLDERS_PATH),
-        "apps".to_string(),
+        format!("{}Utilities/", APP_FOLDERS_PATH).as_str(),
+        "apps",
         "[
             'org.gnome.Calculator.desktop',
             'simple-scan.desktop',
@@ -481,9 +462,8 @@ pub fn setup(distribution: &Distribution) {
             'org.kde.drkonqi.coredump.gui.desktop',
             'torbrowser-settings.desktop',
             'com.github.micahflee.torbrowser-launcher.settings.desktop'
-        ]"
-        .to_string(),
-    );
+        ]",
+    )?;
 
     // Set App Folder Layout
     settings_set(
@@ -501,9 +481,8 @@ pub fn setup(distribution: &Distribution) {
                 'Settings': <{'position': <7>}>,
                 'Utilities': <{'position': <8>}>
             }
-        ]"
-        .to_string(),
-    );
+        ]",
+    )?;
 
     // Set Favorites
     settings_set(
@@ -522,7 +501,7 @@ pub fn setup(distribution: &Distribution) {
             'org.gnome.gedit.desktop',
             'org.gnome.TextEditor.desktop',
             'org.gnome.Terminal.desktop'
-        ]"
-        .to_string(),
-    );
+        ]",
+    )?;
+    Ok(())
 }

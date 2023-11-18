@@ -1,6 +1,6 @@
 use std::fs;
-use std::io::Result;
-use std::process::{Command, Output};
+use std::io;
+use std::process::Command;
 use std::string::FromUtf8Error;
 
 const ANSI_RESET: &str = "\x1b[0m";
@@ -14,10 +14,7 @@ const ANSI_MAGENTA: &str = "\x1b[35m";
 const ANSI_CYAN: &str = "\x1b[36m";
 const ANSI_WHITE: &str = "\x1b[37m";
 
-pub fn get_colored_string<S>(string: S, color: &str) -> String
-where
-    S: Into<String>,
-{
+pub fn get_colored_string<S: Into<String>>(string: S, color: &str) -> String {
     match color {
         "black" => format!("{}{}{}", ANSI_BLACK, string.into(), ANSI_RESET),
         "red" => format!("{}{}{}", ANSI_RED, string.into(), ANSI_RESET),
@@ -31,43 +28,44 @@ where
     }
 }
 
-pub fn get_command_output(mut command: Command) -> Option<String> {
-    let output: Result<Output> = command.output();
-    if output.is_ok() {
-        let output: Output = output.unwrap();
-        let output: Vec<u8> = output.stdout;
-        let output: std::result::Result<String, FromUtf8Error> = String::from_utf8(output);
-        if output.is_ok() {
-            return Option::from(output.unwrap());
-        }
+pub fn get_command_output(mut command: Command) -> Result<String, io::Error> {
+    let output: Vec<u8> = command.output()?.stdout;
+    let output: Result<String, FromUtf8Error> = String::from_utf8(output);
+    if output.is_err() {
+        return Err(io::Error::other("failed to convert output to string"));
     }
-    None
+    Ok(output.unwrap())
 }
 
-fn append_to_file(path: &String, value: &str, sudo: bool) {
+fn append_to_file(path: &String, value: &str, sudo: bool) -> Result<(), io::Error> {
     if sudo {
-        let _ = Command::new("sudo")
+        Command::new("sudo")
             .arg("sh")
             .arg("-c")
             .arg(format!("echo \'{}\' >> {}", value, path))
-            .spawn();
+            .spawn()?;
     } else {
-        let _ = Command::new("sh")
+        Command::new("sh")
             .arg("-c")
             .arg(format!("echo \'{}\' >> {}", value, path))
-            .spawn();
+            .spawn()?;
     }
+    Ok(())
 }
 
-pub fn append_to_file_if_not_found(path: &String, find_value: &str, add_value: &str, sudo: bool) {
-    let content: Result<String> = fs::read_to_string(path);
-    match content {
-        Ok(_) => {
-            let content: String = content.unwrap();
+pub fn append_to_file_if_not_found(
+    path: &String,
+    find_value: &str,
+    add_value: &str,
+    sudo: bool,
+) -> Result<(), io::Error> {
+    match fs::read_to_string(path) {
+        Ok(content) => {
             if !content.contains(find_value) {
-                append_to_file(path, add_value, sudo);
+                append_to_file(path, add_value, sudo)?;
             }
         }
-        Err(_) => append_to_file(path, add_value, sudo),
+        Err(_) => append_to_file(path, add_value, sudo)?,
     }
+    Ok(())
 }

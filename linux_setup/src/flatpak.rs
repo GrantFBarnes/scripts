@@ -1,24 +1,24 @@
-use std::process::Command;
+use std::io;
 use std::str::Split;
 
 use crate::distribution::{Distribution, PackageManager};
-use crate::helper;
 use crate::Info;
 
-pub fn setup(distribution: &Distribution) {
+pub fn setup(distribution: &Distribution) -> Result<(), io::Error> {
     println!("Setup flatpak...");
 
-    rust_cli::commands::run(
+    rust_cli::commands::Operation::new().command(
         "flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo",
-    )
-    .expect("flatpak flathub setup failed");
+    ).run()?;
 
     if distribution.package_manager == PackageManager::DNF {
-        rust_cli::commands::run(
-            "flatpak remote-add --if-not-exists fedora oci+https://registry.fedoraproject.org",
-        )
-        .expect("flatpak fedora setup failed");
+        rust_cli::commands::Operation::new()
+            .command(
+                "flatpak remote-add --if-not-exists fedora oci+https://registry.fedoraproject.org",
+            )
+            .run()?;
     }
+    Ok(())
 }
 
 fn get_package(package: &str) -> Option<&str> {
@@ -167,9 +167,14 @@ pub fn is_installed(package: &str, info: &Info) -> bool {
     false
 }
 
-pub fn install(package: &str, remote: &str, distribution: &Distribution, info: &mut Info) {
-    distribution.install("flatpak", info);
-    setup(distribution);
+pub fn install(
+    package: &str,
+    remote: &str,
+    distribution: &Distribution,
+    info: &mut Info,
+) -> Result<(), io::Error> {
+    distribution.install("flatpak", info)?;
+    setup(distribution)?;
 
     let pkg: Option<&str> = get_package(package);
     if pkg.is_some() {
@@ -179,13 +184,16 @@ pub fn install(package: &str, remote: &str, distribution: &Distribution, info: &
 
             println!("Installing flatpak {} from {}...", pkg, remote);
 
-            rust_cli::commands::run(format!("flatpak install {} {} -y", remote, pkg).as_str())
-                .expect("install flatpak failed");
+            rust_cli::commands::Operation::new()
+                .command(format!("flatpak install {} {} -y", remote, pkg))
+                .show_output(true)
+                .run()?;
         }
     }
+    Ok(())
 }
 
-pub fn uninstall(package: &str, info: &mut Info) {
+pub fn uninstall(package: &str, info: &mut Info) -> Result<(), io::Error> {
     let pkg: Option<&str> = get_package(package);
     if pkg.is_some() {
         let pkg: &str = pkg.unwrap();
@@ -197,43 +205,49 @@ pub fn uninstall(package: &str, info: &mut Info) {
 
             println!("Uninstalling flatpak {}...", pkg);
 
-            rust_cli::commands::run(format!("flatpak remove {} -y", pkg).as_str())
-                .expect("uninstall flatpak failed");
+            rust_cli::commands::Operation::new()
+                .command(format!("flatpak remove {} -y", pkg))
+                .show_output(true)
+                .run()?;
         }
     }
+    Ok(())
 }
 
-pub fn update() {
+pub fn update() -> Result<(), io::Error> {
     println!("Update flatpak...");
-    rust_cli::commands::run("flatpak update -y").expect("update flatpak failed");
+    rust_cli::commands::Operation::new()
+        .command("flatpak update -y")
+        .show_output(true)
+        .run()?;
+    Ok(())
 }
 
-pub fn auto_remove() {
+pub fn auto_remove() -> Result<(), io::Error> {
     println!("Auto removing flatpak...");
-    rust_cli::commands::run("flatpak remove --unused -y").expect("auto remove flatpak failed");
+    rust_cli::commands::Operation::new()
+        .command("flatpak remove --unused -y")
+        .show_output(true)
+        .run()?;
+    Ok(())
 }
 
-pub fn get_installed() -> Vec<String> {
+pub fn get_installed() -> Result<Vec<String>, io::Error> {
     let mut packages: Vec<String> = vec![];
 
-    let mut cmd: Command = Command::new("flatpak");
-    cmd.arg("list");
-    cmd.arg("--app");
-
-    let output: Option<String> = helper::get_command_output(cmd);
-    if output.is_some() {
-        let output: String = output.unwrap();
-        for line in output.split("\n") {
-            if line.is_empty() {
-                continue;
-            }
-            let columns: Split<&str> = line.split("\t");
-            let columns: Vec<&str> = columns.collect::<Vec<&str>>();
-            if columns.len() > 1 {
-                packages.push(columns[1].to_owned());
-            }
+    let output = rust_cli::commands::Operation::new()
+        .command("flatpak list --app")
+        .run()?;
+    for line in output.split("\n") {
+        if line.is_empty() {
+            continue;
+        }
+        let columns: Split<&str> = line.split("\t");
+        let columns: Vec<&str> = columns.collect::<Vec<&str>>();
+        if columns.len() > 1 {
+            packages.push(columns[1].to_owned());
         }
     }
 
-    return packages;
+    return Ok(packages);
 }
