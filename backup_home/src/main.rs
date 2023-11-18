@@ -61,8 +61,12 @@ fn main() -> Result<(), Error> {
         let tar_file: String = format!("{backup_dir}/{folder}.tar.gz");
         let crypt_file: String = format!("{backup_dir}/{folder}.tar.gz.gpg");
 
-        rust_cli::commands::run_silent(&format!("rm -f {}", &tar_file))?;
-        rust_cli::commands::run_silent(&format!("rm -f {}", &crypt_file))?;
+        rust_cli::commands::Operation::new()
+            .command(&format!("rm -f {}", &tar_file))
+            .run()?;
+        rust_cli::commands::Operation::new()
+            .command(&format!("rm -f {}", &crypt_file))
+            .run()?;
 
         println!("Compressing {}...", &folder);
         let _ = Command::new("tar")
@@ -92,7 +96,9 @@ fn main() -> Result<(), Error> {
                 .expect("gpg command failed")
                 .wait();
 
-            rust_cli::commands::run_silent(&format!("rm -f {}", &tar_file))?;
+            rust_cli::commands::Operation::new()
+                .command(&format!("rm -f {}", &tar_file))
+                .run()?;
         }
     }
 

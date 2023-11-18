@@ -11,5 +11,5 @@ dependencies = [
 
 [[package]]
 name = "rust-cli"
-version = "0.9.0"
-source = "git+https://github.com/GrantFBarnes/rust-cli#9ddf5d5afbfac1104589773b2a954736a0eb7ca9"
+version = "0.13.0"
+source = "git+https://github.com/GrantFBarnes/rust-cli#6d73f66f0d6548f36687efdb62651cf24d0d3027"
