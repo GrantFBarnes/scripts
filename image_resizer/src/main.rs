@@ -1,13 +1,12 @@
-use dialoguer::MultiSelect;
+extern crate rust_cli;
+
 use std::env;
 use std::env::VarError;
 use std::fs;
 use std::fs::{DirEntry, ReadDir};
-use std::io::Result;
-use std::num::ParseIntError;
+use std::io;
 use std::path::PathBuf;
-use std::process::{Command, ExitStatus, Output};
-use std::string::FromUtf8Error;
+use std::process::Command;
 
 const ANSI_RESET: &str = "\x1b[0m";
 const ANSI_RED: &str = "\x1b[31m";
@@ -16,30 +15,12 @@ const ANSI_CYAN: &str = "\x1b[36m";
 
 const MAX_SIZE: u32 = 2400;
 
-fn select_folders(folders: &Vec<String>, prompt: &str) -> Option<Vec<usize>> {
-    let selection: Result<Option<Vec<usize>>> = MultiSelect::new()
-        .with_prompt(prompt)
-        .max_length(10)
-        .items(folders)
-        .interact_opt();
-    if selection.is_ok() {
-        let selection: Option<Vec<usize>> = selection.unwrap();
-        if selection.is_some() {
-            let selection: Vec<usize> = selection.unwrap();
-            if !selection.is_empty() {
-                return Option::from(selection);
-            }
-        }
-    }
-    None
-}
-
 fn get_recursive_folders_files(orig_path: &String, path: &String) -> (Vec<String>, Vec<String>) {
     if path.contains(".git") {
         return (vec![], vec![]);
     }
 
-    let dir: Result<ReadDir> = fs::read_dir(path);
+    let dir = fs::read_dir(path);
     if dir.is_err() {
         return (vec![], vec![]);
     }
@@ -81,59 +62,26 @@ fn get_recursive_folders_files(orig_path: &String, path: &String) -> (Vec<String
     (folders, files)
 }
 
-fn remove_file(file: &String) {
-    let _ = Command::new("rm")
-        .arg("-f")
-        .arg(file)
-        .status()
-        .expect("failed to remove file");
-}
-
-fn get_image_dim(file: &String, dim: &str) -> u32 {
-    let mut cmd: Command = Command::new("identify");
-    cmd.arg("-format");
-    cmd.arg(format!("%[{}]", dim));
-    cmd.arg(file);
-    let output: Result<Output> = cmd.output();
-    if output.is_ok() {
-        let output: Output = output.unwrap();
-        let output: Vec<u8> = output.stdout;
-        let output: std::result::Result<String, FromUtf8Error> = String::from_utf8(output);
-        if output.is_ok() {
-            let output: String = output.unwrap();
-            let dim_size: std::result::Result<u32, ParseIntError> = output.parse::<u32>();
-            if dim_size.is_ok() {
-                return dim_size.unwrap();
-            }
-        }
-    }
-    0
+fn get_image_dim(file: &String, dim: &str) -> Result<u32, io::Error> {
+    Ok(rust_cli::commands::Operation::new()
+        .command(format!("identify -format %[{}] {}", dim, file))
+        .run()?
+        .parse::<u32>()
+        .unwrap_or(0))
 }
 
 fn convert_file(old_file: &String, new_file: &String) -> bool {
-    let convert_status: Result<ExitStatus> =
-        Command::new("convert").arg(old_file).arg(new_file).status();
+    let convert_status = Command::new("convert").arg(old_file).arg(new_file).status();
     if convert_status.is_ok() {
         return convert_status.unwrap().success();
     }
     false
 }
 
-fn resize_file(file: &String, dim: &String) {
-    let _ = Command::new("convert")
-        .arg(file)
-        .arg("-resize")
-        .arg(dim)
-        .arg(file)
-        .status()
-        .expect("failed to resize file");
-}
-
-fn main() {
-    let home_dir: std::result::Result<String, VarError> = env::var("HOME");
+fn main() -> Result<(), io::Error> {
+    let home_dir: Result<String, VarError> = env::var("HOME");
     if home_dir.is_err() {
-        println!("HOME directory could not be determined");
-        return;
+        return Err(io::Error::other("HOME directory could not be determined"));
     }
     let home_dir: String = home_dir.unwrap();
     let pictures_dir: String = format!("{}/Pictures/", &home_dir);
@@ -141,15 +89,10 @@ fn main() {
     let folders_files: (Vec<String>, Vec<String>) =
         get_recursive_folders_files(&pictures_dir, &pictures_dir);
 
-    let mut make_small_folders: Vec<&str> = vec![];
-    let folder_selection: Option<Vec<usize>> =
-        select_folders(&folders_files.0, "Choose folders to make small");
-    if folder_selection.is_some() {
-        let folder_selection: Vec<usize> = folder_selection.unwrap();
-        for idx in folder_selection {
-            make_small_folders.push(&folders_files.0[idx]);
-        }
-    }
+    let make_small_folders = rust_cli::prompts::Select::new()
+        .title("Choose folders to make small")
+        .options(&folders_files.0)
+        .run_multi_select_values()?;
 
     for file_path in &folders_files.1 {
         let extension: Option<(&str, &str)> = file_path.rsplit_once(".");
@@ -167,7 +110,9 @@ fn main() {
             );
             if convert_file(&file_path, &file_name) {
                 println!("    {}Convert Successful{}", ANSI_GREEN, ANSI_RESET);
-                remove_file(&file_path);
+                rust_cli::commands::Operation::new()
+                    .command(format!("rm -f {}", &file_path))
+                    .run()?;
             } else {
                 println!("    {}Failed to Convert{}", ANSI_RED, ANSI_RESET);
                 continue;
@@ -181,8 +126,8 @@ fn main() {
                     ANSI_CYAN, file_name, ANSI_RESET
                 );
 
-                let height: u32 = get_image_dim(&file_name, "h");
-                let width: u32 = get_image_dim(&file_name, "w");
+                let height: u32 = get_image_dim(&file_name, "h")?;
+                let width: u32 = get_image_dim(&file_name, "w")?;
 
                 if height > MAX_SIZE || width > MAX_SIZE {
                     if height > width {
@@ -190,14 +135,24 @@ fn main() {
                             "    Image is {}too tall{} (height: {})",
                             ANSI_RED, ANSI_RESET, height
                         );
-                        resize_file(&file_name, &format!("x{}", MAX_SIZE));
+                        rust_cli::commands::Operation::new()
+                            .command(format!(
+                                "convert {} -resize x{} {}",
+                                &file_name, MAX_SIZE, &file_name
+                            ))
+                            .run()?;
                     } else {
                         println!(
                             "    Image is {}too wide{} (width: {})",
                             ANSI_RED, ANSI_RESET, width
                         );
                         println!("    Image is {}too wide{}", ANSI_RED, ANSI_RESET);
-                        resize_file(&file_name, &format!("{}", MAX_SIZE));
+                        rust_cli::commands::Operation::new()
+                            .command(format!(
+                                "convert {} -resize {} {}",
+                                &file_name, MAX_SIZE, &file_name
+                            ))
+                            .run()?;
                     }
                 } else {
                     println!("    Image is {}small enough{}", ANSI_GREEN, ANSI_RESET);
@@ -214,4 +169,6 @@ fn main() {
         &folders_files.1.len(),
         ANSI_RESET
     );
+
+    Ok(())
 }
