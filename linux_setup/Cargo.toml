@@ -6,4 +6,4 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-rust-cli = { git = "https://github.com/GrantFBarnes/rust-cli", version = "0.13.0" }
+rust-cli = { git = "https://github.com/GrantFBarnes/rust-cli", version = "0.14.0" }

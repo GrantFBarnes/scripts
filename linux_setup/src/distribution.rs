@@ -66,7 +66,7 @@ impl Distribution {
             if rust_cli::prompts::Confirm::new()
                 .message("Do you want to enable EPEL/RPM Fusion Repositories?")
                 .default_no(true)
-                .confirm()?
+                .run()?
             {
                 match self.repository {
                     Repository::Fedora => {
@@ -84,7 +84,7 @@ impl Distribution {
                 if rust_cli::prompts::Confirm::new()
                     .message("Do you want to enable Non-Free EPEL/RPM Fusion Repositories?")
                     .default_no(true)
-                    .confirm()?
+                    .run()?
                 {
                     match self.repository {
                         Repository::Fedora => {

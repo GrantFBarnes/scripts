@@ -710,7 +710,7 @@ fn run_flatpak_remote_select(
         .title(format!("Flatpak Remote: {}", package))
         .options(&options)
         .erase_after(true)
-        .prompt_for_value()?;
+        .run_select_value()?;
     if remote.is_none() {
         return Ok(());
     }
@@ -1169,7 +1169,7 @@ fn run_package_select(
         ))
         .options(&options_display)
         .erase_after(true)
-        .prompt_for_index()?;
+        .run_select_index()?;
     if selection.is_none() {
         return Ok(());
     }
@@ -1289,7 +1289,7 @@ fn run_category_select(
         .options(&options_display)
         .default_index(start_idx)
         .erase_after(true)
-        .prompt_for_index()?;
+        .run_select_index()?;
     if selection.is_none() {
         return Ok(());
     }
@@ -1337,7 +1337,7 @@ fn run_install_packages(
         .options(&options)
         .default_index(start_idx)
         .erase_after(true)
-        .prompt_for_index()?;
+        .run_select_index()?;
     if selection.is_none() {
         return Ok(());
     }
@@ -1372,7 +1372,7 @@ fn run_menu(
         .options(&options)
         .default_index(start_idx)
         .erase_after(true)
-        .prompt_for_index()?;
+        .run_select_index()?;
     if selection.is_none() {
         return Ok(());
     }
