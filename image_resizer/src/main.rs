@@ -75,7 +75,7 @@ fn get_image_dim(file: &String, dim: &str) -> Result<u32, io::Error> {
 fn convert_file(old_file: &String, new_file: &String) -> Result<bool, io::Error> {
     Ok(Operation::new()
         .command(format!("convert {} {} ", old_file, new_file))
-        .run_status()?
+        .run()?
         .success())
 }
 
