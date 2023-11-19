@@ -1,5 +1,7 @@
 extern crate rust_cli;
+
 use rust_cli::ansi::font;
+use rust_cli::prompts::Select;
 
 use std::cmp;
 use std::collections::HashMap;
@@ -189,10 +191,10 @@ fn select_directory(path: &String, sizes: HashMap<String, u64>) {
         options_value.push(up_dir.to_string());
     }
 
-    let selection = rust_cli::prompts::Select::new()
+    let selection = Select::new()
         .title("Select Directory to Scan")
         .options(&options_display)
-        .prompt_for_index();
+        .run_select_index();
     if selection.is_err() {
         return;
     }

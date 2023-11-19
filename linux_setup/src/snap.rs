@@ -1,3 +1,5 @@
+use rust_cli::commands::Operation;
+
 use std::io;
 use std::process::{Command, Stdio};
 use std::str::SplitWhitespace;
@@ -307,7 +309,7 @@ pub fn uninstall(package: &str, info: &mut Info) -> Result<(), io::Error> {
 
             println!("Uninstalling snap {}...", pkg.name);
 
-            rust_cli::commands::Operation::new()
+            Operation::new()
                 .command(format!("sudo snap remove {}", pkg.name).as_str())
                 .show_output(true)
                 .run()?;
@@ -318,7 +320,7 @@ pub fn uninstall(package: &str, info: &mut Info) -> Result<(), io::Error> {
 
 pub fn update() -> Result<(), io::Error> {
     println!("Update snap...");
-    rust_cli::commands::Operation::new()
+    Operation::new()
         .command("sudo snap refresh")
         .show_output(true)
         .run()?;
@@ -328,9 +330,7 @@ pub fn update() -> Result<(), io::Error> {
 pub fn get_installed() -> Result<Vec<String>, io::Error> {
     let mut packages: Vec<String> = vec![];
 
-    let output = rust_cli::commands::Operation::new()
-        .command("snap list")
-        .run()?;
+    let output = Operation::new().command("snap list").run_output()?;
     for line in output.split("\n") {
         if line.is_empty() {
             continue;

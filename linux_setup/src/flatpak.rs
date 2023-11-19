@@ -1,3 +1,5 @@
+use rust_cli::commands::Operation;
+
 use std::io;
 use std::str::Split;
 
@@ -7,12 +9,12 @@ use crate::Info;
 pub fn setup(distribution: &Distribution) -> Result<(), io::Error> {
     println!("Setup flatpak...");
 
-    rust_cli::commands::Operation::new().command(
+    Operation::new().command(
         "flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo",
     ).run()?;
 
     if distribution.package_manager == PackageManager::DNF {
-        rust_cli::commands::Operation::new()
+        Operation::new()
             .command(
                 "flatpak remote-add --if-not-exists fedora oci+https://registry.fedoraproject.org",
             )
@@ -184,7 +186,7 @@ pub fn install(
 
             println!("Installing flatpak {} from {}...", pkg, remote);
 
-            rust_cli::commands::Operation::new()
+            Operation::new()
                 .command(format!("flatpak install {} {} -y", remote, pkg))
                 .show_output(true)
                 .run()?;
@@ -205,7 +207,7 @@ pub fn uninstall(package: &str, info: &mut Info) -> Result<(), io::Error> {
 
             println!("Uninstalling flatpak {}...", pkg);
 
-            rust_cli::commands::Operation::new()
+            Operation::new()
                 .command(format!("flatpak remove {} -y", pkg))
                 .show_output(true)
                 .run()?;
@@ -216,7 +218,7 @@ pub fn uninstall(package: &str, info: &mut Info) -> Result<(), io::Error> {
 
 pub fn update() -> Result<(), io::Error> {
     println!("Update flatpak...");
-    rust_cli::commands::Operation::new()
+    Operation::new()
         .command("flatpak update -y")
         .show_output(true)
         .run()?;
@@ -225,7 +227,7 @@ pub fn update() -> Result<(), io::Error> {
 
 pub fn auto_remove() -> Result<(), io::Error> {
     println!("Auto removing flatpak...");
-    rust_cli::commands::Operation::new()
+    Operation::new()
         .command("flatpak remove --unused -y")
         .show_output(true)
         .run()?;
@@ -235,9 +237,9 @@ pub fn auto_remove() -> Result<(), io::Error> {
 pub fn get_installed() -> Result<Vec<String>, io::Error> {
     let mut packages: Vec<String> = vec![];
 
-    let output = rust_cli::commands::Operation::new()
+    let output = Operation::new()
         .command("flatpak list --app")
-        .run()?;
+        .run_output()?;
     for line in output.split("\n") {
         if line.is_empty() {
             continue;

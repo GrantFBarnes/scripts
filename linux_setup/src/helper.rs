@@ -1,7 +1,6 @@
 use std::fs;
 use std::io;
 use std::process::Command;
-use std::string::FromUtf8Error;
 
 const ANSI_RESET: &str = "\x1b[0m";
 
@@ -26,15 +25,6 @@ pub fn get_colored_string<S: Into<String>>(string: S, color: &str) -> String {
         "white" => format!("{}{}{}", ANSI_WHITE, string.into(), ANSI_RESET),
         _ => string.into(),
     }
-}
-
-pub fn get_command_output(mut command: Command) -> Result<String, io::Error> {
-    let output: Vec<u8> = command.output()?.stdout;
-    let output: Result<String, FromUtf8Error> = String::from_utf8(output);
-    if output.is_err() {
-        return Err(io::Error::other("failed to convert output to string"));
-    }
-    Ok(output.unwrap())
 }
 
 fn append_to_file(path: &String, value: &str, sudo: bool) -> Result<(), io::Error> {

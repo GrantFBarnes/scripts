@@ -1,3 +1,6 @@
+use rust_cli::commands::Operation;
+use rust_cli::prompts::Confirm;
+
 use std::fs;
 use std::io;
 use std::process::{Command, Stdio};
@@ -36,15 +39,6 @@ pub enum PackageManager {
     RPMOSTree,
 }
 
-fn get_package_manager_name(pm: PackageManager) -> &'static str {
-    match pm {
-        PackageManager::APT => "apt",
-        PackageManager::DNF => "dnf",
-        PackageManager::PACMAN => "pacman",
-        PackageManager::RPMOSTree => "rpm-ostree",
-    }
-}
-
 pub struct Distribution {
     pub name: DistributionName,
     pub repository: Repository,
@@ -63,7 +57,7 @@ impl Distribution {
                 true,
             )?;
 
-            if rust_cli::prompts::Confirm::new()
+            if Confirm::new()
                 .message("Do you want to enable EPEL/RPM Fusion Repositories?")
                 .default_no(true)
                 .run()?
@@ -75,13 +69,13 @@ impl Distribution {
                     Repository::RedHat => {
                         self.install("https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm",info)?;
                         self.install("https://download1.rpmfusion.org/free/el/rpmfusion-free-release-9.noarch.rpm",info)?;
-                        rust_cli::commands::Operation::new()
+                        Operation::new()
                             .command("sudo dnf config-manager --set-enabled crb")
                             .run()?;
                     }
                     _ => (),
                 }
-                if rust_cli::prompts::Confirm::new()
+                if Confirm::new()
                     .message("Do you want to enable Non-Free EPEL/RPM Fusion Repositories?")
                     .default_no(true)
                     .run()?
@@ -617,38 +611,32 @@ impl Distribution {
 
                 println!("Installing repository {}...", pkg);
 
-                let mut cmd: Command = Command::new("sudo");
                 match self.package_manager {
                     PackageManager::APT => {
-                        cmd.arg(get_package_manager_name(PackageManager::APT));
-                        cmd.arg("install");
-                        cmd.arg(pkg);
-                        cmd.arg("-Vy");
+                        Operation::new()
+                            .command(format!("sudo apt install {} -Vy", pkg))
+                            .show_output(true)
+                            .run()?;
                     }
                     PackageManager::DNF => {
-                        cmd.arg(get_package_manager_name(PackageManager::DNF));
-                        cmd.arg("install");
-                        cmd.arg(pkg);
-                        cmd.arg("-y");
+                        Operation::new()
+                            .command(format!("sudo dnf install {} -y", pkg))
+                            .show_output(true)
+                            .run()?;
                     }
                     PackageManager::PACMAN => {
-                        cmd.arg(get_package_manager_name(PackageManager::PACMAN));
-                        cmd.arg("-S");
-                        cmd.arg(pkg);
-                        cmd.arg("--noconfirm");
-                        cmd.arg("--needed");
+                        Operation::new()
+                            .command(format!("sudo pacman -S {} --noconfirm --needed", pkg))
+                            .show_output(true)
+                            .run()?;
                     }
                     PackageManager::RPMOSTree => {
-                        cmd.arg(get_package_manager_name(PackageManager::RPMOSTree));
-                        cmd.arg("install");
-                        cmd.arg(pkg);
-                        cmd.arg("-y");
+                        Operation::new()
+                            .command(format!("sudo rpm-ostree install {} -y", pkg))
+                            .show_output(true)
+                            .run()?;
                     }
                 }
-                cmd.stdout(Stdio::inherit())
-                    .stderr(Stdio::inherit())
-                    .spawn()?
-                    .wait()?;
             }
         }
         Ok(())
@@ -668,37 +656,32 @@ impl Distribution {
 
                 println!("Uninstalling repository {}...", pkg);
 
-                let mut cmd: Command = Command::new("sudo");
                 match self.package_manager {
                     PackageManager::APT => {
-                        cmd.arg(get_package_manager_name(PackageManager::APT));
-                        cmd.arg("remove");
-                        cmd.arg(pkg);
-                        cmd.arg("-Vy");
+                        Operation::new()
+                            .command(format!("sudo apt remove {} -Vy", pkg))
+                            .show_output(true)
+                            .run()?;
                     }
                     PackageManager::DNF => {
-                        cmd.arg(get_package_manager_name(PackageManager::DNF));
-                        cmd.arg("remove");
-                        cmd.arg(pkg);
-                        cmd.arg("-y");
+                        Operation::new()
+                            .command(format!("sudo dnf remove {} -y", pkg))
+                            .show_output(true)
+                            .run()?;
                     }
                     PackageManager::PACMAN => {
-                        cmd.arg(get_package_manager_name(PackageManager::PACMAN));
-                        cmd.arg("-Rsun");
-                        cmd.arg(pkg);
-                        cmd.arg("--noconfirm");
+                        Operation::new()
+                            .command(format!("sudo pacman -Rsun {} --noconfirm", pkg))
+                            .show_output(true)
+                            .run()?;
                     }
                     PackageManager::RPMOSTree => {
-                        cmd.arg(get_package_manager_name(PackageManager::RPMOSTree));
-                        cmd.arg("uninstall");
-                        cmd.arg(pkg);
-                        cmd.arg("-y");
+                        Operation::new()
+                            .command(format!("sudo rpm-ostree uninstall {} -y", pkg))
+                            .show_output(true)
+                            .run()?;
                     }
                 }
-                cmd.stdout(Stdio::inherit())
-                    .stderr(Stdio::inherit())
-                    .spawn()?
-                    .wait()?;
             }
         }
         Ok(())
@@ -709,29 +692,29 @@ impl Distribution {
 
         match self.package_manager {
             PackageManager::APT => {
-                rust_cli::commands::Operation::new()
+                Operation::new()
                     .command("sudo apt update")
                     .show_output(true)
                     .run()?;
-                rust_cli::commands::Operation::new()
+                Operation::new()
                     .command("sudo apt upgrade -Vy")
                     .show_output(true)
                     .run()?;
             }
             PackageManager::DNF => {
-                rust_cli::commands::Operation::new()
+                Operation::new()
                     .command("sudo dnf upgrade --refresh -y")
                     .show_output(true)
                     .run()?;
             }
             PackageManager::PACMAN => {
-                rust_cli::commands::Operation::new()
+                Operation::new()
                     .command("sudo pacman -Syu --noconfirm")
                     .show_output(true)
                     .run()?;
             }
             PackageManager::RPMOSTree => {
-                rust_cli::commands::Operation::new()
+                Operation::new()
                     .command("rpm-ostree upgrade")
                     .show_output(true)
                     .run()?;
@@ -745,24 +728,21 @@ impl Distribution {
 
         match self.package_manager {
             PackageManager::APT => {
-                rust_cli::commands::Operation::new()
+                Operation::new()
                     .command("sudo apt autoremove -Vy")
                     .show_output(true)
                     .run()?;
             }
             PackageManager::DNF => {
-                rust_cli::commands::Operation::new()
+                Operation::new()
                     .command("sudo dnf autoremove -y")
                     .show_output(true)
                     .run()?;
             }
             PackageManager::PACMAN => {
-                let mut list_cmd: Command =
-                    Command::new(get_package_manager_name(PackageManager::PACMAN));
-                list_cmd.arg("-Qdtq");
-                let orphans = helper::get_command_output(list_cmd)?;
+                let orphans: String = Operation::new().command("pacman -Qdtq").run_output()?;
                 let mut rm_cmd: Command = Command::new("sudo");
-                rm_cmd.arg(get_package_manager_name(PackageManager::PACMAN));
+                rm_cmd.arg("pacman");
                 rm_cmd.arg("-Rsun");
                 for line in orphans.split("\n") {
                     if line.is_empty() {
@@ -786,11 +766,11 @@ impl Distribution {
 
     pub fn setup_snap(&self) -> Result<(), io::Error> {
         if self.package_manager == PackageManager::DNF {
-            rust_cli::commands::Operation::new()
+            Operation::new()
                 .command("sudo systemctl enable --now snapd.socket")
                 .show_output(true)
                 .run()?;
-            rust_cli::commands::Operation::new()
+            Operation::new()
                 .command("sudo ln -s /var/lib/snapd/snap /snap")
                 .show_output(true)
                 .run()?;
@@ -801,33 +781,17 @@ impl Distribution {
     pub fn get_installed(&self) -> Result<Vec<String>, io::Error> {
         let mut packages: Vec<String> = vec![];
 
-        let mut cmd: Command = match self.package_manager {
-            PackageManager::APT => Command::new(get_package_manager_name(PackageManager::APT)),
-            PackageManager::DNF => Command::new(get_package_manager_name(PackageManager::DNF)),
-            PackageManager::PACMAN => {
-                Command::new(get_package_manager_name(PackageManager::PACMAN))
-            }
-            PackageManager::RPMOSTree => Command::new("rpm"),
+        let output: String = match self.package_manager {
+            PackageManager::APT => Operation::new()
+                .command("apt list --installed")
+                .run_output()?,
+            PackageManager::DNF => Operation::new()
+                .command("dnf list installed")
+                .run_output()?,
+            PackageManager::PACMAN => Operation::new().command("pacman -Q").run_output()?,
+            PackageManager::RPMOSTree => Operation::new().command("rpm -qa").run_output()?,
         };
 
-        match self.package_manager {
-            PackageManager::APT => {
-                cmd.arg("list");
-                cmd.arg("--installed");
-            }
-            PackageManager::DNF => {
-                cmd.arg("list");
-                cmd.arg("installed");
-            }
-            PackageManager::PACMAN => {
-                cmd.arg("-Q");
-            }
-            PackageManager::RPMOSTree => {
-                cmd.arg("-qa");
-            }
-        }
-
-        let output = helper::get_command_output(cmd)?;
         for line in output.split("\n") {
             if line.is_empty() {
                 continue;

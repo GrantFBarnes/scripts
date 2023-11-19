@@ -1,3 +1,5 @@
+use rust_cli::commands::Operation;
+
 use std::io;
 use std::process::{Command, Stdio};
 
@@ -58,7 +60,7 @@ pub fn uninstall(package: &str, info: &mut Info) -> Result<(), io::Error> {
 
             match package {
                 "rust" => {
-                    rust_cli::commands::Operation::new()
+                    Operation::new()
                         .command("rustup self uninstall")
                         .show_output(true)
                         .run()?;
@@ -77,11 +79,11 @@ pub fn update(info: &Info) -> Result<(), io::Error> {
         if is_installed(pkg, info) {
             match pkg {
                 "rust" => {
-                    rust_cli::commands::Operation::new()
+                    Operation::new()
                         .command("rustup self update")
                         .show_output(true)
                         .run()?;
-                    rust_cli::commands::Operation::new()
+                    Operation::new()
                         .command("rustup update stable")
                         .show_output(true)
                         .run()?;
@@ -98,10 +100,7 @@ pub fn get_installed() -> Result<Vec<String>, io::Error> {
 
     for pkg in PACKAGES {
         match pkg {
-            "rust" => match rust_cli::commands::Operation::new()
-                .command("rustup --version")
-                .run()
-            {
+            "rust" => match Operation::new().command("rustup --version").run() {
                 Ok(_) => packages.push(pkg.to_string()),
                 _ => (),
             },

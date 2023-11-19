@@ -1,3 +1,6 @@
+use rust_cli::commands::Operation;
+use rust_cli::prompts::Select;
+
 use std::env;
 use std::env::VarError;
 use std::fs;
@@ -706,7 +709,7 @@ fn run_flatpak_remote_select(
     }
     options.push("Cancel");
 
-    let remote = rust_cli::prompts::Select::new()
+    let remote = Select::new()
         .title(format!("Flatpak Remote: {}", package))
         .options(&options)
         .erase_after(true)
@@ -737,21 +740,21 @@ fn post_uninstall(
         "code" => {
             if method != "repository" {
                 if distribution.package_manager == PackageManager::APT {
-                    rust_cli::commands::Operation::new()
+                    Operation::new()
                         .command("sudo rm /etc/apt/sources.list.d/vscode.list")
                         .run()?;
                 }
                 if distribution.package_manager == PackageManager::DNF {
-                    rust_cli::commands::Operation::new()
+                    Operation::new()
                         .command("sudo dnf config-manager --set-disabled code")
                         .run()?;
-                    rust_cli::commands::Operation::new()
+                    Operation::new()
                         .command("sudo rm /etc/yum.repos.d/vscode.repo")
                         .run()?;
                 }
             }
             if method == "uninstall" {
-                rust_cli::commands::Operation::new()
+                Operation::new()
                     .command(format!(
                         "sudo rm -r {}{} {}{}",
                         &home_dir, "/.vscode", &home_dir, "/.config/Code"
@@ -761,7 +764,7 @@ fn post_uninstall(
         }
         "golang" => {
             if method == "uninstall" {
-                rust_cli::commands::Operation::new()
+                Operation::new()
                     .command(format!("sudo rm -r {}{}", &home_dir, "/.go"))
                     .run()?;
             }
@@ -769,7 +772,7 @@ fn post_uninstall(
         "pycharm" => {
             if method != "repository" {
                 if distribution.name == DistributionName::Fedora {
-                    rust_cli::commands::Operation::new()
+                    Operation::new()
                         .command("sudo dnf config-manager --set-disabled phracek-PyCharm")
                         .run()?;
                 }
@@ -777,14 +780,14 @@ fn post_uninstall(
         }
         "rust" => {
             if method != "other" {
-                rust_cli::commands::Operation::new()
+                Operation::new()
                     .command(format!("sudo rm -r {}{}", &home_dir, "/.cargo/bin/rustup"))
                     .run()?;
             }
         }
         "vim" => {
             if method != "repository" {
-                rust_cli::commands::Operation::new()
+                Operation::new()
                     .command(format!(
                         "sudo rm -r {}{} {}{} {}{}",
                         &home_dir, "/.vim", &home_dir, "/.viminfo", &home_dir, "/.vimrc"
@@ -811,16 +814,16 @@ fn pre_install(
                     distribution.install("wget", info)?;
                     distribution.install("gpg", info)?;
 
-                    let key: String = rust_cli::commands::Operation::new()
+                    let key: String = Operation::new()
                         .command("wget -qO- https://packages.microsoft.com/keys/microsoft.asc")
-                        .run()?;
+                        .run_output()?;
                     fs::write("packages.microsoft", key)?;
 
-                    rust_cli::commands::Operation::new()
+                    Operation::new()
                         .command("gpg --dearmor packages.microsoft")
                         .run()?;
 
-                    rust_cli::commands::Operation::new()
+                    Operation::new()
                         .command("sudo install -D -o root -g root -m 644 packages.microsoft.gpg /etc/apt/keyrings/packages.microsoft.gpg")
                         .run()?;
 
@@ -840,12 +843,10 @@ fn pre_install(
                         .spawn()?
                         .wait()?;
 
-                    rust_cli::commands::Operation::new()
-                        .command("sudo apt update")
-                        .run()?;
+                    Operation::new().command("sudo apt update").run()?;
                 }
                 if distribution.package_manager == PackageManager::DNF {
-                    rust_cli::commands::Operation::new()
+                    Operation::new()
                         .command(
                             "sudo rpm --import https://packages.microsoft.com/keys/microsoft.asc",
                         )
@@ -872,18 +873,18 @@ fn pre_install(
                 if distribution.repository == Repository::Debian {
                     distribution.install("wget", info)?;
 
-                    rust_cli::commands::Operation::new()
+                    Operation::new()
                         .command("wget https://packages.microsoft.com/config/debian/12/packages-microsoft-prod.deb -O packages-microsoft-prod.deb")
                         .show_output(true)
                         .run()?;
-                    rust_cli::commands::Operation::new()
+                    Operation::new()
                         .command("sudo dpkg -i packages-microsoft-prod.deb")
                         .show_output(true)
                         .run()?;
-                    rust_cli::commands::Operation::new()
+                    Operation::new()
                         .command("rm packages-microsoft-prod.deb")
                         .run()?;
-                    rust_cli::commands::Operation::new()
+                    Operation::new()
                         .command("sudo apt update")
                         .show_output(true)
                         .run()?;
@@ -893,7 +894,7 @@ fn pre_install(
         "nodejs" => {
             if method == "repository" {
                 if distribution.package_manager == PackageManager::DNF {
-                    rust_cli::commands::Operation::new()
+                    Operation::new()
                         .command("sudo dnf module enable nodejs:18 -y")
                         .run()?;
                 }
@@ -902,7 +903,7 @@ fn pre_install(
         "pycharm" => {
             if method == "repository" {
                 if distribution.repository == Repository::Fedora {
-                    rust_cli::commands::Operation::new()
+                    Operation::new()
                         .command("sudo dnf config-manager --set-enabled phracek-PyCharm")
                         .run()?;
                 }
@@ -931,7 +932,7 @@ fn post_install(package: &str, distribution: &Distribution, method: &str) -> Res
             if method != "uninstall" {
                 let extensions: Vec<&str> = Vec::from(["esbenp.prettier-vscode", "vscodevim.vim"]);
                 for ext in extensions {
-                    rust_cli::commands::Operation::new()
+                    Operation::new()
                         .command(format!("code --install-extension {}", ext))
                         .run()?;
                 }
@@ -975,7 +976,7 @@ fn post_install(package: &str, distribution: &Distribution, method: &str) -> Res
         }
         "go" => {
             if method != "uninstall" {
-                rust_cli::commands::Operation::new()
+                Operation::new()
                     .command("go env -w GOPATH=$HOME/.go")
                     .run()?;
             }
@@ -988,7 +989,7 @@ fn post_install(package: &str, distribution: &Distribution, method: &str) -> Res
         }
         "rust" => {
             if method == "other" {
-                rust_cli::commands::Operation::new()
+                Operation::new()
                     .command(format!(
                         "{}{} component add rust-analyzer",
                         home_dir, "/.cargo/bin/rustup"
@@ -1161,7 +1162,7 @@ fn run_package_select(
     options_display.push(helper::get_colored_string("Cancel", ""));
     options_value.push("cancel");
 
-    let selection = rust_cli::prompts::Select::new()
+    let selection = Select::new()
         .title(format!(
             "Package: {} ({})",
             package,
@@ -1284,7 +1285,7 @@ fn run_category_select(
     options_display.push(helper::get_colored_string("Exit", ""));
     options_value.push("exit");
 
-    let selection = rust_cli::prompts::Select::new()
+    let selection = Select::new()
         .title(format!("Category: {}", category))
         .options(&options_display)
         .default_index(start_idx)
@@ -1332,7 +1333,7 @@ fn run_install_packages(
     }
     options.push("Exit");
 
-    let selection = rust_cli::prompts::Select::new()
+    let selection = Select::new()
         .title("Choose a Category")
         .options(&options)
         .default_index(start_idx)
@@ -1367,7 +1368,7 @@ fn run_menu(
     options.push("Install Packages");
     options.push("Exit");
 
-    let selection = rust_cli::prompts::Select::new()
+    let selection = Select::new()
         .title("Linux Setup")
         .options(&options)
         .default_index(start_idx)
@@ -1407,12 +1408,12 @@ fn run_menu(
 }
 
 fn main() -> Result<(), io::Error> {
-    let has_gnome: bool = rust_cli::commands::Operation::new()
+    let has_gnome: bool = Operation::new()
         .command("gnome-shell --version")
         .run()
         .is_ok();
 
-    let has_kde: bool = rust_cli::commands::Operation::new()
+    let has_kde: bool = Operation::new()
         .command("plasmashell --version")
         .run()
         .is_ok();
@@ -1420,19 +1421,13 @@ fn main() -> Result<(), io::Error> {
     let distribution: Distribution = distribution::get_distribution()?;
     let repository_installed: Vec<String> = distribution.get_installed()?;
 
-    let has_flatpak: bool = rust_cli::commands::Operation::new()
-        .command("flatpak --version")
-        .run()
-        .is_ok();
+    let has_flatpak: bool = Operation::new().command("flatpak --version").run().is_ok();
     let flatpak_installed: Vec<String> = match has_flatpak {
         true => flatpak::get_installed()?,
         false => vec![],
     };
 
-    let has_snap: bool = rust_cli::commands::Operation::new()
-        .command("snap --version")
-        .run()
-        .is_ok();
+    let has_snap: bool = Operation::new().command("snap --version").run().is_ok();
     let snap_installed: Vec<String> = match has_snap {
         true => snap::get_installed()?,
         false => vec![],

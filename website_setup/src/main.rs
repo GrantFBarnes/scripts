@@ -1,6 +1,7 @@
 extern crate rust_cli;
 
 use rust_cli::commands::Operation;
+use rust_cli::prompts::Select;
 
 use std::env;
 use std::fs;
@@ -16,7 +17,7 @@ fn main() -> Result<(), io::Error> {
     }
     let home_dir: String = home_dir.unwrap();
 
-    let projects: Vec<String> = rust_cli::prompts::Select::new()
+    let projects: Vec<String> = Select::new()
         .title("Select projects")
         .options(&vec![
             "home-page",

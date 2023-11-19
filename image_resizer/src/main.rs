@@ -1,12 +1,14 @@
 extern crate rust_cli;
 
+use rust_cli::commands::Operation;
+use rust_cli::prompts::Select;
+
 use std::env;
 use std::env::VarError;
 use std::fs;
 use std::fs::{DirEntry, ReadDir};
 use std::io;
 use std::path::PathBuf;
-use std::process::Command;
 
 const ANSI_RESET: &str = "\x1b[0m";
 const ANSI_RED: &str = "\x1b[31m";
@@ -63,19 +65,18 @@ fn get_recursive_folders_files(orig_path: &String, path: &String) -> (Vec<String
 }
 
 fn get_image_dim(file: &String, dim: &str) -> Result<u32, io::Error> {
-    Ok(rust_cli::commands::Operation::new()
+    Ok(Operation::new()
         .command(format!("identify -format %[{}] {}", dim, file))
-        .run()?
+        .run_output()?
         .parse::<u32>()
         .unwrap_or(0))
 }
 
-fn convert_file(old_file: &String, new_file: &String) -> bool {
-    let convert_status = Command::new("convert").arg(old_file).arg(new_file).status();
-    if convert_status.is_ok() {
-        return convert_status.unwrap().success();
-    }
-    false
+fn convert_file(old_file: &String, new_file: &String) -> Result<bool, io::Error> {
+    Ok(Operation::new()
+        .command(format!("convert {} {} ", old_file, new_file))
+        .run_status()?
+        .success())
 }
 
 fn main() -> Result<(), io::Error> {
@@ -89,7 +90,7 @@ fn main() -> Result<(), io::Error> {
     let folders_files: (Vec<String>, Vec<String>) =
         get_recursive_folders_files(&pictures_dir, &pictures_dir);
 
-    let make_small_folders = rust_cli::prompts::Select::new()
+    let make_small_folders = Select::new()
         .title("Choose folders to make small")
         .options(&folders_files.0)
         .run_multi_select_values()?;
@@ -108,9 +109,9 @@ fn main() -> Result<(), io::Error> {
                 "Attempting to convert {}{}{} to a jpeg...",
                 ANSI_CYAN, file_path, ANSI_RESET
             );
-            if convert_file(&file_path, &file_name) {
+            if convert_file(&file_path, &file_name).is_ok_and(|x| x) {
                 println!("    {}Convert Successful{}", ANSI_GREEN, ANSI_RESET);
-                rust_cli::commands::Operation::new()
+                Operation::new()
                     .command(format!("rm -f {}", &file_path))
                     .run()?;
             } else {
@@ -135,7 +136,7 @@ fn main() -> Result<(), io::Error> {
                             "    Image is {}too tall{} (height: {})",
                             ANSI_RED, ANSI_RESET, height
                         );
-                        rust_cli::commands::Operation::new()
+                        Operation::new()
                             .command(format!(
                                 "convert {} -resize x{} {}",
                                 &file_name, MAX_SIZE, &file_name
@@ -147,7 +148,7 @@ fn main() -> Result<(), io::Error> {
                             ANSI_RED, ANSI_RESET, width
                         );
                         println!("    Image is {}too wide{}", ANSI_RED, ANSI_RESET);
-                        rust_cli::commands::Operation::new()
+                        Operation::new()
                             .command(format!(
                                 "convert {} -resize {} {}",
                                 &file_name, MAX_SIZE, &file_name
