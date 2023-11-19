@@ -1,10 +1,10 @@
-use std::env::VarError;
-use std::io::Result;
-use std::num::ParseFloatError;
-use std::process::{Command, Output};
+extern crate rust_cli;
+
+use rust_cli::commands::Operation;
+
+use std::env;
+use std::fs;
 use std::str::Split;
-use std::string::FromUtf8Error;
-use std::{env, fs};
 
 const RESET: &str = "\x1b[0m";
 const RED: &str = "\x1b[31m";
@@ -12,28 +12,15 @@ const GREEN: &str = "\x1b[32m";
 const YELLOW: &str = "\x1b[33m";
 const CYAN: &str = "\x1b[36m";
 
-fn get_command_output(mut command: Command) -> Option<String> {
-    let output: Result<Output> = command.output();
-    if output.is_ok() {
-        let output: Output = output.unwrap();
-        let output: Vec<u8> = output.stdout;
-        let output: std::result::Result<String, FromUtf8Error> = String::from_utf8(output);
-        if output.is_ok() {
-            return Option::from(output.unwrap());
-        }
-    }
-    None
-}
-
 fn has_command(command: &str) -> bool {
-    match Command::new(command).arg("--version").output() {
-        Ok(_) => true,
-        _ => false,
-    }
+    Operation::new()
+        .command(format!("{} --version", command))
+        .run()
+        .is_ok()
 }
 
 fn get_file_lines(file: &str) -> Option<Vec<String>> {
-    let content: Result<String> = fs::read_to_string(file);
+    let content = fs::read_to_string(file);
     if content.is_ok() {
         let content: String = content.unwrap();
         let mut lines: Vec<String> = vec![];
@@ -46,7 +33,7 @@ fn get_file_lines(file: &str) -> Option<Vec<String>> {
 }
 
 fn get_user() -> String {
-    let home_dir: std::result::Result<String, VarError> = env::var("HOME");
+    let home_dir = env::var("HOME");
     if home_dir.is_ok() {
         let home_dir: String = home_dir.unwrap();
         let user: Option<(&str, &str)> = home_dir.rsplit_once("/");
@@ -59,11 +46,10 @@ fn get_user() -> String {
 }
 
 fn get_hostname() -> String {
-    let hostname: Result<String> = fs::read_to_string("/etc/hostname");
-    if hostname.is_ok() {
-        return hostname.unwrap().trim().to_string();
-    }
-    String::from("(Unknown)")
+    fs::read_to_string("/etc/hostname")
+        .unwrap_or(String::from("(Unknown)"))
+        .trim()
+        .to_string()
 }
 
 fn get_os() -> String {
@@ -87,14 +73,12 @@ fn get_os() -> String {
 }
 
 fn get_kernel() -> String {
-    let mut cmd: Command = Command::new("uname");
-    cmd.arg("-r");
-    let output: Option<String> = get_command_output(cmd);
-    if output.is_some() {
-        let output: String = output.unwrap();
-        return output.trim().to_string();
-    }
-    String::from("(Unknown)")
+    Operation::new()
+        .command("uname -r")
+        .run_output()
+        .unwrap_or(String::from("(Unknown)"))
+        .trim()
+        .to_string()
 }
 
 fn get_cpu() -> String {
@@ -127,8 +111,7 @@ fn get_cpu_speed() -> String {
                 let line_split: Split<&str> = line.split(": ");
                 let line_split: Vec<&str> = line_split.collect::<Vec<&str>>();
                 if line_split.len() > 1 {
-                    let speed: std::result::Result<f64, ParseFloatError> =
-                        line_split[1].trim().parse::<f64>();
+                    let speed = line_split[1].trim().parse::<f64>();
                     if speed.is_ok() {
                         let speed: f64 = speed.unwrap();
                         cpu_speeds.push(speed);
@@ -156,8 +139,7 @@ fn get_cpu_speed() -> String {
                 if first_char.is_some() {
                     let first_char: char = first_char.unwrap();
                     if first_char.is_numeric() {
-                        let speed: std::result::Result<f64, ParseFloatError> =
-                            line.trim().parse::<f64>();
+                        let speed = line.trim().parse::<f64>();
                         if speed.is_ok() {
                             let speed: f64 = speed.unwrap();
                             max_speed = speed / 1000.0 / 1000.0;
@@ -211,8 +193,7 @@ fn get_memory() -> String {
                 let line_split: Split<&str> = line.split(" ");
                 let line_split: Vec<&str> = line_split.collect::<Vec<&str>>();
                 if line_split.len() > 2 {
-                    let amount: std::result::Result<f64, ParseFloatError> =
-                        line_split[line_split.len() - 2].trim().parse::<f64>();
+                    let amount = line_split[line_split.len() - 2].trim().parse::<f64>();
                     if amount.is_ok() {
                         let amount: f64 = amount.unwrap();
                         if line.starts_with("MemTotal") {
@@ -249,14 +230,12 @@ fn get_memory() -> String {
 }
 
 fn get_uptime() -> String {
-    let mut cmd: Command = Command::new("uptime");
-    cmd.arg("-p");
-    let output: Option<String> = get_command_output(cmd);
-    if output.is_some() {
-        let output: String = output.unwrap();
-        return output.trim().to_string();
-    }
-    String::from("(Unknown)")
+    Operation::new()
+        .command("uptime -p")
+        .run_output()
+        .unwrap_or(String::from("(Unknown)"))
+        .trim()
+        .to_string()
 }
 
 fn get_packages() -> String {
@@ -268,58 +247,58 @@ fn get_packages() -> String {
     let mut snap: usize = 0;
 
     if has_command("dpkg") {
-        let mut cmd: Command = Command::new("dpkg");
-        cmd.arg("--list");
-        let output: Option<String> = get_command_output(cmd);
-        if output.is_some() {
-            let output: String = output.unwrap();
-            let pkgs: Split<&str> = output.split("\n");
-            let pkgs: Vec<&str> = pkgs.collect::<Vec<&str>>();
+        let output: String = Operation::new()
+            .command("dpkg --list")
+            .run_output()
+            .unwrap_or_default();
+        let pkgs: Split<&str> = output.split("\n");
+        let pkgs: Vec<&str> = pkgs.collect::<Vec<&str>>();
+        if pkgs.len() > 0 {
             dpkg = pkgs.len() - 1;
         }
     }
     if has_command("pacman") {
-        let mut cmd: Command = Command::new("pacman");
-        cmd.arg("-Q");
-        let output: Option<String> = get_command_output(cmd);
-        if output.is_some() {
-            let output: String = output.unwrap();
-            let pkgs: Split<&str> = output.split("\n");
-            let pkgs: Vec<&str> = pkgs.collect::<Vec<&str>>();
+        let output: String = Operation::new()
+            .command("pacman -Q")
+            .run_output()
+            .unwrap_or_default();
+        let pkgs: Split<&str> = output.split("\n");
+        let pkgs: Vec<&str> = pkgs.collect::<Vec<&str>>();
+        if pkgs.len() > 0 {
             pacman = pkgs.len() - 1;
         }
     }
     if has_command("rpm") {
-        let mut cmd: Command = Command::new("rpm");
-        cmd.arg("-qa");
-        let output: Option<String> = get_command_output(cmd);
-        if output.is_some() {
-            let output: String = output.unwrap();
-            let pkgs: Split<&str> = output.split("\n");
-            let pkgs: Vec<&str> = pkgs.collect::<Vec<&str>>();
+        let output: String = Operation::new()
+            .command("rpm -qa")
+            .run_output()
+            .unwrap_or_default();
+        let pkgs: Split<&str> = output.split("\n");
+        let pkgs: Vec<&str> = pkgs.collect::<Vec<&str>>();
+        if pkgs.len() > 0 {
             rpm = pkgs.len() - 1;
         }
     }
 
     if has_command("flatpak") {
-        let mut cmd: Command = Command::new("flatpak");
-        cmd.arg("list");
-        let output: Option<String> = get_command_output(cmd);
-        if output.is_some() {
-            let output: String = output.unwrap();
-            let pkgs: Split<&str> = output.split("\n");
-            let pkgs: Vec<&str> = pkgs.collect::<Vec<&str>>();
+        let output: String = Operation::new()
+            .command("flatpak list")
+            .run_output()
+            .unwrap_or_default();
+        let pkgs: Split<&str> = output.split("\n");
+        let pkgs: Vec<&str> = pkgs.collect::<Vec<&str>>();
+        if pkgs.len() > 0 {
             flatpak = pkgs.len() - 1;
         }
     }
     if has_command("snap") {
-        let mut cmd: Command = Command::new("snap");
-        cmd.arg("list");
-        let output: Option<String> = get_command_output(cmd);
-        if output.is_some() {
-            let output: String = output.unwrap();
-            let pkgs: Split<&str> = output.split("\n");
-            let pkgs: Vec<&str> = pkgs.collect::<Vec<&str>>();
+        let output: String = Operation::new()
+            .command("snap list")
+            .run_output()
+            .unwrap_or_default();
+        let pkgs: Split<&str> = output.split("\n");
+        let pkgs: Vec<&str> = pkgs.collect::<Vec<&str>>();
+        if pkgs.len() > 0 {
             snap = pkgs.len() - 1;
         }
     }

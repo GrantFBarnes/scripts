@@ -5,3 +5,11 @@ version = 3
 [[package]]
 name = "overview"
 version = "0.1.0"
+dependencies = [
+ "rust-cli",
+]
+
+[[package]]
+name = "rust-cli"
+version = "0.15.0"
+source = "git+https://github.com/GrantFBarnes/rust-cli#ef7dee25f0d8d184cc9260bedf175e218e4a7b74"
