@@ -14,10 +14,11 @@ use std::io;
 use std::io::Write;
 use std::path::PathBuf;
 use std::thread;
-use std::thread::{sleep, JoinHandle};
+use std::thread::sleep;
 use std::time::Duration;
 
 fn print_help() {
+    println!();
     println!("SFS (Scan File System)");
     println!("Command line program that finds the disk usage of files/folders in specified path");
     println!();
@@ -37,6 +38,7 @@ fn print_help() {
     print!("  -h, --help");
     font::reset();
     print!("  Print help information");
+    println!();
     println!();
 }
 
@@ -119,7 +121,7 @@ fn get_directory_sizes(path: &String) -> Option<HashMap<String, u64>> {
     Some(sizes)
 }
 
-fn select_directory(path: &String, sizes: HashMap<String, u64>) {
+fn select_directory(path: &String, sizes: HashMap<String, u64>) -> Result<(), io::Error> {
     let mut max_path: usize = 0;
     let mut max_size: u64 = 0;
     for entry in &sizes {
@@ -191,14 +193,10 @@ fn select_directory(path: &String, sizes: HashMap<String, u64>) {
     }
 
     if path != "/" {
-        let up_dir = fs::canonicalize(PathBuf::from(format!("{}{}", path, "/..")));
-        if up_dir.is_err() {
-            return;
-        }
-        let up_dir: PathBuf = up_dir.unwrap();
+        let up_dir: PathBuf = fs::canonicalize(PathBuf::from(format!("{}{}", path, "/..")))?;
         let up_dir: Option<&str> = up_dir.to_str();
         if up_dir.is_none() {
-            return;
+            return Err(io::Error::other("failed to get back path"));
         }
         let up_dir: &str = up_dir.unwrap();
 
@@ -209,68 +207,61 @@ fn select_directory(path: &String, sizes: HashMap<String, u64>) {
     let selection = Select::new()
         .title("Select Directory to Scan")
         .options(&options_display)
-        .run_select_index();
-    if selection.is_err() {
-        return;
-    }
-    let selection = selection.unwrap();
+        .run_select_index()?;
     if selection.is_none() {
-        return;
+        return Ok(());
     }
 
     if process_directory(&options_value[selection.unwrap()]).is_err() {
         rust_cli::ansi::cursor::previous_lines(cmp::min(sizes.len(), 15) + 2);
-        select_directory(path, sizes);
+        select_directory(path, sizes)?;
     }
+    Ok(())
 }
 
-fn process_directory(path: &String) -> Result<(), &str> {
+fn process_directory(path: &String) -> Result<(), io::Error> {
     let owned_path: String = path.clone();
-    let process: JoinHandle<Option<HashMap<String, u64>>> =
-        thread::spawn(move || get_directory_sizes(&owned_path));
+    let process = thread::spawn(move || get_directory_sizes(&owned_path));
 
     let min_dot_count: usize = 0;
     let max_dot_count: usize = 10;
     let mut dot_count: usize = 0;
     while !process.is_finished() {
         print!("\rScanning Files{}", ".".repeat(dot_count));
-        match io::stdout().flush() {
-            Err(_) => return Err("io stdout flush failed"),
-            _ => (),
-        };
+        io::stdout().flush()?;
         sleep(Duration::from_millis(250));
         dot_count += 1;
         if dot_count == max_dot_count {
             dot_count = min_dot_count;
         }
+        rust_cli::ansi::erase::line();
+        rust_cli::ansi::cursor::line_start();
     }
-    rust_cli::ansi::erase::line();
-    rust_cli::ansi::cursor::line_start();
 
-    let process_results: thread::Result<Option<HashMap<String, u64>>> = process.join();
+    let process_results = process.join();
     if process_results.is_err() {
-        return Err("thread failed to join");
+        return Err(io::Error::other("thread failed to join"));
     }
     let process_results: HashMap<String, u64> = process_results
         .unwrap()
-        .ok_or("selection could not be scanned")?;
-    select_directory(&path, process_results);
+        .ok_or(io::Error::other("selection could not be scanned"))?;
+    select_directory(&path, process_results)?;
     return Ok(());
 }
 
-fn main() {
+fn main() -> Result<(), io::Error> {
     let args: Vec<String> = env::args().collect();
     if args.len() != 2 {
         print_help();
-        return;
+        return Ok(());
     }
 
     let arg: &String = &args[1];
 
     if arg == "-h" || arg == "--help" {
         print_help();
-        return;
+        return Ok(());
     }
 
-    let _ = process_directory(arg);
+    process_directory(arg)
 }
