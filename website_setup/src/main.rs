@@ -1,14 +1,13 @@
 extern crate rust_cli;
 
+use rust_cli::ansi::Color;
+use rust_cli::ansi::Font;
 use rust_cli::commands::Operation;
 use rust_cli::prompts::Select;
 
 use std::env;
 use std::fs;
 use std::io;
-
-const ANSI_RESET: &str = "\x1b[0m";
-const ANSI_CYAN: &str = "\x1b[36m";
 
 fn main() -> Result<(), io::Error> {
     let home_dir = env::var("HOME");
@@ -47,7 +46,12 @@ fn main() -> Result<(), io::Error> {
     }
 
     for project in projects {
-        println!("Working on {}{}{}...", ANSI_CYAN, project, ANSI_RESET);
+        println!(
+            "Working on {}{}{}...",
+            Color::Cyan.as_str(),
+            project,
+            Font::Reset.as_str()
+        );
 
         let project_dir: String = format!("{}/{}", &git_dir, project);
 

@@ -1,16 +1,12 @@
 extern crate rust_cli;
 
+use rust_cli::ansi::Color;
+use rust_cli::ansi::Font;
 use rust_cli::commands::Operation;
 
 use std::env;
 use std::fs;
 use std::str::Split;
-
-const RESET: &str = "\x1b[0m";
-const RED: &str = "\x1b[31m";
-const GREEN: &str = "\x1b[32m";
-const YELLOW: &str = "\x1b[33m";
-const CYAN: &str = "\x1b[36m";
 
 fn has_command(command: &str) -> bool {
     Operation::new()
@@ -165,16 +161,16 @@ fn get_cpu_speed() -> String {
         if percentage > 0.0 {
             result.push_str(&format!(" ({:.0}%)", percentage));
 
-            let mut color: &str = GREEN;
+            let mut color: &str = Color::Green.as_str();
             if percentage > 75.0 {
-                color = RED;
+                color = Color::Red.as_str();
             } else if percentage > 50.0 {
-                color = YELLOW;
+                color = Color::Yellow.as_str();
             } else if percentage > 25.0 {
-                color = RESET;
+                color = Font::Reset.as_str();
             }
 
-            result = format!("{}{}{}", color, result, RESET);
+            result = format!("{}{}{}", color, result, Font::Reset.as_str());
         }
     }
 
@@ -210,13 +206,13 @@ fn get_memory() -> String {
     let used_memory: f64 = total_memory - available_memory;
     let percentage: f64 = (used_memory / total_memory) * 100.0;
 
-    let mut color: &str = GREEN;
+    let mut color: &str = Color::Green.as_str();
     if percentage > 75.0 {
-        color = RED;
+        color = Color::Red.as_str();
     } else if percentage > 50.0 {
-        color = YELLOW;
+        color = Color::Yellow.as_str();
     } else if percentage > 25.0 {
-        color = RESET;
+        color = Font::Reset.as_str();
     }
 
     format!(
@@ -225,7 +221,7 @@ fn get_memory() -> String {
         used_memory / 1024.0 / 1024.0,
         total_memory / 1024.0 / 1024.0,
         percentage,
-        RESET
+        Font::Reset.as_str()
     )
 }
 
@@ -325,15 +321,68 @@ fn get_packages() -> String {
 }
 
 fn main() {
-    println!("{}-------------------------------{}", CYAN, RESET);
-    println!("{}    User{}: {}", CYAN, RESET, get_user());
-    println!("{}Hostname{}: {}", CYAN, RESET, get_hostname());
-    println!("{}      OS{}: {}", CYAN, RESET, get_os());
-    println!("{}  Kernel{}: {}", CYAN, RESET, get_kernel());
-    println!("{}     CPU{}: {}", CYAN, RESET, get_cpu());
-    println!("{}   Speed{}: {}", CYAN, RESET, get_cpu_speed());
-    println!("{}  Memory{}: {}", CYAN, RESET, get_memory());
-    println!("{}  Uptime{}: {}", CYAN, RESET, get_uptime());
-    println!("{}Packages{}: {}", CYAN, RESET, get_packages());
-    println!("{}-------------------------------{}", CYAN, RESET);
+    println!(
+        "{}-------------------------------{}",
+        Color::Cyan.as_str(),
+        Font::Reset.as_str()
+    );
+    println!(
+        "{}    User{}: {}",
+        Color::Cyan.as_str(),
+        Font::Reset.as_str(),
+        get_user()
+    );
+    println!(
+        "{}Hostname{}: {}",
+        Color::Cyan.as_str(),
+        Font::Reset.as_str(),
+        get_hostname()
+    );
+    println!(
+        "{}      OS{}: {}",
+        Color::Cyan.as_str(),
+        Font::Reset.as_str(),
+        get_os()
+    );
+    println!(
+        "{}  Kernel{}: {}",
+        Color::Cyan.as_str(),
+        Font::Reset.as_str(),
+        get_kernel()
+    );
+    println!(
+        "{}     CPU{}: {}",
+        Color::Cyan.as_str(),
+        Font::Reset.as_str(),
+        get_cpu()
+    );
+    println!(
+        "{}   Speed{}: {}",
+        Color::Cyan.as_str(),
+        Font::Reset.as_str(),
+        get_cpu_speed()
+    );
+    println!(
+        "{}  Memory{}: {}",
+        Color::Cyan.as_str(),
+        Font::Reset.as_str(),
+        get_memory()
+    );
+    println!(
+        "{}  Uptime{}: {}",
+        Color::Cyan.as_str(),
+        Font::Reset.as_str(),
+        get_uptime()
+    );
+    println!(
+        "{}Packages{}: {}",
+        Color::Cyan.as_str(),
+        Font::Reset.as_str(),
+        get_packages()
+    );
+    println!(
+        "{}-------------------------------{}",
+        Color::Cyan.as_str(),
+        Font::Reset.as_str()
+    );
 }

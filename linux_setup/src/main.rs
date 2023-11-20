@@ -1,3 +1,4 @@
+use rust_cli::ansi::Color;
 use rust_cli::commands::Operation;
 use rust_cli::prompts::Select;
 
@@ -1096,18 +1097,18 @@ inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-n>" : "\<S-TAB>"
 
 fn get_install_method(package: &str, distribution: &Distribution, info: &Info) -> String {
     if distribution.is_installed(package, info) {
-        return helper::get_colored_string("Repository", "green");
+        return helper::get_colored_string("Repository", Color::Green);
     }
     if flatpak::is_installed(package, info) {
-        return helper::get_colored_string("Flatpak", "blue");
+        return helper::get_colored_string("Flatpak", Color::Blue);
     }
     if snap::is_installed(package, info) {
-        return helper::get_colored_string("Snap", "magenta");
+        return helper::get_colored_string("Snap", Color::Magenta);
     }
     if other::is_installed(package, info) {
-        return helper::get_colored_string("Other", "yellow");
+        return helper::get_colored_string("Other", Color::Yellow);
     }
-    return helper::get_colored_string("Uninstalled", "red");
+    return helper::get_colored_string("Uninstalled", Color::Red);
 }
 
 fn is_installed(package: &str, distribution: &Distribution, info: &Info) -> bool {
@@ -1126,12 +1127,15 @@ fn run_package_select(
     let mut options_value: Vec<&str> = vec![];
 
     if distribution.is_available(package) {
-        options_display.push(helper::get_colored_string("Install Repository", "green"));
+        options_display.push(helper::get_colored_string(
+            "Install Repository",
+            Color::Green,
+        ));
         options_value.push("repository");
     }
 
     if flatpak::is_available(package) {
-        options_display.push(helper::get_colored_string("Install Flatpak", "blue"));
+        options_display.push(helper::get_colored_string("Install Flatpak", Color::Blue));
         options_value.push("flatpak");
     }
 
@@ -1147,19 +1151,19 @@ fn run_package_select(
                 display.push_str(" (classic)");
             }
         }
-        options_display.push(helper::get_colored_string(display, "magenta"));
+        options_display.push(helper::get_colored_string(display, Color::Magenta));
         options_value.push("snap");
     }
 
     if other::is_available(package) {
-        options_display.push(helper::get_colored_string("Install Other", "yellow"));
+        options_display.push(helper::get_colored_string("Install Other", Color::Yellow));
         options_value.push("other");
     }
 
-    options_display.push(helper::get_colored_string("Uninstall", "red"));
+    options_display.push(helper::get_colored_string("Uninstall", Color::Red));
     options_value.push("uninstall");
 
-    options_display.push(helper::get_colored_string("Cancel", ""));
+    options_display.push(String::from("Cancel"));
     options_value.push("cancel");
 
     let selection = Select::new()
@@ -1255,9 +1259,9 @@ fn run_category_select(
             helper::get_colored_string(
                 pkg.display,
                 if missing_pkg_desktop_environment {
-                    "yellow"
+                    Color::Yellow
                 } else {
-                    ""
+                    Color::White
                 }
             ),
             get_install_method(pkg.key, distribution, info)
@@ -1270,9 +1274,9 @@ fn run_category_select(
         options_display.push(format!(
             "[{} Uninstalled Desktop Environments]",
             if show_all_desktop_environments {
-                helper::get_colored_string("Hide", "yellow")
+                helper::get_colored_string("Hide", Color::Yellow)
             } else {
-                helper::get_colored_string("Show", "cyan")
+                helper::get_colored_string("Show", Color::Cyan)
             }
         ));
         options_display.reverse();
@@ -1282,7 +1286,7 @@ fn run_category_select(
         options_value.reverse();
     }
 
-    options_display.push(helper::get_colored_string("Exit", ""));
+    options_display.push(String::from("Exit"));
     options_value.push("exit");
 
     let selection = Select::new()

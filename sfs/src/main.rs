@@ -1,6 +1,8 @@
 extern crate rust_cli;
 
 use rust_cli::ansi::font;
+use rust_cli::ansi::Color;
+use rust_cli::ansi::Font;
 use rust_cli::prompts::Select;
 
 use std::cmp;
@@ -15,27 +17,23 @@ use std::thread;
 use std::thread::{sleep, JoinHandle};
 use std::time::Duration;
 
-const ANSI_RESET: &str = "\x1b[0m";
-const ANSI_BLUE: &str = "\x1b[34m";
-const ANSI_CYAN: &str = "\x1b[36m";
-
 fn print_help() {
     println!("SFS (Scan File System)");
     println!("Command line program that finds the disk usage of files/folders in specified path");
     println!();
     print!("Usage: ");
-    font::text_color(font::Color::BLUE);
+    font::text_color(Color::Blue);
     print!("sfs <PATH>");
     font::reset();
     println!();
     println!();
     println!("Options:");
-    font::text_color(font::Color::CYAN);
+    font::text_color(Color::Cyan);
     print!("  <PATH>");
     font::reset();
     print!("      Path of folder to scan");
     println!();
-    font::text_color(font::Color::CYAN);
+    font::text_color(Color::Cyan);
     print!("  -h, --help");
     font::reset();
     print!("  Print help information");
@@ -125,7 +123,13 @@ fn select_directory(path: &String, sizes: HashMap<String, u64>) {
     let mut max_path: usize = 0;
     let mut max_size: u64 = 0;
     for entry in &sizes {
-        let full_path: String = format!("{}{}{}{}", path, ANSI_BLUE, entry.0, ANSI_RESET);
+        let full_path: String = format!(
+            "{}{}{}{}",
+            path,
+            Color::Blue.as_str(),
+            entry.0,
+            Font::Reset.as_str()
+        );
         if full_path.len() > max_path {
             max_path = full_path.len();
         }
@@ -141,7 +145,13 @@ fn select_directory(path: &String, sizes: HashMap<String, u64>) {
     let mut options_value: Vec<String> = vec![];
 
     for entry in sorted_sizes {
-        let full_path: String = format!("{}{}{}{}", path, ANSI_BLUE, entry.0, ANSI_RESET);
+        let full_path: String = format!(
+            "{}{}{}{}",
+            path,
+            Color::Blue.as_str(),
+            entry.0,
+            Font::Reset.as_str()
+        );
 
         let percent_bar_len: usize = 20;
         let percent: f64 = entry.1.to_owned() as f64 / max_size as f64;
@@ -163,7 +173,12 @@ fn select_directory(path: &String, sizes: HashMap<String, u64>) {
         } else if entry.1 > &1024 {
             size = format!("{} KB", (entry.1 / 1024));
         }
-        let full_size: String = format!("{}{: >7}{}", ANSI_CYAN, size, ANSI_RESET);
+        let full_size: String = format!(
+            "{}{: >7}{}",
+            Color::Cyan.as_str(),
+            size,
+            Font::Reset.as_str()
+        );
 
         options_display.push(format!(
             "{:width$} {} {}",

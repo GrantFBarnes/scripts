@@ -1,5 +1,7 @@
 extern crate rust_cli;
 
+use rust_cli::ansi::Color;
+use rust_cli::ansi::Font;
 use rust_cli::commands::Operation;
 use rust_cli::prompts::Select;
 
@@ -9,11 +11,6 @@ use std::fs;
 use std::fs::{DirEntry, ReadDir};
 use std::io;
 use std::path::PathBuf;
-
-const ANSI_RESET: &str = "\x1b[0m";
-const ANSI_RED: &str = "\x1b[31m";
-const ANSI_GREEN: &str = "\x1b[32m";
-const ANSI_CYAN: &str = "\x1b[36m";
 
 const MAX_SIZE: u32 = 2400;
 
@@ -107,15 +104,25 @@ fn main() -> Result<(), io::Error> {
         if extension != "jpeg" {
             println!(
                 "Attempting to convert {}{}{} to a jpeg...",
-                ANSI_CYAN, file_path, ANSI_RESET
+                Color::Cyan.as_str(),
+                file_path,
+                Font::Reset.as_str()
             );
             if convert_file(&file_path, &file_name).is_ok_and(|x| x) {
-                println!("    {}Convert Successful{}", ANSI_GREEN, ANSI_RESET);
+                println!(
+                    "    {}Convert Successful{}",
+                    Color::Green.as_str(),
+                    Font::Reset.as_str()
+                );
                 Operation::new()
                     .command(format!("rm -f {}", &file_path))
                     .run()?;
             } else {
-                println!("    {}Failed to Convert{}", ANSI_RED, ANSI_RESET);
+                println!(
+                    "    {}Failed to Convert{}",
+                    Color::Red.as_str(),
+                    Font::Reset.as_str()
+                );
                 continue;
             }
         }
@@ -124,7 +131,9 @@ fn main() -> Result<(), io::Error> {
             if file_name.contains(folder) {
                 println!(
                     "Checking size of {}{}{}...",
-                    ANSI_CYAN, file_name, ANSI_RESET
+                    Color::Cyan.as_str(),
+                    file_name,
+                    Font::Reset.as_str()
                 );
 
                 let height: u32 = get_image_dim(&file_name, "h")?;
@@ -134,7 +143,9 @@ fn main() -> Result<(), io::Error> {
                     if height > width {
                         println!(
                             "    Image is {}too tall{} (height: {})",
-                            ANSI_RED, ANSI_RESET, height
+                            Color::Red.as_str(),
+                            Font::Reset.as_str(),
+                            height
                         );
                         Operation::new()
                             .command(format!(
@@ -145,9 +156,15 @@ fn main() -> Result<(), io::Error> {
                     } else {
                         println!(
                             "    Image is {}too wide{} (width: {})",
-                            ANSI_RED, ANSI_RESET, width
+                            Color::Red.as_str(),
+                            Font::Reset.as_str(),
+                            width
                         );
-                        println!("    Image is {}too wide{}", ANSI_RED, ANSI_RESET);
+                        println!(
+                            "    Image is {}too wide{}",
+                            Color::Red.as_str(),
+                            Font::Reset.as_str()
+                        );
                         Operation::new()
                             .command(format!(
                                 "convert {} -resize {} {}",
@@ -156,7 +173,11 @@ fn main() -> Result<(), io::Error> {
                             .run()?;
                     }
                 } else {
-                    println!("    Image is {}small enough{}", ANSI_GREEN, ANSI_RESET);
+                    println!(
+                        "    Image is {}small enough{}",
+                        Color::Green.as_str(),
+                        Font::Reset.as_str()
+                    );
                 }
 
                 break;
@@ -166,9 +187,9 @@ fn main() -> Result<(), io::Error> {
 
     println!(
         "Finished processing {}{}{} images",
-        ANSI_CYAN,
+        Color::Cyan.as_str(),
         &folders_files.1.len(),
-        ANSI_RESET
+        Font::Reset.as_str()
     );
 
     Ok(())
