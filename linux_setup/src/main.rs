@@ -979,6 +979,15 @@ fn post_install(package: &str, distribution: &Distribution, method: &str) -> Res
             if method != "uninstall" {
                 Operation::new()
                     .command("go env -w GOPATH=$HOME/.go")
+                    .show_output(true)
+                    .run()?;
+                Operation::new()
+                    .command("go install golang.org/x/tools/gopls@latest")
+                    .show_output(true)
+                    .run()?;
+                Operation::new()
+                    .command("go install golang.org/x/tools/cmd/goimports@latest")
+                    .show_output(true)
                     .run()?;
             }
         }
