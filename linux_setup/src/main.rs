@@ -927,6 +927,7 @@ fn post_install(package: &str, distribution: &Distribution, method: &str) -> Res
         return Err(io::Error::other("HOME directory could not be determined"));
     }
     let home_dir: String = home_dir.unwrap();
+    let bashrc: String = format!("{}{}", &home_dir, "/.bashrc");
 
     match package {
         "code" => {
@@ -975,20 +976,27 @@ fn post_install(package: &str, distribution: &Distribution, method: &str) -> Res
                 )?;
             }
         }
-        "go" => {
+        "golang" => {
             if method != "uninstall" {
                 Operation::new()
-                    .command("go env -w GOPATH=$HOME/.go")
-                    .show_output(true)
+                    .command(format!("go env -w GOPATH={}/.go", &home_dir))
                     .run()?;
-                Operation::new()
-                    .command("go install golang.org/x/tools/gopls@latest")
-                    .show_output(true)
-                    .run()?;
-                Operation::new()
-                    .command("go install golang.org/x/tools/cmd/goimports@latest")
-                    .show_output(true)
-                    .run()?;
+                if method == "snap" || distribution.repository == Repository::RedHat {
+                    helper::append_to_file_if_not_found(
+                        &bashrc,
+                        "export GOPATH",
+                        r#"
+export GOPATH=$HOME/.go
+export PATH=$PATH:$GOPATH/bin
+                        "#,
+                        false,
+                    )?;
+
+                    Operation::new()
+                        .command("go install golang.org/x/tools/gopls@latest")
+                        .show_output(true)
+                        .run()?;
+                }
             }
         }
         "intellij" | "pycharm" => {
@@ -1014,7 +1022,6 @@ fn post_install(package: &str, distribution: &Distribution, method: &str) -> Res
         }
         "vim" => {
             if method == "repository" {
-                let bashrc: String = format!("{}{}", &home_dir, "/.bashrc");
                 helper::append_to_file_if_not_found(
                     &bashrc,
                     "export EDITOR",
@@ -1086,7 +1093,7 @@ nnoremap <C-l> <C-w>l
 let g:ale_fix_on_save = 1
 let g:ale_completion_enabled = 1
 let g:ale_linters = { "go": ["gopls"], "rust": ["analyzer"] }
-let g:ale_fixers = { "*": ["remove_trailing_lines", "trim_whitespace"], "rust": ["rustfmt"] }
+let g:ale_fixers = { "*": ["remove_trailing_lines", "trim_whitespace"], "go": ["gofmt"], "rust": ["rustfmt"] }
 
 """"""""""""""""""""""""""""""""""""""""
 " insert mode remaps

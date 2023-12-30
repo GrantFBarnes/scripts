@@ -199,16 +199,22 @@ impl Distribution {
             "gimp" => Option::from(vec!["gimp"]),
             "git" => Option::from(vec!["git"]),
             "golang" => {
-                if self.package_manager == PackageManager::APT {
-                    return Option::from(vec!["golang"]);
-                }
-                if self.package_manager == PackageManager::DNF {
-                    return Option::from(vec!["golang"]);
-                }
+                let mut packages = vec![];
                 if self.package_manager == PackageManager::PACMAN {
-                    return Option::from(vec!["go"]);
+                    packages.push("go");
+                } else {
+                    packages.push("golang");
                 }
-                None
+
+                if self.package_manager == PackageManager::APT
+                    || self.package_manager == PackageManager::PACMAN
+                {
+                    packages.push("gopls");
+                } else if self.repository == Repository::Fedora {
+                    packages.push("golang-x-tools-gopls");
+                }
+
+                return Option::from(packages);
             }
             "gparted" => Option::from(vec!["gparted"]),
             "gnome-2048" => {
