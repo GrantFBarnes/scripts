@@ -563,10 +563,27 @@ impl Distribution {
                 Option::from(vec!["transmission-qt"])
             }
             "vim" => {
-                if self.package_manager == PackageManager::DNF {
+                if self.repository == Repository::RedHat {
                     return Option::from(vec!["vim-enhanced"]);
                 }
-                Option::from(vec!["vim"])
+
+                let mut packages = vec![];
+                if self.package_manager == PackageManager::DNF {
+                    packages.push("vim-enhanced");
+                } else {
+                    packages.push("vim");
+                }
+
+                packages.push("vim-airline");
+                packages.push("vim-ale");
+                packages.push("vim-ctrlp");
+                packages.push("vim-gitgutter");
+
+                if self.repository == Repository::Arch || self.repository == Repository::Fedora {
+                    packages.push("vim-nerdtree");
+                }
+
+                return Option::from(packages);
             }
             "virt-manager" => Option::from(vec!["virt-manager"]),
             "vlc" => Option::from(vec!["vlc"]),

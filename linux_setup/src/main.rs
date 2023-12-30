@@ -1013,9 +1013,12 @@ fn post_install(package: &str, distribution: &Distribution, method: &str) -> Res
                     false,
                 )?;
 
+                let vimrc: String = format!("{}{}", &home_dir, "/.vimrc");
                 fs::write(
-                    format!("{}{}", &home_dir, "/.vimrc"),
-                    r#"
+                    &vimrc,
+                    r#"""""""""""""""""""""""""""""""""""""""""
+" vimrc settings
+
 set nocompatible
 
 set encoding=utf-8
@@ -1036,41 +1039,11 @@ syntax on
 filetype plugin indent on
 
 """"""""""""""""""""""""""""""""""""""""
-" Install VIM Plug
-
-let data_dir = has('nvim') ? stdpath('data') . '/site' : '~/.vim'
-if empty(glob(data_dir . '/autoload/plug.vim'))
-  silent execute '!curl -fLo '.data_dir.'/autoload/plug.vim --create-dirs  https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
-  autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
-endif
-
-" Install plugins
-
-call plug#begin()
-
-Plug 'airblade/vim-gitgutter'
-Plug 'fatih/vim-go', { 'do': ':GoUpdateBinaries' }
-Plug 'kien/ctrlp.vim'
-Plug 'scrooloose/nerdtree'
-Plug 'scrooloose/syntastic'
-Plug 'rust-lang/rust.vim'
-Plug 'vim-airline/vim-airline'
-Plug 'w0rp/ale'
-
-call plug#end()
+" normal mode remaps
 
 let mapleader = " "
 
-let g:ale_completion_enabled = 1
-let g:ale_linters = { "rust": ["analyzer"] }
-let g:ale_fixers = { "rust": ["rustfmt"] }
-let g:rustfmt_autosave = 1
-
-""""""""""""""""""""""""""""""""""""""""
-" normal mode remaps
-
 nnoremap <Leader>ex :Explore<CR>
-nnoremap <C-n> :NERDTreeToggle<CR>
 " window split
 nnoremap <Leader>vs <C-w>v
 nnoremap <Leader>hs <C-w>s
@@ -1079,6 +1052,32 @@ nnoremap <C-h> <C-w>h
 nnoremap <C-j> <C-w>j
 nnoremap <C-k> <C-w>k
 nnoremap <C-l> <C-w>l
+"#,
+                )?;
+
+                if distribution.repository != Repository::RedHat {
+                    if distribution.repository == Repository::Arch
+                        || distribution.repository == Repository::Fedora
+                    {
+                        helper::append_to_file_if_not_found(
+                            &vimrc,
+                            "NERDTree",
+                            "nnoremap <C-n> :NERDTreeToggle<CR>",
+                            false,
+                        )?;
+                    }
+
+                    helper::append_to_file_if_not_found(
+                        &vimrc,
+                        "ale settings",
+                        r#"
+""""""""""""""""""""""""""""""""""""""""
+" ale settings
+
+let g:ale_fix_on_save = 1
+let g:ale_completion_enabled = 1
+let g:ale_linters = { "go": ["gopls"], "rust": ["analyzer"] }
+let g:ale_fixers = { "*": ["remove_trailing_lines", "trim_whitespace"], "rust": ["rustfmt"] }
 
 """"""""""""""""""""""""""""""""""""""""
 " insert mode remaps
@@ -1086,7 +1085,9 @@ nnoremap <C-l> <C-w>l
 inoremap <silent><expr> <Tab> pumvisible() ? "\<C-n>" : "\<TAB>"
 inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-n>" : "\<S-TAB>"
 "#,
-                )?;
+                        false,
+                    )?;
+                }
             }
         }
         _ => (),
