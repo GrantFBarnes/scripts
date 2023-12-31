@@ -184,6 +184,12 @@ pub fn get_package(package: &str) -> Option<Snap> {
             is_classic: false,
             channel: "",
         }),
+        "loupe" => Option::from(Snap {
+            name: "loupe",
+            is_official: true,
+            is_classic: false,
+            channel: "",
+        }),
         "node" => Option::from(Snap {
             name: "node",
             is_official: true,

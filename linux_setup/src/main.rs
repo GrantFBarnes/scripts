@@ -52,7 +52,7 @@ const CATEGORIES: [&str; 10] = [
     "Utilities",
 ];
 
-const ALL_PACKAGES: [Package; 105] = [
+const ALL_PACKAGES: [Package; 106] = [
     Package {
         display: "0 A.D.",
         key: "0ad",
@@ -285,6 +285,12 @@ const ALL_PACKAGES: [Package; 105] = [
         display: "Gnome Disk Utility",
         key: "gnome-disk-utility",
         category: "Utilities",
+        desktop_environment: "gnome",
+    },
+    Package {
+        display: "Gnome Image Viewer",
+        key: "loupe",
+        category: "Applications",
         desktop_environment: "gnome",
     },
     Package {

@@ -305,6 +305,7 @@ pub fn setup(distribution: &Distribution) -> Result<(), io::Error> {
             'vlc_vlc.desktop',
             'org.videolan.VLC.desktop',
             'org.gnome.SoundRecorder.desktop',
+            'org.gnome.Loupe.desktop',
             'eog.desktop',
             'org.gnome.eog.desktop',
             'org.kde.gwenview.desktop'

@@ -437,6 +437,12 @@ impl Distribution {
                     "libreoffice-base",
                 ])
             }
+            "loupe" => {
+                if self.repository == Repository::Fedora {
+                    return Option::from(vec!["loupe"]);
+                }
+                None
+            }
             "mariadb" => {
                 if self.package_manager == PackageManager::PACMAN {
                     return Option::from(vec!["mariadb"]);
