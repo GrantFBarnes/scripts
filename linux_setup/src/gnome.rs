@@ -1,20 +1,23 @@
-use rust_cli::commands::Operation;
-
 use std::io;
+use std::process::Command;
 
 use crate::distribution::{Distribution, DistributionName};
 
 fn settings_set(path: &str, key: &str, value: &str) -> Result<(), io::Error> {
-    Operation::new()
-        .command(format!("gsettings set {} {} {}", path, key, value))
-        .run()?;
+    Command::new("gsettings")
+        .arg("set")
+        .arg(path)
+        .arg(key)
+        .arg(value)
+        .status()?;
     Ok(())
 }
 
 fn settings_reset(path: &str) -> Result<(), io::Error> {
-    Operation::new()
-        .command(format!("gsettings reset-recursively {}", path))
-        .run()?;
+    Command::new("gsettings")
+        .arg("reset-recursively")
+        .arg(path)
+        .status()?;
     Ok(())
 }
 
