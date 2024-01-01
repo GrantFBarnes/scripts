@@ -1102,6 +1102,11 @@ let g:ale_completion_enabled = 1
 let g:ale_linters = { "go": ["gopls"], "rust": ["analyzer"] }
 let g:ale_fixers = { "*": ["remove_trailing_lines", "trim_whitespace"], "go": ["gofmt"], "rust": ["rustfmt"] }
 
+nmap K :ALEHover<CR>
+nmap gd :ALEGoToDefinition<CR>
+nmap gn :ALERename<CR>
+nmap gr :ALEFindReferences<CR>
+
 """"""""""""""""""""""""""""""""""""""""
 " insert mode remaps
 
