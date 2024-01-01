@@ -1058,6 +1058,7 @@ set ignorecase smartcase
 set incsearch hlsearch
 
 syntax on
+colorscheme desert
 filetype plugin indent on
 
 """"""""""""""""""""""""""""""""""""""""
