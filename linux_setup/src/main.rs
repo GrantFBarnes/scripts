@@ -39,6 +39,16 @@ struct Package {
     desktop_environment: &'static str,
 }
 
+#[derive(PartialEq)]
+enum InstallMethod {
+    Repository,
+    Flatpak,
+    Snap,
+    Other,
+    Uninstall,
+    Cancel,
+}
+
 const CATEGORIES: [&str; 10] = [
     "Server",
     "Desktop",
@@ -741,7 +751,7 @@ fn run_flatpak_remote_select(
 fn post_uninstall(
     package: &str,
     distribution: &Distribution,
-    method: &str,
+    method: &InstallMethod,
 ) -> Result<(), io::Error> {
     let home_dir: Result<String, VarError> = env::var("HOME");
     if home_dir.is_err() {
@@ -751,7 +761,7 @@ fn post_uninstall(
 
     match package {
         "code" => {
-            if method != "repository" {
+            if method != &InstallMethod::Repository {
                 if distribution.package_manager == PackageManager::APT {
                     Operation::new()
                         .command("sudo rm /etc/apt/sources.list.d/vscode.list")
@@ -766,7 +776,7 @@ fn post_uninstall(
                         .run()?;
                 }
             }
-            if method == "uninstall" {
+            if method == &InstallMethod::Uninstall {
                 Operation::new()
                     .command(format!(
                         "sudo rm -r {}{} {}{}",
@@ -776,21 +786,21 @@ fn post_uninstall(
             }
         }
         "golang" => {
-            if method == "uninstall" {
+            if method == &InstallMethod::Uninstall {
                 Operation::new()
                     .command(format!("sudo rm -r {}{}", &home_dir, "/.go"))
                     .run()?;
             }
         }
         "neovim" => {
-            if method == "uninstall" {
+            if method == &InstallMethod::Uninstall {
                 Operation::new()
                     .command(format!("sudo rm -r {}{}", &home_dir, "/.config/nvim"))
                     .run()?;
             }
         }
         "pycharm" => {
-            if method != "repository" {
+            if method != &InstallMethod::Repository {
                 if distribution.name == DistributionName::Fedora {
                     Operation::new()
                         .command("sudo dnf config-manager --set-disabled phracek-PyCharm")
@@ -799,14 +809,14 @@ fn post_uninstall(
             }
         }
         "rust" => {
-            if method != "other" {
+            if method != &InstallMethod::Other {
                 Operation::new()
                     .command(format!("sudo rm -r {}{}", &home_dir, "/.cargo/bin/rustup"))
                     .run()?;
             }
         }
         "vim" => {
-            if method == "uninstall" {
+            if method == &InstallMethod::Uninstall {
                 Operation::new()
                     .command(format!(
                         "sudo rm -r {}{} {}{} {}{}",
@@ -825,11 +835,11 @@ fn pre_install(
     package: &str,
     distribution: &Distribution,
     info: &mut Info,
-    method: &str,
+    method: &InstallMethod,
 ) -> Result<(), io::Error> {
     match package {
         "code" => {
-            if method == "repository" {
+            if method == &InstallMethod::Repository {
                 if distribution.package_manager == PackageManager::APT {
                     distribution.install("wget", info)?;
                     distribution.install("gpg", info)?;
@@ -889,7 +899,7 @@ fn pre_install(
             }
         }
         p if p.contains("dotnet") => {
-            if method == "repository" {
+            if method == &InstallMethod::Repository {
                 if distribution.repository == Repository::Debian {
                     distribution.install("wget", info)?;
 
@@ -912,16 +922,16 @@ fn pre_install(
             }
         }
         "nodejs" => {
-            if method == "repository" {
-                if distribution.package_manager == PackageManager::DNF {
+            if method == &InstallMethod::Repository {
+                if distribution.repository == Repository::RedHat {
                     Operation::new()
-                        .command("sudo dnf module enable nodejs:18 -y")
+                        .command("sudo dnf module enable nodejs:20 -y")
                         .run()?;
                 }
             }
         }
         "pycharm" => {
-            if method == "repository" {
+            if method == &InstallMethod::Repository {
                 if distribution.repository == Repository::Fedora {
                     Operation::new()
                         .command("sudo dnf config-manager --set-enabled phracek-PyCharm")
@@ -930,7 +940,7 @@ fn pre_install(
             }
         }
         "rust" => {
-            if method == "other" {
+            if method == &InstallMethod::Other {
                 distribution.install("curl", info)?;
             }
         }
@@ -940,7 +950,11 @@ fn pre_install(
     Ok(())
 }
 
-fn post_install(package: &str, distribution: &Distribution, method: &str) -> Result<(), io::Error> {
+fn post_install(
+    package: &str,
+    distribution: &Distribution,
+    method: &InstallMethod,
+) -> Result<(), io::Error> {
     let home_dir: Result<String, VarError> = env::var("HOME");
     if home_dir.is_err() {
         return Err(io::Error::other("HOME directory could not be determined"));
@@ -950,7 +964,7 @@ fn post_install(package: &str, distribution: &Distribution, method: &str) -> Res
 
     match package {
         "code" => {
-            if method != "uninstall" {
+            if method != &InstallMethod::Uninstall {
                 let extensions: Vec<&str> = Vec::from(["esbenp.prettier-vscode", "vscodevim.vim"]);
                 for ext in extensions {
                     Operation::new()
@@ -982,11 +996,11 @@ fn post_install(package: &str, distribution: &Distribution, method: &str) -> Res
             }
         }
         "golang" => {
-            if method != "uninstall" {
+            if method != &InstallMethod::Uninstall {
                 Operation::new()
                     .command(format!("go env -w GOPATH={}/.go", &home_dir))
                     .run()?;
-                if method == "snap" || distribution.repository == Repository::RedHat {
+                if method == &InstallMethod::Snap || distribution.repository == Repository::RedHat {
                     helper::append_to_file_if_not_found(
                         &bashrc,
                         "export GOPATH",
@@ -1005,13 +1019,15 @@ export PATH=$PATH:$GOPATH/bin
             }
         }
         "intellij" | "pycharm" => {
-            fs::write(
-                format!("{}{}", &home_dir, "/.ideavimrc"),
-                "sethandler a:ide",
-            )?;
+            if method != &InstallMethod::Uninstall {
+                fs::write(
+                    format!("{}{}", &home_dir, "/.ideavimrc"),
+                    "sethandler a:ide",
+                )?;
+            }
         }
         "rust" => {
-            if method == "other" {
+            if method == &InstallMethod::Other {
                 Operation::new()
                     .command(format!(
                         "{}{} component add rust-analyzer",
@@ -1021,12 +1037,12 @@ export PATH=$PATH:$GOPATH/bin
             }
         }
         "snapd" => {
-            if method == "repository" {
+            if method != &InstallMethod::Uninstall {
                 distribution.setup_snap()?;
             }
         }
         "vim" | "neovim" => {
-            if method == "repository" {
+            if method != &InstallMethod::Uninstall {
                 helper::append_to_file_if_not_found(
                     &bashrc,
                     "export EDITOR",
@@ -1171,19 +1187,19 @@ fn run_package_select(
     info: &mut Info,
 ) -> Result<(), io::Error> {
     let mut options_display: Vec<String> = vec![];
-    let mut options_value: Vec<&str> = vec![];
+    let mut options_value: Vec<InstallMethod> = vec![];
 
     if distribution.is_available(package) {
         options_display.push(helper::get_colored_string(
             "Install Repository",
             Color::Green,
         ));
-        options_value.push("repository");
+        options_value.push(InstallMethod::Repository);
     }
 
     if flatpak::is_available(package) {
         options_display.push(helper::get_colored_string("Install Flatpak", Color::Blue));
-        options_value.push("flatpak");
+        options_value.push(InstallMethod::Flatpak);
     }
 
     if snap::is_available(package) {
@@ -1199,19 +1215,19 @@ fn run_package_select(
             }
         }
         options_display.push(helper::get_colored_string(display, Color::Magenta));
-        options_value.push("snap");
+        options_value.push(InstallMethod::Snap);
     }
 
     if other::is_available(package) {
         options_display.push(helper::get_colored_string("Install Other", Color::Yellow));
-        options_value.push("other");
+        options_value.push(InstallMethod::Other);
     }
 
     options_display.push(helper::get_colored_string("Uninstall", Color::Red));
-    options_value.push("uninstall");
+    options_value.push(InstallMethod::Uninstall);
 
     options_display.push(String::from("Cancel"));
-    options_value.push("cancel");
+    options_value.push(InstallMethod::Cancel);
 
     let selection = Select::new()
         .title(format!(
@@ -1226,42 +1242,42 @@ fn run_package_select(
         return Ok(());
     }
     let selection: usize = selection.unwrap();
-    let method: &str = options_value[selection];
+    let method: &InstallMethod = &options_value[selection];
 
-    if method == "cancel" {
+    if method == &InstallMethod::Cancel {
         return Ok(());
     }
 
-    if method != "repository" {
+    if method != &InstallMethod::Repository {
         distribution.uninstall(package, info)?;
     }
 
-    if method != "flatpak" {
+    if method != &InstallMethod::Flatpak {
         if info.has_flatpak {
             flatpak::uninstall(package, info)?;
         }
     }
 
-    if method != "snap" {
+    if method != &InstallMethod::Snap {
         if info.has_snap {
             snap::uninstall(package, info)?;
         }
     }
 
-    if method != "other" {
+    if method != &InstallMethod::Other {
         other::uninstall(package, info)?;
     }
-    post_uninstall(package, distribution, method)?;
+    post_uninstall(package, distribution, &method)?;
 
-    pre_install(package, distribution, info, method)?;
+    pre_install(package, distribution, info, &method)?;
     match method {
-        "repository" => distribution.install(package, info)?,
-        "flatpak" => run_flatpak_remote_select(package, distribution, info)?,
-        "snap" => snap::install(package, distribution, info)?,
-        "other" => other::install(package, info)?,
+        InstallMethod::Repository => distribution.install(package, info)?,
+        InstallMethod::Flatpak => run_flatpak_remote_select(package, distribution, info)?,
+        InstallMethod::Snap => snap::install(package, distribution, info)?,
+        InstallMethod::Other => other::install(package, info)?,
         _ => (),
     }
-    post_install(package, distribution, method)
+    post_install(package, distribution, &method)
 }
 
 fn run_category_select(
