@@ -1090,15 +1090,21 @@ filetype plugin indent on
 
 let mapleader = " "
 
-nnoremap <Leader>ex :Explore<CR>
 " window split
 nnoremap <Leader>vs <C-w>v
 nnoremap <Leader>hs <C-w>s
+
 " window navigation
 nnoremap <C-h> <C-w>h
 nnoremap <C-j> <C-w>j
 nnoremap <C-k> <C-w>k
 nnoremap <C-l> <C-w>l
+
+" text insert
+nnoremap <Leader>go iif err != nil {}<ESC>
+
+" file explore
+nnoremap <Leader>ex :Explore<CR>
 "#,
                 )?;
 
@@ -1126,10 +1132,10 @@ let g:ale_completion_enabled = 1
 let g:ale_linters = { "go": ["gopls"], "rust": ["analyzer"] }
 let g:ale_fixers = { "*": ["remove_trailing_lines", "trim_whitespace"], "go": ["gofmt"], "rust": ["rustfmt"] }
 
-nmap K :ALEHover<CR>
-nmap gd :ALEGoToDefinition<CR>
-nmap gn :ALERename<CR>
-nmap gr :ALEFindReferences<CR>
+nnoremap K :ALEHover<CR>
+nnoremap gd :ALEGoToDefinition<CR>
+nnoremap gn :ALERename<CR>
+nnoremap gr :ALEFindReferences<CR>
 
 """"""""""""""""""""""""""""""""""""""""
 " insert mode remaps
