@@ -52,7 +52,7 @@ const CATEGORIES: [&str; 10] = [
     "Utilities",
 ];
 
-const ALL_PACKAGES: [Package; 106] = [
+const ALL_PACKAGES: [Package; 107] = [
     Package {
         display: "0 A.D.",
         key: "0ad",
@@ -510,6 +510,12 @@ const ALL_PACKAGES: [Package; 106] = [
         desktop_environment: "",
     },
     Package {
+        display: "neovim - Text Editor",
+        key: "neovim",
+        category: "Server",
+        desktop_environment: "",
+    },
+    Package {
         display: "nano - Text Editor",
         key: "nano",
         category: "Server",
@@ -654,7 +660,7 @@ const ALL_PACKAGES: [Package; 106] = [
         desktop_environment: "",
     },
     Package {
-        display: "VIM - Text Editor",
+        display: "vim - Text Editor",
         key: "vim",
         category: "Server",
         desktop_environment: "",
@@ -776,6 +782,13 @@ fn post_uninstall(
                     .run()?;
             }
         }
+        "neovim" => {
+            if method == "uninstall" {
+                Operation::new()
+                    .command(format!("sudo rm -r {}{}", &home_dir, "/.config/nvim"))
+                    .run()?;
+            }
+        }
         "pycharm" => {
             if method != "repository" {
                 if distribution.name == DistributionName::Fedora {
@@ -793,7 +806,7 @@ fn post_uninstall(
             }
         }
         "vim" => {
-            if method != "repository" {
+            if method == "uninstall" {
                 Operation::new()
                     .command(format!(
                         "sudo rm -r {}{} {}{} {}{}",
@@ -1026,7 +1039,7 @@ export PATH=$PATH:$GOPATH/bin
                 distribution.setup_snap()?;
             }
         }
-        "vim" => {
+        "vim" | "neovim" => {
             if method == "repository" {
                 helper::append_to_file_if_not_found(
                     &bashrc,
@@ -1035,11 +1048,22 @@ export PATH=$PATH:$GOPATH/bin
                     false,
                 )?;
 
-                let vimrc: String = format!("{}{}", &home_dir, "/.vimrc");
+                let config_file: String = if package == "vim" {
+                    format!("{}{}", &home_dir, "/.vimrc")
+                } else {
+                    format!("{}{}", &home_dir, "/.config/nvim/init.vim")
+                };
+
+                if package == "neovim" {
+                    Operation::new()
+                        .command(format!("mkdir -p {}/.config/nvim", &home_dir))
+                        .run()?;
+                }
+
                 fs::write(
-                    &vimrc,
+                    &config_file,
                     r#"""""""""""""""""""""""""""""""""""""""""
-" vimrc settings
+" vim settings
 
 set nocompatible
 
@@ -1083,7 +1107,7 @@ nnoremap <C-l> <C-w>l
                         || distribution.repository == Repository::Fedora
                     {
                         helper::append_to_file_if_not_found(
-                            &vimrc,
+                            &config_file,
                             "NERDTree",
                             "nnoremap <C-n> :NERDTreeToggle<CR>",
                             false,
@@ -1091,7 +1115,7 @@ nnoremap <C-l> <C-w>l
                     }
 
                     helper::append_to_file_if_not_found(
-                        &vimrc,
+                        &config_file,
                         "ale settings",
                         r#"
 """"""""""""""""""""""""""""""""""""""""

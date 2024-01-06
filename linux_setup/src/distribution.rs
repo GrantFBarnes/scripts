@@ -574,12 +574,21 @@ impl Distribution {
                 }
                 Option::from(vec!["transmission-qt"])
             }
-            "vim" => {
+            "vim" | "neovim" => {
                 if self.repository == Repository::RedHat {
-                    return Option::from(vec!["vim-enhanced"]);
+                    return if package == "vim" {
+                        Option::from(vec!["vim-enhanced"])
+                    } else {
+                        None
+                    };
                 }
 
-                let mut packages = vec![];
+                let mut packages = if package == "neovim" {
+                    vec!["neovim"]
+                } else {
+                    vec![]
+                };
+
                 if self.package_manager == PackageManager::DNF {
                     packages.push("vim-enhanced");
                 } else {

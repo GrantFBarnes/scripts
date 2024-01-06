@@ -241,6 +241,7 @@ pub fn setup(distribution: &Distribution) -> Result<(), io::Error> {
             'texstudio.desktop',
             'org.texstudio.TeXstudio.desktop',
             'org.gnome.gitg.desktop',
+            'nvim.desktop',
             'vim.desktop'
         ]",
     )?;
