@@ -1080,6 +1080,8 @@ set number
 set relativenumber
 set ignorecase smartcase
 set incsearch hlsearch
+set foldmethod=indent
+set foldlevel=99
 
 syntax on
 colorscheme desert
