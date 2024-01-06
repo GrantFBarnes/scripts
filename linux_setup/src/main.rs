@@ -960,36 +960,22 @@ fn post_install(package: &str, distribution: &Distribution, method: &str) -> Res
 
                 fs::write(
                     format!("{}{}", &home_dir, "/.config/Code/User/settings.json"),
-                    r#"
-{
-  "telemetry.telemetryLevel": "off",
+                    r#"{
+  "[css]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+  "[html]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+  "[javascript]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+  "[json]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+  "[jsonc]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+  "[scss]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+  "[typescript]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
   "editor.formatOnSave": true,
   "editor.rulers": [80, 160],
   "extensions.ignoreRecommendations": true,
   "git.openRepositoryInParentFolders": "always",
-  "workbench.startupEditor": "none",
+  "telemetry.telemetryLevel": "off",
+  "vim.smartRelativeLine": true,
   "vim.useCtrlKeys": false,
-  "[css]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
-  },
-  "[scss]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
-  },
-  "[html]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
-  },
-  "[javascript]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
-  },
-  "[json]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
-  },
-  "[jsonc]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
-  },
-  "[typescript]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
-  }
+  "workbench.startupEditor": "none"
 }
 "#,
                 )?;
