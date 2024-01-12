@@ -19,7 +19,10 @@ mod other;
 mod package;
 mod snap;
 
-use crate::distribution::{Distribution, DistributionName, PackageManager, Repository};
+use crate::distribution::{
+    DesktopEnvironment, Distribution, DistributionName, PackageManager, Repository,
+};
+use crate::package::Package;
 use crate::snap::Snap;
 
 #[derive(PartialEq)]
@@ -65,24 +68,20 @@ fn repository_setup(distribution: &Distribution, info: &mut Info) -> Result<(), 
 }
 
 fn run_flatpak_remote_select(
-    package: &str,
+    package: &Package,
     distribution: &Distribution,
     info: &mut Info,
 ) -> Result<(), io::Error> {
     let mut options: Vec<&str> = vec![];
-
-    let remotes: Option<Vec<&str>> = flatpak::get_remotes(package);
-    if remotes.is_none() {
-        return Err(io::Error::other("failed to get flatpak remotes"));
-    }
-    let remotes: Vec<&str> = remotes.unwrap();
-    for remote in remotes {
-        options.push(remote);
+    if let Some(fp) = &package.flatpak {
+        for remote in &fp.remotes {
+            options.push(remote);
+        }
     }
     options.push("Cancel");
 
     let remote = Select::new()
-        .title(format!("Flatpak Remote: {}", package))
+        .title(format!("Flatpak Remote: {}", package.key))
         .options(&options)
         .erase_after(true)
         .run_select_value()?;
@@ -507,38 +506,38 @@ inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-n>" : "\<S-TAB>"
     Ok(())
 }
 
-fn get_install_method(package: &str, distribution: &Distribution, info: &Info) -> String {
-    if distribution.is_installed(package, info) {
+fn get_install_method(package: &Package, distribution: &Distribution, info: &Info) -> String {
+    if distribution.is_installed(package.key, info) {
         return helper::get_colored_string("Repository", Color::Green);
     }
     if flatpak::is_installed(package, info) {
         return helper::get_colored_string("Flatpak", Color::Blue);
     }
-    if snap::is_installed(package, info) {
+    if snap::is_installed(package.key, info) {
         return helper::get_colored_string("Snap", Color::Magenta);
     }
-    if other::is_installed(package, info) {
+    if other::is_installed(package.key, info) {
         return helper::get_colored_string("Other", Color::Yellow);
     }
     return helper::get_colored_string("Uninstalled", Color::Red);
 }
 
-fn is_installed(package: &str, distribution: &Distribution, info: &Info) -> bool {
-    distribution.is_installed(package, info)
+fn is_installed(package: &Package, distribution: &Distribution, info: &Info) -> bool {
+    distribution.is_installed(package.key, info)
         || flatpak::is_installed(package, info)
-        || snap::is_installed(package, info)
-        || other::is_installed(package, info)
+        || snap::is_installed(package.key, info)
+        || other::is_installed(package.key, info)
 }
 
 fn run_package_select(
-    package: &str,
+    package: &Package,
     distribution: &Distribution,
     info: &mut Info,
 ) -> Result<(), io::Error> {
     let mut options_display: Vec<String> = vec![];
     let mut options_value: Vec<InstallMethod> = vec![];
 
-    if distribution.is_available(package) {
+    if distribution.is_available(package.key) {
         options_display.push(helper::get_colored_string(
             "Install Repository",
             Color::Green,
@@ -551,9 +550,9 @@ fn run_package_select(
         options_value.push(InstallMethod::Flatpak);
     }
 
-    if snap::is_available(package) {
+    if snap::is_available(package.key) {
         let mut display: String = String::from("Install Snap");
-        let pkg: Option<Snap> = snap::get_package(package);
+        let pkg: Option<Snap> = snap::get_package(package.key);
         if pkg.is_some() {
             let pkg: Snap = pkg.unwrap();
             if pkg.is_official {
@@ -567,7 +566,7 @@ fn run_package_select(
         options_value.push(InstallMethod::Snap);
     }
 
-    if other::is_available(package) {
+    if other::is_available(package.key) {
         options_display.push(helper::get_colored_string("Install Other", Color::Yellow));
         options_value.push(InstallMethod::Other);
     }
@@ -581,7 +580,7 @@ fn run_package_select(
     let selection = Select::new()
         .title(format!(
             "Package: {} ({})",
-            package,
+            package.key,
             get_install_method(package, distribution, &info)
         ))
         .options(&options_display)
@@ -598,7 +597,7 @@ fn run_package_select(
     }
 
     if method != &InstallMethod::Repository {
-        distribution.uninstall(package, info)?;
+        distribution.uninstall(package.key, info)?;
     }
 
     if method != &InstallMethod::Flatpak {
@@ -609,24 +608,24 @@ fn run_package_select(
 
     if method != &InstallMethod::Snap {
         if info.has_snap {
-            snap::uninstall(package, info)?;
+            snap::uninstall(package.key, info)?;
         }
     }
 
     if method != &InstallMethod::Other {
-        other::uninstall(package, info)?;
+        other::uninstall(package.key, info)?;
     }
-    post_uninstall(package, distribution, &method)?;
+    post_uninstall(package.key, distribution, &method)?;
 
-    pre_install(package, distribution, info, &method)?;
+    pre_install(package.key, distribution, info, &method)?;
     match method {
-        InstallMethod::Repository => distribution.install(package, info)?,
+        InstallMethod::Repository => distribution.install(package.key, info)?,
         InstallMethod::Flatpak => run_flatpak_remote_select(package, distribution, info)?,
-        InstallMethod::Snap => snap::install(package, distribution, info)?,
-        InstallMethod::Other => other::install(package, info)?,
+        InstallMethod::Snap => snap::install(package.key, distribution, info)?,
+        InstallMethod::Other => other::install(package.key, info)?,
         _ => (),
     }
-    post_install(package, distribution, &method)
+    post_install(package.key, distribution, &method)
 }
 
 fn run_category_select(
@@ -637,31 +636,31 @@ fn run_category_select(
     info: &mut Info,
 ) -> Result<(), io::Error> {
     let mut options_display: Vec<String> = vec![];
-    let mut options_value: Vec<&str> = vec![];
+    let mut options_value: Vec<Package> = vec![];
 
     let mut missing_desktop_environment: bool = false;
 
-    for pkg in package::get_all_packages() {
-        if pkg.category != category {
+    for package in package::get_all_packages() {
+        if &package.category != &category {
             continue;
         }
 
-        if !distribution.is_available(pkg.key)
-            && !flatpak::is_available(pkg.key)
-            && !snap::is_available(pkg.key)
-            && !other::is_available(pkg.key)
+        if !distribution.is_available(&package.key)
+            && !flatpak::is_available(&package)
+            && !snap::is_available(&package.key)
+            && !other::is_available(&package.key)
         {
             continue;
         }
 
         let mut missing_pkg_desktop_environment: bool = false;
 
-        if let Some(de) = pkg.desktop_environment {
-            if (de == package::DesktopEnvironment::Gnome && !info.has_gnome)
-                || (de == package::DesktopEnvironment::KDE && !info.has_kde)
+        if let Some(de) = &package.desktop_environment {
+            if (de == &DesktopEnvironment::Gnome && !info.has_gnome)
+                || (de == &DesktopEnvironment::KDE && !info.has_kde)
             {
                 missing_desktop_environment = true;
-                if !show_all_desktop_environments && !is_installed(pkg.key, distribution, info) {
+                if !show_all_desktop_environments && !is_installed(&package, distribution, info) {
                     continue;
                 }
                 missing_pkg_desktop_environment = true;
@@ -671,16 +670,16 @@ fn run_category_select(
         options_display.push(format!(
             "{} ({})",
             helper::get_colored_string(
-                pkg.display,
+                package.display,
                 if missing_pkg_desktop_environment {
                     Color::Yellow
                 } else {
                     Color::White
                 }
             ),
-            get_install_method(pkg.key, distribution, info)
+            get_install_method(&package, distribution, info)
         ));
-        options_value.push(pkg.key);
+        options_value.push(package);
     }
 
     if missing_desktop_environment {
@@ -696,12 +695,12 @@ fn run_category_select(
         options_display.reverse();
 
         options_value.reverse();
-        options_value.push("toggle_show_all_desktop_environments");
+        options_value.push(Package::new());
         options_value.reverse();
     }
 
     options_display.push(String::from("Exit"));
-    options_value.push("exit");
+    options_value.push(Package::new());
 
     let selection = Select::new()
         .title(format!("Category: {}", category))
@@ -714,27 +713,25 @@ fn run_category_select(
     }
     let selection: usize = selection.unwrap();
 
-    match options_value[selection] {
-        "exit" => (),
-        "toggle_show_all_desktop_environments" => {
-            run_category_select(
-                category,
-                selection,
-                !show_all_desktop_environments,
-                distribution,
-                info,
-            )?;
-        }
-        _ => {
-            run_package_select(options_value[selection], distribution, info)?;
-            run_category_select(
-                category,
-                selection + 1,
-                show_all_desktop_environments,
-                distribution,
-                info,
-            )?;
-        }
+    if missing_desktop_environment && selection == 0 {
+        // toggle show all desktop environments
+        run_category_select(
+            category,
+            selection,
+            !show_all_desktop_environments,
+            distribution,
+            info,
+        )?;
+    } else if selection < options_value.len() - 1 {
+        // not exit
+        run_package_select(&options_value[selection], distribution, info)?;
+        run_category_select(
+            category,
+            selection + 1,
+            show_all_desktop_environments,
+            distribution,
+            info,
+        )?;
     }
 
     Ok(())

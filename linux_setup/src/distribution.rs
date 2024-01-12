@@ -9,6 +9,12 @@ use std::str::{Split, SplitWhitespace};
 use crate::helper;
 use crate::Info;
 
+#[derive(PartialEq)]
+pub enum DesktopEnvironment {
+    Gnome,
+    KDE,
+}
+
 #[derive(Debug, PartialEq, Eq)]
 pub enum DistributionName {
     Alma,
