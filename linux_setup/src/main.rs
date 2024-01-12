@@ -80,7 +80,7 @@ fn run_flatpak_remote_select(
     options.push("Cancel");
 
     let remote = Select::new()
-        .title(format!("Flatpak Remote: {}", package.key))
+        .title(format!("Flatpak Remote: {}", package.display))
         .options(&options)
         .erase_after(true)
         .run_select_value()?;
@@ -577,7 +577,7 @@ fn run_package_select(
     let selection = Select::new()
         .title(format!(
             "Package: {} ({})",
-            package.key,
+            package.display,
             get_install_method(package, distribution, &info)
         ))
         .options(&options_display)

@@ -455,7 +455,7 @@ pub fn get_all_packages() -> Vec<Package> {
             other: None,
         },
         Package {
-            display: "F;atpak",
+            display: "Flatpak",
             key: "flatpak",
             category: "Server",
             desktop_environment: None,
