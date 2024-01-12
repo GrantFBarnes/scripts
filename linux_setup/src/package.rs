@@ -2,6 +2,7 @@ use std::collections::HashMap;
 
 use crate::distribution::{DesktopEnvironment, Repository};
 use crate::flatpak::Flatpak;
+use crate::other::OtherPackage;
 use crate::snap::Snap;
 
 pub struct Package {
@@ -12,6 +13,7 @@ pub struct Package {
     pub repository: HashMap<Repository, Vec<&'static str>>,
     pub flatpak: Option<Flatpak>,
     pub snap: Option<Snap>,
+    pub other: Option<OtherPackage>,
 }
 
 impl Package {
@@ -24,6 +26,7 @@ impl Package {
             repository: HashMap::new(),
             flatpak: None,
             snap: None,
+            other: None,
         }
     }
 }
@@ -51,6 +54,7 @@ pub fn get_all_packages() -> Vec<Package> {
                 is_classic: false,
                 channel: "",
             }),
+            other: None,
         },
         Package {
             display: "Ark Archiving",
@@ -74,6 +78,7 @@ pub fn get_all_packages() -> Vec<Package> {
                 is_classic: false,
                 channel: "",
             }),
+            other: None,
         },
         Package {
             display: "Blender",
@@ -96,6 +101,7 @@ pub fn get_all_packages() -> Vec<Package> {
                 is_classic: true,
                 channel: "",
             }),
+            other: None,
         },
         Package {
             display: "Cheese - Webcam",
@@ -114,6 +120,7 @@ pub fn get_all_packages() -> Vec<Package> {
                 remotes: vec!["fedora", "flathub"],
             }),
             snap: None,
+            other: None,
         },
         Package {
             display: "Chromium",
@@ -135,6 +142,7 @@ pub fn get_all_packages() -> Vec<Package> {
                 is_classic: false,
                 channel: "",
             }),
+            other: None,
         },
         Package {
             display: "Cockpit - Web Interface",
@@ -150,6 +158,7 @@ pub fn get_all_packages() -> Vec<Package> {
             ]),
             flatpak: None,
             snap: None,
+            other: None,
         },
         Package {
             display: "cups - Printer Support",
@@ -165,6 +174,7 @@ pub fn get_all_packages() -> Vec<Package> {
             ]),
             flatpak: None,
             snap: None,
+            other: None,
         },
         Package {
             display: "cURL - Client URL",
@@ -180,6 +190,7 @@ pub fn get_all_packages() -> Vec<Package> {
             ]),
             flatpak: None,
             snap: None,
+            other: None,
         },
         Package {
             display: "dconf Editor",
@@ -198,6 +209,7 @@ pub fn get_all_packages() -> Vec<Package> {
                 remotes: vec!["fedora", "flathub"],
             }),
             snap: None,
+            other: None,
         },
         Package {
             display: "Deja Dup - Backups",
@@ -215,6 +227,7 @@ pub fn get_all_packages() -> Vec<Package> {
                 remotes: vec!["flathub"],
             }),
             snap: None,
+            other: None,
         },
         Package {
             display: "Discord",
@@ -232,6 +245,7 @@ pub fn get_all_packages() -> Vec<Package> {
                 is_classic: false,
                 channel: "",
             }),
+            other: None,
         },
         Package {
             display: "dotnet - C# runtime 8.0 LTS",
@@ -252,6 +266,7 @@ pub fn get_all_packages() -> Vec<Package> {
                 is_classic: false,
                 channel: "",
             }),
+            other: None,
         },
         Package {
             display: "dotnet - C# SDK 8.0 LTS",
@@ -272,6 +287,7 @@ pub fn get_all_packages() -> Vec<Package> {
                 is_classic: true,
                 channel: "8.0/stable",
             }),
+            other: None,
         },
         Package {
             display: "Elisa Music Player",
@@ -289,6 +305,7 @@ pub fn get_all_packages() -> Vec<Package> {
                 remotes: vec!["fedora", "flathub"],
             }),
             snap: None,
+            other: None,
         },
         Package {
             display: "Epiphany - Gnome Web",
@@ -306,6 +323,7 @@ pub fn get_all_packages() -> Vec<Package> {
                 remotes: vec!["fedora", "flathub"],
             }),
             snap: None,
+            other: None,
         },
         Package {
             display: "Evince - Document Viewer",
@@ -324,6 +342,7 @@ pub fn get_all_packages() -> Vec<Package> {
                 remotes: vec!["fedora", "flathub"],
             }),
             snap: None,
+            other: None,
         },
         Package {
             display: "Eye of Gnome - Image Viewer",
@@ -347,6 +366,7 @@ pub fn get_all_packages() -> Vec<Package> {
                 is_classic: false,
                 channel: "",
             }),
+            other: None,
         },
         Package {
             display: "Fedora Media Writer",
@@ -361,6 +381,7 @@ pub fn get_all_packages() -> Vec<Package> {
                 remotes: vec!["fedora", "flathub"],
             }),
             snap: None,
+            other: None,
         },
         Package {
             display: "ffmpeg - Media Codecs",
@@ -376,6 +397,7 @@ pub fn get_all_packages() -> Vec<Package> {
             ]),
             flatpak: None,
             snap: None,
+            other: None,
         },
         Package {
             display: "FileLight Disk Usage",
@@ -391,6 +413,7 @@ pub fn get_all_packages() -> Vec<Package> {
             ]),
             flatpak: None,
             snap: None,
+            other: None,
         },
         Package {
             display: "Firefox",
@@ -411,6 +434,7 @@ pub fn get_all_packages() -> Vec<Package> {
                 is_classic: false,
                 channel: "",
             }),
+            other: None,
         },
         Package {
             display: "Firefox ESR",
@@ -428,6 +452,7 @@ pub fn get_all_packages() -> Vec<Package> {
                 is_classic: false,
                 channel: "esr-stable",
             }),
+            other: None,
         },
         Package {
             display: "F;atpak",
@@ -443,6 +468,7 @@ pub fn get_all_packages() -> Vec<Package> {
             ]),
             flatpak: None,
             snap: None,
+            other: None,
         },
         Package {
             display: "Flutter",
@@ -457,6 +483,7 @@ pub fn get_all_packages() -> Vec<Package> {
                 is_classic: true,
                 channel: "",
             }),
+            other: None,
         },
         Package {
             display: "gedit",
@@ -480,6 +507,7 @@ pub fn get_all_packages() -> Vec<Package> {
                 is_classic: false,
                 channel: "",
             }),
+            other: None,
         },
         Package {
             display: "GIMP",
@@ -503,6 +531,7 @@ pub fn get_all_packages() -> Vec<Package> {
                 is_classic: false,
                 channel: "",
             }),
+            other: None,
         },
         Package {
             display: "git - Version Control",
@@ -518,6 +547,7 @@ pub fn get_all_packages() -> Vec<Package> {
             ]),
             flatpak: None,
             snap: None,
+            other: None,
         },
         Package {
             display: "Go Language",
@@ -538,6 +568,7 @@ pub fn get_all_packages() -> Vec<Package> {
                 is_classic: true,
                 channel: "",
             }),
+            other: None,
         },
         Package {
             display: "GParted",
@@ -553,6 +584,7 @@ pub fn get_all_packages() -> Vec<Package> {
             ]),
             flatpak: None,
             snap: None,
+            other: None,
         },
         Package {
             display: "Gnome 2048",
@@ -570,6 +602,7 @@ pub fn get_all_packages() -> Vec<Package> {
                 remotes: vec!["fedora", "flathub"],
             }),
             snap: None,
+            other: None,
         },
         Package {
             display: "Gnome Boxes - VM Manager",
@@ -587,6 +620,7 @@ pub fn get_all_packages() -> Vec<Package> {
                 remotes: vec!["flathub"],
             }),
             snap: None,
+            other: None,
         },
         Package {
             display: "Gnome Builder",
@@ -604,6 +638,7 @@ pub fn get_all_packages() -> Vec<Package> {
                 remotes: vec!["flathub"],
             }),
             snap: None,
+            other: None,
         },
         Package {
             display: "Gnome Calculator",
@@ -627,6 +662,7 @@ pub fn get_all_packages() -> Vec<Package> {
                 is_classic: false,
                 channel: "",
             }),
+            other: None,
         },
         Package {
             display: "Gnome Calendar",
@@ -644,6 +680,7 @@ pub fn get_all_packages() -> Vec<Package> {
                 remotes: vec!["fedora", "flathub"],
             }),
             snap: None,
+            other: None,
         },
         Package {
             display: "Gnome Chess",
@@ -661,6 +698,7 @@ pub fn get_all_packages() -> Vec<Package> {
                 remotes: vec!["fedora", "flathub"],
             }),
             snap: None,
+            other: None,
         },
         Package {
             display: "Gnome Clocks",
@@ -683,6 +721,7 @@ pub fn get_all_packages() -> Vec<Package> {
                 is_classic: false,
                 channel: "",
             }),
+            other: None,
         },
         Package {
             display: "Gnome Connections",
@@ -701,6 +740,7 @@ pub fn get_all_packages() -> Vec<Package> {
                 remotes: vec!["fedora", "flathub"],
             }),
             snap: None,
+            other: None,
         },
         Package {
             display: "Gnome Contacts",
@@ -718,6 +758,7 @@ pub fn get_all_packages() -> Vec<Package> {
                 remotes: vec!["fedora", "flathub"],
             }),
             snap: None,
+            other: None,
         },
         Package {
             display: "Gnome Disk Usage",
@@ -736,6 +777,7 @@ pub fn get_all_packages() -> Vec<Package> {
                 remotes: vec!["fedora", "flathub"],
             }),
             snap: None,
+            other: None,
         },
         Package {
             display: "Gnome Disk Utility",
@@ -751,6 +793,7 @@ pub fn get_all_packages() -> Vec<Package> {
             ]),
             flatpak: None,
             snap: None,
+            other: None,
         },
         Package {
             display: "Gnome Image Viewer",
@@ -770,6 +813,7 @@ pub fn get_all_packages() -> Vec<Package> {
                 is_classic: false,
                 channel: "",
             }),
+            other: None,
         },
         Package {
             display: "Gnome Maps",
@@ -787,6 +831,7 @@ pub fn get_all_packages() -> Vec<Package> {
                 remotes: vec!["fedora", "flathub"],
             }),
             snap: None,
+            other: None,
         },
         Package {
             display: "Gnome Mines",
@@ -804,6 +849,7 @@ pub fn get_all_packages() -> Vec<Package> {
                 remotes: vec!["fedora", "flathub"],
             }),
             snap: None,
+            other: None,
         },
         Package {
             display: "Gnome Music",
@@ -821,6 +867,7 @@ pub fn get_all_packages() -> Vec<Package> {
                 remotes: vec!["fedora", "flathub"],
             }),
             snap: None,
+            other: None,
         },
         Package {
             display: "Gnome Password Safe",
@@ -838,6 +885,7 @@ pub fn get_all_packages() -> Vec<Package> {
                 remotes: vec!["fedora", "flathub"],
             }),
             snap: None,
+            other: None,
         },
         Package {
             display: "Gnome Photos",
@@ -856,6 +904,7 @@ pub fn get_all_packages() -> Vec<Package> {
                 remotes: vec!["fedora", "flathub"],
             }),
             snap: None,
+            other: None,
         },
         Package {
             display: "Gnome Shell Extension",
@@ -871,6 +920,7 @@ pub fn get_all_packages() -> Vec<Package> {
             ]),
             flatpak: None,
             snap: None,
+            other: None,
         },
         Package {
             display: "Gnome Shell Extension Manager",
@@ -883,6 +933,7 @@ pub fn get_all_packages() -> Vec<Package> {
             ]),
             flatpak: None,
             snap: None,
+            other: None,
         },
         Package {
             display: "Gnome Software",
@@ -898,6 +949,7 @@ pub fn get_all_packages() -> Vec<Package> {
             ]),
             flatpak: None,
             snap: None,
+            other: None,
         },
         Package {
             display: "Gnome Solitaire",
@@ -915,6 +967,7 @@ pub fn get_all_packages() -> Vec<Package> {
                 remotes: vec!["fedora", "flathub"],
             }),
             snap: None,
+            other: None,
         },
         Package {
             display: "Gnome Sound Recorder",
@@ -932,6 +985,7 @@ pub fn get_all_packages() -> Vec<Package> {
                 remotes: vec!["fedora", "flathub"],
             }),
             snap: None,
+            other: None,
         },
         Package {
             display: "Gnome Sudoku",
@@ -954,6 +1008,7 @@ pub fn get_all_packages() -> Vec<Package> {
                 is_classic: false,
                 channel: "",
             }),
+            other: None,
         },
         Package {
             display: "Gnome System Monitor",
@@ -969,6 +1024,7 @@ pub fn get_all_packages() -> Vec<Package> {
             ]),
             flatpak: None,
             snap: None,
+            other: None,
         },
         Package {
             display: "Gnome Tetris",
@@ -991,6 +1047,7 @@ pub fn get_all_packages() -> Vec<Package> {
                 is_classic: false,
                 channel: "",
             }),
+            other: None,
         },
         Package {
             display: "Gnome Text Editor",
@@ -1008,6 +1065,7 @@ pub fn get_all_packages() -> Vec<Package> {
                 remotes: vec!["fedora", "flathub"],
             }),
             snap: None,
+            other: None,
         },
         Package {
             display: "Gnome Tweaks",
@@ -1023,6 +1081,7 @@ pub fn get_all_packages() -> Vec<Package> {
             ]),
             flatpak: None,
             snap: None,
+            other: None,
         },
         Package {
             display: "Gnome Weather",
@@ -1040,6 +1099,7 @@ pub fn get_all_packages() -> Vec<Package> {
                 remotes: vec!["fedora", "flathub"],
             }),
             snap: None,
+            other: None,
         },
         Package {
             display: "GNU Cash - Accounting",
@@ -1057,6 +1117,7 @@ pub fn get_all_packages() -> Vec<Package> {
                 remotes: vec!["fedora", "flathub"],
             }),
             snap: None,
+            other: None,
         },
         Package {
             display: "Gwenview - Image Viewer",
@@ -1079,6 +1140,7 @@ pub fn get_all_packages() -> Vec<Package> {
                 is_classic: false,
                 channel: "",
             }),
+            other: None,
         },
         Package {
             display: "htop - Process Reviewer",
@@ -1094,6 +1156,7 @@ pub fn get_all_packages() -> Vec<Package> {
             ]),
             flatpak: None,
             snap: None,
+            other: None,
         },
         Package {
             display: "IceCat - GNU Browser",
@@ -1105,6 +1168,7 @@ pub fn get_all_packages() -> Vec<Package> {
             ]),
             flatpak: None,
             snap: None,
+            other: None,
         },
         Package {
             display: "imagemagick",
@@ -1120,6 +1184,7 @@ pub fn get_all_packages() -> Vec<Package> {
             ]),
             flatpak: None,
             snap: None,
+            other: None,
         },
         Package {
             display: "Intellij",
@@ -1139,6 +1204,7 @@ pub fn get_all_packages() -> Vec<Package> {
                 is_classic: true,
                 channel: "",
             }),
+            other: None,
         },
         Package {
             display: "Kate",
@@ -1159,6 +1225,7 @@ pub fn get_all_packages() -> Vec<Package> {
                 is_classic: true,
                 channel: "",
             }),
+            other: None,
         },
         Package {
             display: "KCalc - Calculator",
@@ -1182,6 +1249,7 @@ pub fn get_all_packages() -> Vec<Package> {
                 is_classic: false,
                 channel: "",
             }),
+            other: None,
         },
         Package {
             display: "KDE Chess",
@@ -1201,6 +1269,7 @@ pub fn get_all_packages() -> Vec<Package> {
                 is_classic: false,
                 channel: "",
             }),
+            other: None,
         },
         Package {
             display: "KDE Mines",
@@ -1221,6 +1290,7 @@ pub fn get_all_packages() -> Vec<Package> {
                 is_classic: false,
                 channel: "",
             }),
+            other: None,
         },
         Package {
             display: "KDE Sudoku",
@@ -1244,6 +1314,7 @@ pub fn get_all_packages() -> Vec<Package> {
                 is_classic: false,
                 channel: "",
             }),
+            other: None,
         },
         Package {
             display: "KdenLive Video Editor",
@@ -1266,6 +1337,7 @@ pub fn get_all_packages() -> Vec<Package> {
                 is_classic: false,
                 channel: "",
             }),
+            other: None,
         },
         Package {
             display: "KDevelop",
@@ -1288,6 +1360,7 @@ pub fn get_all_packages() -> Vec<Package> {
                 is_classic: true,
                 channel: "",
             }),
+            other: None,
         },
         Package {
             display: "Kile - LaTex Editor",
@@ -1302,6 +1375,7 @@ pub fn get_all_packages() -> Vec<Package> {
             ]),
             flatpak: None,
             snap: None,
+            other: None,
         },
         Package {
             display: "KSysGuard",
@@ -1317,6 +1391,7 @@ pub fn get_all_packages() -> Vec<Package> {
             ]),
             flatpak: None,
             snap: None,
+            other: None,
         },
         Package {
             display: "KWrite",
@@ -1335,6 +1410,7 @@ pub fn get_all_packages() -> Vec<Package> {
                 remotes: vec!["fedora", "flathub"],
             }),
             snap: None,
+            other: None,
         },
         Package {
             display: "LaTex - Compiler",
@@ -1350,6 +1426,7 @@ pub fn get_all_packages() -> Vec<Package> {
             ]),
             flatpak: None,
             snap: None,
+            other: None,
         },
         Package {
             display: "LibreOffice",
@@ -1373,6 +1450,7 @@ pub fn get_all_packages() -> Vec<Package> {
                 is_classic: false,
                 channel: "",
             }),
+            other: None,
         },
         Package {
             display: "MariaDB - Database",
@@ -1388,6 +1466,7 @@ pub fn get_all_packages() -> Vec<Package> {
             ]),
             flatpak: None,
             snap: None,
+            other: None,
         },
         Package {
             display: "MP3 Metadata Editor",
@@ -1402,6 +1481,7 @@ pub fn get_all_packages() -> Vec<Package> {
             ]),
             flatpak: None,
             snap: None,
+            other: None,
         },
         Package {
             display: "neovim - Text Editor",
@@ -1416,6 +1496,7 @@ pub fn get_all_packages() -> Vec<Package> {
             ]),
             flatpak: None,
             snap: None,
+            other: None,
         },
         Package {
             display: "nano - Text Editor",
@@ -1431,6 +1512,7 @@ pub fn get_all_packages() -> Vec<Package> {
             ]),
             flatpak: None,
             snap: None,
+            other: None,
         },
         Package {
             display: "Node.js - JavaScript RE",
@@ -1451,6 +1533,7 @@ pub fn get_all_packages() -> Vec<Package> {
                 is_classic: true,
                 channel: "18/stable",
             }),
+            other: None,
         },
         Package {
             display: "Okular - Document Viewer",
@@ -1473,6 +1556,7 @@ pub fn get_all_packages() -> Vec<Package> {
                 is_classic: false,
                 channel: "",
             }),
+            other: None,
         },
         Package {
             display: "Plasma Discover",
@@ -1487,6 +1571,7 @@ pub fn get_all_packages() -> Vec<Package> {
             ]),
             flatpak: None,
             snap: None,
+            other: None,
         },
         Package {
             display: "Plasma System Monitor",
@@ -1502,6 +1587,7 @@ pub fn get_all_packages() -> Vec<Package> {
             ]),
             flatpak: None,
             snap: None,
+            other: None,
         },
         Package {
             display: "Podman - Containers",
@@ -1517,6 +1603,7 @@ pub fn get_all_packages() -> Vec<Package> {
             ]),
             flatpak: None,
             snap: None,
+            other: None,
         },
         Package {
             display: "Pycharm",
@@ -1537,6 +1624,7 @@ pub fn get_all_packages() -> Vec<Package> {
                 is_classic: true,
                 channel: "",
             }),
+            other: None,
         },
         Package {
             display: "qtile - Window Manager",
@@ -1548,6 +1636,7 @@ pub fn get_all_packages() -> Vec<Package> {
             ]),
             flatpak: None,
             snap: None,
+            other: None,
         },
         Package {
             display: "RhythmBox",
@@ -1565,6 +1654,7 @@ pub fn get_all_packages() -> Vec<Package> {
                 remotes: vec!["fedora", "flathub"],
             }),
             snap: None,
+            other: None,
         },
         Package {
             display: "Rust Language",
@@ -1580,6 +1670,7 @@ pub fn get_all_packages() -> Vec<Package> {
             ]),
             flatpak: None,
             snap: None,
+            other: Some(OtherPackage { name: "rust" }),
         },
         Package {
             display: "Shotwell",
@@ -1597,6 +1688,7 @@ pub fn get_all_packages() -> Vec<Package> {
                 remotes: vec!["fedora", "flathub"],
             }),
             snap: None,
+            other: None,
         },
         Package {
             display: "Simple Scan",
@@ -1611,6 +1703,7 @@ pub fn get_all_packages() -> Vec<Package> {
             ]),
             flatpak: None,
             snap: None,
+            other: None,
         },
         Package {
             display: "Snap",
@@ -1625,6 +1718,7 @@ pub fn get_all_packages() -> Vec<Package> {
             ]),
             flatpak: None,
             snap: None,
+            other: None,
         },
         Package {
             display: "Snap Store",
@@ -1639,6 +1733,7 @@ pub fn get_all_packages() -> Vec<Package> {
                 is_classic: false,
                 channel: "",
             }),
+            other: None,
         },
         Package {
             display: "Spectacle Screenshot",
@@ -1654,6 +1749,7 @@ pub fn get_all_packages() -> Vec<Package> {
             ]),
             flatpak: None,
             snap: None,
+            other: None,
         },
         Package {
             display: "SSH - Secure Shell Protocol",
@@ -1669,6 +1765,7 @@ pub fn get_all_packages() -> Vec<Package> {
             ]),
             flatpak: None,
             snap: None,
+            other: None,
         },
         Package {
             display: "Steam",
@@ -1688,6 +1785,7 @@ pub fn get_all_packages() -> Vec<Package> {
                 is_classic: false,
                 channel: "",
             }),
+            other: None,
         },
         Package {
             display: "Super Tux Kart",
@@ -1710,6 +1808,7 @@ pub fn get_all_packages() -> Vec<Package> {
                 is_classic: false,
                 channel: "",
             }),
+            other: None,
         },
         Package {
             display: "Thunderbird",
@@ -1733,6 +1832,7 @@ pub fn get_all_packages() -> Vec<Package> {
                 is_classic: false,
                 channel: "",
             }),
+            other: None,
         },
         Package {
             display: "TOR - The Onion Router",
@@ -1745,6 +1845,7 @@ pub fn get_all_packages() -> Vec<Package> {
                 remotes: vec!["flathub"],
             }),
             snap: None,
+            other: None,
         },
         Package {
             display: "Totem Video Player",
@@ -1763,6 +1864,7 @@ pub fn get_all_packages() -> Vec<Package> {
                 remotes: vec!["fedora", "flathub"],
             }),
             snap: None,
+            other: None,
         },
         Package {
             display: "Transmission (GTK) - Torrent",
@@ -1780,6 +1882,7 @@ pub fn get_all_packages() -> Vec<Package> {
                 remotes: vec!["fedora", "flathub"],
             }),
             snap: None,
+            other: None,
         },
         Package {
             display: "Transmission (QT) - Torrent",
@@ -1797,6 +1900,7 @@ pub fn get_all_packages() -> Vec<Package> {
                 remotes: vec!["fedora", "flathub"],
             }),
             snap: None,
+            other: None,
         },
         Package {
             display: "Vietnamese Keyboard",
@@ -1812,6 +1916,7 @@ pub fn get_all_packages() -> Vec<Package> {
             ]),
             flatpak: None,
             snap: None,
+            other: None,
         },
         Package {
             display: "vim - Text Editor",
@@ -1827,6 +1932,7 @@ pub fn get_all_packages() -> Vec<Package> {
             ]),
             flatpak: None,
             snap: None,
+            other: None,
         },
         Package {
             display: "Virt Manager",
@@ -1842,6 +1948,7 @@ pub fn get_all_packages() -> Vec<Package> {
             ]),
             flatpak: None,
             snap: None,
+            other: None,
         },
         Package {
             display: "VLC",
@@ -1865,6 +1972,7 @@ pub fn get_all_packages() -> Vec<Package> {
                 is_classic: false,
                 channel: "",
             }),
+            other: None,
         },
         Package {
             display: "VS Code",
@@ -1887,6 +1995,7 @@ pub fn get_all_packages() -> Vec<Package> {
                 is_classic: true,
                 channel: "",
             }),
+            other: None,
         },
         Package {
             display: "Xonotic",
@@ -1907,6 +2016,7 @@ pub fn get_all_packages() -> Vec<Package> {
                 is_classic: false,
                 channel: "",
             }),
+            other: None,
         },
         Package {
             display: "yt-dlp - Download YouTube",
@@ -1922,6 +2032,7 @@ pub fn get_all_packages() -> Vec<Package> {
             ]),
             flatpak: None,
             snap: None,
+            other: None,
         },
     ])
 }

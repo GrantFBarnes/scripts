@@ -3,29 +3,35 @@ use rust_cli::commands::Operation;
 use std::io;
 use std::process::{Command, Stdio};
 
+use crate::package::Package;
 use crate::Info;
 
 const PACKAGES: [&str; 1] = ["rust"];
-
-pub fn is_available(package: &str) -> bool {
-    PACKAGES.contains(&package)
+pub struct OtherPackage {
+    pub name: &'static str,
 }
 
-pub fn is_installed(package: &str, info: &Info) -> bool {
-    if info.other_installed.contains(&package.to_string()) {
-        return true;
+pub fn is_available(package: &Package) -> bool {
+    package.other.is_some()
+}
+
+pub fn is_installed(package: &Package, info: &Info) -> bool {
+    if let Some(otr) = &package.other {
+        if info.other_installed.contains(&otr.name.to_string()) {
+            return true;
+        }
     }
     false
 }
 
-pub fn install(package: &str, info: &mut Info) -> Result<(), io::Error> {
-    if is_available(package) {
-        if !is_installed(package, info) {
-            info.other_installed.push(package.to_owned());
+pub fn install(package: &Package, info: &mut Info) -> Result<(), io::Error> {
+    if let Some(otr) = &package.other {
+        if !info.other_installed.contains(&otr.name.to_string()) {
+            info.other_installed.push(otr.name.to_owned());
 
-            println!("Installing other {}...", package);
+            println!("Installing other {}...", otr.name);
 
-            match package {
+            match otr.name {
                 "rust" => {
                     let curl_cmd = Command::new("curl")
                         .arg("'=https'")
@@ -48,17 +54,17 @@ pub fn install(package: &str, info: &mut Info) -> Result<(), io::Error> {
     Ok(())
 }
 
-pub fn uninstall(package: &str, info: &mut Info) -> Result<(), io::Error> {
-    if is_available(package) {
-        if is_installed(package, info) {
-            let index: Option<usize> = info.other_installed.iter().position(|x| *x == package);
+pub fn uninstall(package: &Package, info: &mut Info) -> Result<(), io::Error> {
+    if let Some(otr) = &package.other {
+        if info.other_installed.contains(&otr.name.to_string()) {
+            let index: Option<usize> = info.other_installed.iter().position(|x| *x == otr.name);
             if index.is_some() {
                 info.other_installed.remove(index.unwrap());
             }
 
-            println!("Uninstalling other {}...", package);
+            println!("Uninstalling other {}...", otr.name);
 
-            match package {
+            match otr.name {
                 "rust" => {
                     Operation::new()
                         .command("rustup self uninstall")
@@ -76,7 +82,7 @@ pub fn update(info: &Info) -> Result<(), io::Error> {
     println!("Update other...");
 
     for pkg in PACKAGES {
-        if is_installed(pkg, info) {
+        if info.other_installed.contains(&pkg.to_string()) {
             match pkg {
                 "rust" => {
                     Operation::new()

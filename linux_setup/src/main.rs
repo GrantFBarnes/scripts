@@ -515,7 +515,7 @@ fn get_install_method(package: &Package, distribution: &Distribution, info: &Inf
     if snap::is_installed(package, info) {
         return helper::get_colored_string("Snap", Color::Magenta);
     }
-    if other::is_installed(package.key, info) {
+    if other::is_installed(package, info) {
         return helper::get_colored_string("Other", Color::Yellow);
     }
     return helper::get_colored_string("Uninstalled", Color::Red);
@@ -525,7 +525,7 @@ fn is_installed(package: &Package, distribution: &Distribution, info: &Info) -> 
     distribution.is_installed(package, info)
         || flatpak::is_installed(package, info)
         || snap::is_installed(package, info)
-        || other::is_installed(package.key, info)
+        || other::is_installed(package, info)
 }
 
 fn run_package_select(
@@ -563,7 +563,7 @@ fn run_package_select(
         options_value.push(InstallMethod::Snap);
     }
 
-    if other::is_available(package.key) {
+    if other::is_available(package) {
         options_display.push(helper::get_colored_string("Install Other", Color::Yellow));
         options_value.push(InstallMethod::Other);
     }
@@ -610,7 +610,7 @@ fn run_package_select(
     }
 
     if method != &InstallMethod::Other {
-        other::uninstall(package.key, info)?;
+        other::uninstall(package, info)?;
     }
     post_uninstall(package.key, distribution, &method)?;
 
@@ -619,7 +619,7 @@ fn run_package_select(
         InstallMethod::Repository => distribution.install(package, info)?,
         InstallMethod::Flatpak => run_flatpak_remote_select(package, distribution, info)?,
         InstallMethod::Snap => snap::install(package, distribution, info)?,
-        InstallMethod::Other => other::install(package.key, info)?,
+        InstallMethod::Other => other::install(package, info)?,
         _ => (),
     }
     post_install(package.key, distribution, &method)
@@ -645,7 +645,7 @@ fn run_category_select(
         if !distribution.is_available(&package)
             && !flatpak::is_available(&package)
             && !snap::is_available(&package)
-            && !other::is_available(&package.key)
+            && !other::is_available(&package)
         {
             continue;
         }
