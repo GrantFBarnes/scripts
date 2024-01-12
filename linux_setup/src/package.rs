@@ -1,32 +1,95 @@
 use std::collections::HashMap;
+use std::env;
+use std::fs;
+use std::io;
+use std::process::Command;
+use std::process::Stdio;
+use std::slice::Iter;
 
-use crate::distribution::{DesktopEnvironment, Repository};
+use rust_cli::commands::Operation;
+
+use crate::distribution::{
+    DesktopEnvironment, Distribution, DistributionName, PackageManager, Repository,
+};
 use crate::flatpak::Flatpak;
+use crate::helper;
 use crate::other::OtherPackage;
 use crate::snap::Snap;
 
+use crate::Info;
+use crate::InstallMethod;
+
+#[derive(PartialEq)]
+pub enum Category {
+    Server,
+    Desktop,
+    Applications,
+    Browsers,
+    Communication,
+    Games,
+    MultiMedia,
+    Editors,
+    Software,
+    Utilities,
+}
+
+impl Category {
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            Category::Server => "Server",
+            Category::Desktop => "Desktop",
+            Category::Applications => "Applications",
+            Category::Browsers => "Browsers",
+            Category::Communication => "Communication",
+            Category::Games => "Games",
+            Category::MultiMedia => "Multi Media",
+            Category::Editors => "Editors",
+            Category::Software => "Software",
+            Category::Utilities => "Utilities",
+        }
+    }
+
+    pub fn iterator() -> Iter<'static, Category> {
+        static CATEGORIES: [Category; 10] = [
+            Category::Server,
+            Category::Desktop,
+            Category::Applications,
+            Category::Browsers,
+            Category::Communication,
+            Category::Games,
+            Category::MultiMedia,
+            Category::Editors,
+            Category::Software,
+            Category::Utilities,
+           ];
+        CATEGORIES.iter()
+    }
+}
+
 pub struct Package {
-    pub display: &'static str,
-    pub key: &'static str,
-    pub category: &'static str,
+    pub name: &'static str,
+    pub category: Category,
     pub desktop_environment: Option<DesktopEnvironment>,
     pub repository: HashMap<Repository, Vec<&'static str>>,
     pub flatpak: Option<Flatpak>,
     pub snap: Option<Snap>,
     pub other: Option<OtherPackage>,
+    pub pre_install: Box<dyn Fn(&Distribution, &mut Info, &InstallMethod) -> Result<(), io::Error>>,
+    pub post_install: Box<dyn Fn(&Distribution, &InstallMethod) -> Result<(), io::Error>>,
 }
 
 impl Package {
     pub fn new() -> Self {
         Self {
-            display: "",
-            key: "",
-            category: "",
+            name: "",
+            category: Category::Server,
             desktop_environment: None,
             repository: HashMap::new(),
             flatpak: None,
             snap: None,
             other: None,
+            pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
+            post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
         }
     }
 }
@@ -34,9 +97,8 @@ impl Package {
 pub fn get_all_packages() -> Vec<Package> {
     Vec::from([
         Package {
-            display: "0 A.D.",
-            key: "0ad",
-            category: "Games",
+            name: "0 A.D.",
+            category: Category::Games,
             desktop_environment: None,
             repository: HashMap::from([
                 (Repository::Arch, vec!["0ad"]),
@@ -55,11 +117,12 @@ pub fn get_all_packages() -> Vec<Package> {
                 channel: "",
             }),
             other: None,
+            pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
+            post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
         },
         Package {
-            display: "Ark Archiving",
-            key: "ark",
-            category: "Utilities",
+            name: "Ark Archiving",
+            category: Category::Utilities,
             desktop_environment: Some(DesktopEnvironment::KDE),
             repository: HashMap::from([
                 (Repository::Arch, vec!["ark"]),
@@ -79,11 +142,12 @@ pub fn get_all_packages() -> Vec<Package> {
                 channel: "",
             }),
             other: None,
+            pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
+            post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
         },
         Package {
-            display: "Blender",
-            key: "blender",
-            category: "Multi Media",
+            name: "Blender",
+            category: Category::MultiMedia,
             desktop_environment: None,
             repository: HashMap::from([
                 (Repository::Arch, vec!["blender"]),
@@ -102,11 +166,12 @@ pub fn get_all_packages() -> Vec<Package> {
                 channel: "",
             }),
             other: None,
+            pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
+            post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
         },
         Package {
-            display: "Cheese - Webcam",
-            key: "cheese",
-            category: "Applications",
+            name: "Cheese - Webcam",
+            category: Category::Applications,
             desktop_environment: Some(DesktopEnvironment::Gnome),
             repository: HashMap::from([
                 (Repository::Arch, vec!["cheese"]),
@@ -121,11 +186,12 @@ pub fn get_all_packages() -> Vec<Package> {
             }),
             snap: None,
             other: None,
+            pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
+            post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
         },
         Package {
-            display: "Chromium",
-            key: "chromium",
-            category: "Browsers",
+            name: "Chromium",
+            category: Category::Browsers,
             desktop_environment: None,
             repository: HashMap::from([
                 (Repository::Arch, vec!["chromium"]),
@@ -143,11 +209,12 @@ pub fn get_all_packages() -> Vec<Package> {
                 channel: "",
             }),
             other: None,
+            pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
+            post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
         },
         Package {
-            display: "Cockpit - Web Interface",
-            key: "cockpit",
-            category: "Server",
+            name: "Cockpit - Web Interface",
+            category: Category::Server,
             desktop_environment: None,
             repository: HashMap::from([
                 (Repository::Arch, vec!["cockpit"]),
@@ -159,11 +226,12 @@ pub fn get_all_packages() -> Vec<Package> {
             flatpak: None,
             snap: None,
             other: None,
+            pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
+            post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
         },
         Package {
-            display: "cups - Printer Support",
-            key: "cups",
-            category: "Desktop",
+            name: "cups - Printer Support",
+            category: Category::Desktop,
             desktop_environment: None,
             repository: HashMap::from([
                 (Repository::Arch, vec!["cups"]),
@@ -175,11 +243,12 @@ pub fn get_all_packages() -> Vec<Package> {
             flatpak: None,
             snap: None,
             other: None,
+            pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
+            post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
         },
         Package {
-            display: "cURL - Client URL",
-            key: "curl",
-            category: "Server",
+            name: "cURL - Client URL",
+            category: Category::Server,
             desktop_environment: None,
             repository: HashMap::from([
                 (Repository::Arch, vec!["curl"]),
@@ -191,11 +260,12 @@ pub fn get_all_packages() -> Vec<Package> {
             flatpak: None,
             snap: None,
             other: None,
+            pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
+            post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
         },
         Package {
-            display: "dconf Editor",
-            key: "dconf-editor",
-            category: "Utilities",
+            name: "dconf Editor",
+            category: Category::Utilities,
             desktop_environment: Some(DesktopEnvironment::Gnome),
             repository: HashMap::from([
                 (Repository::Arch, vec!["dconf-editor"]),
@@ -210,11 +280,12 @@ pub fn get_all_packages() -> Vec<Package> {
             }),
             snap: None,
             other: None,
+            pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
+            post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
         },
         Package {
-            display: "Deja Dup - Backups",
-            key: "deja-dup",
-            category: "Applications",
+            name: "Deja Dup - Backups",
+            category: Category::Applications,
             desktop_environment: Some(DesktopEnvironment::Gnome),
             repository: HashMap::from([
                 (Repository::Arch, vec!["deja-dup"]),
@@ -228,11 +299,12 @@ pub fn get_all_packages() -> Vec<Package> {
             }),
             snap: None,
             other: None,
+            pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
+            post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
         },
         Package {
-            display: "Discord",
-            key: "discord",
-            category: "Communication",
+            name: "Discord",
+            category: Category::Communication,
             desktop_environment: None,
             repository: HashMap::from([(Repository::Arch, vec!["discord"])]),
             flatpak: Some(Flatpak {
@@ -246,11 +318,12 @@ pub fn get_all_packages() -> Vec<Package> {
                 channel: "",
             }),
             other: None,
+            pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
+            post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
         },
         Package {
-            display: "dotnet - C# runtime 8.0 LTS",
-            key: "dotnet-runtime-8",
-            category: "Server",
+            name: "dotnet - C# runtime 8.0 LTS",
+            category: Category::Server,
             desktop_environment: None,
             repository: HashMap::from([
                 (Repository::Arch, vec!["dotnet-runtime-8.0"]),
@@ -267,11 +340,35 @@ pub fn get_all_packages() -> Vec<Package> {
                 channel: "",
             }),
             other: None,
+            pre_install: Box::new(|distribution: &Distribution, info: &mut Info, method: &InstallMethod| {
+                if method == &InstallMethod::Repository {
+                    if distribution.repository == Repository::Debian {
+                        distribution.install_package("wget", info)?;
+    
+                        Operation::new()
+                            .command("wget https://packages.microsoft.com/config/debian/12/packages-microsoft-prod.deb -O packages-microsoft-prod.deb")
+                            .show_output(true)
+                            .run()?;
+                        Operation::new()
+                            .command("sudo dpkg -i packages-microsoft-prod.deb")
+                            .show_output(true)
+                            .run()?;
+                        Operation::new()
+                            .command("rm packages-microsoft-prod.deb")
+                            .run()?;
+                        Operation::new()
+                            .command("sudo apt update")
+                            .show_output(true)
+                            .run()?;
+                    }
+                }
+                Ok(())
+            }),
+            post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
         },
         Package {
-            display: "dotnet - C# SDK 8.0 LTS",
-            key: "dotnet-sdk-8",
-            category: "Server",
+            name: "dotnet - C# SDK 8.0 LTS",
+            category: Category::Server,
             desktop_environment: None,
             repository: HashMap::from([
                 (Repository::Arch, vec!["dotnet-sdk-8.0"]),
@@ -288,11 +385,35 @@ pub fn get_all_packages() -> Vec<Package> {
                 channel: "8.0/stable",
             }),
             other: None,
+            pre_install: Box::new(|distribution: &Distribution, info: &mut Info, method: &InstallMethod| {
+                if method == &InstallMethod::Repository {
+                    if distribution.repository == Repository::Debian {
+                        distribution.install_package("wget", info)?;
+    
+                        Operation::new()
+                            .command("wget https://packages.microsoft.com/config/debian/12/packages-microsoft-prod.deb -O packages-microsoft-prod.deb")
+                            .show_output(true)
+                            .run()?;
+                        Operation::new()
+                            .command("sudo dpkg -i packages-microsoft-prod.deb")
+                            .show_output(true)
+                            .run()?;
+                        Operation::new()
+                            .command("rm packages-microsoft-prod.deb")
+                            .run()?;
+                        Operation::new()
+                            .command("sudo apt update")
+                            .show_output(true)
+                            .run()?;
+                    }
+                }
+                Ok(())
+            }),
+            post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
         },
         Package {
-            display: "Elisa Music Player",
-            key: "elisa",
-            category: "Multi Media",
+            name: "Elisa Music Player",
+            category: Category::MultiMedia,
             desktop_environment: Some(DesktopEnvironment::KDE),
             repository: HashMap::from([
                 (Repository::Arch, vec!["elisa"]),
@@ -306,11 +427,12 @@ pub fn get_all_packages() -> Vec<Package> {
             }),
             snap: None,
             other: None,
+            pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
+            post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
         },
         Package {
-            display: "Epiphany - Gnome Web",
-            key: "epiphany",
-            category: "Browsers",
+            name: "Epiphany - Gnome Web",
+            category: Category::Browsers,
             desktop_environment: Some(DesktopEnvironment::Gnome),
             repository: HashMap::from([
                 (Repository::Arch, vec!["epiphany"]),
@@ -324,11 +446,12 @@ pub fn get_all_packages() -> Vec<Package> {
             }),
             snap: None,
             other: None,
+            pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
+            post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
         },
         Package {
-            display: "Evince - Document Viewer",
-            key: "evince",
-            category: "Applications",
+            name: "Evince - Document Viewer",
+            category: Category::Applications,
             desktop_environment: Some(DesktopEnvironment::Gnome),
             repository: HashMap::from([
                 (Repository::Arch, vec!["evince"]),
@@ -343,11 +466,12 @@ pub fn get_all_packages() -> Vec<Package> {
             }),
             snap: None,
             other: None,
+            pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
+            post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
         },
         Package {
-            display: "Eye of Gnome - Image Viewer",
-            key: "eog",
-            category: "Applications",
+            name: "Eye of Gnome - Image Viewer",
+            category: Category::Applications,
             desktop_environment: Some(DesktopEnvironment::Gnome),
             repository: HashMap::from([
                 (Repository::Arch, vec!["eog"]),
@@ -367,11 +491,12 @@ pub fn get_all_packages() -> Vec<Package> {
                 channel: "",
             }),
             other: None,
+            pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
+            post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
         },
         Package {
-            display: "Fedora Media Writer",
-            key: "mediawriter",
-            category: "Utilities",
+            name: "Fedora Media Writer",
+            category: Category::Utilities,
             desktop_environment: None,
             repository: HashMap::from([
                 (Repository::Fedora, vec!["mediawriter"]),
@@ -382,11 +507,12 @@ pub fn get_all_packages() -> Vec<Package> {
             }),
             snap: None,
             other: None,
+            pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
+            post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
         },
         Package {
-            display: "ffmpeg - Media Codecs",
-            key: "ffmpeg",
-            category: "Desktop",
+            name: "ffmpeg - Media Codecs",
+            category: Category::Desktop,
             desktop_environment: None,
             repository: HashMap::from([
                 (Repository::Arch, vec!["ffmpeg"]),
@@ -398,11 +524,12 @@ pub fn get_all_packages() -> Vec<Package> {
             flatpak: None,
             snap: None,
             other: None,
+            pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
+            post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
         },
         Package {
-            display: "FileLight Disk Usage",
-            key: "filelight",
-            category: "Utilities",
+            name: "FileLight Disk Usage",
+            category: Category::Utilities,
             desktop_environment: Some(DesktopEnvironment::KDE),
             repository: HashMap::from([
                 (Repository::Arch, vec!["filelight"]),
@@ -414,11 +541,12 @@ pub fn get_all_packages() -> Vec<Package> {
             flatpak: None,
             snap: None,
             other: None,
+            pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
+            post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
         },
         Package {
-            display: "Firefox",
-            key: "firefox",
-            category: "Browsers",
+            name: "Firefox",
+            category: Category::Browsers,
             desktop_environment: None,
             repository: HashMap::from([
                 (Repository::Arch, vec!["firefox"]),
@@ -435,11 +563,12 @@ pub fn get_all_packages() -> Vec<Package> {
                 channel: "",
             }),
             other: None,
+            pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
+            post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
         },
         Package {
-            display: "Firefox ESR",
-            key: "firefox-esr",
-            category: "Browsers",
+            name: "Firefox ESR",
+            category: Category::Browsers,
             desktop_environment: None,
             repository: HashMap::from([
                 (Repository::Debian, vec!["firefox-esr"]),
@@ -453,11 +582,12 @@ pub fn get_all_packages() -> Vec<Package> {
                 channel: "esr-stable",
             }),
             other: None,
+            pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
+            post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
         },
         Package {
-            display: "Flatpak",
-            key: "flatpak",
-            category: "Server",
+            name: "Flatpak",
+            category: Category::Server,
             desktop_environment: None,
             repository: HashMap::from([
                 (Repository::Arch, vec!["flatpak"]),
@@ -469,11 +599,12 @@ pub fn get_all_packages() -> Vec<Package> {
             flatpak: None,
             snap: None,
             other: None,
+            pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
+            post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
         },
         Package {
-            display: "Flutter",
-            key: "flutter",
-            category: "Server",
+            name: "Flutter",
+            category: Category::Server,
             desktop_environment: None,
             repository: HashMap::new(),
             flatpak: None,
@@ -484,11 +615,12 @@ pub fn get_all_packages() -> Vec<Package> {
                 channel: "",
             }),
             other: None,
+            pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
+            post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
         },
         Package {
-            display: "gedit",
-            key: "gedit",
-            category: "Editors",
+            name: "gedit",
+            category: Category::Editors,
             desktop_environment: Some(DesktopEnvironment::Gnome),
             repository: HashMap::from([
                 (Repository::Arch, vec!["gedit"]),
@@ -508,11 +640,12 @@ pub fn get_all_packages() -> Vec<Package> {
                 channel: "",
             }),
             other: None,
+            pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
+            post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
         },
         Package {
-            display: "GIMP",
-            key: "gimp",
-            category: "Multi Media",
+            name: "GIMP",
+            category: Category::MultiMedia,
             desktop_environment: None,
             repository: HashMap::from([
                 (Repository::Arch, vec!["gimp"]),
@@ -532,11 +665,12 @@ pub fn get_all_packages() -> Vec<Package> {
                 channel: "",
             }),
             other: None,
+            pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
+            post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
         },
         Package {
-            display: "git - Version Control",
-            key: "git",
-            category: "Server",
+            name: "git - Version Control",
+            category: Category::Server,
             desktop_environment: None,
             repository: HashMap::from([
                 (Repository::Arch, vec!["git"]),
@@ -548,11 +682,12 @@ pub fn get_all_packages() -> Vec<Package> {
             flatpak: None,
             snap: None,
             other: None,
+            pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
+            post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
         },
         Package {
-            display: "Go Language",
-            key: "golang",
-            category: "Server",
+            name: "Go Language",
+            category: Category::Server,
             desktop_environment: None,
             repository: HashMap::from([
                 (Repository::Arch, vec!["go", "gopls"]),
@@ -569,11 +704,45 @@ pub fn get_all_packages() -> Vec<Package> {
                 channel: "",
             }),
             other: None,
+            pre_install: Box::new(|_: &Distribution, _: &mut Info, method: &InstallMethod| {
+                let home_dir: String = env::var("HOME").expect("HOME directory could not be determined");
+                if method == &InstallMethod::Uninstall {
+                    Operation::new()
+                        .command(format!("sudo rm -r {}{}", &home_dir, "/.go"))
+                        .run()?;
+                }
+                Ok(())
+            }),
+            post_install: Box::new(|distribution: &Distribution, method: &InstallMethod| {
+                let home_dir: String = env::var("HOME").expect("HOME directory could not be determined");
+                let bashrc: String = format!("{}{}", &home_dir, "/.bashrc");
+                if method != &InstallMethod::Uninstall {
+                    Operation::new()
+                        .command(format!("go env -w GOPATH={}/.go", &home_dir))
+                        .run()?;
+                    if method == &InstallMethod::Snap || distribution.repository == Repository::RedHat {
+                        helper::append_to_file_if_not_found(
+                            &bashrc,
+                            "export GOPATH",
+                            r#"
+export GOPATH=$HOME/.go
+export PATH=$PATH:$GOPATH/bin
+"#,
+                            false,
+                        )?;
+
+                        Operation::new()
+                            .command("go install golang.org/x/tools/gopls@latest")
+                            .show_output(true)
+                            .run()?;
+                    }
+                }
+                Ok(())
+            }),
         },
         Package {
-            display: "GParted",
-            key: "gparted",
-            category: "Utilities",
+            name: "GParted",
+            category: Category::Utilities,
             desktop_environment: Some(DesktopEnvironment::Gnome),
             repository: HashMap::from([
                 (Repository::Arch, vec!["gparted"]),
@@ -585,11 +754,12 @@ pub fn get_all_packages() -> Vec<Package> {
             flatpak: None,
             snap: None,
             other: None,
+            pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
+            post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
         },
         Package {
-            display: "Gnome 2048",
-            key: "gnome-2048",
-            category: "Games",
+            name: "Gnome 2048",
+            category: Category::Games,
             desktop_environment: Some(DesktopEnvironment::Gnome),
             repository: HashMap::from([
                 (Repository::Arch, vec!["gnome-2048"]),
@@ -603,11 +773,12 @@ pub fn get_all_packages() -> Vec<Package> {
             }),
             snap: None,
             other: None,
+            pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
+            post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
         },
         Package {
-            display: "Gnome Boxes - VM Manager",
-            key: "gnome-boxes",
-            category: "Applications",
+            name: "Gnome Boxes - VM Manager",
+            category: Category::Applications,
             desktop_environment: Some(DesktopEnvironment::Gnome),
             repository: HashMap::from([
                 (Repository::Arch, vec!["gnome-boxes"]),
@@ -621,11 +792,12 @@ pub fn get_all_packages() -> Vec<Package> {
             }),
             snap: None,
             other: None,
+            pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
+            post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
         },
         Package {
-            display: "Gnome Builder",
-            key: "gnome-builder",
-            category: "Editors",
+            name: "Gnome Builder",
+            category: Category::Editors,
             desktop_environment: Some(DesktopEnvironment::Gnome),
             repository: HashMap::from([
                 (Repository::Arch, vec!["gnome-builder"]),
@@ -639,11 +811,12 @@ pub fn get_all_packages() -> Vec<Package> {
             }),
             snap: None,
             other: None,
+            pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
+            post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
         },
         Package {
-            display: "Gnome Calculator",
-            key: "gnome-calculator",
-            category: "Applications",
+            name: "Gnome Calculator",
+            category: Category::Applications,
             desktop_environment: Some(DesktopEnvironment::Gnome),
             repository: HashMap::from([
                 (Repository::Arch, vec!["gnome-calculator"]),
@@ -663,11 +836,12 @@ pub fn get_all_packages() -> Vec<Package> {
                 channel: "",
             }),
             other: None,
+            pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
+            post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
         },
         Package {
-            display: "Gnome Calendar",
-            key: "gnome-calendar",
-            category: "Applications",
+            name: "Gnome Calendar",
+            category: Category::Applications,
             desktop_environment: Some(DesktopEnvironment::Gnome),
             repository: HashMap::from([
                 (Repository::Arch, vec!["gnome-calendar"]),
@@ -681,11 +855,12 @@ pub fn get_all_packages() -> Vec<Package> {
             }),
             snap: None,
             other: None,
+            pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
+            post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
         },
         Package {
-            display: "Gnome Chess",
-            key: "gnome-chess",
-            category: "Games",
+            name: "Gnome Chess",
+            category: Category::Games,
             desktop_environment: Some(DesktopEnvironment::Gnome),
             repository: HashMap::from([
                 (Repository::Arch, vec!["gnome-chess"]),
@@ -699,11 +874,12 @@ pub fn get_all_packages() -> Vec<Package> {
             }),
             snap: None,
             other: None,
+            pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
+            post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
         },
         Package {
-            display: "Gnome Clocks",
-            key: "gnome-clocks",
-            category: "Applications",
+            name: "Gnome Clocks",
+            category: Category::Applications,
             desktop_environment: Some(DesktopEnvironment::Gnome),
             repository: HashMap::from([
                 (Repository::Arch, vec!["gnome-clocks"]),
@@ -722,11 +898,12 @@ pub fn get_all_packages() -> Vec<Package> {
                 channel: "",
             }),
             other: None,
+            pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
+            post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
         },
         Package {
-            display: "Gnome Connections",
-            key: "gnome-connections",
-            category: "Applications",
+            name: "Gnome Connections",
+            category: Category::Applications,
             desktop_environment: Some(DesktopEnvironment::Gnome),
             repository: HashMap::from([
                 (Repository::Arch, vec!["gnome-connections"]),
@@ -741,11 +918,12 @@ pub fn get_all_packages() -> Vec<Package> {
             }),
             snap: None,
             other: None,
+            pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
+            post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
         },
         Package {
-            display: "Gnome Contacts",
-            key: "gnome-contacts",
-            category: "Applications",
+            name: "Gnome Contacts",
+            category: Category::Applications,
             desktop_environment: Some(DesktopEnvironment::Gnome),
             repository: HashMap::from([
                 (Repository::Arch, vec!["gnome-contacts"]),
@@ -759,11 +937,12 @@ pub fn get_all_packages() -> Vec<Package> {
             }),
             snap: None,
             other: None,
+            pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
+            post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
         },
         Package {
-            display: "Gnome Disk Usage",
-            key: "baobab",
-            category: "Utilities",
+            name: "Gnome Disk Usage",
+            category: Category::Utilities,
             desktop_environment: Some(DesktopEnvironment::Gnome),
             repository: HashMap::from([
                 (Repository::Arch, vec!["baobab"]),
@@ -778,11 +957,12 @@ pub fn get_all_packages() -> Vec<Package> {
             }),
             snap: None,
             other: None,
+            pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
+            post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
         },
         Package {
-            display: "Gnome Disk Utility",
-            key: "gnome-disk-utility",
-            category: "Utilities",
+            name: "Gnome Disk Utility",
+            category: Category::Utilities,
             desktop_environment: Some(DesktopEnvironment::Gnome),
             repository: HashMap::from([
                 (Repository::Arch, vec!["gnome-disk-utility"]),
@@ -794,11 +974,12 @@ pub fn get_all_packages() -> Vec<Package> {
             flatpak: None,
             snap: None,
             other: None,
+            pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
+            post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
         },
         Package {
-            display: "Gnome Image Viewer",
-            key: "loupe",
-            category: "Applications",
+            name: "Gnome Image Viewer",
+            category: Category::Applications,
             desktop_environment: Some(DesktopEnvironment::Gnome),
             repository: HashMap::from([
                 (Repository::Fedora, vec!["loupe"]),
@@ -814,11 +995,12 @@ pub fn get_all_packages() -> Vec<Package> {
                 channel: "",
             }),
             other: None,
+            pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
+            post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
         },
         Package {
-            display: "Gnome Maps",
-            key: "gnome-maps",
-            category: "Applications",
+            name: "Gnome Maps",
+            category: Category::Applications,
             desktop_environment: Some(DesktopEnvironment::Gnome),
             repository: HashMap::from([
                 (Repository::Arch, vec!["gnome-maps"]),
@@ -832,11 +1014,12 @@ pub fn get_all_packages() -> Vec<Package> {
             }),
             snap: None,
             other: None,
+            pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
+            post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
         },
         Package {
-            display: "Gnome Mines",
-            key: "gnome-mines",
-            category: "Games",
+            name: "Gnome Mines",
+            category: Category::Games,
             desktop_environment: Some(DesktopEnvironment::Gnome),
             repository: HashMap::from([
                 (Repository::Arch, vec!["gnome-mines"]),
@@ -850,11 +1033,12 @@ pub fn get_all_packages() -> Vec<Package> {
             }),
             snap: None,
             other: None,
+            pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
+            post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
         },
         Package {
-            display: "Gnome Music",
-            key: "gnome-music",
-            category: "Multi Media",
+            name: "Gnome Music",
+            category: Category::MultiMedia,
             desktop_environment: Some(DesktopEnvironment::Gnome),
             repository: HashMap::from([
                 (Repository::Arch, vec!["gnome-music"]),
@@ -868,11 +1052,12 @@ pub fn get_all_packages() -> Vec<Package> {
             }),
             snap: None,
             other: None,
+            pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
+            post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
         },
         Package {
-            display: "Gnome Password Safe",
-            key: "gnome-passwordsafe",
-            category: "Applications",
+            name: "Gnome Password Safe",
+            category: Category::Applications,
             desktop_environment: Some(DesktopEnvironment::Gnome),
             repository: HashMap::from([
                 (Repository::Arch, vec!["gnome-passwordsafe"]),
@@ -886,11 +1071,12 @@ pub fn get_all_packages() -> Vec<Package> {
             }),
             snap: None,
             other: None,
+            pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
+            post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
         },
         Package {
-            display: "Gnome Photos",
-            key: "gnome-photos",
-            category: "Multi Media",
+            name: "Gnome Photos",
+            category: Category::MultiMedia,
             desktop_environment: Some(DesktopEnvironment::Gnome),
             repository: HashMap::from([
                 (Repository::Arch, vec!["gnome-photos"]),
@@ -905,11 +1091,12 @@ pub fn get_all_packages() -> Vec<Package> {
             }),
             snap: None,
             other: None,
+            pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
+            post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
         },
         Package {
-            display: "Gnome Shell Extension",
-            key: "gnome-shell-extensions",
-            category: "Utilities",
+            name: "Gnome Shell Extension",
+            category: Category::Utilities,
             desktop_environment: Some(DesktopEnvironment::Gnome),
             repository: HashMap::from([
                 (Repository::Arch, vec!["gnome-shell-extensions"]),
@@ -921,11 +1108,12 @@ pub fn get_all_packages() -> Vec<Package> {
             flatpak: None,
             snap: None,
             other: None,
+            pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
+            post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
         },
         Package {
-            display: "Gnome Shell Extension Manager",
-            key: "gnome-shell-extension-manager",
-            category: "Utilities",
+            name: "Gnome Shell Extension Manager",
+            category: Category::Utilities,
             desktop_environment: Some(DesktopEnvironment::Gnome),
             repository: HashMap::from([
                 (Repository::Debian, vec!["gnome-shell-extension-manager"]),
@@ -934,11 +1122,12 @@ pub fn get_all_packages() -> Vec<Package> {
             flatpak: None,
             snap: None,
             other: None,
+            pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
+            post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
         },
         Package {
-            display: "Gnome Software",
-            key: "gnome-software",
-            category: "Software",
+            name: "Gnome Software",
+            category: Category::Software,
             desktop_environment: Some(DesktopEnvironment::Gnome),
             repository: HashMap::from([
                 (Repository::Arch, vec!["gnome-software"]),
@@ -950,11 +1139,12 @@ pub fn get_all_packages() -> Vec<Package> {
             flatpak: None,
             snap: None,
             other: None,
+            pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
+            post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
         },
         Package {
-            display: "Gnome Solitaire",
-            key: "aisleriot",
-            category: "Games",
+            name: "Gnome Solitaire",
+            category: Category::Games,
             desktop_environment: Some(DesktopEnvironment::Gnome),
             repository: HashMap::from([
                 (Repository::Arch, vec!["aisleriot"]),
@@ -968,11 +1158,12 @@ pub fn get_all_packages() -> Vec<Package> {
             }),
             snap: None,
             other: None,
+            pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
+            post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
         },
         Package {
-            display: "Gnome Sound Recorder",
-            key: "gnome-sound-recorder",
-            category: "Multi Media",
+            name: "Gnome Sound Recorder",
+            category: Category::MultiMedia,
             desktop_environment: Some(DesktopEnvironment::Gnome),
             repository: HashMap::from([
                 (Repository::Arch, vec!["gnome-sound-recorder"]),
@@ -986,11 +1177,12 @@ pub fn get_all_packages() -> Vec<Package> {
             }),
             snap: None,
             other: None,
+            pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
+            post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
         },
         Package {
-            display: "Gnome Sudoku",
-            key: "gnome-sudoku",
-            category: "Games",
+            name: "Gnome Sudoku",
+            category: Category::Games,
             desktop_environment: Some(DesktopEnvironment::Gnome),
             repository: HashMap::from([
                 (Repository::Arch, vec!["gnome-sudoku"]),
@@ -1009,11 +1201,12 @@ pub fn get_all_packages() -> Vec<Package> {
                 channel: "",
             }),
             other: None,
+            pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
+            post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
         },
         Package {
-            display: "Gnome System Monitor",
-            key: "gnome-system-monitor",
-            category: "Utilities",
+            name: "Gnome System Monitor",
+            category: Category::Utilities,
             desktop_environment: Some(DesktopEnvironment::Gnome),
             repository: HashMap::from([
                 (Repository::Arch, vec!["gnome-system-monitor"]),
@@ -1025,11 +1218,12 @@ pub fn get_all_packages() -> Vec<Package> {
             flatpak: None,
             snap: None,
             other: None,
+            pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
+            post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
         },
         Package {
-            display: "Gnome Tetris",
-            key: "quadrapassel",
-            category: "Games",
+            name: "Gnome Tetris",
+            category: Category::Games,
             desktop_environment: Some(DesktopEnvironment::Gnome),
             repository: HashMap::from([
                 (Repository::Arch, vec!["quadrapassel"]),
@@ -1048,11 +1242,12 @@ pub fn get_all_packages() -> Vec<Package> {
                 channel: "",
             }),
             other: None,
+            pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
+            post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
         },
         Package {
-            display: "Gnome Text Editor",
-            key: "gnome-text-editor",
-            category: "Editors",
+            name: "Gnome Text Editor",
+            category: Category::Editors,
             desktop_environment: Some(DesktopEnvironment::Gnome),
             repository: HashMap::from([
                 (Repository::Arch, vec!["gnome-text-editor"]),
@@ -1066,11 +1261,12 @@ pub fn get_all_packages() -> Vec<Package> {
             }),
             snap: None,
             other: None,
+            pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
+            post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
         },
         Package {
-            display: "Gnome Tweaks",
-            key: "gnome-tweaks",
-            category: "Utilities",
+            name: "Gnome Tweaks",
+            category: Category::Utilities,
             desktop_environment: Some(DesktopEnvironment::Gnome),
             repository: HashMap::from([
                 (Repository::Arch, vec!["gnome-tweaks"]),
@@ -1082,11 +1278,12 @@ pub fn get_all_packages() -> Vec<Package> {
             flatpak: None,
             snap: None,
             other: None,
+            pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
+            post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
         },
         Package {
-            display: "Gnome Weather",
-            key: "gnome-weather",
-            category: "Applications",
+            name: "Gnome Weather",
+            category: Category::Applications,
             desktop_environment: Some(DesktopEnvironment::Gnome),
             repository: HashMap::from([
                 (Repository::Arch, vec!["gnome-weather"]),
@@ -1100,11 +1297,12 @@ pub fn get_all_packages() -> Vec<Package> {
             }),
             snap: None,
             other: None,
+            pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
+            post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
         },
         Package {
-            display: "GNU Cash - Accounting",
-            key: "gnucash",
-            category: "Applications",
+            name: "GNU Cash - Accounting",
+            category: Category::Applications,
             desktop_environment: None,
             repository: HashMap::from([
                 (Repository::Arch, vec!["gnucash"]),
@@ -1118,11 +1316,12 @@ pub fn get_all_packages() -> Vec<Package> {
             }),
             snap: None,
             other: None,
+            pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
+            post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
         },
         Package {
-            display: "Gwenview - Image Viewer",
-            key: "gwenview",
-            category: "Applications",
+            name: "Gwenview - Image Viewer",
+            category: Category::Applications,
             desktop_environment: Some(DesktopEnvironment::KDE),
             repository: HashMap::from([
                 (Repository::Arch, vec!["gwenview"]),
@@ -1141,11 +1340,12 @@ pub fn get_all_packages() -> Vec<Package> {
                 channel: "",
             }),
             other: None,
+            pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
+            post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
         },
         Package {
-            display: "htop - Process Reviewer",
-            key: "htop",
-            category: "Server",
+            name: "htop - Process Reviewer",
+            category: Category::Server,
             desktop_environment: None,
             repository: HashMap::from([
                 (Repository::Arch, vec!["htop"]),
@@ -1157,11 +1357,12 @@ pub fn get_all_packages() -> Vec<Package> {
             flatpak: None,
             snap: None,
             other: None,
+            pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
+            post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
         },
         Package {
-            display: "IceCat - GNU Browser",
-            key: "icecat",
-            category: "Browsers",
+            name: "IceCat - GNU Browser",
+            category: Category::Browsers,
             desktop_environment: None,
             repository: HashMap::from([
                 (Repository::Fedora, vec!["icecat"]),
@@ -1169,11 +1370,12 @@ pub fn get_all_packages() -> Vec<Package> {
             flatpak: None,
             snap: None,
             other: None,
+            pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
+            post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
         },
         Package {
-            display: "imagemagick",
-            key: "imagemagick",
-            category: "Desktop",
+            name: "imagemagick",
+            category: Category::Desktop,
             desktop_environment: None,
             repository: HashMap::from([
                 (Repository::Arch, vec!["imagemagick"]),
@@ -1185,11 +1387,12 @@ pub fn get_all_packages() -> Vec<Package> {
             flatpak: None,
             snap: None,
             other: None,
+            pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
+            post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
         },
         Package {
-            display: "Intellij",
-            key: "intellij",
-            category: "Editors",
+            name: "Intellij",
+            category: Category::Editors,
             desktop_environment: None,
             repository: HashMap::from([
                 (Repository::Arch, vec!["intellij-idea-community-edition"]),
@@ -1205,11 +1408,21 @@ pub fn get_all_packages() -> Vec<Package> {
                 channel: "",
             }),
             other: None,
+            pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
+            post_install: Box::new(|_: &Distribution, method: &InstallMethod| {
+                let home_dir: String = env::var("HOME").expect("HOME directory could not be determined");
+                if method != &InstallMethod::Uninstall {
+                    fs::write(
+                        format!("{}{}", &home_dir, "/.ideavimrc"),
+                        "sethandler a:ide",
+                    )?;
+                }
+                Ok(())
+            }),
         },
         Package {
-            display: "Kate",
-            key: "kate",
-            category: "Editors",
+            name: "Kate",
+            category: Category::Editors,
             desktop_environment: Some(DesktopEnvironment::KDE),
             repository: HashMap::from([
                 (Repository::Arch, vec!["kate"]),
@@ -1226,11 +1439,12 @@ pub fn get_all_packages() -> Vec<Package> {
                 channel: "",
             }),
             other: None,
+            pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
+            post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
         },
         Package {
-            display: "KCalc - Calculator",
-            key: "kcalc",
-            category: "Applications",
+            name: "KCalc - Calculator",
+            category: Category::Applications,
             desktop_environment: Some(DesktopEnvironment::KDE),
             repository: HashMap::from([
                 (Repository::Arch, vec!["kcalc"]),
@@ -1250,11 +1464,12 @@ pub fn get_all_packages() -> Vec<Package> {
                 channel: "",
             }),
             other: None,
+            pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
+            post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
         },
         Package {
-            display: "KDE Chess",
-            key: "knights",
-            category: "Games",
+            name: "KDE Chess",
+            category: Category::Games,
             desktop_environment: Some(DesktopEnvironment::KDE),
             repository: HashMap::from([
                 (Repository::Arch, vec!["knights"]),
@@ -1270,11 +1485,12 @@ pub fn get_all_packages() -> Vec<Package> {
                 channel: "",
             }),
             other: None,
+            pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
+            post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
         },
         Package {
-            display: "KDE Mines",
-            key: "kmines",
-            category: "Games",
+            name: "KDE Mines",
+            category: Category::Games,
             desktop_environment: Some(DesktopEnvironment::KDE),
             repository: HashMap::from([
                 (Repository::Arch, vec!["kmines"]),
@@ -1291,11 +1507,12 @@ pub fn get_all_packages() -> Vec<Package> {
                 channel: "",
             }),
             other: None,
+            pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
+            post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
         },
         Package {
-            display: "KDE Sudoku",
-            key: "ksudoku",
-            category: "Games",
+            name: "KDE Sudoku",
+            category: Category::Games,
             desktop_environment: Some(DesktopEnvironment::KDE),
             repository: HashMap::from([
                 (Repository::Arch, vec!["ksudoku"]),
@@ -1315,11 +1532,12 @@ pub fn get_all_packages() -> Vec<Package> {
                 channel: "",
             }),
             other: None,
+            pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
+            post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
         },
         Package {
-            display: "KdenLive Video Editor",
-            key: "kdenlive",
-            category: "Multi Media",
+            name: "KdenLive Video Editor",
+            category: Category::MultiMedia,
             desktop_environment: Some(DesktopEnvironment::KDE),
             repository: HashMap::from([
                 (Repository::Arch, vec!["kdenlive"]),
@@ -1338,11 +1556,12 @@ pub fn get_all_packages() -> Vec<Package> {
                 channel: "",
             }),
             other: None,
+            pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
+            post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
         },
         Package {
-            display: "KDevelop",
-            key: "kdevelop",
-            category: "Editors",
+            name: "KDevelop",
+            category: Category::Editors,
             desktop_environment: Some(DesktopEnvironment::KDE),
             repository: HashMap::from([
                 (Repository::Arch, vec!["kdevelop"]),
@@ -1361,11 +1580,12 @@ pub fn get_all_packages() -> Vec<Package> {
                 channel: "",
             }),
             other: None,
+            pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
+            post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
         },
         Package {
-            display: "Kile - LaTex Editor",
-            key: "kile",
-            category: "Editors",
+            name: "Kile - LaTex Editor",
+            category: Category::Editors,
             desktop_environment: Some(DesktopEnvironment::KDE),
             repository: HashMap::from([
                 (Repository::Arch, vec!["kile"]),
@@ -1376,11 +1596,12 @@ pub fn get_all_packages() -> Vec<Package> {
             flatpak: None,
             snap: None,
             other: None,
+            pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
+            post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
         },
         Package {
-            display: "KSysGuard",
-            key: "ksysguard",
-            category: "Utilities",
+            name: "KSysGuard",
+            category: Category::Utilities,
             desktop_environment: Some(DesktopEnvironment::KDE),
             repository: HashMap::from([
                 (Repository::Arch, vec!["ksysguard"]),
@@ -1392,11 +1613,12 @@ pub fn get_all_packages() -> Vec<Package> {
             flatpak: None,
             snap: None,
             other: None,
+            pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
+            post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
         },
         Package {
-            display: "KWrite",
-            key: "kwrite",
-            category: "Editors",
+            name: "KWrite",
+            category: Category::Editors,
             desktop_environment: Some(DesktopEnvironment::KDE),
             repository: HashMap::from([
                 (Repository::Arch, vec!["kwrite"]),
@@ -1411,11 +1633,12 @@ pub fn get_all_packages() -> Vec<Package> {
             }),
             snap: None,
             other: None,
+            pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
+            post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
         },
         Package {
-            display: "LaTex - Compiler",
-            key: "latex",
-            category: "Desktop",
+            name: "LaTex - Compiler",
+            category: Category::Desktop,
             desktop_environment: None,
             repository: HashMap::from([
                 (Repository::Arch, vec!["texlive-core", "texlive-latexextra"]),
@@ -1427,11 +1650,12 @@ pub fn get_all_packages() -> Vec<Package> {
             flatpak: None,
             snap: None,
             other: None,
+            pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
+            post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
         },
         Package {
-            display: "LibreOffice",
-            key: "libreoffice",
-            category: "Editors",
+            name: "LibreOffice",
+            category: Category::Editors,
             desktop_environment: None,
             repository: HashMap::from([
                 (Repository::Arch, vec!["libreoffice-fresh"]),
@@ -1451,11 +1675,12 @@ pub fn get_all_packages() -> Vec<Package> {
                 channel: "",
             }),
             other: None,
+            pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
+            post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
         },
         Package {
-            display: "MariaDB - Database",
-            key: "mariadb",
-            category: "Server",
+            name: "MariaDB - Database",
+            category: Category::Server,
             desktop_environment: None,
             repository: HashMap::from([
                 (Repository::Arch, vec!["mariadb"]),
@@ -1467,11 +1692,12 @@ pub fn get_all_packages() -> Vec<Package> {
             flatpak: None,
             snap: None,
             other: None,
+            pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
+            post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
         },
         Package {
-            display: "MP3 Metadata Editor",
-            key: "id3v2",
-            category: "Desktop",
+            name: "MP3 Metadata Editor",
+            category: Category::Desktop,
             desktop_environment: None,
             repository: HashMap::from([
                 (Repository::Arch, vec!["id3v2"]),
@@ -1482,11 +1708,12 @@ pub fn get_all_packages() -> Vec<Package> {
             flatpak: None,
             snap: None,
             other: None,
+            pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
+            post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
         },
         Package {
-            display: "neovim - Text Editor",
-            key: "neovim",
-            category: "Server",
+            name: "neovim - Text Editor",
+            category: Category::Server,
             desktop_environment: None,
             repository: HashMap::from([
                 (Repository::Arch, vec!["neovim", "vim", "vim-airline", "vim-ale", "vim-ctrlp", "vim-gitgutter", "vim-nerdtree"]),
@@ -1497,11 +1724,114 @@ pub fn get_all_packages() -> Vec<Package> {
             flatpak: None,
             snap: None,
             other: None,
+            pre_install: Box::new(|_: &Distribution, _: &mut Info, method: &InstallMethod| {
+                if method == &InstallMethod::Uninstall {
+                    let home_dir: String = env::var("HOME").expect("HOME directory could not be determined");
+                    Operation::new()
+                        .command(format!("sudo rm -r {}{}", &home_dir, "/.config/nvim"))
+                        .run()?;
+                }
+                Ok(())
+            }),
+            post_install: Box::new(|distribution: &Distribution, method: &InstallMethod| {
+                let home_dir: String = env::var("HOME").expect("HOME directory could not be determined");
+                if method != &InstallMethod::Uninstall {
+                    let config_file: String = format!("{}{}", &home_dir, "/.config/nvim/init.vim");
+
+                    Operation::new()
+                        .command(format!("mkdir -p {}/.config/nvim", &home_dir))
+                        .run()?;
+    
+                    fs::write(
+                        &config_file,
+                        r#"""""""""""""""""""""""""""""""""""""""""
+" neovim settings
+
+set noswapfile
+set nobackup
+set nowritebackup
+
+set updatetime=300
+set scrolloff=10
+set number
+set relativenumber
+set ignorecase smartcase
+set incsearch hlsearch
+set foldmethod=indent
+set foldlevel=99
+
+syntax on
+colorscheme desert
+filetype plugin indent on
+
+""""""""""""""""""""""""""""""""""""""""
+" normal mode remaps
+
+let mapleader = " "
+
+" window split
+nnoremap <Leader>vs <C-w>v
+nnoremap <Leader>hs <C-w>s
+
+" window navigation
+nnoremap <C-h> <C-w>h
+nnoremap <C-j> <C-w>j
+nnoremap <C-k> <C-w>k
+nnoremap <C-l> <C-w>l
+
+" text insert
+nnoremap <Leader>go iif err != nil {}<ESC>
+
+" file explore
+nnoremap <Leader>ex :Explore<CR>
+"#,
+                    )?;
+    
+                    if distribution.repository != Repository::RedHat {
+                        if distribution.repository == Repository::Arch
+                            || distribution.repository == Repository::Fedora
+                        {
+                            helper::append_to_file_if_not_found(
+                                &config_file,
+                                "NERDTree",
+                                "nnoremap <C-n> :NERDTreeToggle<CR>",
+                                false,
+                            )?;
+                        }
+    
+                        helper::append_to_file_if_not_found(
+                            &config_file,
+                            "ale settings",
+                            r#"
+""""""""""""""""""""""""""""""""""""""""
+" ale settings
+
+let g:ale_fix_on_save = 1
+let g:ale_completion_enabled = 1
+let g:ale_linters = { "go": ["gopls"], "rust": ["analyzer"] }
+let g:ale_fixers = { "*": ["remove_trailing_lines", "trim_whitespace"], "go": ["gofmt"], "rust": ["rustfmt"] }
+
+nnoremap K :ALEHover<CR>
+nnoremap gd :ALEGoToDefinition<CR>
+nnoremap gn :ALERename<CR>
+nnoremap gr :ALEFindReferences<CR>
+
+""""""""""""""""""""""""""""""""""""""""
+" insert mode remaps
+
+inoremap <silent><expr> <Tab> pumvisible() ? "\<C-n>" : "\<TAB>"
+inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-n>" : "\<S-TAB>"
+"#,
+                            false,
+                        )?;
+                    }
+                }
+                Ok(())
+            }),
         },
         Package {
-            display: "nano - Text Editor",
-            key: "nano",
-            category: "Server",
+            name: "nano - Text Editor",
+            category: Category::Server,
             desktop_environment: None,
             repository: HashMap::from([
                 (Repository::Arch, vec!["nano"]),
@@ -1513,11 +1843,12 @@ pub fn get_all_packages() -> Vec<Package> {
             flatpak: None,
             snap: None,
             other: None,
+            pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
+            post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
         },
         Package {
-            display: "Node.js - JavaScript RE",
-            key: "node",
-            category: "Server",
+            name: "Node.js - JavaScript RE",
+            category: Category::Server,
             desktop_environment: None,
             repository: HashMap::from([
                 (Repository::Arch, vec!["nodejs", "npm"]),
@@ -1534,11 +1865,21 @@ pub fn get_all_packages() -> Vec<Package> {
                 channel: "18/stable",
             }),
             other: None,
+            pre_install: Box::new(|distribution: &Distribution, _: &mut Info, method: &InstallMethod| {
+                if method == &InstallMethod::Repository {
+                    if distribution.repository == Repository::RedHat {
+                        Operation::new()
+                            .command("sudo dnf module enable nodejs:20 -y")
+                            .run()?;
+                    }
+                }
+                Ok(())
+            }),
+            post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
         },
         Package {
-            display: "Okular - Document Viewer",
-            key: "okular",
-            category: "Applications",
+            name: "Okular - Document Viewer",
+            category: Category::Applications,
             desktop_environment: Some(DesktopEnvironment::KDE),
             repository: HashMap::from([
                 (Repository::Arch, vec!["okular"]),
@@ -1557,11 +1898,12 @@ pub fn get_all_packages() -> Vec<Package> {
                 channel: "",
             }),
             other: None,
+            pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
+            post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
         },
         Package {
-            display: "Plasma Discover",
-            key: "plasma-discover",
-            category: "Software",
+            name: "Plasma Discover",
+            category: Category::Software,
             desktop_environment: Some(DesktopEnvironment::KDE),
             repository: HashMap::from([
                 (Repository::Arch, vec!["discover"]),
@@ -1572,11 +1914,12 @@ pub fn get_all_packages() -> Vec<Package> {
             flatpak: None,
             snap: None,
             other: None,
+            pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
+            post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
         },
         Package {
-            display: "Plasma System Monitor",
-            key: "plasma-systemmonitor",
-            category: "Utilities",
+            name: "Plasma System Monitor",
+            category: Category::Utilities,
             desktop_environment: Some(DesktopEnvironment::KDE),
             repository: HashMap::from([
                 (Repository::Arch, vec!["plasma-systemmonitor"]),
@@ -1588,11 +1931,12 @@ pub fn get_all_packages() -> Vec<Package> {
             flatpak: None,
             snap: None,
             other: None,
+            pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
+            post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
         },
         Package {
-            display: "Podman - Containers",
-            key: "podman",
-            category: "Server",
+            name: "Podman - Containers",
+            category: Category::Server,
             desktop_environment: None,
             repository: HashMap::from([
                 (Repository::Arch, vec!["podman"]),
@@ -1604,11 +1948,12 @@ pub fn get_all_packages() -> Vec<Package> {
             flatpak: None,
             snap: None,
             other: None,
+            pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
+            post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
         },
         Package {
-            display: "Pycharm",
-            key: "pycharm",
-            category: "Editors",
+            name: "Pycharm",
+            category: Category::Editors,
             desktop_environment: None,
             repository: HashMap::from([
                 (Repository::Arch, vec!["pycharm-community-edition"]),
@@ -1625,11 +1970,37 @@ pub fn get_all_packages() -> Vec<Package> {
                 channel: "",
             }),
             other: None,
+            pre_install: Box::new(|distribution: &Distribution, _: &mut Info, method: &InstallMethod| {
+                if method != &InstallMethod::Repository {
+                    if distribution.name == DistributionName::Fedora {
+                        Operation::new()
+                            .command("sudo dnf config-manager --set-disabled phracek-PyCharm")
+                            .run()?;
+                    }
+                }
+                if method == &InstallMethod::Repository {
+                    if distribution.repository == Repository::Fedora {
+                        Operation::new()
+                            .command("sudo dnf config-manager --set-enabled phracek-PyCharm")
+                            .run()?;
+                    }
+                }
+                Ok(())
+            }),
+            post_install: Box::new(|_: &Distribution, method: &InstallMethod| {
+                let home_dir: String = env::var("HOME").expect("HOME directory could not be determined");
+                if method != &InstallMethod::Uninstall {
+                    fs::write(
+                        format!("{}{}", &home_dir, "/.ideavimrc"),
+                        "sethandler a:ide",
+                    )?;
+                }
+                Ok(())
+            }),
         },
         Package {
-            display: "qtile - Window Manager",
-            key: "qtile",
-            category: "Desktop",
+            name: "qtile - Window Manager",
+            category: Category::Desktop,
             desktop_environment: None,
             repository: HashMap::from([
                 (Repository::Arch, vec!["qtile", "alacritty", "rofi", "numlockx", "playerctl"]),
@@ -1637,11 +2008,12 @@ pub fn get_all_packages() -> Vec<Package> {
             flatpak: None,
             snap: None,
             other: None,
+            pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
+            post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
         },
         Package {
-            display: "RhythmBox",
-            key: "rhythmbox",
-            category: "Multi Media",
+            name: "RhythmBox",
+            category: Category::MultiMedia,
             desktop_environment: Some(DesktopEnvironment::Gnome),
             repository: HashMap::from([
                 (Repository::Arch, vec!["rhythmbox"]),
@@ -1655,11 +2027,12 @@ pub fn get_all_packages() -> Vec<Package> {
             }),
             snap: None,
             other: None,
+            pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
+            post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
         },
         Package {
-            display: "Rust Language",
-            key: "rust",
-            category: "Server",
+            name: "Rust Language",
+            category: Category::Server,
             desktop_environment: None,
             repository: HashMap::from([
                 (Repository::Arch, vec!["rustup"]),
@@ -1671,11 +2044,34 @@ pub fn get_all_packages() -> Vec<Package> {
             flatpak: None,
             snap: None,
             other: Some(OtherPackage { name: "rust" }),
+            pre_install: Box::new(|distribution: &Distribution, info: &mut Info, method: &InstallMethod| {
+                if method != &InstallMethod::Other {
+                    let home_dir: String = env::var("HOME").expect("HOME directory could not be determined");
+                    Operation::new()
+                        .command(format!("sudo rm -r {}{}", &home_dir, "/.cargo/bin/rustup"))
+                        .run()?;
+                }
+                if method == &InstallMethod::Other {
+                    distribution.install_package("curl", info)?;
+                }
+                Ok(())
+            }),
+            post_install: Box::new(|_: &Distribution, method: &InstallMethod| {
+                let home_dir: String = env::var("HOME").expect("HOME directory could not be determined");
+                if method == &InstallMethod::Other {
+                    Operation::new()
+                        .command(format!(
+                            "{}{} component add rust-analyzer",
+                            &home_dir, "/.cargo/bin/rustup"
+                        ))
+                        .run()?;
+                }
+                Ok(())
+            }),
         },
         Package {
-            display: "Shotwell",
-            key: "shotwell",
-            category: "Multi Media",
+            name: "Shotwell",
+            category: Category::MultiMedia,
             desktop_environment: Some(DesktopEnvironment::Gnome),
             repository: HashMap::from([
                 (Repository::Arch, vec!["shotwell"]),
@@ -1689,11 +2085,12 @@ pub fn get_all_packages() -> Vec<Package> {
             }),
             snap: None,
             other: None,
+            pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
+            post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
         },
         Package {
-            display: "Simple Scan",
-            key: "simple-scan",
-            category: "Utilities",
+            name: "Simple Scan",
+            category: Category::Utilities,
             desktop_environment: None,
             repository: HashMap::from([
                 (Repository::Arch, vec!["simple-scan"]),
@@ -1704,11 +2101,12 @@ pub fn get_all_packages() -> Vec<Package> {
             flatpak: None,
             snap: None,
             other: None,
+            pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
+            post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
         },
         Package {
-            display: "Snap",
-            key: "snapd",
-            category: "Server",
+            name: "Snap",
+            category: Category::Server,
             desktop_environment: None,
             repository: HashMap::from([
                 (Repository::Debian, vec!["snapd"]),
@@ -1719,11 +2117,17 @@ pub fn get_all_packages() -> Vec<Package> {
             flatpak: None,
             snap: None,
             other: None,
+            pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
+            post_install: Box::new(|distribution: &Distribution, method: &InstallMethod| {
+                if method != &InstallMethod::Uninstall {
+                    distribution.setup_snap()?;
+                }
+                Ok(())
+            }),
         },
         Package {
-            display: "Snap Store",
-            key: "snap-store",
-            category: "Software",
+            name: "Snap Store",
+            category: Category::Software,
             desktop_environment: None,
             repository: HashMap::new(),
             flatpak: None,
@@ -1734,11 +2138,12 @@ pub fn get_all_packages() -> Vec<Package> {
                 channel: "",
             }),
             other: None,
+            pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
+            post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
         },
         Package {
-            display: "Spectacle Screenshot",
-            key: "spectacle",
-            category: "Utilities",
+            name: "Spectacle Screenshot",
+            category: Category::Utilities,
             desktop_environment: Some(DesktopEnvironment::KDE),
             repository: HashMap::from([
                 (Repository::Arch, vec!["spectacle"]),
@@ -1750,11 +2155,12 @@ pub fn get_all_packages() -> Vec<Package> {
             flatpak: None,
             snap: None,
             other: None,
+            pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
+            post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
         },
         Package {
-            display: "SSH - Secure Shell Protocol",
-            key: "ssh",
-            category: "Server",
+            name: "SSH - Secure Shell Protocol",
+            category: Category::Server,
             desktop_environment: None,
             repository: HashMap::from([
                 (Repository::Arch, vec!["libssh", "openssh"]),
@@ -1766,11 +2172,12 @@ pub fn get_all_packages() -> Vec<Package> {
             flatpak: None,
             snap: None,
             other: None,
+            pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
+            post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
         },
         Package {
-            display: "Steam",
-            key: "steam",
-            category: "Games",
+            name: "Steam",
+            category: Category::Games,
             desktop_environment: None,
             repository: HashMap::from([
                 (Repository::Arch, vec!["steam"]),
@@ -1786,11 +2193,12 @@ pub fn get_all_packages() -> Vec<Package> {
                 channel: "",
             }),
             other: None,
+            pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
+            post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
         },
         Package {
-            display: "Super Tux Kart",
-            key: "supertuxkart",
-            category: "Games",
+            name: "Super Tux Kart",
+            category: Category::Games,
             desktop_environment: None,
             repository: HashMap::from([
                 (Repository::Arch, vec!["supertuxkart"]),
@@ -1809,11 +2217,12 @@ pub fn get_all_packages() -> Vec<Package> {
                 channel: "",
             }),
             other: None,
+            pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
+            post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
         },
         Package {
-            display: "Thunderbird",
-            key: "thunderbird",
-            category: "Communication",
+            name: "Thunderbird",
+            category: Category::Communication,
             desktop_environment: None,
             repository: HashMap::from([
                 (Repository::Arch, vec!["thunderbird"]),
@@ -1833,11 +2242,12 @@ pub fn get_all_packages() -> Vec<Package> {
                 channel: "",
             }),
             other: None,
+            pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
+            post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
         },
         Package {
-            display: "TOR - The Onion Router",
-            key: "torbrowser-launcher",
-            category: "Browsers",
+            name: "TOR - The Onion Router",
+            category: Category::Browsers,
             desktop_environment: None,
             repository: HashMap::new(),
             flatpak: Some(Flatpak {
@@ -1846,11 +2256,12 @@ pub fn get_all_packages() -> Vec<Package> {
             }),
             snap: None,
             other: None,
+            pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
+            post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
         },
         Package {
-            display: "Totem Video Player",
-            key: "totem",
-            category: "Multi Media",
+            name: "Totem Video Player",
+            category: Category::MultiMedia,
             desktop_environment: Some(DesktopEnvironment::Gnome),
             repository: HashMap::from([
                 (Repository::Arch, vec!["totem"]),
@@ -1865,11 +2276,12 @@ pub fn get_all_packages() -> Vec<Package> {
             }),
             snap: None,
             other: None,
+            pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
+            post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
         },
         Package {
-            display: "Transmission (GTK) - Torrent",
-            key: "transmission-gtk",
-            category: "Applications",
+            name: "Transmission (GTK) - Torrent",
+            category: Category::Applications,
             desktop_environment: Some(DesktopEnvironment::Gnome),
             repository: HashMap::from([
                 (Repository::Arch, vec!["transmission-gtk"]),
@@ -1883,11 +2295,12 @@ pub fn get_all_packages() -> Vec<Package> {
             }),
             snap: None,
             other: None,
+            pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
+            post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
         },
         Package {
-            display: "Transmission (QT) - Torrent",
-            key: "transmission-qt",
-            category: "Applications",
+            name: "Transmission (QT) - Torrent",
+            category: Category::Applications,
             desktop_environment: Some(DesktopEnvironment::KDE),
             repository: HashMap::from([
                 (Repository::Arch, vec!["transmission-qt"]),
@@ -1901,11 +2314,12 @@ pub fn get_all_packages() -> Vec<Package> {
             }),
             snap: None,
             other: None,
+            pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
+            post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
         },
         Package {
-            display: "Vietnamese Keyboard",
-            key: "ibus-unikey",
-            category: "Desktop",
+            name: "Vietnamese Keyboard",
+            category: Category::Desktop,
             desktop_environment: None,
             repository: HashMap::from([
                 (Repository::Arch, vec!["ibus-unikey"]),
@@ -1917,11 +2331,12 @@ pub fn get_all_packages() -> Vec<Package> {
             flatpak: None,
             snap: None,
             other: None,
+            pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
+            post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
         },
         Package {
-            display: "vim - Text Editor",
-            key: "vim",
-            category: "Server",
+            name: "vim - Text Editor",
+            category: Category::Server,
             desktop_environment: None,
             repository: HashMap::from([
                 (Repository::Arch, vec!["vim", "vim-airline", "vim-ale", "vim-ctrlp", "vim-gitgutter", "vim-nerdtree"]),
@@ -1933,11 +2348,126 @@ pub fn get_all_packages() -> Vec<Package> {
             flatpak: None,
             snap: None,
             other: None,
+            pre_install: Box::new(|_: &Distribution, _: &mut Info, method: &InstallMethod| {
+                let home_dir: String = env::var("HOME").expect("HOME directory could not be determined");
+                if method == &InstallMethod::Uninstall {
+                    Operation::new()
+                        .command(format!(
+                            "sudo rm -r {}{} {}{} {}{}",
+                            &home_dir, "/.vim", &home_dir, "/.viminfo", &home_dir, "/.vimrc"
+                        ))
+                        .run()?;
+                }
+                Ok(())
+            }),
+            post_install: Box::new(|distribution: &Distribution, method: &InstallMethod| {
+                let home_dir: String = env::var("HOME").expect("HOME directory could not be determined");
+                let bashrc: String = format!("{}{}", &home_dir, "/.bashrc");
+                if method != &InstallMethod::Uninstall {
+                    helper::append_to_file_if_not_found(
+                        &bashrc,
+                        "export EDITOR",
+                        "export EDITOR=\"/usr/bin/vim\"\n",
+                        false,
+                    )?;
+    
+                    let config_file: String = format!("{}{}", &home_dir, "/.vimrc");
+    
+                    fs::write(
+                        &config_file,
+                        r#"""""""""""""""""""""""""""""""""""""""""
+" vim settings
+
+set nocompatible
+
+set encoding=utf-8
+
+set noswapfile
+set nobackup
+set nowritebackup
+
+set mouse=a
+set updatetime=300
+set scrolloff=10
+set number
+set relativenumber
+set ignorecase smartcase
+set incsearch hlsearch
+set foldmethod=indent
+set foldlevel=99
+
+syntax on
+colorscheme desert
+filetype plugin indent on
+
+""""""""""""""""""""""""""""""""""""""""
+" normal mode remaps
+
+let mapleader = " "
+
+" window split
+nnoremap <Leader>vs <C-w>v
+nnoremap <Leader>hs <C-w>s
+
+" window navigation
+nnoremap <C-h> <C-w>h
+nnoremap <C-j> <C-w>j
+nnoremap <C-k> <C-w>k
+nnoremap <C-l> <C-w>l
+
+" text insert
+nnoremap <Leader>go iif err != nil {}<ESC>
+
+" file explore
+nnoremap <Leader>ex :Explore<CR>
+"#,
+                    )?;
+    
+                    if distribution.repository != Repository::RedHat {
+                        if distribution.repository == Repository::Arch
+                            || distribution.repository == Repository::Fedora
+                        {
+                            helper::append_to_file_if_not_found(
+                                &config_file,
+                                "NERDTree",
+                                "nnoremap <C-n> :NERDTreeToggle<CR>",
+                                false,
+                            )?;
+                        }
+    
+                        helper::append_to_file_if_not_found(
+                            &config_file,
+                            "ale settings",
+                            r#"
+""""""""""""""""""""""""""""""""""""""""
+" ale settings
+
+let g:ale_fix_on_save = 1
+let g:ale_completion_enabled = 1
+let g:ale_linters = { "go": ["gopls"], "rust": ["analyzer"] }
+let g:ale_fixers = { "*": ["remove_trailing_lines", "trim_whitespace"], "go": ["gofmt"], "rust": ["rustfmt"] }
+
+nnoremap K :ALEHover<CR>
+nnoremap gd :ALEGoToDefinition<CR>
+nnoremap gn :ALERename<CR>
+nnoremap gr :ALEFindReferences<CR>
+
+""""""""""""""""""""""""""""""""""""""""
+" insert mode remaps
+
+inoremap <silent><expr> <Tab> pumvisible() ? "\<C-n>" : "\<TAB>"
+inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-n>" : "\<S-TAB>"
+"#,
+                            false,
+                        )?;
+                    }
+                }
+                Ok(())
+            }),
         },
         Package {
-            display: "Virt Manager",
-            key: "virt-manager",
-            category: "Applications",
+            name: "Virt Manager",
+            category: Category::Applications,
             desktop_environment: None,
             repository: HashMap::from([
                 (Repository::Arch, vec!["virt-manager"]),
@@ -1949,11 +2479,12 @@ pub fn get_all_packages() -> Vec<Package> {
             flatpak: None,
             snap: None,
             other: None,
+            pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
+            post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
         },
         Package {
-            display: "VLC",
-            key: "vlc",
-            category: "Multi Media",
+            name: "VLC",
+            category: Category::MultiMedia,
             desktop_environment: None,
             repository: HashMap::from([
                 (Repository::Arch, vec!["vlc"]),
@@ -1973,11 +2504,12 @@ pub fn get_all_packages() -> Vec<Package> {
                 channel: "",
             }),
             other: None,
+            pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
+            post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
         },
         Package {
-            display: "VS Code",
-            key: "code",
-            category: "Editors",
+            name: "VS Code",
+            category: Category::Editors,
             desktop_environment: None,
             repository: HashMap::from([
                 (Repository::Arch, vec!["code"]),
@@ -1996,11 +2528,129 @@ pub fn get_all_packages() -> Vec<Package> {
                 channel: "",
             }),
             other: None,
+            pre_install: Box::new(|distribution: &Distribution, info: &mut Info, method: &InstallMethod| {
+                let home_dir: String = env::var("HOME").expect("HOME directory could not be determined");
+                if method != &InstallMethod::Repository {
+                    if distribution.package_manager == PackageManager::APT {
+                        Operation::new()
+                            .command("sudo rm /etc/apt/sources.list.d/vscode.list")
+                            .run()?;
+                    }
+                    if distribution.package_manager == PackageManager::DNF {
+                        Operation::new()
+                            .command("sudo dnf config-manager --set-disabled code")
+                            .run()?;
+                        Operation::new()
+                            .command("sudo rm /etc/yum.repos.d/vscode.repo")
+                            .run()?;
+                    }
+                }
+                if method == &InstallMethod::Uninstall {
+                    Operation::new()
+                        .command(format!(
+                            "sudo rm -r {}{} {}{}",
+                            &home_dir, "/.vscode", &home_dir, "/.config/Code"
+                        ))
+                        .run()?;
+                }
+                if method == &InstallMethod::Repository {
+                    if distribution.package_manager == PackageManager::APT {
+                        distribution.install_package("wget", info)?;
+                        distribution.install_package("gpg", info)?;
+    
+                        let key: String = Operation::new()
+                            .command("wget -qO- https://packages.microsoft.com/keys/microsoft.asc")
+                            .run_output()?;
+                        fs::write("packages.microsoft", key)?;
+    
+                        Operation::new()
+                            .command("gpg --dearmor packages.microsoft")
+                            .run()?;
+    
+                        Operation::new()
+                            .command("sudo install -D -o root -g root -m 644 packages.microsoft.gpg /etc/apt/keyrings/packages.microsoft.gpg")
+                            .run()?;
+    
+                        fs::remove_file("packages.microsoft")?;
+                        fs::remove_file("packages.microsoft.gpg")?;
+    
+                        let echo_cmd = Command::new("echo")
+                            .arg("deb [arch=amd64,arm64,armhf signed-by=/etc/apt/keyrings/packages.microsoft.gpg] https://packages.microsoft.com/repos/code stable main")
+                            .stdout(Stdio::piped())
+                            .spawn()?;
+                        Command::new("sudo")
+                            .arg("tee")
+                            .arg("/etc/apt/sources.list.d/vscode.list")
+                            .stdin(Stdio::from(echo_cmd.stdout.unwrap()))
+                            .stdout(Stdio::inherit())
+                            .stderr(Stdio::inherit())
+                            .spawn()?
+                            .wait()?;
+    
+                        Operation::new().command("sudo apt update").run()?;
+                    }
+                    if distribution.package_manager == PackageManager::DNF {
+                        Operation::new()
+                            .command(
+                                "sudo rpm --import https://packages.microsoft.com/keys/microsoft.asc",
+                            )
+                            .run()?;
+    
+                        let echo_cmd = Command::new("echo")
+                            .arg("-e")
+                            .arg("[code]\nname=Visual Studio Code\nbaseurl=https://packages.microsoft.com/yumrepos/vscode\nenabled=1\ngpgcheck=1\ngpgkey=https://packages.microsoft.com/keys/microsoft.asc")
+                            .stdout(Stdio::piped())
+                            .spawn()?;
+                        Command::new("sudo")
+                            .arg("tee")
+                            .arg("/etc/yum.repos.d/vscode.repo")
+                            .stdin(Stdio::from(echo_cmd.stdout.unwrap()))
+                            .stdout(Stdio::inherit())
+                            .stderr(Stdio::inherit())
+                            .spawn()?
+                            .wait()?;
+                    }
+                }
+                Ok(())
+            }),
+            post_install: Box::new(|_: &Distribution, method: &InstallMethod| {
+                let home_dir: String = env::var("HOME").expect("HOME directory could not be determined");
+                if method != &InstallMethod::Uninstall {
+                    let extensions: Vec<&str> = Vec::from(["esbenp.prettier-vscode", "vscodevim.vim"]);
+                    for ext in extensions {
+                        Operation::new()
+                            .command(format!("code --install-extension {}", ext))
+                            .run()?;
+                    }
+
+                    fs::write(
+                        format!("{}{}", &home_dir, "/.config/Code/User/settings.json"),
+                        r#"{
+  "[css]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+  "[html]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+  "[javascript]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+  "[json]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+  "[jsonc]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+  "[scss]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+  "[typescript]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+  "editor.formatOnSave": true,
+  "editor.rulers": [80, 160],
+  "extensions.ignoreRecommendations": true,
+  "git.openRepositoryInParentFolders": "always",
+  "telemetry.telemetryLevel": "off",
+  "vim.smartRelativeLine": true,
+  "vim.useCtrlKeys": false,
+  "workbench.startupEditor": "none"
+}
+"#,
+                    )?;
+                }
+                Ok(())
+            }),
         },
         Package {
-            display: "Xonotic",
-            key: "xonotic",
-            category: "Games",
+            name: "Xonotic",
+            category: Category::Games,
             desktop_environment: None,
             repository: HashMap::from([
                 (Repository::Arch, vec!["xonotic"]),
@@ -2017,11 +2667,12 @@ pub fn get_all_packages() -> Vec<Package> {
                 channel: "",
             }),
             other: None,
+            pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
+            post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
         },
         Package {
-            display: "yt-dlp - Download YouTube",
-            key: "yt-dlp",
-            category: "Desktop",
+            name: "yt-dlp - Download YouTube",
+            category: Category::Desktop,
             desktop_environment: None,
             repository: HashMap::from([
                 (Repository::Arch, vec!["yt-dlp"]),
@@ -2033,6 +2684,8 @@ pub fn get_all_packages() -> Vec<Package> {
             flatpak: None,
             snap: None,
             other: None,
+            pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
+            post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
         },
     ])
 }

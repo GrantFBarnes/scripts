@@ -2,11 +2,7 @@ use rust_cli::ansi::Color;
 use rust_cli::commands::Operation;
 use rust_cli::prompts::Select;
 
-use std::env;
-use std::env::VarError;
-use std::fs;
 use std::io;
-use std::process::{Command, Stdio};
 
 extern crate rust_cli;
 
@@ -19,10 +15,8 @@ mod other;
 mod package;
 mod snap;
 
-use crate::distribution::{
-    DesktopEnvironment, Distribution, DistributionName, PackageManager, Repository,
-};
-use crate::package::Package;
+use crate::distribution::{DesktopEnvironment, Distribution};
+use crate::package::{Category, Package};
 
 #[derive(PartialEq)]
 enum InstallMethod {
@@ -44,19 +38,6 @@ pub struct Info {
     snap_installed: Vec<String>,
     other_installed: Vec<String>,
 }
-
-const CATEGORIES: [&str; 10] = [
-    "Server",
-    "Desktop",
-    "Applications",
-    "Browsers",
-    "Communication",
-    "Games",
-    "Multi Media",
-    "Editors",
-    "Software",
-    "Utilities",
-];
 
 fn repository_setup(distribution: &Distribution, info: &mut Info) -> Result<(), io::Error> {
     distribution.setup(info)?;
@@ -80,7 +61,7 @@ fn run_flatpak_remote_select(
     options.push("Cancel");
 
     let remote = Select::new()
-        .title(format!("Flatpak Remote: {}", package.display))
+        .title(format!("Flatpak Remote: {}", package.name))
         .options(&options)
         .erase_after(true)
         .run_select_value()?;
@@ -93,416 +74,6 @@ fn run_flatpak_remote_select(
     }
 
     flatpak::install(package, remote.as_str(), distribution, info)
-}
-
-fn post_uninstall(
-    package: &str,
-    distribution: &Distribution,
-    method: &InstallMethod,
-) -> Result<(), io::Error> {
-    let home_dir: Result<String, VarError> = env::var("HOME");
-    if home_dir.is_err() {
-        return Err(io::Error::other("HOME directory could not be determined"));
-    }
-    let home_dir: String = home_dir.unwrap();
-
-    match package {
-        "code" => {
-            if method != &InstallMethod::Repository {
-                if distribution.package_manager == PackageManager::APT {
-                    Operation::new()
-                        .command("sudo rm /etc/apt/sources.list.d/vscode.list")
-                        .run()?;
-                }
-                if distribution.package_manager == PackageManager::DNF {
-                    Operation::new()
-                        .command("sudo dnf config-manager --set-disabled code")
-                        .run()?;
-                    Operation::new()
-                        .command("sudo rm /etc/yum.repos.d/vscode.repo")
-                        .run()?;
-                }
-            }
-            if method == &InstallMethod::Uninstall {
-                Operation::new()
-                    .command(format!(
-                        "sudo rm -r {}{} {}{}",
-                        &home_dir, "/.vscode", &home_dir, "/.config/Code"
-                    ))
-                    .run()?;
-            }
-        }
-        "golang" => {
-            if method == &InstallMethod::Uninstall {
-                Operation::new()
-                    .command(format!("sudo rm -r {}{}", &home_dir, "/.go"))
-                    .run()?;
-            }
-        }
-        "neovim" => {
-            if method == &InstallMethod::Uninstall {
-                Operation::new()
-                    .command(format!("sudo rm -r {}{}", &home_dir, "/.config/nvim"))
-                    .run()?;
-            }
-        }
-        "pycharm" => {
-            if method != &InstallMethod::Repository {
-                if distribution.name == DistributionName::Fedora {
-                    Operation::new()
-                        .command("sudo dnf config-manager --set-disabled phracek-PyCharm")
-                        .run()?;
-                }
-            }
-        }
-        "rust" => {
-            if method != &InstallMethod::Other {
-                Operation::new()
-                    .command(format!("sudo rm -r {}{}", &home_dir, "/.cargo/bin/rustup"))
-                    .run()?;
-            }
-        }
-        "vim" => {
-            if method == &InstallMethod::Uninstall {
-                Operation::new()
-                    .command(format!(
-                        "sudo rm -r {}{} {}{} {}{}",
-                        &home_dir, "/.vim", &home_dir, "/.viminfo", &home_dir, "/.vimrc"
-                    ))
-                    .run()?;
-            }
-        }
-        _ => (),
-    }
-
-    Ok(())
-}
-
-fn pre_install(
-    package: &str,
-    distribution: &Distribution,
-    info: &mut Info,
-    method: &InstallMethod,
-) -> Result<(), io::Error> {
-    match package {
-        "code" => {
-            if method == &InstallMethod::Repository {
-                if distribution.package_manager == PackageManager::APT {
-                    distribution.install_package("wget", info)?;
-                    distribution.install_package("gpg", info)?;
-
-                    let key: String = Operation::new()
-                        .command("wget -qO- https://packages.microsoft.com/keys/microsoft.asc")
-                        .run_output()?;
-                    fs::write("packages.microsoft", key)?;
-
-                    Operation::new()
-                        .command("gpg --dearmor packages.microsoft")
-                        .run()?;
-
-                    Operation::new()
-                        .command("sudo install -D -o root -g root -m 644 packages.microsoft.gpg /etc/apt/keyrings/packages.microsoft.gpg")
-                        .run()?;
-
-                    fs::remove_file("packages.microsoft")?;
-                    fs::remove_file("packages.microsoft.gpg")?;
-
-                    let echo_cmd = Command::new("echo")
-                        .arg("deb [arch=amd64,arm64,armhf signed-by=/etc/apt/keyrings/packages.microsoft.gpg] https://packages.microsoft.com/repos/code stable main")
-                        .stdout(Stdio::piped())
-                        .spawn()?;
-                    Command::new("sudo")
-                        .arg("tee")
-                        .arg("/etc/apt/sources.list.d/vscode.list")
-                        .stdin(Stdio::from(echo_cmd.stdout.unwrap()))
-                        .stdout(Stdio::inherit())
-                        .stderr(Stdio::inherit())
-                        .spawn()?
-                        .wait()?;
-
-                    Operation::new().command("sudo apt update").run()?;
-                }
-                if distribution.package_manager == PackageManager::DNF {
-                    Operation::new()
-                        .command(
-                            "sudo rpm --import https://packages.microsoft.com/keys/microsoft.asc",
-                        )
-                        .run()?;
-
-                    let echo_cmd = Command::new("echo")
-                        .arg("-e")
-                        .arg("[code]\nname=Visual Studio Code\nbaseurl=https://packages.microsoft.com/yumrepos/vscode\nenabled=1\ngpgcheck=1\ngpgkey=https://packages.microsoft.com/keys/microsoft.asc")
-                        .stdout(Stdio::piped())
-                        .spawn()?;
-                    Command::new("sudo")
-                        .arg("tee")
-                        .arg("/etc/yum.repos.d/vscode.repo")
-                        .stdin(Stdio::from(echo_cmd.stdout.unwrap()))
-                        .stdout(Stdio::inherit())
-                        .stderr(Stdio::inherit())
-                        .spawn()?
-                        .wait()?;
-                }
-            }
-        }
-        p if p.contains("dotnet") => {
-            if method == &InstallMethod::Repository {
-                if distribution.repository == Repository::Debian {
-                    distribution.install_package("wget", info)?;
-
-                    Operation::new()
-                        .command("wget https://packages.microsoft.com/config/debian/12/packages-microsoft-prod.deb -O packages-microsoft-prod.deb")
-                        .show_output(true)
-                        .run()?;
-                    Operation::new()
-                        .command("sudo dpkg -i packages-microsoft-prod.deb")
-                        .show_output(true)
-                        .run()?;
-                    Operation::new()
-                        .command("rm packages-microsoft-prod.deb")
-                        .run()?;
-                    Operation::new()
-                        .command("sudo apt update")
-                        .show_output(true)
-                        .run()?;
-                }
-            }
-        }
-        "nodejs" => {
-            if method == &InstallMethod::Repository {
-                if distribution.repository == Repository::RedHat {
-                    Operation::new()
-                        .command("sudo dnf module enable nodejs:20 -y")
-                        .run()?;
-                }
-            }
-        }
-        "pycharm" => {
-            if method == &InstallMethod::Repository {
-                if distribution.repository == Repository::Fedora {
-                    Operation::new()
-                        .command("sudo dnf config-manager --set-enabled phracek-PyCharm")
-                        .run()?;
-                }
-            }
-        }
-        "rust" => {
-            if method == &InstallMethod::Other {
-                distribution.install_package("curl", info)?;
-            }
-        }
-        _ => (),
-    }
-
-    Ok(())
-}
-
-fn post_install(
-    package: &str,
-    distribution: &Distribution,
-    method: &InstallMethod,
-) -> Result<(), io::Error> {
-    let home_dir: Result<String, VarError> = env::var("HOME");
-    if home_dir.is_err() {
-        return Err(io::Error::other("HOME directory could not be determined"));
-    }
-    let home_dir: String = home_dir.unwrap();
-    let bashrc: String = format!("{}{}", &home_dir, "/.bashrc");
-
-    match package {
-        "code" => {
-            if method != &InstallMethod::Uninstall {
-                let extensions: Vec<&str> = Vec::from(["esbenp.prettier-vscode", "vscodevim.vim"]);
-                for ext in extensions {
-                    Operation::new()
-                        .command(format!("code --install-extension {}", ext))
-                        .run()?;
-                }
-
-                fs::write(
-                    format!("{}{}", &home_dir, "/.config/Code/User/settings.json"),
-                    r#"{
-  "[css]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
-  "[html]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
-  "[javascript]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
-  "[json]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
-  "[jsonc]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
-  "[scss]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
-  "[typescript]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
-  "editor.formatOnSave": true,
-  "editor.rulers": [80, 160],
-  "extensions.ignoreRecommendations": true,
-  "git.openRepositoryInParentFolders": "always",
-  "telemetry.telemetryLevel": "off",
-  "vim.smartRelativeLine": true,
-  "vim.useCtrlKeys": false,
-  "workbench.startupEditor": "none"
-}
-"#,
-                )?;
-            }
-        }
-        "golang" => {
-            if method != &InstallMethod::Uninstall {
-                Operation::new()
-                    .command(format!("go env -w GOPATH={}/.go", &home_dir))
-                    .run()?;
-                if method == &InstallMethod::Snap || distribution.repository == Repository::RedHat {
-                    helper::append_to_file_if_not_found(
-                        &bashrc,
-                        "export GOPATH",
-                        r#"
-export GOPATH=$HOME/.go
-export PATH=$PATH:$GOPATH/bin
-                        "#,
-                        false,
-                    )?;
-
-                    Operation::new()
-                        .command("go install golang.org/x/tools/gopls@latest")
-                        .show_output(true)
-                        .run()?;
-                }
-            }
-        }
-        "intellij" | "pycharm" => {
-            if method != &InstallMethod::Uninstall {
-                fs::write(
-                    format!("{}{}", &home_dir, "/.ideavimrc"),
-                    "sethandler a:ide",
-                )?;
-            }
-        }
-        "rust" => {
-            if method == &InstallMethod::Other {
-                Operation::new()
-                    .command(format!(
-                        "{}{} component add rust-analyzer",
-                        home_dir, "/.cargo/bin/rustup"
-                    ))
-                    .run()?;
-            }
-        }
-        "snapd" => {
-            if method != &InstallMethod::Uninstall {
-                distribution.setup_snap()?;
-            }
-        }
-        "vim" | "neovim" => {
-            if method != &InstallMethod::Uninstall {
-                helper::append_to_file_if_not_found(
-                    &bashrc,
-                    "export EDITOR",
-                    "export EDITOR=\"/usr/bin/vim\"\n",
-                    false,
-                )?;
-
-                let config_file: String = if package == "vim" {
-                    format!("{}{}", &home_dir, "/.vimrc")
-                } else {
-                    format!("{}{}", &home_dir, "/.config/nvim/init.vim")
-                };
-
-                if package == "neovim" {
-                    Operation::new()
-                        .command(format!("mkdir -p {}/.config/nvim", &home_dir))
-                        .run()?;
-                }
-
-                fs::write(
-                    &config_file,
-                    r#"""""""""""""""""""""""""""""""""""""""""
-" vim settings
-
-set nocompatible
-
-set encoding=utf-8
-
-set noswapfile
-set nobackup
-set nowritebackup
-
-set mouse=a
-set updatetime=300
-set scrolloff=10
-set number
-set relativenumber
-set ignorecase smartcase
-set incsearch hlsearch
-set foldmethod=indent
-set foldlevel=99
-
-syntax on
-colorscheme desert
-filetype plugin indent on
-
-""""""""""""""""""""""""""""""""""""""""
-" normal mode remaps
-
-let mapleader = " "
-
-" window split
-nnoremap <Leader>vs <C-w>v
-nnoremap <Leader>hs <C-w>s
-
-" window navigation
-nnoremap <C-h> <C-w>h
-nnoremap <C-j> <C-w>j
-nnoremap <C-k> <C-w>k
-nnoremap <C-l> <C-w>l
-
-" text insert
-nnoremap <Leader>go iif err != nil {}<ESC>
-
-" file explore
-nnoremap <Leader>ex :Explore<CR>
-"#,
-                )?;
-
-                if distribution.repository != Repository::RedHat {
-                    if distribution.repository == Repository::Arch
-                        || distribution.repository == Repository::Fedora
-                    {
-                        helper::append_to_file_if_not_found(
-                            &config_file,
-                            "NERDTree",
-                            "nnoremap <C-n> :NERDTreeToggle<CR>",
-                            false,
-                        )?;
-                    }
-
-                    helper::append_to_file_if_not_found(
-                        &config_file,
-                        "ale settings",
-                        r#"
-""""""""""""""""""""""""""""""""""""""""
-" ale settings
-
-let g:ale_fix_on_save = 1
-let g:ale_completion_enabled = 1
-let g:ale_linters = { "go": ["gopls"], "rust": ["analyzer"] }
-let g:ale_fixers = { "*": ["remove_trailing_lines", "trim_whitespace"], "go": ["gofmt"], "rust": ["rustfmt"] }
-
-nnoremap K :ALEHover<CR>
-nnoremap gd :ALEGoToDefinition<CR>
-nnoremap gn :ALERename<CR>
-nnoremap gr :ALEFindReferences<CR>
-
-""""""""""""""""""""""""""""""""""""""""
-" insert mode remaps
-
-inoremap <silent><expr> <Tab> pumvisible() ? "\<C-n>" : "\<TAB>"
-inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-n>" : "\<S-TAB>"
-"#,
-                        false,
-                    )?;
-                }
-            }
-        }
-        _ => (),
-    }
-
-    Ok(())
 }
 
 fn get_install_method(package: &Package, distribution: &Distribution, info: &Info) -> String {
@@ -577,7 +148,7 @@ fn run_package_select(
     let selection = Select::new()
         .title(format!(
             "Package: {} ({})",
-            package.display,
+            package.name,
             get_install_method(package, distribution, &info)
         ))
         .options(&options_display)
@@ -612,9 +183,8 @@ fn run_package_select(
     if method != &InstallMethod::Other {
         other::uninstall(package, info)?;
     }
-    post_uninstall(package.key, distribution, &method)?;
 
-    pre_install(package.key, distribution, info, &method)?;
+    (package.pre_install)(distribution, info, &method)?;
     match method {
         InstallMethod::Repository => distribution.install(package, info)?,
         InstallMethod::Flatpak => run_flatpak_remote_select(package, distribution, info)?,
@@ -622,11 +192,11 @@ fn run_package_select(
         InstallMethod::Other => other::install(package, info)?,
         _ => (),
     }
-    post_install(package.key, distribution, &method)
+    (package.post_install)(distribution, &method)
 }
 
 fn run_category_select(
-    category: &str,
+    category: &Category,
     start_idx: usize,
     show_all_desktop_environments: bool,
     distribution: &Distribution,
@@ -638,7 +208,7 @@ fn run_category_select(
     let mut missing_desktop_environment: bool = false;
 
     for package in package::get_all_packages() {
-        if &package.category != &category {
+        if &package.category != category {
             continue;
         }
 
@@ -667,7 +237,7 @@ fn run_category_select(
         options_display.push(format!(
             "{} ({})",
             helper::get_colored_string(
-                package.display,
+                package.name,
                 if missing_pkg_desktop_environment {
                     Color::Yellow
                 } else {
@@ -700,7 +270,7 @@ fn run_category_select(
     options_value.push(Package::new());
 
     let selection = Select::new()
-        .title(format!("Category: {}", category))
+        .title(format!("Category: {}", category.as_str()))
         .options(&options_display)
         .default_index(start_idx)
         .erase_after(true)
@@ -739,15 +309,17 @@ fn run_install_packages(
     distribution: &Distribution,
     info: &mut Info,
 ) -> Result<(), io::Error> {
-    let mut options: Vec<&str> = vec![];
-    for category in CATEGORIES {
-        options.push(category);
+    let mut options_display: Vec<&str> = vec![];
+    let mut options_value: Vec<&Category> = vec![];
+    for category in Category::iterator() {
+        options_display.push(category.as_str());
+        options_value.push(category);
     }
-    options.push("Exit");
+    options_display.push("Exit");
 
     let selection = Select::new()
         .title("Choose a Category")
-        .options(&options)
+        .options(&options_display)
         .default_index(start_idx)
         .erase_after(true)
         .run_select_index()?;
@@ -755,9 +327,9 @@ fn run_install_packages(
         return Ok(());
     }
     let selection = selection.unwrap();
-    match options[selection] {
+    match options_display[selection] {
         "Exit" => return Ok(()),
-        _ => run_category_select(options[selection], 0, false, distribution, info)?,
+        _ => run_category_select(options_value[selection], 0, false, distribution, info)?,
     }
 
     run_install_packages(selection + 1, distribution, info)
