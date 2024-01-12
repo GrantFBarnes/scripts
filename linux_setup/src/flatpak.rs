@@ -8,7 +8,7 @@ use crate::package::Package;
 use crate::Info;
 
 pub struct Flatpak {
-    pub package: &'static str,
+    pub name: &'static str,
     pub remotes: Vec<&'static str>,
 }
 
@@ -35,7 +35,7 @@ pub fn is_available(package: &Package) -> bool {
 
 pub fn is_installed(package: &Package, info: &Info) -> bool {
     if let Some(fp) = &package.flatpak {
-        let package: &str = fp.package;
+        let package: &str = fp.name;
         if info.flatpak_installed.contains(&package.to_owned()) {
             return true;
         }
@@ -53,7 +53,7 @@ pub fn install(
     setup(distribution)?;
 
     if let Some(fp) = &package.flatpak {
-        let package = fp.package;
+        let package = fp.name;
         if !info.flatpak_installed.contains(&package.to_owned()) {
             info.flatpak_installed.push(package.to_owned());
 
@@ -70,7 +70,7 @@ pub fn install(
 
 pub fn uninstall(package: &Package, info: &mut Info) -> Result<(), io::Error> {
     if let Some(fp) = &package.flatpak {
-        let package = fp.package;
+        let package = fp.name;
         if info.flatpak_installed.contains(&package.to_owned()) {
             let index: Option<usize> = info.flatpak_installed.iter().position(|x| *x == package);
             if index.is_some() {

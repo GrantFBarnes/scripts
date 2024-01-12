@@ -23,7 +23,6 @@ use crate::distribution::{
     DesktopEnvironment, Distribution, DistributionName, PackageManager, Repository,
 };
 use crate::package::Package;
-use crate::snap::Snap;
 
 #[derive(PartialEq)]
 enum InstallMethod {
@@ -513,7 +512,7 @@ fn get_install_method(package: &Package, distribution: &Distribution, info: &Inf
     if flatpak::is_installed(package, info) {
         return helper::get_colored_string("Flatpak", Color::Blue);
     }
-    if snap::is_installed(package.key, info) {
+    if snap::is_installed(package, info) {
         return helper::get_colored_string("Snap", Color::Magenta);
     }
     if other::is_installed(package.key, info) {
@@ -525,7 +524,7 @@ fn get_install_method(package: &Package, distribution: &Distribution, info: &Inf
 fn is_installed(package: &Package, distribution: &Distribution, info: &Info) -> bool {
     distribution.is_installed(package.key, info)
         || flatpak::is_installed(package, info)
-        || snap::is_installed(package.key, info)
+        || snap::is_installed(package, info)
         || other::is_installed(package.key, info)
 }
 
@@ -550,15 +549,13 @@ fn run_package_select(
         options_value.push(InstallMethod::Flatpak);
     }
 
-    if snap::is_available(package.key) {
+    if snap::is_available(package) {
         let mut display: String = String::from("Install Snap");
-        let pkg: Option<Snap> = snap::get_package(package.key);
-        if pkg.is_some() {
-            let pkg: Snap = pkg.unwrap();
-            if pkg.is_official {
+        if let Some(snp) = &package.snap {
+            if snp.is_official {
                 display.push_str(" (Official)");
             }
-            if pkg.is_classic {
+            if snp.is_classic {
                 display.push_str(" (classic)");
             }
         }
@@ -608,7 +605,7 @@ fn run_package_select(
 
     if method != &InstallMethod::Snap {
         if info.has_snap {
-            snap::uninstall(package.key, info)?;
+            snap::uninstall(package, info)?;
         }
     }
 
@@ -621,7 +618,7 @@ fn run_package_select(
     match method {
         InstallMethod::Repository => distribution.install(package.key, info)?,
         InstallMethod::Flatpak => run_flatpak_remote_select(package, distribution, info)?,
-        InstallMethod::Snap => snap::install(package.key, distribution, info)?,
+        InstallMethod::Snap => snap::install(package, distribution, info)?,
         InstallMethod::Other => other::install(package.key, info)?,
         _ => (),
     }
@@ -647,7 +644,7 @@ fn run_category_select(
 
         if !distribution.is_available(&package.key)
             && !flatpak::is_available(&package)
-            && !snap::is_available(&package.key)
+            && !snap::is_available(&package)
             && !other::is_available(&package.key)
         {
             continue;

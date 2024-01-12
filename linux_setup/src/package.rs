@@ -1,5 +1,6 @@
 use crate::distribution::DesktopEnvironment;
 use crate::flatpak::Flatpak;
+use crate::snap::Snap;
 
 pub struct Package {
     pub display: &'static str,
@@ -7,6 +8,7 @@ pub struct Package {
     pub category: &'static str,
     pub desktop_environment: Option<DesktopEnvironment>,
     pub flatpak: Option<Flatpak>,
+    pub snap: Option<Snap>,
 }
 
 impl Package {
@@ -17,6 +19,7 @@ impl Package {
             category: "",
             desktop_environment: None,
             flatpak: None,
+            snap: None,
         }
     }
 }
@@ -29,8 +32,14 @@ pub fn get_all_packages() -> Vec<Package> {
             category: "Games",
             desktop_environment: None,
             flatpak: Some(Flatpak {
-                package: "com.play0ad.zeroad",
+                name: "com.play0ad.zeroad",
                 remotes: vec!["fedora", "flathub"],
+            }),
+            snap: Some(Snap {
+                name: "0ad",
+                is_official: true,
+                is_classic: false,
+                channel: "",
             }),
         },
         Package {
@@ -39,8 +48,14 @@ pub fn get_all_packages() -> Vec<Package> {
             category: "Utilities",
             desktop_environment: Some(DesktopEnvironment::KDE),
             flatpak: Some(Flatpak {
-                package: "org.kde.ark",
+                name: "org.kde.ark",
                 remotes: vec!["fedora", "flathub"],
+            }),
+            snap: Some(Snap {
+                name: "ark",
+                is_official: true,
+                is_classic: false,
+                channel: "",
             }),
         },
         Package {
@@ -49,8 +64,14 @@ pub fn get_all_packages() -> Vec<Package> {
             category: "Multi Media",
             desktop_environment: None,
             flatpak: Some(Flatpak {
-                package: "org.blender.Blender",
+                name: "org.blender.Blender",
                 remotes: vec!["flathub"],
+            }),
+            snap: Some(Snap {
+                name: "blender",
+                is_official: true,
+                is_classic: true,
+                channel: "",
             }),
         },
         Package {
@@ -59,9 +80,10 @@ pub fn get_all_packages() -> Vec<Package> {
             category: "Applications",
             desktop_environment: Some(DesktopEnvironment::Gnome),
             flatpak: Some(Flatpak {
-                package: "org.gnome.Cheese",
+                name: "org.gnome.Cheese",
                 remotes: vec!["fedora", "flathub"],
             }),
+            snap: None,
         },
         Package {
             display: "Chromium",
@@ -69,8 +91,14 @@ pub fn get_all_packages() -> Vec<Package> {
             category: "Browsers",
             desktop_environment: None,
             flatpak: Some(Flatpak {
-                package: "org.chromium.Chromium",
+                name: "org.chromium.Chromium",
                 remotes: vec!["flathub"],
+            }),
+            snap: Some(Snap {
+                name: "chromium",
+                is_official: true,
+                is_classic: false,
+                channel: "",
             }),
         },
         Package {
@@ -79,6 +107,7 @@ pub fn get_all_packages() -> Vec<Package> {
             category: "Server",
             desktop_environment: None,
             flatpak: None,
+            snap: None,
         },
         Package {
             display: "cups - Printer Support",
@@ -86,6 +115,7 @@ pub fn get_all_packages() -> Vec<Package> {
             category: "Desktop",
             desktop_environment: None,
             flatpak: None,
+            snap: None,
         },
         Package {
             display: "cURL - Client URL",
@@ -93,6 +123,7 @@ pub fn get_all_packages() -> Vec<Package> {
             category: "Server",
             desktop_environment: None,
             flatpak: None,
+            snap: None,
         },
         Package {
             display: "dconf Editor",
@@ -100,9 +131,10 @@ pub fn get_all_packages() -> Vec<Package> {
             category: "Utilities",
             desktop_environment: Some(DesktopEnvironment::Gnome),
             flatpak: Some(Flatpak {
-                package: "ca.desrt.dconf-editor",
+                name: "ca.desrt.dconf-editor",
                 remotes: vec!["fedora", "flathub"],
             }),
+            snap: None,
         },
         Package {
             display: "Deja Dup - Backups",
@@ -110,9 +142,10 @@ pub fn get_all_packages() -> Vec<Package> {
             category: "Applications",
             desktop_environment: Some(DesktopEnvironment::Gnome),
             flatpak: Some(Flatpak {
-                package: "org.gnome.DejaDup",
+                name: "org.gnome.DejaDup",
                 remotes: vec!["flathub"],
             }),
+            snap: None,
         },
         Package {
             display: "Discord",
@@ -120,8 +153,14 @@ pub fn get_all_packages() -> Vec<Package> {
             category: "Communication",
             desktop_environment: None,
             flatpak: Some(Flatpak {
-                package: "com.discordapp.Discord",
+                name: "com.discordapp.Discord",
                 remotes: vec!["flathub"],
+            }),
+            snap: Some(Snap {
+                name: "discord",
+                is_official: false,
+                is_classic: false,
+                channel: "",
             }),
         },
         Package {
@@ -130,6 +169,12 @@ pub fn get_all_packages() -> Vec<Package> {
             category: "Server",
             desktop_environment: None,
             flatpak: None,
+            snap: Some(Snap {
+                name: "dotnet-runtime-80",
+                is_official: true,
+                is_classic: false,
+                channel: "",
+            }),
         },
         Package {
             display: "dotnet - C# SDK 8.0 LTS",
@@ -137,6 +182,12 @@ pub fn get_all_packages() -> Vec<Package> {
             category: "Server",
             desktop_environment: None,
             flatpak: None,
+            snap: Some(Snap {
+                name: "dotnet-sdk",
+                is_official: true,
+                is_classic: true,
+                channel: "8.0/stable",
+            }),
         },
         Package {
             display: "Elisa Music Player",
@@ -144,9 +195,10 @@ pub fn get_all_packages() -> Vec<Package> {
             category: "Multi Media",
             desktop_environment: Some(DesktopEnvironment::KDE),
             flatpak: Some(Flatpak {
-                package: "org.kde.elisa",
+                name: "org.kde.elisa",
                 remotes: vec!["fedora", "flathub"],
             }),
+            snap: None,
         },
         Package {
             display: "Epiphany - Gnome Web",
@@ -154,9 +206,10 @@ pub fn get_all_packages() -> Vec<Package> {
             category: "Browsers",
             desktop_environment: Some(DesktopEnvironment::Gnome),
             flatpak: Some(Flatpak {
-                package: "org.gnome.Epiphany",
+                name: "org.gnome.Epiphany",
                 remotes: vec!["fedora", "flathub"],
             }),
+            snap: None,
         },
         Package {
             display: "Evince - Document Viewer",
@@ -164,9 +217,10 @@ pub fn get_all_packages() -> Vec<Package> {
             category: "Applications",
             desktop_environment: Some(DesktopEnvironment::Gnome),
             flatpak: Some(Flatpak {
-                package: "org.gnome.Evince",
+                name: "org.gnome.Evince",
                 remotes: vec!["fedora", "flathub"],
             }),
+            snap: None,
         },
         Package {
             display: "Eye of Gnome - Image Viewer",
@@ -174,8 +228,14 @@ pub fn get_all_packages() -> Vec<Package> {
             category: "Applications",
             desktop_environment: Some(DesktopEnvironment::Gnome),
             flatpak: Some(Flatpak {
-                package: "org.gnome.eog",
+                name: "org.gnome.eog",
                 remotes: vec!["fedora", "flathub"],
+            }),
+            snap: Some(Snap {
+                name: "eog",
+                is_official: true,
+                is_classic: false,
+                channel: "",
             }),
         },
         Package {
@@ -184,9 +244,10 @@ pub fn get_all_packages() -> Vec<Package> {
             category: "Utilities",
             desktop_environment: None,
             flatpak: Some(Flatpak {
-                package: "org.fedoraproject.MediaWriter",
+                name: "org.fedoraproject.MediaWriter",
                 remotes: vec!["fedora", "flathub"],
             }),
+            snap: None,
         },
         Package {
             display: "ffmpeg - Media Codecs",
@@ -194,6 +255,7 @@ pub fn get_all_packages() -> Vec<Package> {
             category: "Desktop",
             desktop_environment: None,
             flatpak: None,
+            snap: None,
         },
         Package {
             display: "FileLight Disk Usage",
@@ -201,6 +263,7 @@ pub fn get_all_packages() -> Vec<Package> {
             category: "Utilities",
             desktop_environment: Some(DesktopEnvironment::KDE),
             flatpak: None,
+            snap: None,
         },
         Package {
             display: "Firefox",
@@ -208,8 +271,14 @@ pub fn get_all_packages() -> Vec<Package> {
             category: "Browsers",
             desktop_environment: None,
             flatpak: Some(Flatpak {
-                package: "org.mozilla.firefox",
+                name: "org.mozilla.firefox",
                 remotes: vec!["flathub"],
+            }),
+            snap: Some(Snap {
+                name: "firefox",
+                is_official: true,
+                is_classic: false,
+                channel: "",
             }),
         },
         Package {
@@ -218,6 +287,12 @@ pub fn get_all_packages() -> Vec<Package> {
             category: "Browsers",
             desktop_environment: None,
             flatpak: None,
+            snap: Some(Snap {
+                name: "firefox",
+                is_official: true,
+                is_classic: false,
+                channel: "esr-stable",
+            }),
         },
         Package {
             display: "Flutter",
@@ -225,6 +300,12 @@ pub fn get_all_packages() -> Vec<Package> {
             category: "Server",
             desktop_environment: None,
             flatpak: None,
+            snap: Some(Snap {
+                name: "flutter",
+                is_official: true,
+                is_classic: true,
+                channel: "",
+            }),
         },
         Package {
             display: "gedit",
@@ -232,8 +313,14 @@ pub fn get_all_packages() -> Vec<Package> {
             category: "Editors",
             desktop_environment: Some(DesktopEnvironment::Gnome),
             flatpak: Some(Flatpak {
-                package: "org.gnome.gedit",
+                name: "org.gnome.gedit",
                 remotes: vec!["fedora", "flathub"],
+            }),
+            snap: Some(Snap {
+                name: "gedit",
+                is_official: true,
+                is_classic: false,
+                channel: "",
             }),
         },
         Package {
@@ -242,8 +329,14 @@ pub fn get_all_packages() -> Vec<Package> {
             category: "Multi Media",
             desktop_environment: None,
             flatpak: Some(Flatpak {
-                package: "org.gimp.GIMP",
+                name: "org.gimp.GIMP",
                 remotes: vec!["fedora", "flathub"],
+            }),
+            snap: Some(Snap {
+                name: "gimp",
+                is_official: false,
+                is_classic: false,
+                channel: "",
             }),
         },
         Package {
@@ -252,6 +345,7 @@ pub fn get_all_packages() -> Vec<Package> {
             category: "Server",
             desktop_environment: None,
             flatpak: None,
+            snap: None,
         },
         Package {
             display: "Go Language",
@@ -259,6 +353,12 @@ pub fn get_all_packages() -> Vec<Package> {
             category: "Server",
             desktop_environment: None,
             flatpak: None,
+            snap: Some(Snap {
+                name: "go",
+                is_official: true,
+                is_classic: true,
+                channel: "",
+            }),
         },
         Package {
             display: "GParted",
@@ -266,6 +366,7 @@ pub fn get_all_packages() -> Vec<Package> {
             category: "Utilities",
             desktop_environment: Some(DesktopEnvironment::Gnome),
             flatpak: None,
+            snap: None,
         },
         Package {
             display: "Gnome 2048",
@@ -273,9 +374,10 @@ pub fn get_all_packages() -> Vec<Package> {
             category: "Games",
             desktop_environment: Some(DesktopEnvironment::Gnome),
             flatpak: Some(Flatpak {
-                package: "org.gnome.TwentyFortyEight",
+                name: "org.gnome.TwentyFortyEight",
                 remotes: vec!["fedora", "flathub"],
             }),
+            snap: None,
         },
         Package {
             display: "Gnome Boxes - VM Manager",
@@ -283,9 +385,10 @@ pub fn get_all_packages() -> Vec<Package> {
             category: "Applications",
             desktop_environment: Some(DesktopEnvironment::Gnome),
             flatpak: Some(Flatpak {
-                package: "org.gnome.Boxes",
+                name: "org.gnome.Boxes",
                 remotes: vec!["flathub"],
             }),
+            snap: None,
         },
         Package {
             display: "Gnome Builder",
@@ -293,9 +396,10 @@ pub fn get_all_packages() -> Vec<Package> {
             category: "Editors",
             desktop_environment: Some(DesktopEnvironment::Gnome),
             flatpak: Some(Flatpak {
-                package: "org.gnome.Builder",
+                name: "org.gnome.Builder",
                 remotes: vec!["flathub"],
             }),
+            snap: None,
         },
         Package {
             display: "Gnome Calculator",
@@ -303,8 +407,14 @@ pub fn get_all_packages() -> Vec<Package> {
             category: "Applications",
             desktop_environment: Some(DesktopEnvironment::Gnome),
             flatpak: Some(Flatpak {
-                package: "org.gnome.Calculator",
+                name: "org.gnome.Calculator",
                 remotes: vec!["fedora", "flathub"],
+            }),
+            snap: Some(Snap {
+                name: "gnome-calculator",
+                is_official: true,
+                is_classic: false,
+                channel: "",
             }),
         },
         Package {
@@ -313,9 +423,10 @@ pub fn get_all_packages() -> Vec<Package> {
             category: "Applications",
             desktop_environment: Some(DesktopEnvironment::Gnome),
             flatpak: Some(Flatpak {
-                package: "org.gnome.Calendar",
+                name: "org.gnome.Calendar",
                 remotes: vec!["fedora", "flathub"],
             }),
+            snap: None,
         },
         Package {
             display: "Gnome Chess",
@@ -323,9 +434,10 @@ pub fn get_all_packages() -> Vec<Package> {
             category: "Games",
             desktop_environment: Some(DesktopEnvironment::Gnome),
             flatpak: Some(Flatpak {
-                package: "org.gnome.Chess",
+                name: "org.gnome.Chess",
                 remotes: vec!["fedora", "flathub"],
             }),
+            snap: None,
         },
         Package {
             display: "Gnome Clocks",
@@ -333,8 +445,14 @@ pub fn get_all_packages() -> Vec<Package> {
             category: "Applications",
             desktop_environment: Some(DesktopEnvironment::Gnome),
             flatpak: Some(Flatpak {
-                package: "org.gnome.clocks",
+                name: "org.gnome.clocks",
                 remotes: vec!["fedora", "flathub"],
+            }),
+            snap: Some(Snap {
+                name: "gnome-clocks",
+                is_official: true,
+                is_classic: false,
+                channel: "",
             }),
         },
         Package {
@@ -343,9 +461,10 @@ pub fn get_all_packages() -> Vec<Package> {
             category: "Applications",
             desktop_environment: Some(DesktopEnvironment::Gnome),
             flatpak: Some(Flatpak {
-                package: "org.gnome.Connections",
+                name: "org.gnome.Connections",
                 remotes: vec!["fedora", "flathub"],
             }),
+            snap: None,
         },
         Package {
             display: "Gnome Contacts",
@@ -353,9 +472,10 @@ pub fn get_all_packages() -> Vec<Package> {
             category: "Applications",
             desktop_environment: Some(DesktopEnvironment::Gnome),
             flatpak: Some(Flatpak {
-                package: "org.gnome.Contacts",
+                name: "org.gnome.Contacts",
                 remotes: vec!["fedora", "flathub"],
             }),
+            snap: None,
         },
         Package {
             display: "Gnome Disk Usage",
@@ -363,9 +483,10 @@ pub fn get_all_packages() -> Vec<Package> {
             category: "Utilities",
             desktop_environment: Some(DesktopEnvironment::Gnome),
             flatpak: Some(Flatpak {
-                package: "org.gnome.baobab",
+                name: "org.gnome.baobab",
                 remotes: vec!["fedora", "flathub"],
             }),
+            snap: None,
         },
         Package {
             display: "Gnome Disk Utility",
@@ -373,6 +494,7 @@ pub fn get_all_packages() -> Vec<Package> {
             category: "Utilities",
             desktop_environment: Some(DesktopEnvironment::Gnome),
             flatpak: None,
+            snap: None,
         },
         Package {
             display: "Gnome Image Viewer",
@@ -380,8 +502,14 @@ pub fn get_all_packages() -> Vec<Package> {
             category: "Applications",
             desktop_environment: Some(DesktopEnvironment::Gnome),
             flatpak: Some(Flatpak {
-                package: "org.gnome.Loupe",
+                name: "org.gnome.Loupe",
                 remotes: vec!["fedora", "flathub"],
+            }),
+            snap: Some(Snap {
+                name: "loupe",
+                is_official: true,
+                is_classic: false,
+                channel: "",
             }),
         },
         Package {
@@ -390,9 +518,10 @@ pub fn get_all_packages() -> Vec<Package> {
             category: "Applications",
             desktop_environment: Some(DesktopEnvironment::Gnome),
             flatpak: Some(Flatpak {
-                package: "org.gnome.Maps",
+                name: "org.gnome.Maps",
                 remotes: vec!["fedora", "flathub"],
             }),
+            snap: None,
         },
         Package {
             display: "Gnome Mines",
@@ -400,9 +529,10 @@ pub fn get_all_packages() -> Vec<Package> {
             category: "Games",
             desktop_environment: Some(DesktopEnvironment::Gnome),
             flatpak: Some(Flatpak {
-                package: "org.gnome.Mines",
+                name: "org.gnome.Mines",
                 remotes: vec!["fedora", "flathub"],
             }),
+            snap: None,
         },
         Package {
             display: "Gnome Music",
@@ -410,9 +540,10 @@ pub fn get_all_packages() -> Vec<Package> {
             category: "Multi Media",
             desktop_environment: Some(DesktopEnvironment::Gnome),
             flatpak: Some(Flatpak {
-                package: "org.gnome.Music",
+                name: "org.gnome.Music",
                 remotes: vec!["fedora", "flathub"],
             }),
+            snap: None,
         },
         Package {
             display: "Gnome Password Safe",
@@ -420,9 +551,10 @@ pub fn get_all_packages() -> Vec<Package> {
             category: "Applications",
             desktop_environment: Some(DesktopEnvironment::Gnome),
             flatpak: Some(Flatpak {
-                package: "org.gnome.World.Secrets",
+                name: "org.gnome.World.Secrets",
                 remotes: vec!["fedora", "flathub"],
             }),
+            snap: None,
         },
         Package {
             display: "Gnome Photos",
@@ -430,9 +562,10 @@ pub fn get_all_packages() -> Vec<Package> {
             category: "Multi Media",
             desktop_environment: Some(DesktopEnvironment::Gnome),
             flatpak: Some(Flatpak {
-                package: "org.gnome.Photos",
+                name: "org.gnome.Photos",
                 remotes: vec!["fedora", "flathub"],
             }),
+            snap: None,
         },
         Package {
             display: "Gnome Shell Extension",
@@ -440,6 +573,7 @@ pub fn get_all_packages() -> Vec<Package> {
             category: "Utilities",
             desktop_environment: Some(DesktopEnvironment::Gnome),
             flatpak: None,
+            snap: None,
         },
         Package {
             display: "Gnome Shell Extension Manager",
@@ -447,6 +581,7 @@ pub fn get_all_packages() -> Vec<Package> {
             category: "Utilities",
             desktop_environment: Some(DesktopEnvironment::Gnome),
             flatpak: None,
+            snap: None,
         },
         Package {
             display: "Gnome Software",
@@ -454,6 +589,7 @@ pub fn get_all_packages() -> Vec<Package> {
             category: "Software",
             desktop_environment: Some(DesktopEnvironment::Gnome),
             flatpak: None,
+            snap: None,
         },
         Package {
             display: "Gnome Solitaire",
@@ -461,9 +597,10 @@ pub fn get_all_packages() -> Vec<Package> {
             category: "Games",
             desktop_environment: Some(DesktopEnvironment::Gnome),
             flatpak: Some(Flatpak {
-                package: "org.gnome.Aisleriot",
+                name: "org.gnome.Aisleriot",
                 remotes: vec!["fedora", "flathub"],
             }),
+            snap: None,
         },
         Package {
             display: "Gnome Sound Recorder",
@@ -471,9 +608,10 @@ pub fn get_all_packages() -> Vec<Package> {
             category: "Multi Media",
             desktop_environment: Some(DesktopEnvironment::Gnome),
             flatpak: Some(Flatpak {
-                package: "org.gnome.SoundRecorder",
+                name: "org.gnome.SoundRecorder",
                 remotes: vec!["fedora", "flathub"],
             }),
+            snap: None,
         },
         Package {
             display: "Gnome Sudoku",
@@ -481,8 +619,14 @@ pub fn get_all_packages() -> Vec<Package> {
             category: "Games",
             desktop_environment: Some(DesktopEnvironment::Gnome),
             flatpak: Some(Flatpak {
-                package: "org.gnome.Sudoku",
+                name: "org.gnome.Sudoku",
                 remotes: vec!["fedora", "flathub"],
+            }),
+            snap: Some(Snap {
+                name: "gnome-sudoku",
+                is_official: true,
+                is_classic: false,
+                channel: "",
             }),
         },
         Package {
@@ -491,6 +635,7 @@ pub fn get_all_packages() -> Vec<Package> {
             category: "Utilities",
             desktop_environment: Some(DesktopEnvironment::Gnome),
             flatpak: None,
+            snap: None,
         },
         Package {
             display: "Gnome Tetris",
@@ -498,8 +643,14 @@ pub fn get_all_packages() -> Vec<Package> {
             category: "Games",
             desktop_environment: Some(DesktopEnvironment::Gnome),
             flatpak: Some(Flatpak {
-                package: "org.gnome.Quadrapassel",
+                name: "org.gnome.Quadrapassel",
                 remotes: vec!["fedora", "flathub"],
+            }),
+            snap: Some(Snap {
+                name: "quadrapassel",
+                is_official: true,
+                is_classic: false,
+                channel: "",
             }),
         },
         Package {
@@ -508,9 +659,10 @@ pub fn get_all_packages() -> Vec<Package> {
             category: "Editors",
             desktop_environment: Some(DesktopEnvironment::Gnome),
             flatpak: Some(Flatpak {
-                package: "org.gnome.TextEditor",
+                name: "org.gnome.TextEditor",
                 remotes: vec!["fedora", "flathub"],
             }),
+            snap: None,
         },
         Package {
             display: "Gnome Tweaks",
@@ -518,6 +670,7 @@ pub fn get_all_packages() -> Vec<Package> {
             category: "Utilities",
             desktop_environment: Some(DesktopEnvironment::Gnome),
             flatpak: None,
+            snap: None,
         },
         Package {
             display: "Gnome Weather",
@@ -525,9 +678,10 @@ pub fn get_all_packages() -> Vec<Package> {
             category: "Applications",
             desktop_environment: Some(DesktopEnvironment::Gnome),
             flatpak: Some(Flatpak {
-                package: "org.gnome.Weather",
+                name: "org.gnome.Weather",
                 remotes: vec!["fedora", "flathub"],
             }),
+            snap: None,
         },
         Package {
             display: "GNU Cash - Accounting",
@@ -535,9 +689,10 @@ pub fn get_all_packages() -> Vec<Package> {
             category: "Applications",
             desktop_environment: None,
             flatpak: Some(Flatpak {
-                package: "org.gnucash.GnuCash",
+                name: "org.gnucash.GnuCash",
                 remotes: vec!["fedora", "flathub"],
             }),
+            snap: None,
         },
         Package {
             display: "Gwenview - Image Viewer",
@@ -545,8 +700,14 @@ pub fn get_all_packages() -> Vec<Package> {
             category: "Applications",
             desktop_environment: Some(DesktopEnvironment::KDE),
             flatpak: Some(Flatpak {
-                package: "org.kde.gwenview",
+                name: "org.kde.gwenview",
                 remotes: vec!["fedora", "flathub"],
+            }),
+            snap: Some(Snap {
+                name: "gwenview",
+                is_official: true,
+                is_classic: false,
+                channel: "",
             }),
         },
         Package {
@@ -555,6 +716,7 @@ pub fn get_all_packages() -> Vec<Package> {
             category: "Server",
             desktop_environment: None,
             flatpak: None,
+            snap: None,
         },
         Package {
             display: "IceCat - GNU Browser",
@@ -562,6 +724,7 @@ pub fn get_all_packages() -> Vec<Package> {
             category: "Browsers",
             desktop_environment: None,
             flatpak: None,
+            snap: None,
         },
         Package {
             display: "imagemagick",
@@ -569,6 +732,7 @@ pub fn get_all_packages() -> Vec<Package> {
             category: "Desktop",
             desktop_environment: None,
             flatpak: None,
+            snap: None,
         },
         Package {
             display: "Intellij",
@@ -576,8 +740,14 @@ pub fn get_all_packages() -> Vec<Package> {
             category: "Editors",
             desktop_environment: None,
             flatpak: Some(Flatpak {
-                package: "com.jetbrains.IntelliJ-IDEA-Community",
+                name: "com.jetbrains.IntelliJ-IDEA-Community",
                 remotes: vec!["flathub"],
+            }),
+            snap: Some(Snap {
+                name: "intellij-idea-community",
+                is_official: true,
+                is_classic: true,
+                channel: "",
             }),
         },
         Package {
@@ -586,6 +756,12 @@ pub fn get_all_packages() -> Vec<Package> {
             category: "Editors",
             desktop_environment: Some(DesktopEnvironment::KDE),
             flatpak: None,
+            snap: Some(Snap {
+                name: "kate",
+                is_official: true,
+                is_classic: true,
+                channel: "",
+            }),
         },
         Package {
             display: "KCalc - Calculator",
@@ -593,8 +769,14 @@ pub fn get_all_packages() -> Vec<Package> {
             category: "Applications",
             desktop_environment: Some(DesktopEnvironment::KDE),
             flatpak: Some(Flatpak {
-                package: "org.kde.kcalc",
+                name: "org.kde.kcalc",
                 remotes: vec!["fedora", "flathub"],
+            }),
+            snap: Some(Snap {
+                name: "kcalc",
+                is_official: true,
+                is_classic: false,
+                channel: "",
             }),
         },
         Package {
@@ -603,6 +785,12 @@ pub fn get_all_packages() -> Vec<Package> {
             category: "Games",
             desktop_environment: Some(DesktopEnvironment::KDE),
             flatpak: None,
+            snap: Some(Snap {
+                name: "knights",
+                is_official: true,
+                is_classic: false,
+                channel: "",
+            }),
         },
         Package {
             display: "KDE Mines",
@@ -610,6 +798,12 @@ pub fn get_all_packages() -> Vec<Package> {
             category: "Games",
             desktop_environment: Some(DesktopEnvironment::KDE),
             flatpak: None,
+            snap: Some(Snap {
+                name: "kmines",
+                is_official: true,
+                is_classic: false,
+                channel: "",
+            }),
         },
         Package {
             display: "KDE Sudoku",
@@ -617,8 +811,14 @@ pub fn get_all_packages() -> Vec<Package> {
             category: "Games",
             desktop_environment: Some(DesktopEnvironment::KDE),
             flatpak: Some(Flatpak {
-                package: "org.kde.ksudoku",
+                name: "org.kde.ksudoku",
                 remotes: vec!["fedora", "flathub"],
+            }),
+            snap: Some(Snap {
+                name: "ksudoku",
+                is_official: true,
+                is_classic: false,
+                channel: "",
             }),
         },
         Package {
@@ -627,8 +827,14 @@ pub fn get_all_packages() -> Vec<Package> {
             category: "Multi Media",
             desktop_environment: Some(DesktopEnvironment::KDE),
             flatpak: Some(Flatpak {
-                package: "org.kde.kdenlive",
+                name: "org.kde.kdenlive",
                 remotes: vec!["flathub"],
+            }),
+            snap: Some(Snap {
+                name: "kdenlive",
+                is_official: true,
+                is_classic: false,
+                channel: "",
             }),
         },
         Package {
@@ -637,8 +843,14 @@ pub fn get_all_packages() -> Vec<Package> {
             category: "Editors",
             desktop_environment: Some(DesktopEnvironment::KDE),
             flatpak: Some(Flatpak {
-                package: "org.kde.kdevelop",
+                name: "org.kde.kdevelop",
                 remotes: vec!["flathub"],
+            }),
+            snap: Some(Snap {
+                name: "kdevelop",
+                is_official: true,
+                is_classic: true,
+                channel: "",
             }),
         },
         Package {
@@ -647,6 +859,7 @@ pub fn get_all_packages() -> Vec<Package> {
             category: "Editors",
             desktop_environment: Some(DesktopEnvironment::KDE),
             flatpak: None,
+            snap: None,
         },
         Package {
             display: "KSysGuard",
@@ -654,6 +867,7 @@ pub fn get_all_packages() -> Vec<Package> {
             category: "Utilities",
             desktop_environment: Some(DesktopEnvironment::KDE),
             flatpak: None,
+            snap: None,
         },
         Package {
             display: "KWrite",
@@ -661,9 +875,10 @@ pub fn get_all_packages() -> Vec<Package> {
             category: "Editors",
             desktop_environment: Some(DesktopEnvironment::KDE),
             flatpak: Some(Flatpak {
-                package: "org.kde.kwrite",
+                name: "org.kde.kwrite",
                 remotes: vec!["fedora", "flathub"],
             }),
+            snap: None,
         },
         Package {
             display: "LaTex - Compiler",
@@ -671,6 +886,7 @@ pub fn get_all_packages() -> Vec<Package> {
             category: "Desktop",
             desktop_environment: None,
             flatpak: None,
+            snap: None,
         },
         Package {
             display: "LibreOffice",
@@ -678,8 +894,14 @@ pub fn get_all_packages() -> Vec<Package> {
             category: "Editors",
             desktop_environment: None,
             flatpak: Some(Flatpak {
-                package: "org.libreoffice.LibreOffice",
+                name: "org.libreoffice.LibreOffice",
                 remotes: vec!["fedora", "flathub"],
+            }),
+            snap: Some(Snap {
+                name: "libreoffice",
+                is_official: true,
+                is_classic: false,
+                channel: "",
             }),
         },
         Package {
@@ -688,6 +910,7 @@ pub fn get_all_packages() -> Vec<Package> {
             category: "Server",
             desktop_environment: None,
             flatpak: None,
+            snap: None,
         },
         Package {
             display: "MP3 Metadata Editor",
@@ -695,6 +918,7 @@ pub fn get_all_packages() -> Vec<Package> {
             category: "Desktop",
             desktop_environment: None,
             flatpak: None,
+            snap: None,
         },
         Package {
             display: "neovim - Text Editor",
@@ -702,6 +926,7 @@ pub fn get_all_packages() -> Vec<Package> {
             category: "Server",
             desktop_environment: None,
             flatpak: None,
+            snap: None,
         },
         Package {
             display: "nano - Text Editor",
@@ -709,6 +934,7 @@ pub fn get_all_packages() -> Vec<Package> {
             category: "Server",
             desktop_environment: None,
             flatpak: None,
+            snap: None,
         },
         Package {
             display: "Node.js - JavaScript RE",
@@ -716,6 +942,12 @@ pub fn get_all_packages() -> Vec<Package> {
             category: "Server",
             desktop_environment: None,
             flatpak: None,
+            snap: Some(Snap {
+                name: "node",
+                is_official: true,
+                is_classic: true,
+                channel: "18/stable",
+            }),
         },
         Package {
             display: "Okular - Document Viewer",
@@ -723,8 +955,14 @@ pub fn get_all_packages() -> Vec<Package> {
             category: "Applications",
             desktop_environment: Some(DesktopEnvironment::KDE),
             flatpak: Some(Flatpak {
-                package: "org.kde.okular",
+                name: "org.kde.okular",
                 remotes: vec!["fedora", "flathub"],
+            }),
+            snap: Some(Snap {
+                name: "okular",
+                is_official: true,
+                is_classic: false,
+                channel: "",
             }),
         },
         Package {
@@ -733,6 +971,7 @@ pub fn get_all_packages() -> Vec<Package> {
             category: "Software",
             desktop_environment: Some(DesktopEnvironment::KDE),
             flatpak: None,
+            snap: None,
         },
         Package {
             display: "Plasma System Monitor",
@@ -740,6 +979,7 @@ pub fn get_all_packages() -> Vec<Package> {
             category: "Utilities",
             desktop_environment: Some(DesktopEnvironment::KDE),
             flatpak: None,
+            snap: None,
         },
         Package {
             display: "Podman - Containers",
@@ -747,6 +987,7 @@ pub fn get_all_packages() -> Vec<Package> {
             category: "Server",
             desktop_environment: None,
             flatpak: None,
+            snap: None,
         },
         Package {
             display: "Pycharm",
@@ -754,8 +995,14 @@ pub fn get_all_packages() -> Vec<Package> {
             category: "Editors",
             desktop_environment: None,
             flatpak: Some(Flatpak {
-                package: "com.jetbrains.PyCharm-Community",
+                name: "com.jetbrains.PyCharm-Community",
                 remotes: vec!["flathub"],
+            }),
+            snap: Some(Snap {
+                name: "pycharm-community",
+                is_official: true,
+                is_classic: true,
+                channel: "",
             }),
         },
         Package {
@@ -764,6 +1011,7 @@ pub fn get_all_packages() -> Vec<Package> {
             category: "Desktop",
             desktop_environment: None,
             flatpak: None,
+            snap: None,
         },
         Package {
             display: "RhythmBox",
@@ -771,9 +1019,10 @@ pub fn get_all_packages() -> Vec<Package> {
             category: "Multi Media",
             desktop_environment: Some(DesktopEnvironment::Gnome),
             flatpak: Some(Flatpak {
-                package: "org.gnome.Rhythmbox3",
+                name: "org.gnome.Rhythmbox3",
                 remotes: vec!["fedora", "flathub"],
             }),
+            snap: None,
         },
         Package {
             display: "Rust Language",
@@ -781,6 +1030,7 @@ pub fn get_all_packages() -> Vec<Package> {
             category: "Server",
             desktop_environment: None,
             flatpak: None,
+            snap: None,
         },
         Package {
             display: "Shotwell",
@@ -788,9 +1038,10 @@ pub fn get_all_packages() -> Vec<Package> {
             category: "Multi Media",
             desktop_environment: Some(DesktopEnvironment::Gnome),
             flatpak: Some(Flatpak {
-                package: "org.gnome.Shotwell",
+                name: "org.gnome.Shotwell",
                 remotes: vec!["fedora", "flathub"],
             }),
+            snap: None,
         },
         Package {
             display: "Simple Scan",
@@ -798,6 +1049,7 @@ pub fn get_all_packages() -> Vec<Package> {
             category: "Utilities",
             desktop_environment: None,
             flatpak: None,
+            snap: None,
         },
         Package {
             display: "Snap",
@@ -805,6 +1057,7 @@ pub fn get_all_packages() -> Vec<Package> {
             category: "Server",
             desktop_environment: None,
             flatpak: None,
+            snap: None,
         },
         Package {
             display: "Snap Store",
@@ -812,6 +1065,12 @@ pub fn get_all_packages() -> Vec<Package> {
             category: "Software",
             desktop_environment: None,
             flatpak: None,
+            snap: Some(Snap {
+                name: "snap-store",
+                is_official: true,
+                is_classic: false,
+                channel: "",
+            }),
         },
         Package {
             display: "Spectacle Screenshot",
@@ -819,6 +1078,7 @@ pub fn get_all_packages() -> Vec<Package> {
             category: "Utilities",
             desktop_environment: Some(DesktopEnvironment::KDE),
             flatpak: None,
+            snap: None,
         },
         Package {
             display: "SSH - Secure Shell Protocol",
@@ -826,6 +1086,7 @@ pub fn get_all_packages() -> Vec<Package> {
             category: "Server",
             desktop_environment: None,
             flatpak: None,
+            snap: None,
         },
         Package {
             display: "Steam",
@@ -833,8 +1094,14 @@ pub fn get_all_packages() -> Vec<Package> {
             category: "Games",
             desktop_environment: None,
             flatpak: Some(Flatpak {
-                package: "com.valvesoftware.Steam",
+                name: "com.valvesoftware.Steam",
                 remotes: vec!["flathub"],
+            }),
+            snap: Some(Snap {
+                name: "steam",
+                is_official: true,
+                is_classic: false,
+                channel: "",
             }),
         },
         Package {
@@ -843,8 +1110,14 @@ pub fn get_all_packages() -> Vec<Package> {
             category: "Games",
             desktop_environment: None,
             flatpak: Some(Flatpak {
-                package: "net.supertuxkart.SuperTuxKart",
+                name: "net.supertuxkart.SuperTuxKart",
                 remotes: vec!["fedora", "flathub"],
+            }),
+            snap: Some(Snap {
+                name: "supertuxkart",
+                is_official: false,
+                is_classic: false,
+                channel: "",
             }),
         },
         Package {
@@ -853,8 +1126,14 @@ pub fn get_all_packages() -> Vec<Package> {
             category: "Communication",
             desktop_environment: None,
             flatpak: Some(Flatpak {
-                package: "org.mozilla.Thunderbird",
+                name: "org.mozilla.Thunderbird",
                 remotes: vec!["fedora", "flathub"],
+            }),
+            snap: Some(Snap {
+                name: "thunderbird",
+                is_official: true,
+                is_classic: false,
+                channel: "",
             }),
         },
         Package {
@@ -863,9 +1142,10 @@ pub fn get_all_packages() -> Vec<Package> {
             category: "Browsers",
             desktop_environment: None,
             flatpak: Some(Flatpak {
-                package: "com.github.micahflee.torbrowser-launcher",
+                name: "com.github.micahflee.torbrowser-launcher",
                 remotes: vec!["flathub"],
             }),
+            snap: None,
         },
         Package {
             display: "Totem Video Player",
@@ -873,9 +1153,10 @@ pub fn get_all_packages() -> Vec<Package> {
             category: "Multi Media",
             desktop_environment: Some(DesktopEnvironment::Gnome),
             flatpak: Some(Flatpak {
-                package: "org.gnome.Totem",
+                name: "org.gnome.Totem",
                 remotes: vec!["fedora", "flathub"],
             }),
+            snap: None,
         },
         Package {
             display: "Transmission (GTK) - Torrent",
@@ -883,9 +1164,10 @@ pub fn get_all_packages() -> Vec<Package> {
             category: "Applications",
             desktop_environment: Some(DesktopEnvironment::Gnome),
             flatpak: Some(Flatpak {
-                package: "com.transmissionbt.Transmission",
+                name: "com.transmissionbt.Transmission",
                 remotes: vec!["fedora", "flathub"],
             }),
+            snap: None,
         },
         Package {
             display: "Transmission (QT) - Torrent",
@@ -893,9 +1175,10 @@ pub fn get_all_packages() -> Vec<Package> {
             category: "Applications",
             desktop_environment: Some(DesktopEnvironment::KDE),
             flatpak: Some(Flatpak {
-                package: "com.transmissionbt.Transmission",
+                name: "com.transmissionbt.Transmission",
                 remotes: vec!["fedora", "flathub"],
             }),
+            snap: None,
         },
         Package {
             display: "Vietnamese Keyboard",
@@ -903,6 +1186,7 @@ pub fn get_all_packages() -> Vec<Package> {
             category: "Desktop",
             desktop_environment: None,
             flatpak: None,
+            snap: None,
         },
         Package {
             display: "vim - Text Editor",
@@ -910,6 +1194,7 @@ pub fn get_all_packages() -> Vec<Package> {
             category: "Server",
             desktop_environment: None,
             flatpak: None,
+            snap: None,
         },
         Package {
             display: "Virt Manager",
@@ -917,6 +1202,7 @@ pub fn get_all_packages() -> Vec<Package> {
             category: "Applications",
             desktop_environment: None,
             flatpak: None,
+            snap: None,
         },
         Package {
             display: "VLC",
@@ -924,8 +1210,14 @@ pub fn get_all_packages() -> Vec<Package> {
             category: "Multi Media",
             desktop_environment: None,
             flatpak: Some(Flatpak {
-                package: "org.videolan.VLC",
+                name: "org.videolan.VLC",
                 remotes: vec!["flathub"],
+            }),
+            snap: Some(Snap {
+                name: "vlc",
+                is_official: true,
+                is_classic: false,
+                channel: "",
             }),
         },
         Package {
@@ -934,8 +1226,14 @@ pub fn get_all_packages() -> Vec<Package> {
             category: "Editors",
             desktop_environment: None,
             flatpak: Some(Flatpak {
-                package: "com.visualstudio.code",
+                name: "com.visualstudio.code",
                 remotes: vec!["flathub"],
+            }),
+            snap: Some(Snap {
+                name: "code",
+                is_official: true,
+                is_classic: true,
+                channel: "",
             }),
         },
         Package {
@@ -944,8 +1242,14 @@ pub fn get_all_packages() -> Vec<Package> {
             category: "Games",
             desktop_environment: None,
             flatpak: Some(Flatpak {
-                package: "org.xonotic.Xonotic",
+                name: "org.xonotic.Xonotic",
                 remotes: vec!["flathub"],
+            }),
+            snap: Some(Snap {
+                name: "xonotic",
+                is_official: false,
+                is_classic: false,
+                channel: "",
             }),
         },
         Package {
@@ -954,6 +1258,7 @@ pub fn get_all_packages() -> Vec<Package> {
             category: "Desktop",
             desktop_environment: None,
             flatpak: None,
+            snap: None,
         },
     ])
 }
