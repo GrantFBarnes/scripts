@@ -7,6 +7,7 @@ use std::process::{Command, Stdio};
 use std::str::{Split, SplitWhitespace};
 
 use crate::helper;
+use crate::package::Package;
 use crate::Info;
 
 #[derive(PartialEq)]
@@ -23,12 +24,11 @@ pub enum DistributionName {
     Debian,
     Fedora,
     Mint,
-    PopOS,
     SilverBlue,
     Ubuntu,
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Hash)]
 pub enum Repository {
     Arch,
     Debian,
@@ -70,11 +70,11 @@ impl Distribution {
             {
                 match self.repository {
                     Repository::Fedora => {
-                        self.install("https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-38.noarch.rpm",info)?;
+                        self.install_package("https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-38.noarch.rpm",info)?;
                     }
                     Repository::RedHat => {
-                        self.install("https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm",info)?;
-                        self.install("https://download1.rpmfusion.org/free/el/rpmfusion-free-release-9.noarch.rpm",info)?;
+                        self.install_package("https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm",info)?;
+                        self.install_package("https://download1.rpmfusion.org/free/el/rpmfusion-free-release-9.noarch.rpm",info)?;
                         Operation::new()
                             .command("sudo dnf config-manager --set-enabled crb")
                             .run()?;
@@ -88,10 +88,10 @@ impl Distribution {
                 {
                     match self.repository {
                         Repository::Fedora => {
-                            self.install("https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-38.noarch.rpm",info)?;
+                            self.install_package("https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-38.noarch.rpm",info)?;
                         }
                         Repository::RedHat => {
-                            self.install("https://download1.rpmfusion.org/nonfree/el/rpmfusion-nonfree-release-9.noarch.rpm",info)?;
+                            self.install_package("https://download1.rpmfusion.org/nonfree/el/rpmfusion-nonfree-release-9.noarch.rpm",info)?;
                         }
                         _ => (),
                     }
@@ -104,539 +104,14 @@ impl Distribution {
         Ok(())
     }
 
-    fn get_packages<'a>(&self, package: &'a str) -> Option<Vec<&'a str>> {
-        match package {
-            "0ad" => {
-                if self.repository == Repository::RedHat {
-                    return None;
-                }
-                Option::from(vec!["0ad"])
-            }
-            "aisleriot" => {
-                if self.repository == Repository::RedHat {
-                    return None;
-                }
-                Option::from(vec!["aisleriot"])
-            }
-            "ark" => Option::from(vec!["ark"]),
-            "baobab" => Option::from(vec!["baobab"]),
-            "blender" => {
-                if self.repository == Repository::RedHat {
-                    return None;
-                }
-                Option::from(vec!["blender"])
-            }
-            "cheese" => Option::from(vec!["cheese"]),
-            "chromium" => {
-                if self.name == DistributionName::Ubuntu || self.repository == Repository::RedHat {
-                    return None;
-                }
-                return Option::from(vec!["chromium"]);
-            }
-            "cockpit" => Option::from(vec!["cockpit"]),
-            "code" => {
-                if self.package_manager == PackageManager::DNF {
-                    return Option::from(vec!["code"]);
-                }
-                if self.package_manager == PackageManager::PACMAN {
-                    return Option::from(vec!["code"]);
-                }
-                if self.repository == Repository::Debian {
-                    return Option::from(vec!["code"]);
-                }
-                None
-            }
-            "cups" => Option::from(vec!["cups"]),
-            "curl" => Option::from(vec!["curl"]),
-            "dconf-editor" => Option::from(vec!["dconf-editor"]),
-            "deja-dup" => {
-                if self.repository == Repository::RedHat {
-                    return None;
-                }
-                Option::from(vec!["deja-dup"])
-            }
-            "discord" => {
-                if self.package_manager == PackageManager::PACMAN {
-                    return Option::from(vec!["discord"]);
-                }
-                None
-            }
-            "dotnet-runtime-8" => Option::from(vec!["dotnet-runtime-8.0"]),
-            "dotnet-sdk-8" => Option::from(vec!["dotnet-sdk-8.0"]),
-            "elisa" => {
-                if self.repository == Repository::RedHat {
-                    return None;
-                }
-                Option::from(vec!["elisa"])
-            }
-            "eog" => Option::from(vec!["eog"]),
-            "epiphany" => {
-                if self.repository == Repository::RedHat {
-                    return None;
-                }
-                if self.package_manager == PackageManager::APT {
-                    return Option::from(vec!["epiphany-browser"]);
-                }
-                return Option::from(vec!["epiphany"]);
-            }
-            "evince" => Option::from(vec!["evince"]),
-            "ffmpeg" => Option::from(vec!["ffmpeg"]),
-            "filelight" => Option::from(vec!["filelight"]),
-            "firefox" => {
-                if self.name == DistributionName::Ubuntu
-                    || self.repository == Repository::Debian
-                    || self.repository == Repository::RedHat
-                {
-                    return None;
-                }
-                return Option::from(vec!["firefox"]);
-            }
-            "firefox-esr" => {
-                if self.repository == Repository::RedHat {
-                    return Option::from(vec!["firefox"]);
-                }
-                if self.repository == Repository::Debian {
-                    return Option::from(vec!["firefox-esr"]);
-                }
-                None
-            }
-            "flatpak" => Option::from(vec!["flatpak"]),
-            "gedit" => Option::from(vec!["gedit"]),
-            "gimp" => Option::from(vec!["gimp"]),
-            "git" => Option::from(vec!["git"]),
-            "golang" => {
-                let mut packages = vec![];
-                if self.package_manager == PackageManager::PACMAN {
-                    packages.push("go");
-                } else {
-                    packages.push("golang");
-                }
-
-                if self.package_manager == PackageManager::APT
-                    || self.package_manager == PackageManager::PACMAN
-                {
-                    packages.push("gopls");
-                } else if self.repository == Repository::Fedora {
-                    packages.push("golang-x-tools-gopls");
-                }
-
-                return Option::from(packages);
-            }
-            "gparted" => Option::from(vec!["gparted"]),
-            "gnome-2048" => {
-                if self.repository == Repository::RedHat {
-                    return None;
-                }
-                Option::from(vec!["gnome-2048"])
-            }
-            "gnome-boxes" => {
-                if self.repository == Repository::RedHat {
-                    return None;
-                }
-                Option::from(vec!["gnome-boxes"])
-            }
-            "gnome-builder" => {
-                if self.repository == Repository::RedHat {
-                    return None;
-                }
-                Option::from(vec!["gnome-builder"])
-            }
-            "gnome-calculator" => Option::from(vec!["gnome-calculator"]),
-            "gnome-calendar" => {
-                if self.repository == Repository::RedHat {
-                    return None;
-                }
-                Option::from(vec!["gnome-calendar"])
-            }
-            "gnome-chess" => {
-                if self.repository == Repository::RedHat {
-                    return None;
-                }
-                Option::from(vec!["gnome-chess"])
-            }
-            "gnome-clocks" => {
-                if self.repository == Repository::RedHat {
-                    return None;
-                }
-                Option::from(vec!["gnome-clocks"])
-            }
-            "gnome-connections" => Option::from(vec!["gnome-connections"]),
-            "gnome-contacts" => {
-                if self.repository == Repository::RedHat {
-                    return None;
-                }
-                Option::from(vec!["gnome-contacts"])
-            }
-            "gnome-disk-utility" => Option::from(vec!["gnome-disk-utility"]),
-            "gnome-maps" => {
-                if self.repository == Repository::RedHat {
-                    return None;
-                }
-                Option::from(vec!["gnome-maps"])
-            }
-            "gnome-mines" => {
-                if self.repository == Repository::RedHat {
-                    return None;
-                }
-                Option::from(vec!["gnome-mines"])
-            }
-            "gnome-music" => {
-                if self.repository == Repository::RedHat {
-                    return None;
-                }
-                Option::from(vec!["gnome-music"])
-            }
-            "gnome-passwordsafe" => {
-                if self.repository == Repository::RedHat {
-                    return None;
-                }
-                if self.repository == Repository::Fedora {
-                    return Option::from(vec!["secrets"]);
-                }
-                Option::from(vec!["gnome-passwordsafe"])
-            }
-            "gnome-photos" => Option::from(vec!["gnome-photos"]),
-            "gnome-shell-extension-manager" => {
-                if self.package_manager == PackageManager::APT {
-                    return Option::from(vec!["gnome-shell-extension-manager"]);
-                }
-                None
-            }
-            "gnome-shell-extensions" => {
-                if self.package_manager == PackageManager::DNF {
-                    return Option::from(vec!["gnome-extensions-app"]);
-                }
-                Option::from(vec!["gnome-shell-extensions"])
-            }
-            "gnome-software" => {
-                if self.name == DistributionName::PopOS {
-                    return None;
-                }
-                Option::from(vec!["gnome-software"])
-            }
-            "gnome-sound-recorder" => {
-                if self.repository == Repository::RedHat {
-                    return None;
-                }
-                Option::from(vec!["gnome-sound-recorder"])
-            }
-            "gnome-sudoku" => {
-                if self.repository == Repository::RedHat {
-                    return None;
-                }
-                Option::from(vec!["gnome-sudoku"])
-            }
-            "gnome-system-monitor" => Option::from(vec!["gnome-system-monitor"]),
-            "gnome-text-editor" => {
-                if self.repository == Repository::RedHat {
-                    return None;
-                }
-                Option::from(vec!["gnome-text-editor"])
-            }
-            "gnome-tweaks" => Option::from(vec!["gnome-tweaks"]),
-            "gnome-weather" => {
-                if self.repository == Repository::RedHat {
-                    return None;
-                }
-                Option::from(vec!["gnome-weather"])
-            }
-            "gnucash" => {
-                if self.repository == Repository::RedHat {
-                    return None;
-                }
-                Option::from(vec!["gnucash"])
-            }
-            "gwenview" => {
-                if self.repository == Repository::RedHat {
-                    return None;
-                }
-                Option::from(vec!["gwenview"])
-            }
-            "htop" => Option::from(vec!["htop"]),
-            "ibus-unikey" => {
-                if self.repository == Repository::RedHat {
-                    return Option::from(vec!["https://rpmfind.net/linux/fedora/linux/releases/34/Everything/x86_64/os/Packages/i/ibus-unikey-0.6.1-26.20190311git46b5b9e.fc34.x86_64.rpm"]);
-                }
-                Option::from(vec!["ibus-unikey"])
-            }
-            "icecat" => {
-                if self.repository == Repository::Fedora {
-                    return Option::from(vec!["icecat"]);
-                }
-                None
-            }
-            "id3v2" => {
-                if self.repository == Repository::RedHat {
-                    return None;
-                }
-                Option::from(vec!["id3v2"])
-            }
-            "imagemagick" => {
-                if self.package_manager == PackageManager::DNF {
-                    return Option::from(vec!["ImageMagick"]);
-                }
-                Option::from(vec!["imagemagick"])
-            }
-            "intellij" => {
-                if self.package_manager == PackageManager::PACMAN {
-                    return Option::from(vec!["intellij-idea-community-edition"]);
-                }
-                None
-            }
-            "kate" => Option::from(vec!["kate"]),
-            "kcalc" => Option::from(vec!["kcalc"]),
-            "kdenlive" => {
-                if self.repository == Repository::RedHat {
-                    return None;
-                }
-                Option::from(vec!["kdenlive"])
-            }
-            "kdevelop" => {
-                if self.repository == Repository::RedHat {
-                    return None;
-                }
-                Option::from(vec!["kdevelop"])
-            }
-            "kile" => {
-                if self.repository == Repository::RedHat {
-                    return None;
-                }
-                Option::from(vec!["kile"])
-            }
-            "kmines" => Option::from(vec!["kmines"]),
-            "knights" => {
-                if self.repository == Repository::RedHat {
-                    return None;
-                }
-                Option::from(vec!["knights"])
-            }
-            "ksudoku" => Option::from(vec!["ksudoku"]),
-            "ksysguard" => Option::from(vec!["ksysguard"]),
-            "kwrite" => Option::from(vec!["kwrite"]),
-            "latex" => {
-                if self.package_manager == PackageManager::APT {
-                    return Option::from(vec!["texlive-latex-base", "texlive-latex-extra"]);
-                }
-                if self.package_manager == PackageManager::DNF {
-                    if self.repository == Repository::Fedora {
-                        return Option::from(vec![
-                            "texlive-latex",
-                            "texlive-collection-latexextra",
-                        ]);
-                    }
-                    return Option::from(vec!["texlive-latex"]);
-                }
-                if self.package_manager == PackageManager::PACMAN {
-                    return Option::from(vec!["texlive-core", "texlive-latexextra"]);
-                }
-                None
-            }
-            "libreoffice" => {
-                if self.package_manager == PackageManager::PACMAN {
-                    return Option::from(vec!["libreoffice-fresh"]);
-                }
-                Option::from(vec![
-                    "libreoffice-writer",
-                    "libreoffice-calc",
-                    "libreoffice-impress",
-                    "libreoffice-draw",
-                    "libreoffice-base",
-                ])
-            }
-            "loupe" => {
-                if self.repository == Repository::Fedora {
-                    return Option::from(vec!["loupe"]);
-                }
-                None
-            }
-            "mariadb" => {
-                if self.package_manager == PackageManager::PACMAN {
-                    return Option::from(vec!["mariadb"]);
-                }
-                Option::from(vec!["mariadb-server"])
-            }
-            "mediawriter" => {
-                if self.repository == Repository::Fedora {
-                    return Option::from(vec!["mediawriter"]);
-                }
-                None
-            }
-            "nano" => Option::from(vec!["nano"]),
-            "node" => Option::from(vec!["nodejs", "npm"]),
-            "okular" => {
-                if self.repository == Repository::RedHat {
-                    return None;
-                }
-                Option::from(vec!["okular"])
-            }
-            "plasma-discover" => {
-                if self.repository == Repository::RedHat {
-                    return None;
-                }
-                if self.package_manager == PackageManager::PACMAN {
-                    return Option::from(vec!["discover"]);
-                }
-                Option::from(vec!["plasma-discover"])
-            }
-            "plasma-systemmonitor" => Option::from(vec!["plasma-systemmonitor"]),
-            "podman" => Option::from(vec!["podman"]),
-            "pycharm" => {
-                if self.package_manager == PackageManager::PACMAN {
-                    return Option::from(vec!["pycharm-community-edition"]);
-                }
-                if self.repository == Repository::Fedora {
-                    return Option::from(vec!["pycharm-community"]);
-                }
-                None
-            }
-            "qtile" => {
-                if self.package_manager == PackageManager::PACMAN {
-                    return Option::from(vec![
-                        "qtile",
-                        "alacritty",
-                        "rofi",
-                        "numlockx",
-                        "playerctl",
-                    ]);
-                }
-                None
-            }
-            "quadrapassel" => {
-                if self.repository == Repository::RedHat {
-                    return None;
-                }
-                Option::from(vec!["quadrapassel"])
-            }
-            "rhythmbox" => {
-                if self.repository == Repository::RedHat {
-                    return None;
-                }
-                Option::from(vec!["rhythmbox"])
-            }
-            "rust" => {
-                if self.package_manager == PackageManager::APT {
-                    return Option::from(vec!["rustc", "rustfmt", "cargo"]);
-                }
-                if self.package_manager == PackageManager::DNF {
-                    if self.repository == Repository::Fedora {
-                        return Option::from(vec!["rust", "rustfmt", "cargo", "rust-analyzer"]);
-                    }
-                    return Option::from(vec!["rust", "rustfmt", "cargo"]);
-                }
-                if self.package_manager == PackageManager::PACMAN {
-                    return Option::from(vec!["rustup"]);
-                }
-                None
-            }
-            "shotwell" => {
-                if self.repository == Repository::RedHat {
-                    return None;
-                }
-                Option::from(vec!["shotwell"])
-            }
-            "simple-scan" => {
-                if self.repository == Repository::RedHat {
-                    return None;
-                }
-                Option::from(vec!["simple-scan"])
-            }
-            "snapd" => {
-                if self.package_manager == PackageManager::PACMAN {
-                    return None;
-                }
-                Option::from(vec!["snapd"])
-            }
-            "spectacle" => Option::from(vec!["spectacle"]),
-            "ssh" => {
-                if self.package_manager == PackageManager::APT {
-                    return Option::from(vec!["ssh"]);
-                }
-                Option::from(vec!["libssh", "openssh"])
-            }
-            "steam" => {
-                if self.package_manager == PackageManager::PACMAN {
-                    return Option::from(vec!["steam"]);
-                }
-                None
-            }
-            "supertuxkart" => {
-                if self.repository == Repository::RedHat {
-                    return None;
-                }
-                Option::from(vec!["supertuxkart"])
-            }
-            "thunderbird" => Option::from(vec!["thunderbird"]),
-            "torbrowser-launcher" => Option::from(vec!["torbrowser-launcher"]),
-            "totem" => Option::from(vec!["totem"]),
-            "transmission-gtk" => {
-                if self.repository == Repository::RedHat {
-                    return None;
-                }
-                Option::from(vec!["transmission-gtk"])
-            }
-            "transmission-qt" => {
-                if self.repository == Repository::RedHat {
-                    return None;
-                }
-                Option::from(vec!["transmission-qt"])
-            }
-            "vim" | "neovim" => {
-                if self.repository == Repository::RedHat {
-                    return if package == "vim" {
-                        Option::from(vec!["vim-enhanced"])
-                    } else {
-                        None
-                    };
-                }
-
-                let mut packages = if package == "neovim" {
-                    vec!["neovim"]
-                } else {
-                    vec![]
-                };
-
-                if self.package_manager == PackageManager::DNF {
-                    packages.push("vim-enhanced");
-                } else {
-                    packages.push("vim");
-                }
-
-                packages.push("vim-airline");
-                packages.push("vim-ale");
-                packages.push("vim-ctrlp");
-                packages.push("vim-gitgutter");
-
-                if self.repository == Repository::Arch || self.repository == Repository::Fedora {
-                    packages.push("vim-nerdtree");
-                }
-
-                return Option::from(packages);
-            }
-            "virt-manager" => Option::from(vec!["virt-manager"]),
-            "vlc" => Option::from(vec!["vlc"]),
-            "xonotic" => {
-                if self.package_manager == PackageManager::PACMAN
-                    || self.repository == Repository::Fedora
-                {
-                    return Option::from(vec!["xonotic"]);
-                }
-                None
-            }
-            "yt-dlp" => Option::from(vec!["yt-dlp"]),
-            x if x.contains("http") => Option::from(vec![package]),
-            _ => None,
-        }
+    pub fn is_available(&self, package: &Package) -> bool {
+        package.repository.contains_key(&self.repository)
     }
 
-    pub fn is_available(&self, package: &str) -> bool {
-        self.get_packages(package).is_some()
-    }
-
-    pub fn is_installed(&self, package: &str, info: &Info) -> bool {
-        let packages: Option<Vec<&str>> = self.get_packages(package);
-        if packages.is_some() {
-            for pkg in packages.unwrap() {
-                if info.repository_installed.contains(&pkg.to_owned()) {
+    pub fn is_installed(&self, package: &Package, info: &Info) -> bool {
+        if let Some(packages) = package.repository.get(&self.repository) {
+            for pkg in packages {
+                if info.repository_installed.contains(&pkg.to_string()) {
                     return true;
                 }
             }
@@ -644,56 +119,61 @@ impl Distribution {
         false
     }
 
-    pub fn install(&self, package: &str, info: &mut Info) -> Result<(), io::Error> {
-        let packages: Option<Vec<&str>> = self.get_packages(package);
-        if packages.is_some() {
-            for pkg in packages.unwrap() {
-                if info.repository_installed.contains(&pkg.to_owned()) {
-                    continue;
+    pub fn install(&self, package: &Package, info: &mut Info) -> Result<(), io::Error> {
+        if let Some(packages) = package.repository.get(&self.repository) {
+            for pkg in packages {
+                self.install_package(pkg, info)?;
+            }
+        }
+        Ok(())
+    }
+
+    pub fn install_package(&self, package: &str, info: &mut Info) -> Result<(), io::Error> {
+        if !info.repository_installed.contains(&package.to_string()) {
+            info.repository_installed.push(package.to_string());
+
+            println!("Installing repository {}...", package);
+
+            match self.package_manager {
+                PackageManager::APT => {
+                    Operation::new()
+                        .command(format!("sudo apt install {} -Vy", package))
+                        .show_output(true)
+                        .run()?;
                 }
-                info.repository_installed.push(pkg.to_owned());
-
-                println!("Installing repository {}...", pkg);
-
-                match self.package_manager {
-                    PackageManager::APT => {
-                        Operation::new()
-                            .command(format!("sudo apt install {} -Vy", pkg))
-                            .show_output(true)
-                            .run()?;
-                    }
-                    PackageManager::DNF => {
-                        Operation::new()
-                            .command(format!("sudo dnf install {} -y", pkg))
-                            .show_output(true)
-                            .run()?;
-                    }
-                    PackageManager::PACMAN => {
-                        Operation::new()
-                            .command(format!("sudo pacman -S {} --noconfirm --needed", pkg))
-                            .show_output(true)
-                            .run()?;
-                    }
-                    PackageManager::RPMOSTree => {
-                        Operation::new()
-                            .command(format!("sudo rpm-ostree install {} -y", pkg))
-                            .show_output(true)
-                            .run()?;
-                    }
+                PackageManager::DNF => {
+                    Operation::new()
+                        .command(format!("sudo dnf install {} -y", package))
+                        .show_output(true)
+                        .run()?;
+                }
+                PackageManager::PACMAN => {
+                    Operation::new()
+                        .command(format!("sudo pacman -S {} --noconfirm --needed", package))
+                        .show_output(true)
+                        .run()?;
+                }
+                PackageManager::RPMOSTree => {
+                    Operation::new()
+                        .command(format!("sudo rpm-ostree install {} -y", package))
+                        .show_output(true)
+                        .run()?;
                 }
             }
         }
         Ok(())
     }
 
-    pub fn uninstall(&self, package: &str, info: &mut Info) -> Result<(), io::Error> {
-        let packages: Option<Vec<&str>> = self.get_packages(package);
-        if packages.is_some() {
-            for pkg in packages.unwrap() {
-                if !info.repository_installed.contains(&pkg.to_owned()) {
+    pub fn uninstall(&self, package: &Package, info: &mut Info) -> Result<(), io::Error> {
+        if let Some(packages) = package.repository.get(&self.repository) {
+            for pkg in packages {
+                if !info.repository_installed.contains(&pkg.to_string()) {
                     continue;
                 }
-                let index: Option<usize> = info.repository_installed.iter().position(|x| *x == pkg);
+                let index: Option<usize> = info
+                    .repository_installed
+                    .iter()
+                    .position(|x| *x == pkg.to_string());
                 if index.is_some() {
                     info.repository_installed.remove(index.unwrap());
                 }
@@ -919,11 +399,6 @@ pub fn get_distribution() -> Result<Distribution, io::Error> {
         }),
         x if x.contains("Mint") => Ok(Distribution {
             name: DistributionName::Mint,
-            repository: Repository::Ubuntu,
-            package_manager: PackageManager::APT,
-        }),
-        x if x.contains("Pop!_OS") => Ok(Distribution {
-            name: DistributionName::PopOS,
             repository: Repository::Ubuntu,
             package_manager: PackageManager::APT,
         }),

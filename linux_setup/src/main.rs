@@ -188,8 +188,8 @@ fn pre_install(
         "code" => {
             if method == &InstallMethod::Repository {
                 if distribution.package_manager == PackageManager::APT {
-                    distribution.install("wget", info)?;
-                    distribution.install("gpg", info)?;
+                    distribution.install_package("wget", info)?;
+                    distribution.install_package("gpg", info)?;
 
                     let key: String = Operation::new()
                         .command("wget -qO- https://packages.microsoft.com/keys/microsoft.asc")
@@ -248,7 +248,7 @@ fn pre_install(
         p if p.contains("dotnet") => {
             if method == &InstallMethod::Repository {
                 if distribution.repository == Repository::Debian {
-                    distribution.install("wget", info)?;
+                    distribution.install_package("wget", info)?;
 
                     Operation::new()
                         .command("wget https://packages.microsoft.com/config/debian/12/packages-microsoft-prod.deb -O packages-microsoft-prod.deb")
@@ -288,7 +288,7 @@ fn pre_install(
         }
         "rust" => {
             if method == &InstallMethod::Other {
-                distribution.install("curl", info)?;
+                distribution.install_package("curl", info)?;
             }
         }
         _ => (),
@@ -506,7 +506,7 @@ inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-n>" : "\<S-TAB>"
 }
 
 fn get_install_method(package: &Package, distribution: &Distribution, info: &Info) -> String {
-    if distribution.is_installed(package.key, info) {
+    if distribution.is_installed(package, info) {
         return helper::get_colored_string("Repository", Color::Green);
     }
     if flatpak::is_installed(package, info) {
@@ -522,7 +522,7 @@ fn get_install_method(package: &Package, distribution: &Distribution, info: &Inf
 }
 
 fn is_installed(package: &Package, distribution: &Distribution, info: &Info) -> bool {
-    distribution.is_installed(package.key, info)
+    distribution.is_installed(package, info)
         || flatpak::is_installed(package, info)
         || snap::is_installed(package, info)
         || other::is_installed(package.key, info)
@@ -536,7 +536,7 @@ fn run_package_select(
     let mut options_display: Vec<String> = vec![];
     let mut options_value: Vec<InstallMethod> = vec![];
 
-    if distribution.is_available(package.key) {
+    if distribution.is_available(package) {
         options_display.push(helper::get_colored_string(
             "Install Repository",
             Color::Green,
@@ -594,7 +594,7 @@ fn run_package_select(
     }
 
     if method != &InstallMethod::Repository {
-        distribution.uninstall(package.key, info)?;
+        distribution.uninstall(package, info)?;
     }
 
     if method != &InstallMethod::Flatpak {
@@ -616,7 +616,7 @@ fn run_package_select(
 
     pre_install(package.key, distribution, info, &method)?;
     match method {
-        InstallMethod::Repository => distribution.install(package.key, info)?,
+        InstallMethod::Repository => distribution.install(package, info)?,
         InstallMethod::Flatpak => run_flatpak_remote_select(package, distribution, info)?,
         InstallMethod::Snap => snap::install(package, distribution, info)?,
         InstallMethod::Other => other::install(package.key, info)?,
@@ -642,7 +642,7 @@ fn run_category_select(
             continue;
         }
 
-        if !distribution.is_available(&package.key)
+        if !distribution.is_available(&package)
             && !flatpak::is_available(&package)
             && !snap::is_available(&package)
             && !other::is_available(&package.key)

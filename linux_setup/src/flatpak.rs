@@ -49,7 +49,7 @@ pub fn install(
     distribution: &Distribution,
     info: &mut Info,
 ) -> Result<(), io::Error> {
-    distribution.install("flatpak", info)?;
+    distribution.install_package("flatpak", info)?;
     setup(distribution)?;
 
     if let Some(fp) = &package.flatpak {

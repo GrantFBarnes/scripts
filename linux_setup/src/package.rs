@@ -1,4 +1,6 @@
-use crate::distribution::DesktopEnvironment;
+use std::collections::HashMap;
+
+use crate::distribution::{DesktopEnvironment, Repository};
 use crate::flatpak::Flatpak;
 use crate::snap::Snap;
 
@@ -7,6 +9,7 @@ pub struct Package {
     pub key: &'static str,
     pub category: &'static str,
     pub desktop_environment: Option<DesktopEnvironment>,
+    pub repository: HashMap<Repository, Vec<&'static str>>,
     pub flatpak: Option<Flatpak>,
     pub snap: Option<Snap>,
 }
@@ -18,6 +21,7 @@ impl Package {
             key: "",
             category: "",
             desktop_environment: None,
+            repository: HashMap::new(),
             flatpak: None,
             snap: None,
         }
@@ -31,6 +35,12 @@ pub fn get_all_packages() -> Vec<Package> {
             key: "0ad",
             category: "Games",
             desktop_environment: None,
+            repository: HashMap::from([
+                (Repository::Arch, vec!["0ad"]),
+                (Repository::Debian, vec!["0ad"]),
+                (Repository::Fedora, vec!["0ad"]),
+                (Repository::Ubuntu, vec!["0ad"]),
+            ]),
             flatpak: Some(Flatpak {
                 name: "com.play0ad.zeroad",
                 remotes: vec!["fedora", "flathub"],
@@ -47,6 +57,13 @@ pub fn get_all_packages() -> Vec<Package> {
             key: "ark",
             category: "Utilities",
             desktop_environment: Some(DesktopEnvironment::KDE),
+            repository: HashMap::from([
+                (Repository::Arch, vec!["ark"]),
+                (Repository::Debian, vec!["ark"]),
+                (Repository::Fedora, vec!["ark"]),
+                (Repository::RedHat, vec!["ark"]),
+                (Repository::Ubuntu, vec!["ark"]),
+            ]),
             flatpak: Some(Flatpak {
                 name: "org.kde.ark",
                 remotes: vec!["fedora", "flathub"],
@@ -63,6 +80,12 @@ pub fn get_all_packages() -> Vec<Package> {
             key: "blender",
             category: "Multi Media",
             desktop_environment: None,
+            repository: HashMap::from([
+                (Repository::Arch, vec!["blender"]),
+                (Repository::Debian, vec!["blender"]),
+                (Repository::Fedora, vec!["blender"]),
+                (Repository::Ubuntu, vec!["blender"]),
+            ]),
             flatpak: Some(Flatpak {
                 name: "org.blender.Blender",
                 remotes: vec!["flathub"],
@@ -79,6 +102,13 @@ pub fn get_all_packages() -> Vec<Package> {
             key: "cheese",
             category: "Applications",
             desktop_environment: Some(DesktopEnvironment::Gnome),
+            repository: HashMap::from([
+                (Repository::Arch, vec!["cheese"]),
+                (Repository::Debian, vec!["cheese"]),
+                (Repository::Fedora, vec!["cheese"]),
+                (Repository::RedHat, vec!["cheese"]),
+                (Repository::Ubuntu, vec!["cheese"]),
+            ]),
             flatpak: Some(Flatpak {
                 name: "org.gnome.Cheese",
                 remotes: vec!["fedora", "flathub"],
@@ -90,6 +120,11 @@ pub fn get_all_packages() -> Vec<Package> {
             key: "chromium",
             category: "Browsers",
             desktop_environment: None,
+            repository: HashMap::from([
+                (Repository::Arch, vec!["chromium"]),
+                (Repository::Debian, vec!["chromium"]),
+                (Repository::Fedora, vec!["chromium"]),
+            ]),
             flatpak: Some(Flatpak {
                 name: "org.chromium.Chromium",
                 remotes: vec!["flathub"],
@@ -106,6 +141,13 @@ pub fn get_all_packages() -> Vec<Package> {
             key: "cockpit",
             category: "Server",
             desktop_environment: None,
+            repository: HashMap::from([
+                (Repository::Arch, vec!["cockpit"]),
+                (Repository::Debian, vec!["cockpit"]),
+                (Repository::Fedora, vec!["cockpit"]),
+                (Repository::RedHat, vec!["cockpit"]),
+                (Repository::Ubuntu, vec!["cockpit"]),
+            ]),
             flatpak: None,
             snap: None,
         },
@@ -114,6 +156,13 @@ pub fn get_all_packages() -> Vec<Package> {
             key: "cups",
             category: "Desktop",
             desktop_environment: None,
+            repository: HashMap::from([
+                (Repository::Arch, vec!["cups"]),
+                (Repository::Debian, vec!["cups"]),
+                (Repository::Fedora, vec!["cups"]),
+                (Repository::RedHat, vec!["cups"]),
+                (Repository::Ubuntu, vec!["cups"]),
+            ]),
             flatpak: None,
             snap: None,
         },
@@ -122,6 +171,13 @@ pub fn get_all_packages() -> Vec<Package> {
             key: "curl",
             category: "Server",
             desktop_environment: None,
+            repository: HashMap::from([
+                (Repository::Arch, vec!["curl"]),
+                (Repository::Debian, vec!["curl"]),
+                (Repository::Fedora, vec!["curl"]),
+                (Repository::RedHat, vec!["curl"]),
+                (Repository::Ubuntu, vec!["curl"]),
+            ]),
             flatpak: None,
             snap: None,
         },
@@ -130,6 +186,13 @@ pub fn get_all_packages() -> Vec<Package> {
             key: "dconf-editor",
             category: "Utilities",
             desktop_environment: Some(DesktopEnvironment::Gnome),
+            repository: HashMap::from([
+                (Repository::Arch, vec!["dconf-editor"]),
+                (Repository::Debian, vec!["dconf-editor"]),
+                (Repository::Fedora, vec!["dconf-editor"]),
+                (Repository::RedHat, vec!["dconf-editor"]),
+                (Repository::Ubuntu, vec!["dconf-editor"]),
+            ]),
             flatpak: Some(Flatpak {
                 name: "ca.desrt.dconf-editor",
                 remotes: vec!["fedora", "flathub"],
@@ -141,6 +204,12 @@ pub fn get_all_packages() -> Vec<Package> {
             key: "deja-dup",
             category: "Applications",
             desktop_environment: Some(DesktopEnvironment::Gnome),
+            repository: HashMap::from([
+                (Repository::Arch, vec!["deja-dup"]),
+                (Repository::Debian, vec!["deja-dup"]),
+                (Repository::Fedora, vec!["deja-dup"]),
+                (Repository::Ubuntu, vec!["deja-dup"]),
+            ]),
             flatpak: Some(Flatpak {
                 name: "org.gnome.DejaDup",
                 remotes: vec!["flathub"],
@@ -152,6 +221,7 @@ pub fn get_all_packages() -> Vec<Package> {
             key: "discord",
             category: "Communication",
             desktop_environment: None,
+            repository: HashMap::from([(Repository::Arch, vec!["discord"])]),
             flatpak: Some(Flatpak {
                 name: "com.discordapp.Discord",
                 remotes: vec!["flathub"],
@@ -168,6 +238,13 @@ pub fn get_all_packages() -> Vec<Package> {
             key: "dotnet-runtime-8",
             category: "Server",
             desktop_environment: None,
+            repository: HashMap::from([
+                (Repository::Arch, vec!["dotnet-runtime-8.0"]),
+                (Repository::Debian, vec!["dotnet-runtime-8.0"]),
+                (Repository::Fedora, vec!["dotnet-runtime-8.0"]),
+                (Repository::RedHat, vec!["dotnet-runtime-8.0"]),
+                (Repository::Ubuntu, vec!["dotnet-runtime-8.0"]),
+            ]),
             flatpak: None,
             snap: Some(Snap {
                 name: "dotnet-runtime-80",
@@ -181,6 +258,13 @@ pub fn get_all_packages() -> Vec<Package> {
             key: "dotnet-sdk-8",
             category: "Server",
             desktop_environment: None,
+            repository: HashMap::from([
+                (Repository::Arch, vec!["dotnet-sdk-8.0"]),
+                (Repository::Debian, vec!["dotnet-sdk-8.0"]),
+                (Repository::Fedora, vec!["dotnet-sdk-8.0"]),
+                (Repository::RedHat, vec!["dotnet-sdk-8.0"]),
+                (Repository::Ubuntu, vec!["dotnet-sdk-8.0"]),
+            ]),
             flatpak: None,
             snap: Some(Snap {
                 name: "dotnet-sdk",
@@ -194,6 +278,12 @@ pub fn get_all_packages() -> Vec<Package> {
             key: "elisa",
             category: "Multi Media",
             desktop_environment: Some(DesktopEnvironment::KDE),
+            repository: HashMap::from([
+                (Repository::Arch, vec!["elisa"]),
+                (Repository::Debian, vec!["elisa"]),
+                (Repository::Fedora, vec!["elisa"]),
+                (Repository::Ubuntu, vec!["elisa"]),
+            ]),
             flatpak: Some(Flatpak {
                 name: "org.kde.elisa",
                 remotes: vec!["fedora", "flathub"],
@@ -205,6 +295,12 @@ pub fn get_all_packages() -> Vec<Package> {
             key: "epiphany",
             category: "Browsers",
             desktop_environment: Some(DesktopEnvironment::Gnome),
+            repository: HashMap::from([
+                (Repository::Arch, vec!["epiphany"]),
+                (Repository::Debian, vec!["epiphany-browser"]),
+                (Repository::Fedora, vec!["epiphany"]),
+                (Repository::Ubuntu, vec!["epiphany-browser"]),
+            ]),
             flatpak: Some(Flatpak {
                 name: "org.gnome.Epiphany",
                 remotes: vec!["fedora", "flathub"],
@@ -216,6 +312,13 @@ pub fn get_all_packages() -> Vec<Package> {
             key: "evince",
             category: "Applications",
             desktop_environment: Some(DesktopEnvironment::Gnome),
+            repository: HashMap::from([
+                (Repository::Arch, vec!["evince"]),
+                (Repository::Debian, vec!["evince"]),
+                (Repository::Fedora, vec!["evince"]),
+                (Repository::RedHat, vec!["evince"]),
+                (Repository::Ubuntu, vec!["evince"]),
+            ]),
             flatpak: Some(Flatpak {
                 name: "org.gnome.Evince",
                 remotes: vec!["fedora", "flathub"],
@@ -227,6 +330,13 @@ pub fn get_all_packages() -> Vec<Package> {
             key: "eog",
             category: "Applications",
             desktop_environment: Some(DesktopEnvironment::Gnome),
+            repository: HashMap::from([
+                (Repository::Arch, vec!["eog"]),
+                (Repository::Debian, vec!["eog"]),
+                (Repository::Fedora, vec!["eog"]),
+                (Repository::RedHat, vec!["eog"]),
+                (Repository::Ubuntu, vec!["eog"]),
+            ]),
             flatpak: Some(Flatpak {
                 name: "org.gnome.eog",
                 remotes: vec!["fedora", "flathub"],
@@ -243,6 +353,9 @@ pub fn get_all_packages() -> Vec<Package> {
             key: "mediawriter",
             category: "Utilities",
             desktop_environment: None,
+            repository: HashMap::from([
+                (Repository::Fedora, vec!["mediawriter"]),
+            ]),
             flatpak: Some(Flatpak {
                 name: "org.fedoraproject.MediaWriter",
                 remotes: vec!["fedora", "flathub"],
@@ -254,6 +367,13 @@ pub fn get_all_packages() -> Vec<Package> {
             key: "ffmpeg",
             category: "Desktop",
             desktop_environment: None,
+            repository: HashMap::from([
+                (Repository::Arch, vec!["ffmpeg"]),
+                (Repository::Debian, vec!["ffmpeg"]),
+                (Repository::Fedora, vec!["ffmpeg"]),
+                (Repository::RedHat, vec!["ffmpeg"]),
+                (Repository::Ubuntu, vec!["ffmpeg"]),
+            ]),
             flatpak: None,
             snap: None,
         },
@@ -262,6 +382,13 @@ pub fn get_all_packages() -> Vec<Package> {
             key: "filelight",
             category: "Utilities",
             desktop_environment: Some(DesktopEnvironment::KDE),
+            repository: HashMap::from([
+                (Repository::Arch, vec!["filelight"]),
+                (Repository::Debian, vec!["filelight"]),
+                (Repository::Fedora, vec!["filelight"]),
+                (Repository::RedHat, vec!["filelight"]),
+                (Repository::Ubuntu, vec!["filelight"]),
+            ]),
             flatpak: None,
             snap: None,
         },
@@ -270,6 +397,10 @@ pub fn get_all_packages() -> Vec<Package> {
             key: "firefox",
             category: "Browsers",
             desktop_environment: None,
+            repository: HashMap::from([
+                (Repository::Arch, vec!["firefox"]),
+                (Repository::Fedora, vec!["firefox"]),
+            ]),
             flatpak: Some(Flatpak {
                 name: "org.mozilla.firefox",
                 remotes: vec!["flathub"],
@@ -286,6 +417,10 @@ pub fn get_all_packages() -> Vec<Package> {
             key: "firefox-esr",
             category: "Browsers",
             desktop_environment: None,
+            repository: HashMap::from([
+                (Repository::Debian, vec!["firefox-esr"]),
+                (Repository::RedHat, vec!["firefox"]),
+            ]),
             flatpak: None,
             snap: Some(Snap {
                 name: "firefox",
@@ -295,10 +430,26 @@ pub fn get_all_packages() -> Vec<Package> {
             }),
         },
         Package {
+            display: "F;atpak",
+            key: "flatpak",
+            category: "Server",
+            desktop_environment: None,
+            repository: HashMap::from([
+                (Repository::Arch, vec!["flatpak"]),
+                (Repository::Debian, vec!["flatpak"]),
+                (Repository::Fedora, vec!["flatpak"]),
+                (Repository::RedHat, vec!["flatpak"]),
+                (Repository::Ubuntu, vec!["flatpak"]),
+            ]),
+            flatpak: None,
+            snap: None,
+        },
+        Package {
             display: "Flutter",
             key: "flutter",
             category: "Server",
             desktop_environment: None,
+            repository: HashMap::new(),
             flatpak: None,
             snap: Some(Snap {
                 name: "flutter",
@@ -312,6 +463,13 @@ pub fn get_all_packages() -> Vec<Package> {
             key: "gedit",
             category: "Editors",
             desktop_environment: Some(DesktopEnvironment::Gnome),
+            repository: HashMap::from([
+                (Repository::Arch, vec!["gedit"]),
+                (Repository::Debian, vec!["gedit"]),
+                (Repository::Fedora, vec!["gedit"]),
+                (Repository::RedHat, vec!["gedit"]),
+                (Repository::Ubuntu, vec!["gedit"]),
+            ]),
             flatpak: Some(Flatpak {
                 name: "org.gnome.gedit",
                 remotes: vec!["fedora", "flathub"],
@@ -328,6 +486,13 @@ pub fn get_all_packages() -> Vec<Package> {
             key: "gimp",
             category: "Multi Media",
             desktop_environment: None,
+            repository: HashMap::from([
+                (Repository::Arch, vec!["gimp"]),
+                (Repository::Debian, vec!["gimp"]),
+                (Repository::Fedora, vec!["gimp"]),
+                (Repository::RedHat, vec!["gimp"]),
+                (Repository::Ubuntu, vec!["gimp"]),
+            ]),
             flatpak: Some(Flatpak {
                 name: "org.gimp.GIMP",
                 remotes: vec!["fedora", "flathub"],
@@ -344,6 +509,13 @@ pub fn get_all_packages() -> Vec<Package> {
             key: "git",
             category: "Server",
             desktop_environment: None,
+            repository: HashMap::from([
+                (Repository::Arch, vec!["git"]),
+                (Repository::Debian, vec!["git"]),
+                (Repository::Fedora, vec!["git"]),
+                (Repository::RedHat, vec!["git"]),
+                (Repository::Ubuntu, vec!["git"]),
+            ]),
             flatpak: None,
             snap: None,
         },
@@ -352,6 +524,13 @@ pub fn get_all_packages() -> Vec<Package> {
             key: "golang",
             category: "Server",
             desktop_environment: None,
+            repository: HashMap::from([
+                (Repository::Arch, vec!["go", "gopls"]),
+                (Repository::Debian, vec!["golang", "gopls"]),
+                (Repository::Fedora, vec!["golang", "golang-x-tools-gopls"]),
+                (Repository::RedHat, vec!["golang"]),
+                (Repository::Ubuntu, vec!["golang", "gopls"]),
+            ]),
             flatpak: None,
             snap: Some(Snap {
                 name: "go",
@@ -365,6 +544,13 @@ pub fn get_all_packages() -> Vec<Package> {
             key: "gparted",
             category: "Utilities",
             desktop_environment: Some(DesktopEnvironment::Gnome),
+            repository: HashMap::from([
+                (Repository::Arch, vec!["gparted"]),
+                (Repository::Debian, vec!["gparted"]),
+                (Repository::Fedora, vec!["gparted"]),
+                (Repository::RedHat, vec!["gparted"]),
+                (Repository::Ubuntu, vec!["gparted"]),
+            ]),
             flatpak: None,
             snap: None,
         },
@@ -373,6 +559,12 @@ pub fn get_all_packages() -> Vec<Package> {
             key: "gnome-2048",
             category: "Games",
             desktop_environment: Some(DesktopEnvironment::Gnome),
+            repository: HashMap::from([
+                (Repository::Arch, vec!["gnome-2048"]),
+                (Repository::Debian, vec!["gnome-2048"]),
+                (Repository::Fedora, vec!["gnome-2048"]),
+                (Repository::Ubuntu, vec!["gnome-2048"]),
+            ]),
             flatpak: Some(Flatpak {
                 name: "org.gnome.TwentyFortyEight",
                 remotes: vec!["fedora", "flathub"],
@@ -384,6 +576,12 @@ pub fn get_all_packages() -> Vec<Package> {
             key: "gnome-boxes",
             category: "Applications",
             desktop_environment: Some(DesktopEnvironment::Gnome),
+            repository: HashMap::from([
+                (Repository::Arch, vec!["gnome-boxes"]),
+                (Repository::Debian, vec!["gnome-boxes"]),
+                (Repository::Fedora, vec!["gnome-boxes"]),
+                (Repository::Ubuntu, vec!["gnome-boxes"]),
+            ]),
             flatpak: Some(Flatpak {
                 name: "org.gnome.Boxes",
                 remotes: vec!["flathub"],
@@ -395,6 +593,12 @@ pub fn get_all_packages() -> Vec<Package> {
             key: "gnome-builder",
             category: "Editors",
             desktop_environment: Some(DesktopEnvironment::Gnome),
+            repository: HashMap::from([
+                (Repository::Arch, vec!["gnome-builder"]),
+                (Repository::Debian, vec!["gnome-builder"]),
+                (Repository::Fedora, vec!["gnome-builder"]),
+                (Repository::Ubuntu, vec!["gnome-builder"]),
+            ]),
             flatpak: Some(Flatpak {
                 name: "org.gnome.Builder",
                 remotes: vec!["flathub"],
@@ -406,6 +610,13 @@ pub fn get_all_packages() -> Vec<Package> {
             key: "gnome-calculator",
             category: "Applications",
             desktop_environment: Some(DesktopEnvironment::Gnome),
+            repository: HashMap::from([
+                (Repository::Arch, vec!["gnome-calculator"]),
+                (Repository::Debian, vec!["gnome-calculator"]),
+                (Repository::Fedora, vec!["gnome-calculator"]),
+                (Repository::RedHat, vec!["gnome-calculator"]),
+                (Repository::Ubuntu, vec!["gnome-calculator"]),
+            ]),
             flatpak: Some(Flatpak {
                 name: "org.gnome.Calculator",
                 remotes: vec!["fedora", "flathub"],
@@ -422,6 +633,12 @@ pub fn get_all_packages() -> Vec<Package> {
             key: "gnome-calendar",
             category: "Applications",
             desktop_environment: Some(DesktopEnvironment::Gnome),
+            repository: HashMap::from([
+                (Repository::Arch, vec!["gnome-calendar"]),
+                (Repository::Debian, vec!["gnome-calendar"]),
+                (Repository::Fedora, vec!["gnome-calendar"]),
+                (Repository::Ubuntu, vec!["gnome-calendar"]),
+            ]),
             flatpak: Some(Flatpak {
                 name: "org.gnome.Calendar",
                 remotes: vec!["fedora", "flathub"],
@@ -433,6 +650,12 @@ pub fn get_all_packages() -> Vec<Package> {
             key: "gnome-chess",
             category: "Games",
             desktop_environment: Some(DesktopEnvironment::Gnome),
+            repository: HashMap::from([
+                (Repository::Arch, vec!["gnome-chess"]),
+                (Repository::Debian, vec!["gnome-chess"]),
+                (Repository::Fedora, vec!["gnome-chess"]),
+                (Repository::Ubuntu, vec!["gnome-chess"]),
+            ]),
             flatpak: Some(Flatpak {
                 name: "org.gnome.Chess",
                 remotes: vec!["fedora", "flathub"],
@@ -444,6 +667,12 @@ pub fn get_all_packages() -> Vec<Package> {
             key: "gnome-clocks",
             category: "Applications",
             desktop_environment: Some(DesktopEnvironment::Gnome),
+            repository: HashMap::from([
+                (Repository::Arch, vec!["gnome-clocks"]),
+                (Repository::Debian, vec!["gnome-clocks"]),
+                (Repository::Fedora, vec!["gnome-clocks"]),
+                (Repository::Ubuntu, vec!["gnome-clocks"]),
+            ]),
             flatpak: Some(Flatpak {
                 name: "org.gnome.clocks",
                 remotes: vec!["fedora", "flathub"],
@@ -460,6 +689,13 @@ pub fn get_all_packages() -> Vec<Package> {
             key: "gnome-connections",
             category: "Applications",
             desktop_environment: Some(DesktopEnvironment::Gnome),
+            repository: HashMap::from([
+                (Repository::Arch, vec!["gnome-connections"]),
+                (Repository::Debian, vec!["gnome-connections"]),
+                (Repository::Fedora, vec!["gnome-connections"]),
+                (Repository::RedHat, vec!["gnome-connections"]),
+                (Repository::Ubuntu, vec!["gnome-connections"]),
+            ]),
             flatpak: Some(Flatpak {
                 name: "org.gnome.Connections",
                 remotes: vec!["fedora", "flathub"],
@@ -471,6 +707,12 @@ pub fn get_all_packages() -> Vec<Package> {
             key: "gnome-contacts",
             category: "Applications",
             desktop_environment: Some(DesktopEnvironment::Gnome),
+            repository: HashMap::from([
+                (Repository::Arch, vec!["gnome-contacts"]),
+                (Repository::Debian, vec!["gnome-contacts"]),
+                (Repository::Fedora, vec!["gnome-contacts"]),
+                (Repository::Ubuntu, vec!["gnome-contacts"]),
+            ]),
             flatpak: Some(Flatpak {
                 name: "org.gnome.Contacts",
                 remotes: vec!["fedora", "flathub"],
@@ -482,6 +724,13 @@ pub fn get_all_packages() -> Vec<Package> {
             key: "baobab",
             category: "Utilities",
             desktop_environment: Some(DesktopEnvironment::Gnome),
+            repository: HashMap::from([
+                (Repository::Arch, vec!["baobab"]),
+                (Repository::Debian, vec!["baobab"]),
+                (Repository::Fedora, vec!["baobab"]),
+                (Repository::RedHat, vec!["baobab"]),
+                (Repository::Ubuntu, vec!["baobab"]),
+            ]),
             flatpak: Some(Flatpak {
                 name: "org.gnome.baobab",
                 remotes: vec!["fedora", "flathub"],
@@ -493,6 +742,13 @@ pub fn get_all_packages() -> Vec<Package> {
             key: "gnome-disk-utility",
             category: "Utilities",
             desktop_environment: Some(DesktopEnvironment::Gnome),
+            repository: HashMap::from([
+                (Repository::Arch, vec!["gnome-disk-utility"]),
+                (Repository::Debian, vec!["gnome-disk-utility"]),
+                (Repository::Fedora, vec!["gnome-disk-utility"]),
+                (Repository::RedHat, vec!["gnome-disk-utility"]),
+                (Repository::Ubuntu, vec!["gnome-disk-utility"]),
+            ]),
             flatpak: None,
             snap: None,
         },
@@ -501,6 +757,9 @@ pub fn get_all_packages() -> Vec<Package> {
             key: "loupe",
             category: "Applications",
             desktop_environment: Some(DesktopEnvironment::Gnome),
+            repository: HashMap::from([
+                (Repository::Fedora, vec!["loupe"]),
+            ]),
             flatpak: Some(Flatpak {
                 name: "org.gnome.Loupe",
                 remotes: vec!["fedora", "flathub"],
@@ -517,6 +776,12 @@ pub fn get_all_packages() -> Vec<Package> {
             key: "gnome-maps",
             category: "Applications",
             desktop_environment: Some(DesktopEnvironment::Gnome),
+            repository: HashMap::from([
+                (Repository::Arch, vec!["gnome-maps"]),
+                (Repository::Debian, vec!["gnome-maps"]),
+                (Repository::Fedora, vec!["gnome-maps"]),
+                (Repository::Ubuntu, vec!["gnome-maps"]),
+            ]),
             flatpak: Some(Flatpak {
                 name: "org.gnome.Maps",
                 remotes: vec!["fedora", "flathub"],
@@ -528,6 +793,12 @@ pub fn get_all_packages() -> Vec<Package> {
             key: "gnome-mines",
             category: "Games",
             desktop_environment: Some(DesktopEnvironment::Gnome),
+            repository: HashMap::from([
+                (Repository::Arch, vec!["gnome-mines"]),
+                (Repository::Debian, vec!["gnome-mines"]),
+                (Repository::Fedora, vec!["gnome-mines"]),
+                (Repository::Ubuntu, vec!["gnome-mines"]),
+            ]),
             flatpak: Some(Flatpak {
                 name: "org.gnome.Mines",
                 remotes: vec!["fedora", "flathub"],
@@ -539,6 +810,12 @@ pub fn get_all_packages() -> Vec<Package> {
             key: "gnome-music",
             category: "Multi Media",
             desktop_environment: Some(DesktopEnvironment::Gnome),
+            repository: HashMap::from([
+                (Repository::Arch, vec!["gnome-music"]),
+                (Repository::Debian, vec!["gnome-music"]),
+                (Repository::Fedora, vec!["gnome-music"]),
+                (Repository::Ubuntu, vec!["gnome-music"]),
+            ]),
             flatpak: Some(Flatpak {
                 name: "org.gnome.Music",
                 remotes: vec!["fedora", "flathub"],
@@ -550,6 +827,12 @@ pub fn get_all_packages() -> Vec<Package> {
             key: "gnome-passwordsafe",
             category: "Applications",
             desktop_environment: Some(DesktopEnvironment::Gnome),
+            repository: HashMap::from([
+                (Repository::Arch, vec!["gnome-passwordsafe"]),
+                (Repository::Debian, vec!["gnome-passwordsafe"]),
+                (Repository::Fedora, vec!["secrets"]),
+                (Repository::Ubuntu, vec!["gnome-passwordsafe"]),
+            ]),
             flatpak: Some(Flatpak {
                 name: "org.gnome.World.Secrets",
                 remotes: vec!["fedora", "flathub"],
@@ -561,6 +844,13 @@ pub fn get_all_packages() -> Vec<Package> {
             key: "gnome-photos",
             category: "Multi Media",
             desktop_environment: Some(DesktopEnvironment::Gnome),
+            repository: HashMap::from([
+                (Repository::Arch, vec!["gnome-photos"]),
+                (Repository::Debian, vec!["gnome-photos"]),
+                (Repository::Fedora, vec!["gnome-photos"]),
+                (Repository::RedHat, vec!["gnome-photos"]),
+                (Repository::Ubuntu, vec!["gnome-photos"]),
+            ]),
             flatpak: Some(Flatpak {
                 name: "org.gnome.Photos",
                 remotes: vec!["fedora", "flathub"],
@@ -572,6 +862,13 @@ pub fn get_all_packages() -> Vec<Package> {
             key: "gnome-shell-extensions",
             category: "Utilities",
             desktop_environment: Some(DesktopEnvironment::Gnome),
+            repository: HashMap::from([
+                (Repository::Arch, vec!["gnome-shell-extensions"]),
+                (Repository::Debian, vec!["gnome-shell-extensions"]),
+                (Repository::Fedora, vec!["gnome-extensions-app"]),
+                (Repository::RedHat, vec!["gnome-extensions-app"]),
+                (Repository::Ubuntu, vec!["gnome-shell-extensions"]),
+            ]),
             flatpak: None,
             snap: None,
         },
@@ -580,6 +877,10 @@ pub fn get_all_packages() -> Vec<Package> {
             key: "gnome-shell-extension-manager",
             category: "Utilities",
             desktop_environment: Some(DesktopEnvironment::Gnome),
+            repository: HashMap::from([
+                (Repository::Debian, vec!["gnome-shell-extension-manager"]),
+                (Repository::Ubuntu, vec!["gnome-shell-extension-manager"]),
+            ]),
             flatpak: None,
             snap: None,
         },
@@ -588,6 +889,13 @@ pub fn get_all_packages() -> Vec<Package> {
             key: "gnome-software",
             category: "Software",
             desktop_environment: Some(DesktopEnvironment::Gnome),
+            repository: HashMap::from([
+                (Repository::Arch, vec!["gnome-software"]),
+                (Repository::Debian, vec!["gnome-software"]),
+                (Repository::Fedora, vec!["gnome-software"]),
+                (Repository::RedHat, vec!["gnome-software"]),
+                (Repository::Ubuntu, vec!["gnome-software"]),
+            ]),
             flatpak: None,
             snap: None,
         },
@@ -596,6 +904,12 @@ pub fn get_all_packages() -> Vec<Package> {
             key: "aisleriot",
             category: "Games",
             desktop_environment: Some(DesktopEnvironment::Gnome),
+            repository: HashMap::from([
+                (Repository::Arch, vec!["aisleriot"]),
+                (Repository::Debian, vec!["aisleriot"]),
+                (Repository::Fedora, vec!["aisleriot"]),
+                (Repository::Ubuntu, vec!["aisleriot"]),
+            ]),
             flatpak: Some(Flatpak {
                 name: "org.gnome.Aisleriot",
                 remotes: vec!["fedora", "flathub"],
@@ -607,6 +921,12 @@ pub fn get_all_packages() -> Vec<Package> {
             key: "gnome-sound-recorder",
             category: "Multi Media",
             desktop_environment: Some(DesktopEnvironment::Gnome),
+            repository: HashMap::from([
+                (Repository::Arch, vec!["gnome-sound-recorder"]),
+                (Repository::Debian, vec!["gnome-sound-recorder"]),
+                (Repository::Fedora, vec!["gnome-sound-recorder"]),
+                (Repository::Ubuntu, vec!["gnome-sound-recorder"]),
+            ]),
             flatpak: Some(Flatpak {
                 name: "org.gnome.SoundRecorder",
                 remotes: vec!["fedora", "flathub"],
@@ -618,6 +938,12 @@ pub fn get_all_packages() -> Vec<Package> {
             key: "gnome-sudoku",
             category: "Games",
             desktop_environment: Some(DesktopEnvironment::Gnome),
+            repository: HashMap::from([
+                (Repository::Arch, vec!["gnome-sudoku"]),
+                (Repository::Debian, vec!["gnome-sudoku"]),
+                (Repository::Fedora, vec!["gnome-sudoku"]),
+                (Repository::Ubuntu, vec!["gnome-sudoku"]),
+            ]),
             flatpak: Some(Flatpak {
                 name: "org.gnome.Sudoku",
                 remotes: vec!["fedora", "flathub"],
@@ -634,6 +960,13 @@ pub fn get_all_packages() -> Vec<Package> {
             key: "gnome-system-monitor",
             category: "Utilities",
             desktop_environment: Some(DesktopEnvironment::Gnome),
+            repository: HashMap::from([
+                (Repository::Arch, vec!["gnome-system-monitor"]),
+                (Repository::Debian, vec!["gnome-system-monitor"]),
+                (Repository::Fedora, vec!["gnome-system-monitor"]),
+                (Repository::RedHat, vec!["gnome-system-monitor"]),
+                (Repository::Ubuntu, vec!["gnome-system-monitor"]),
+            ]),
             flatpak: None,
             snap: None,
         },
@@ -642,6 +975,12 @@ pub fn get_all_packages() -> Vec<Package> {
             key: "quadrapassel",
             category: "Games",
             desktop_environment: Some(DesktopEnvironment::Gnome),
+            repository: HashMap::from([
+                (Repository::Arch, vec!["quadrapassel"]),
+                (Repository::Debian, vec!["quadrapassel"]),
+                (Repository::Fedora, vec!["quadrapassel"]),
+                (Repository::Ubuntu, vec!["quadrapassel"]),
+            ]),
             flatpak: Some(Flatpak {
                 name: "org.gnome.Quadrapassel",
                 remotes: vec!["fedora", "flathub"],
@@ -658,6 +997,12 @@ pub fn get_all_packages() -> Vec<Package> {
             key: "gnome-text-editor",
             category: "Editors",
             desktop_environment: Some(DesktopEnvironment::Gnome),
+            repository: HashMap::from([
+                (Repository::Arch, vec!["gnome-text-editor"]),
+                (Repository::Debian, vec!["gnome-text-editor"]),
+                (Repository::Fedora, vec!["gnome-text-editor"]),
+                (Repository::Ubuntu, vec!["gnome-text-editor"]),
+            ]),
             flatpak: Some(Flatpak {
                 name: "org.gnome.TextEditor",
                 remotes: vec!["fedora", "flathub"],
@@ -669,6 +1014,13 @@ pub fn get_all_packages() -> Vec<Package> {
             key: "gnome-tweaks",
             category: "Utilities",
             desktop_environment: Some(DesktopEnvironment::Gnome),
+            repository: HashMap::from([
+                (Repository::Arch, vec!["gnome-tweaks"]),
+                (Repository::Debian, vec!["gnome-tweaks"]),
+                (Repository::Fedora, vec!["gnome-tweaks"]),
+                (Repository::RedHat, vec!["gnome-tweaks"]),
+                (Repository::Ubuntu, vec!["gnome-tweaks"]),
+            ]),
             flatpak: None,
             snap: None,
         },
@@ -677,6 +1029,12 @@ pub fn get_all_packages() -> Vec<Package> {
             key: "gnome-weather",
             category: "Applications",
             desktop_environment: Some(DesktopEnvironment::Gnome),
+            repository: HashMap::from([
+                (Repository::Arch, vec!["gnome-weather"]),
+                (Repository::Debian, vec!["gnome-weather"]),
+                (Repository::Fedora, vec!["gnome-weather"]),
+                (Repository::Ubuntu, vec!["gnome-weather"]),
+            ]),
             flatpak: Some(Flatpak {
                 name: "org.gnome.Weather",
                 remotes: vec!["fedora", "flathub"],
@@ -688,6 +1046,12 @@ pub fn get_all_packages() -> Vec<Package> {
             key: "gnucash",
             category: "Applications",
             desktop_environment: None,
+            repository: HashMap::from([
+                (Repository::Arch, vec!["gnucash"]),
+                (Repository::Debian, vec!["gnucash"]),
+                (Repository::Fedora, vec!["gnucash"]),
+                (Repository::Ubuntu, vec!["gnucash"]),
+            ]),
             flatpak: Some(Flatpak {
                 name: "org.gnucash.GnuCash",
                 remotes: vec!["fedora", "flathub"],
@@ -699,6 +1063,12 @@ pub fn get_all_packages() -> Vec<Package> {
             key: "gwenview",
             category: "Applications",
             desktop_environment: Some(DesktopEnvironment::KDE),
+            repository: HashMap::from([
+                (Repository::Arch, vec!["gwenview"]),
+                (Repository::Debian, vec!["gwenview"]),
+                (Repository::Fedora, vec!["gwenview"]),
+                (Repository::Ubuntu, vec!["gwenview"]),
+            ]),
             flatpak: Some(Flatpak {
                 name: "org.kde.gwenview",
                 remotes: vec!["fedora", "flathub"],
@@ -715,6 +1085,13 @@ pub fn get_all_packages() -> Vec<Package> {
             key: "htop",
             category: "Server",
             desktop_environment: None,
+            repository: HashMap::from([
+                (Repository::Arch, vec!["htop"]),
+                (Repository::Debian, vec!["htop"]),
+                (Repository::Fedora, vec!["htop"]),
+                (Repository::RedHat, vec!["htop"]),
+                (Repository::Ubuntu, vec!["htop"]),
+            ]),
             flatpak: None,
             snap: None,
         },
@@ -723,6 +1100,9 @@ pub fn get_all_packages() -> Vec<Package> {
             key: "icecat",
             category: "Browsers",
             desktop_environment: None,
+            repository: HashMap::from([
+                (Repository::Fedora, vec!["icecat"]),
+            ]),
             flatpak: None,
             snap: None,
         },
@@ -731,6 +1111,13 @@ pub fn get_all_packages() -> Vec<Package> {
             key: "imagemagick",
             category: "Desktop",
             desktop_environment: None,
+            repository: HashMap::from([
+                (Repository::Arch, vec!["imagemagick"]),
+                (Repository::Debian, vec!["imagemagick"]),
+                (Repository::Fedora, vec!["ImageMagick"]),
+                (Repository::RedHat, vec!["ImageMagick"]),
+                (Repository::Ubuntu, vec!["imagemagick"]),
+            ]),
             flatpak: None,
             snap: None,
         },
@@ -739,6 +1126,9 @@ pub fn get_all_packages() -> Vec<Package> {
             key: "intellij",
             category: "Editors",
             desktop_environment: None,
+            repository: HashMap::from([
+                (Repository::Arch, vec!["intellij-idea-community-edition"]),
+            ]),
             flatpak: Some(Flatpak {
                 name: "com.jetbrains.IntelliJ-IDEA-Community",
                 remotes: vec!["flathub"],
@@ -755,6 +1145,13 @@ pub fn get_all_packages() -> Vec<Package> {
             key: "kate",
             category: "Editors",
             desktop_environment: Some(DesktopEnvironment::KDE),
+            repository: HashMap::from([
+                (Repository::Arch, vec!["kate"]),
+                (Repository::Debian, vec!["kate"]),
+                (Repository::Fedora, vec!["kate"]),
+                (Repository::RedHat, vec!["kate"]),
+                (Repository::Ubuntu, vec!["kate"]),
+            ]),
             flatpak: None,
             snap: Some(Snap {
                 name: "kate",
@@ -768,6 +1165,13 @@ pub fn get_all_packages() -> Vec<Package> {
             key: "kcalc",
             category: "Applications",
             desktop_environment: Some(DesktopEnvironment::KDE),
+            repository: HashMap::from([
+                (Repository::Arch, vec!["kcalc"]),
+                (Repository::Debian, vec!["kcalc"]),
+                (Repository::Fedora, vec!["kcalc"]),
+                (Repository::RedHat, vec!["kcalc"]),
+                (Repository::Ubuntu, vec!["kcalc"]),
+            ]),
             flatpak: Some(Flatpak {
                 name: "org.kde.kcalc",
                 remotes: vec!["fedora", "flathub"],
@@ -784,6 +1188,12 @@ pub fn get_all_packages() -> Vec<Package> {
             key: "knights",
             category: "Games",
             desktop_environment: Some(DesktopEnvironment::KDE),
+            repository: HashMap::from([
+                (Repository::Arch, vec!["knights"]),
+                (Repository::Debian, vec!["knights"]),
+                (Repository::Fedora, vec!["knights"]),
+                (Repository::Ubuntu, vec!["knights"]),
+            ]),
             flatpak: None,
             snap: Some(Snap {
                 name: "knights",
@@ -797,6 +1207,13 @@ pub fn get_all_packages() -> Vec<Package> {
             key: "kmines",
             category: "Games",
             desktop_environment: Some(DesktopEnvironment::KDE),
+            repository: HashMap::from([
+                (Repository::Arch, vec!["kmines"]),
+                (Repository::Debian, vec!["kmines"]),
+                (Repository::Fedora, vec!["kmines"]),
+                (Repository::RedHat, vec!["kmines"]),
+                (Repository::Ubuntu, vec!["kmines"]),
+            ]),
             flatpak: None,
             snap: Some(Snap {
                 name: "kmines",
@@ -810,6 +1227,13 @@ pub fn get_all_packages() -> Vec<Package> {
             key: "ksudoku",
             category: "Games",
             desktop_environment: Some(DesktopEnvironment::KDE),
+            repository: HashMap::from([
+                (Repository::Arch, vec!["ksudoku"]),
+                (Repository::Debian, vec!["ksudoku"]),
+                (Repository::Fedora, vec!["ksudoku"]),
+                (Repository::RedHat, vec!["ksudoku"]),
+                (Repository::Ubuntu, vec!["ksudoku"]),
+            ]),
             flatpak: Some(Flatpak {
                 name: "org.kde.ksudoku",
                 remotes: vec!["fedora", "flathub"],
@@ -826,6 +1250,12 @@ pub fn get_all_packages() -> Vec<Package> {
             key: "kdenlive",
             category: "Multi Media",
             desktop_environment: Some(DesktopEnvironment::KDE),
+            repository: HashMap::from([
+                (Repository::Arch, vec!["kdenlive"]),
+                (Repository::Debian, vec!["kdenlive"]),
+                (Repository::Fedora, vec!["kdenlive"]),
+                (Repository::Ubuntu, vec!["kdenlive"]),
+            ]),
             flatpak: Some(Flatpak {
                 name: "org.kde.kdenlive",
                 remotes: vec!["flathub"],
@@ -842,6 +1272,12 @@ pub fn get_all_packages() -> Vec<Package> {
             key: "kdevelop",
             category: "Editors",
             desktop_environment: Some(DesktopEnvironment::KDE),
+            repository: HashMap::from([
+                (Repository::Arch, vec!["kdevelop"]),
+                (Repository::Debian, vec!["kdevelop"]),
+                (Repository::Fedora, vec!["kdevelop"]),
+                (Repository::Ubuntu, vec!["kdevelop"]),
+            ]),
             flatpak: Some(Flatpak {
                 name: "org.kde.kdevelop",
                 remotes: vec!["flathub"],
@@ -858,6 +1294,12 @@ pub fn get_all_packages() -> Vec<Package> {
             key: "kile",
             category: "Editors",
             desktop_environment: Some(DesktopEnvironment::KDE),
+            repository: HashMap::from([
+                (Repository::Arch, vec!["kile"]),
+                (Repository::Debian, vec!["kile"]),
+                (Repository::Fedora, vec!["kile"]),
+                (Repository::Ubuntu, vec!["kile"]),
+            ]),
             flatpak: None,
             snap: None,
         },
@@ -866,6 +1308,13 @@ pub fn get_all_packages() -> Vec<Package> {
             key: "ksysguard",
             category: "Utilities",
             desktop_environment: Some(DesktopEnvironment::KDE),
+            repository: HashMap::from([
+                (Repository::Arch, vec!["ksysguard"]),
+                (Repository::Debian, vec!["ksysguard"]),
+                (Repository::Fedora, vec!["ksysguard"]),
+                (Repository::RedHat, vec!["ksysguard"]),
+                (Repository::Ubuntu, vec!["ksysguard"]),
+            ]),
             flatpak: None,
             snap: None,
         },
@@ -874,6 +1323,13 @@ pub fn get_all_packages() -> Vec<Package> {
             key: "kwrite",
             category: "Editors",
             desktop_environment: Some(DesktopEnvironment::KDE),
+            repository: HashMap::from([
+                (Repository::Arch, vec!["kwrite"]),
+                (Repository::Debian, vec!["kwrite"]),
+                (Repository::Fedora, vec!["kwrite"]),
+                (Repository::RedHat, vec!["kwrite"]),
+                (Repository::Ubuntu, vec!["kwrite"]),
+            ]),
             flatpak: Some(Flatpak {
                 name: "org.kde.kwrite",
                 remotes: vec!["fedora", "flathub"],
@@ -885,6 +1341,13 @@ pub fn get_all_packages() -> Vec<Package> {
             key: "latex",
             category: "Desktop",
             desktop_environment: None,
+            repository: HashMap::from([
+                (Repository::Arch, vec!["texlive-core", "texlive-latexextra"]),
+                (Repository::Debian, vec!["texlive-latex-base", "texlive-latex-extra"]),
+                (Repository::Fedora, vec!["texlive-latex", "texlive-collection-latexextra"]),
+                (Repository::RedHat, vec!["texlive-latex"]),
+                (Repository::Ubuntu, vec!["texlive-latex-base", "texlive-latex-extra"]),
+            ]),
             flatpak: None,
             snap: None,
         },
@@ -893,6 +1356,13 @@ pub fn get_all_packages() -> Vec<Package> {
             key: "libreoffice",
             category: "Editors",
             desktop_environment: None,
+            repository: HashMap::from([
+                (Repository::Arch, vec!["libreoffice-fresh"]),
+                (Repository::Debian, vec!["libreoffice-writer", "libreoffice-calc", "libreoffice-impress", "libreoffice-draw", "libreoffice-base"]),
+                (Repository::Fedora, vec!["libreoffice-writer", "libreoffice-calc", "libreoffice-impress", "libreoffice-draw", "libreoffice-base"]),
+                (Repository::RedHat, vec!["libreoffice-writer", "libreoffice-calc", "libreoffice-impress", "libreoffice-draw", "libreoffice-base"]),
+                (Repository::Ubuntu, vec!["libreoffice-writer", "libreoffice-calc", "libreoffice-impress", "libreoffice-draw", "libreoffice-base"]),
+            ]),
             flatpak: Some(Flatpak {
                 name: "org.libreoffice.LibreOffice",
                 remotes: vec!["fedora", "flathub"],
@@ -909,6 +1379,13 @@ pub fn get_all_packages() -> Vec<Package> {
             key: "mariadb",
             category: "Server",
             desktop_environment: None,
+            repository: HashMap::from([
+                (Repository::Arch, vec!["mariadb"]),
+                (Repository::Debian, vec!["mariadb-server"]),
+                (Repository::Fedora, vec!["mariadb-server"]),
+                (Repository::RedHat, vec!["mariadb-server"]),
+                (Repository::Ubuntu, vec!["mariadb-server"]),
+            ]),
             flatpak: None,
             snap: None,
         },
@@ -917,6 +1394,12 @@ pub fn get_all_packages() -> Vec<Package> {
             key: "id3v2",
             category: "Desktop",
             desktop_environment: None,
+            repository: HashMap::from([
+                (Repository::Arch, vec!["id3v2"]),
+                (Repository::Debian, vec!["id3v2"]),
+                (Repository::Fedora, vec!["id3v2"]),
+                (Repository::Ubuntu, vec!["id3v2"]),
+            ]),
             flatpak: None,
             snap: None,
         },
@@ -925,6 +1408,12 @@ pub fn get_all_packages() -> Vec<Package> {
             key: "neovim",
             category: "Server",
             desktop_environment: None,
+            repository: HashMap::from([
+                (Repository::Arch, vec!["neovim", "vim", "vim-airline", "vim-ale", "vim-ctrlp", "vim-gitgutter", "vim-nerdtree"]),
+                (Repository::Debian, vec!["neovim", "vim", "vim-airline", "vim-ale", "vim-ctrlp", "vim-gitgutter"]),
+                (Repository::Fedora, vec!["neovim", "vim-enhanced", "vim-airline", "vim-ale", "vim-ctrlp", "vim-gitgutter", "vim-nerdtree"]),
+                (Repository::Ubuntu, vec!["neovim", "vim", "vim-airline", "vim-ale", "vim-ctrlp", "vim-gitgutter"]),
+            ]),
             flatpak: None,
             snap: None,
         },
@@ -933,6 +1422,13 @@ pub fn get_all_packages() -> Vec<Package> {
             key: "nano",
             category: "Server",
             desktop_environment: None,
+            repository: HashMap::from([
+                (Repository::Arch, vec!["nano"]),
+                (Repository::Debian, vec!["nano"]),
+                (Repository::Fedora, vec!["nano"]),
+                (Repository::RedHat, vec!["nano"]),
+                (Repository::Ubuntu, vec!["nano"]),
+            ]),
             flatpak: None,
             snap: None,
         },
@@ -941,6 +1437,13 @@ pub fn get_all_packages() -> Vec<Package> {
             key: "node",
             category: "Server",
             desktop_environment: None,
+            repository: HashMap::from([
+                (Repository::Arch, vec!["nodejs", "npm"]),
+                (Repository::Debian, vec!["nodejs", "npm"]),
+                (Repository::Fedora, vec!["nodejs", "npm"]),
+                (Repository::RedHat, vec!["nodejs", "npm"]),
+                (Repository::Ubuntu, vec!["nodejs", "npm"]),
+            ]),
             flatpak: None,
             snap: Some(Snap {
                 name: "node",
@@ -954,6 +1457,12 @@ pub fn get_all_packages() -> Vec<Package> {
             key: "okular",
             category: "Applications",
             desktop_environment: Some(DesktopEnvironment::KDE),
+            repository: HashMap::from([
+                (Repository::Arch, vec!["okular"]),
+                (Repository::Debian, vec!["okular"]),
+                (Repository::Fedora, vec!["okular"]),
+                (Repository::Ubuntu, vec!["okular"]),
+            ]),
             flatpak: Some(Flatpak {
                 name: "org.kde.okular",
                 remotes: vec!["fedora", "flathub"],
@@ -970,6 +1479,12 @@ pub fn get_all_packages() -> Vec<Package> {
             key: "plasma-discover",
             category: "Software",
             desktop_environment: Some(DesktopEnvironment::KDE),
+            repository: HashMap::from([
+                (Repository::Arch, vec!["discover"]),
+                (Repository::Debian, vec!["plasma-discover"]),
+                (Repository::Fedora, vec!["plasma-discover"]),
+                (Repository::Ubuntu, vec!["plasma-discover"]),
+            ]),
             flatpak: None,
             snap: None,
         },
@@ -978,6 +1493,13 @@ pub fn get_all_packages() -> Vec<Package> {
             key: "plasma-systemmonitor",
             category: "Utilities",
             desktop_environment: Some(DesktopEnvironment::KDE),
+            repository: HashMap::from([
+                (Repository::Arch, vec!["plasma-systemmonitor"]),
+                (Repository::Debian, vec!["plasma-systemmonitor"]),
+                (Repository::Fedora, vec!["plasma-systemmonitor"]),
+                (Repository::RedHat, vec!["plasma-systemmonitor"]),
+                (Repository::Ubuntu, vec!["plasma-systemmonitor"]),
+            ]),
             flatpak: None,
             snap: None,
         },
@@ -986,6 +1508,13 @@ pub fn get_all_packages() -> Vec<Package> {
             key: "podman",
             category: "Server",
             desktop_environment: None,
+            repository: HashMap::from([
+                (Repository::Arch, vec!["podman"]),
+                (Repository::Debian, vec!["podman"]),
+                (Repository::Fedora, vec!["podman"]),
+                (Repository::RedHat, vec!["podman"]),
+                (Repository::Ubuntu, vec!["podman"]),
+            ]),
             flatpak: None,
             snap: None,
         },
@@ -994,6 +1523,10 @@ pub fn get_all_packages() -> Vec<Package> {
             key: "pycharm",
             category: "Editors",
             desktop_environment: None,
+            repository: HashMap::from([
+                (Repository::Arch, vec!["pycharm-community-edition"]),
+                (Repository::Fedora, vec!["pycharm-community"]),
+            ]),
             flatpak: Some(Flatpak {
                 name: "com.jetbrains.PyCharm-Community",
                 remotes: vec!["flathub"],
@@ -1010,6 +1543,9 @@ pub fn get_all_packages() -> Vec<Package> {
             key: "qtile",
             category: "Desktop",
             desktop_environment: None,
+            repository: HashMap::from([
+                (Repository::Arch, vec!["qtile", "alacritty", "rofi", "numlockx", "playerctl"]),
+            ]),
             flatpak: None,
             snap: None,
         },
@@ -1018,6 +1554,12 @@ pub fn get_all_packages() -> Vec<Package> {
             key: "rhythmbox",
             category: "Multi Media",
             desktop_environment: Some(DesktopEnvironment::Gnome),
+            repository: HashMap::from([
+                (Repository::Arch, vec!["rhythmbox"]),
+                (Repository::Debian, vec!["rhythmbox"]),
+                (Repository::Fedora, vec!["rhythmbox"]),
+                (Repository::Ubuntu, vec!["rhythmbox"]),
+            ]),
             flatpak: Some(Flatpak {
                 name: "org.gnome.Rhythmbox3",
                 remotes: vec!["fedora", "flathub"],
@@ -1029,6 +1571,13 @@ pub fn get_all_packages() -> Vec<Package> {
             key: "rust",
             category: "Server",
             desktop_environment: None,
+            repository: HashMap::from([
+                (Repository::Arch, vec!["rustup"]),
+                (Repository::Debian, vec!["rustc", "rustfmt", "cargo"]),
+                (Repository::Fedora, vec!["rust", "rustfmt", "cargo"]),
+                (Repository::RedHat, vec!["rust", "rustfmt", "cargo"]),
+                (Repository::Ubuntu, vec!["rustc", "rustfmt", "cargo"]),
+            ]),
             flatpak: None,
             snap: None,
         },
@@ -1037,6 +1586,12 @@ pub fn get_all_packages() -> Vec<Package> {
             key: "shotwell",
             category: "Multi Media",
             desktop_environment: Some(DesktopEnvironment::Gnome),
+            repository: HashMap::from([
+                (Repository::Arch, vec!["shotwell"]),
+                (Repository::Debian, vec!["shotwell"]),
+                (Repository::Fedora, vec!["shotwell"]),
+                (Repository::Ubuntu, vec!["shotwell"]),
+            ]),
             flatpak: Some(Flatpak {
                 name: "org.gnome.Shotwell",
                 remotes: vec!["fedora", "flathub"],
@@ -1048,6 +1603,12 @@ pub fn get_all_packages() -> Vec<Package> {
             key: "simple-scan",
             category: "Utilities",
             desktop_environment: None,
+            repository: HashMap::from([
+                (Repository::Arch, vec!["simple-scan"]),
+                (Repository::Debian, vec!["simple-scan"]),
+                (Repository::Fedora, vec!["simple-scan"]),
+                (Repository::Ubuntu, vec!["simple-scan"]),
+            ]),
             flatpak: None,
             snap: None,
         },
@@ -1056,6 +1617,12 @@ pub fn get_all_packages() -> Vec<Package> {
             key: "snapd",
             category: "Server",
             desktop_environment: None,
+            repository: HashMap::from([
+                (Repository::Debian, vec!["snapd"]),
+                (Repository::Fedora, vec!["snapd"]),
+                (Repository::RedHat, vec!["snapd"]),
+                (Repository::Ubuntu, vec!["snapd"]),
+            ]),
             flatpak: None,
             snap: None,
         },
@@ -1064,6 +1631,7 @@ pub fn get_all_packages() -> Vec<Package> {
             key: "snap-store",
             category: "Software",
             desktop_environment: None,
+            repository: HashMap::new(),
             flatpak: None,
             snap: Some(Snap {
                 name: "snap-store",
@@ -1077,6 +1645,13 @@ pub fn get_all_packages() -> Vec<Package> {
             key: "spectacle",
             category: "Utilities",
             desktop_environment: Some(DesktopEnvironment::KDE),
+            repository: HashMap::from([
+                (Repository::Arch, vec!["spectacle"]),
+                (Repository::Debian, vec!["spectacle"]),
+                (Repository::Fedora, vec!["spectacle"]),
+                (Repository::RedHat, vec!["spectacle"]),
+                (Repository::Ubuntu, vec!["spectacle"]),
+            ]),
             flatpak: None,
             snap: None,
         },
@@ -1085,6 +1660,13 @@ pub fn get_all_packages() -> Vec<Package> {
             key: "ssh",
             category: "Server",
             desktop_environment: None,
+            repository: HashMap::from([
+                (Repository::Arch, vec!["libssh", "openssh"]),
+                (Repository::Debian, vec!["ssh"]),
+                (Repository::Fedora, vec!["libssh", "openssh"]),
+                (Repository::RedHat, vec!["libssh", "openssh"]),
+                (Repository::Ubuntu, vec!["ssh"]),
+            ]),
             flatpak: None,
             snap: None,
         },
@@ -1093,6 +1675,9 @@ pub fn get_all_packages() -> Vec<Package> {
             key: "steam",
             category: "Games",
             desktop_environment: None,
+            repository: HashMap::from([
+                (Repository::Arch, vec!["steam"]),
+            ]),
             flatpak: Some(Flatpak {
                 name: "com.valvesoftware.Steam",
                 remotes: vec!["flathub"],
@@ -1109,6 +1694,12 @@ pub fn get_all_packages() -> Vec<Package> {
             key: "supertuxkart",
             category: "Games",
             desktop_environment: None,
+            repository: HashMap::from([
+                (Repository::Arch, vec!["supertuxkart"]),
+                (Repository::Debian, vec!["supertuxkart"]),
+                (Repository::Fedora, vec!["supertuxkart"]),
+                (Repository::Ubuntu, vec!["supertuxkart"]),
+            ]),
             flatpak: Some(Flatpak {
                 name: "net.supertuxkart.SuperTuxKart",
                 remotes: vec!["fedora", "flathub"],
@@ -1125,6 +1716,13 @@ pub fn get_all_packages() -> Vec<Package> {
             key: "thunderbird",
             category: "Communication",
             desktop_environment: None,
+            repository: HashMap::from([
+                (Repository::Arch, vec!["thunderbird"]),
+                (Repository::Debian, vec!["thunderbird"]),
+                (Repository::Fedora, vec!["thunderbird"]),
+                (Repository::RedHat, vec!["thunderbird"]),
+                (Repository::Ubuntu, vec!["thunderbird"]),
+            ]),
             flatpak: Some(Flatpak {
                 name: "org.mozilla.Thunderbird",
                 remotes: vec!["fedora", "flathub"],
@@ -1141,6 +1739,7 @@ pub fn get_all_packages() -> Vec<Package> {
             key: "torbrowser-launcher",
             category: "Browsers",
             desktop_environment: None,
+            repository: HashMap::new(),
             flatpak: Some(Flatpak {
                 name: "com.github.micahflee.torbrowser-launcher",
                 remotes: vec!["flathub"],
@@ -1152,6 +1751,13 @@ pub fn get_all_packages() -> Vec<Package> {
             key: "totem",
             category: "Multi Media",
             desktop_environment: Some(DesktopEnvironment::Gnome),
+            repository: HashMap::from([
+                (Repository::Arch, vec!["totem"]),
+                (Repository::Debian, vec!["totem"]),
+                (Repository::Fedora, vec!["totem"]),
+                (Repository::RedHat, vec!["totem"]),
+                (Repository::Ubuntu, vec!["totem"]),
+            ]),
             flatpak: Some(Flatpak {
                 name: "org.gnome.Totem",
                 remotes: vec!["fedora", "flathub"],
@@ -1163,6 +1769,12 @@ pub fn get_all_packages() -> Vec<Package> {
             key: "transmission-gtk",
             category: "Applications",
             desktop_environment: Some(DesktopEnvironment::Gnome),
+            repository: HashMap::from([
+                (Repository::Arch, vec!["transmission-gtk"]),
+                (Repository::Debian, vec!["transmission-gtk"]),
+                (Repository::Fedora, vec!["transmission-gtk"]),
+                (Repository::Ubuntu, vec!["transmission-gtk"]),
+            ]),
             flatpak: Some(Flatpak {
                 name: "com.transmissionbt.Transmission",
                 remotes: vec!["fedora", "flathub"],
@@ -1174,6 +1786,12 @@ pub fn get_all_packages() -> Vec<Package> {
             key: "transmission-qt",
             category: "Applications",
             desktop_environment: Some(DesktopEnvironment::KDE),
+            repository: HashMap::from([
+                (Repository::Arch, vec!["transmission-qt"]),
+                (Repository::Debian, vec!["transmission-qt"]),
+                (Repository::Fedora, vec!["transmission-qt"]),
+                (Repository::Ubuntu, vec!["transmission-qt"]),
+            ]),
             flatpak: Some(Flatpak {
                 name: "com.transmissionbt.Transmission",
                 remotes: vec!["fedora", "flathub"],
@@ -1185,6 +1803,13 @@ pub fn get_all_packages() -> Vec<Package> {
             key: "ibus-unikey",
             category: "Desktop",
             desktop_environment: None,
+            repository: HashMap::from([
+                (Repository::Arch, vec!["ibus-unikey"]),
+                (Repository::Debian, vec!["ibus-unikey"]),
+                (Repository::Fedora, vec!["ibus-unikey"]),
+                (Repository::RedHat, vec!["https://rpmfind.net/linux/fedora/linux/releases/34/Everything/x86_64/os/Packages/i/ibus-unikey-0.6.1-26.20190311git46b5b9e.fc34.x86_64.rpm"]),
+                (Repository::Ubuntu, vec!["ibus-unikey"]),
+            ]),
             flatpak: None,
             snap: None,
         },
@@ -1193,6 +1818,13 @@ pub fn get_all_packages() -> Vec<Package> {
             key: "vim",
             category: "Server",
             desktop_environment: None,
+            repository: HashMap::from([
+                (Repository::Arch, vec!["vim", "vim-airline", "vim-ale", "vim-ctrlp", "vim-gitgutter", "vim-nerdtree"]),
+                (Repository::Debian, vec!["vim", "vim-airline", "vim-ale", "vim-ctrlp", "vim-gitgutter"]),
+                (Repository::Fedora, vec!["vim-enhanced", "vim-airline", "vim-ale", "vim-ctrlp", "vim-gitgutter", "vim-nerdtree"]),
+                (Repository::RedHat, vec!["vim-enhanced"]),
+                (Repository::Ubuntu, vec!["vim", "vim-airline", "vim-ale", "vim-ctrlp", "vim-gitgutter"]),
+            ]),
             flatpak: None,
             snap: None,
         },
@@ -1201,6 +1833,13 @@ pub fn get_all_packages() -> Vec<Package> {
             key: "virt-manager",
             category: "Applications",
             desktop_environment: None,
+            repository: HashMap::from([
+                (Repository::Arch, vec!["virt-manager"]),
+                (Repository::Debian, vec!["virt-manager"]),
+                (Repository::Fedora, vec!["virt-manager"]),
+                (Repository::RedHat, vec!["virt-manager"]),
+                (Repository::Ubuntu, vec!["virt-manager"]),
+            ]),
             flatpak: None,
             snap: None,
         },
@@ -1209,6 +1848,13 @@ pub fn get_all_packages() -> Vec<Package> {
             key: "vlc",
             category: "Multi Media",
             desktop_environment: None,
+            repository: HashMap::from([
+                (Repository::Arch, vec!["vlc"]),
+                (Repository::Debian, vec!["vlc"]),
+                (Repository::Fedora, vec!["vlc"]),
+                (Repository::RedHat, vec!["vlc"]),
+                (Repository::Ubuntu, vec!["vlc"]),
+            ]),
             flatpak: Some(Flatpak {
                 name: "org.videolan.VLC",
                 remotes: vec!["flathub"],
@@ -1225,6 +1871,12 @@ pub fn get_all_packages() -> Vec<Package> {
             key: "code",
             category: "Editors",
             desktop_environment: None,
+            repository: HashMap::from([
+                (Repository::Arch, vec!["code"]),
+                (Repository::Debian, vec!["code"]),
+                (Repository::Fedora, vec!["code"]),
+                (Repository::RedHat, vec!["code"]),
+            ]),
             flatpak: Some(Flatpak {
                 name: "com.visualstudio.code",
                 remotes: vec!["flathub"],
@@ -1241,6 +1893,10 @@ pub fn get_all_packages() -> Vec<Package> {
             key: "xonotic",
             category: "Games",
             desktop_environment: None,
+            repository: HashMap::from([
+                (Repository::Arch, vec!["xonotic"]),
+                (Repository::Fedora, vec!["xonotic"]),
+            ]),
             flatpak: Some(Flatpak {
                 name: "org.xonotic.Xonotic",
                 remotes: vec!["flathub"],
@@ -1257,6 +1913,13 @@ pub fn get_all_packages() -> Vec<Package> {
             key: "yt-dlp",
             category: "Desktop",
             desktop_environment: None,
+            repository: HashMap::from([
+                (Repository::Arch, vec!["yt-dlp"]),
+                (Repository::Debian, vec!["yt-dlp"]),
+                (Repository::Fedora, vec!["yt-dlp"]),
+                (Repository::RedHat, vec!["yt-dlp"]),
+                (Repository::Ubuntu, vec!["yt-dlp"]),
+            ]),
             flatpak: None,
             snap: None,
         },

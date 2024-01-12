@@ -33,7 +33,7 @@ pub fn install(
     distribution: &Distribution,
     info: &mut Info,
 ) -> Result<(), io::Error> {
-    distribution.install("snap", info)?;
+    distribution.install_package("snapd", info)?;
 
     if let Some(snp) = &package.snap {
         if !info.snap_installed.contains(&snp.name.to_owned()) {
