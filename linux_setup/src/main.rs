@@ -207,11 +207,7 @@ fn run_category_select(
 
     let mut missing_desktop_environment: bool = false;
 
-    for package in package::get_all_packages() {
-        if &package.category != category {
-            continue;
-        }
-
+    for package in package::get_category_packages(category) {
         if !distribution.is_available(&package)
             && !flatpak::is_available(&package)
             && !snap::is_available(&package)
