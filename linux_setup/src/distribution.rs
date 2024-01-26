@@ -52,6 +52,52 @@ pub struct Distribution {
 }
 
 impl Distribution {
+    pub fn new() -> Result<Self, io::Error> {
+        match fs::read_to_string("/etc/os-release")? {
+            x if x.contains("Arch") => Ok(Distribution {
+                name: DistributionName::Arch,
+                repository: Repository::Arch,
+                package_manager: PackageManager::PACMAN,
+            }),
+            x if x.contains("Alma") => Ok(Distribution {
+                name: DistributionName::Alma,
+                repository: Repository::RedHat,
+                package_manager: PackageManager::DNF,
+            }),
+            x if x.contains("CentOS") => Ok(Distribution {
+                name: DistributionName::CentOS,
+                repository: Repository::RedHat,
+                package_manager: PackageManager::DNF,
+            }),
+            x if x.contains("Debian") => Ok(Distribution {
+                name: DistributionName::Debian,
+                repository: Repository::Debian,
+                package_manager: PackageManager::APT,
+            }),
+            x if x.contains("Silverblue") => Ok(Distribution {
+                name: DistributionName::SilverBlue,
+                repository: Repository::Fedora,
+                package_manager: PackageManager::RPMOSTree,
+            }),
+            x if x.contains("Fedora") => Ok(Distribution {
+                name: DistributionName::Fedora,
+                repository: Repository::Fedora,
+                package_manager: PackageManager::DNF,
+            }),
+            x if x.contains("Mint") => Ok(Distribution {
+                name: DistributionName::Mint,
+                repository: Repository::Ubuntu,
+                package_manager: PackageManager::APT,
+            }),
+            x if x.contains("Ubuntu") => Ok(Distribution {
+                name: DistributionName::Ubuntu,
+                repository: Repository::Ubuntu,
+                package_manager: PackageManager::APT,
+            }),
+            _ => Err(io::Error::other("distribution not found")),
+        }
+    }
+
     pub fn setup(&self, info: &mut Info) -> Result<(), io::Error> {
         println!("Setup repository...");
 
@@ -362,51 +408,5 @@ impl Distribution {
         }
 
         Ok(packages)
-    }
-}
-
-pub fn get_distribution() -> Result<Distribution, io::Error> {
-    match fs::read_to_string("/etc/os-release")? {
-        x if x.contains("Arch") => Ok(Distribution {
-            name: DistributionName::Arch,
-            repository: Repository::Arch,
-            package_manager: PackageManager::PACMAN,
-        }),
-        x if x.contains("Alma") => Ok(Distribution {
-            name: DistributionName::Alma,
-            repository: Repository::RedHat,
-            package_manager: PackageManager::DNF,
-        }),
-        x if x.contains("CentOS") => Ok(Distribution {
-            name: DistributionName::CentOS,
-            repository: Repository::RedHat,
-            package_manager: PackageManager::DNF,
-        }),
-        x if x.contains("Debian") => Ok(Distribution {
-            name: DistributionName::Debian,
-            repository: Repository::Debian,
-            package_manager: PackageManager::APT,
-        }),
-        x if x.contains("Silverblue") => Ok(Distribution {
-            name: DistributionName::SilverBlue,
-            repository: Repository::Fedora,
-            package_manager: PackageManager::RPMOSTree,
-        }),
-        x if x.contains("Fedora") => Ok(Distribution {
-            name: DistributionName::Fedora,
-            repository: Repository::Fedora,
-            package_manager: PackageManager::DNF,
-        }),
-        x if x.contains("Mint") => Ok(Distribution {
-            name: DistributionName::Mint,
-            repository: Repository::Ubuntu,
-            package_manager: PackageManager::APT,
-        }),
-        x if x.contains("Ubuntu") => Ok(Distribution {
-            name: DistributionName::Ubuntu,
-            repository: Repository::Ubuntu,
-            package_manager: PackageManager::APT,
-        }),
-        _ => Err(io::Error::other("distribution not found")),
     }
 }

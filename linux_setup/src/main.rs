@@ -184,7 +184,9 @@ fn run_package_select(
         other::uninstall(package, info)?;
     }
 
-    (package.pre_install)(distribution, info, &method)?;
+    if let Some(pre_install) = &package.pre_install {
+        (pre_install)(distribution, info, &method)?;
+    }
     match method {
         InstallMethod::Repository => distribution.install(package, info)?,
         InstallMethod::Flatpak => run_flatpak_remote_select(package, distribution, info)?,
@@ -192,7 +194,10 @@ fn run_package_select(
         InstallMethod::Other => other::install(package, info)?,
         _ => (),
     }
-    (package.post_install)(distribution, &method)
+    if let Some(post_install) = &package.post_install {
+        (post_install)(distribution, &method)?;
+    }
+    Ok(())
 }
 
 fn run_category_select(
@@ -398,7 +403,7 @@ fn main() -> Result<(), io::Error> {
         .run()
         .is_ok();
 
-    let distribution: Distribution = distribution::get_distribution()?;
+    let distribution: Distribution = distribution::Distribution::new()?;
     let repository_installed: Vec<String> = distribution.get_installed()?;
 
     let has_flatpak: bool = Operation::new().command("flatpak --version").run().is_ok();
