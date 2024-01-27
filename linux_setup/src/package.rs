@@ -301,9 +301,9 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                                 &bashrc,
                                 "export GOPATH",
                                 r#"
-    export GOPATH=$HOME/.go
-    export PATH=$PATH:$GOPATH/bin
-    "#,
+export GOPATH=$HOME/.go
+export PATH=$PATH:$GOPATH/bin
+"#,
                                 false,
                             )?;
 
@@ -381,46 +381,46 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                         fs::write(
                             &config_file,
                             r#"""""""""""""""""""""""""""""""""""""""""
-    " neovim settings
+" neovim settings
 
-    set noswapfile
-    set nobackup
-    set nowritebackup
+set noswapfile
+set nobackup
+set nowritebackup
 
-    set updatetime=300
-    set scrolloff=10
-    set number
-    set relativenumber
-    set ignorecase smartcase
-    set incsearch hlsearch
-    set foldmethod=indent
-    set foldlevel=99
+set updatetime=300
+set scrolloff=10
+set number
+set relativenumber
+set ignorecase smartcase
+set incsearch hlsearch
+set foldmethod=indent
+set foldlevel=99
 
-    syntax on
-    colorscheme desert
-    filetype plugin indent on
+syntax on
+colorscheme desert
+filetype plugin indent on
 
-    """"""""""""""""""""""""""""""""""""""""
-    " normal mode remaps
+""""""""""""""""""""""""""""""""""""""""
+" normal mode remaps
 
-    let mapleader = " "
+let mapleader = " "
 
-    " window split
-    nnoremap <Leader>vs <C-w>v
-    nnoremap <Leader>hs <C-w>s
+" window split
+nnoremap <Leader>vs <C-w>v
+nnoremap <Leader>hs <C-w>s
 
-    " window navigation
-    nnoremap <C-h> <C-w>h
-    nnoremap <C-j> <C-w>j
-    nnoremap <C-k> <C-w>k
-    nnoremap <C-l> <C-w>l
+" window navigation
+nnoremap <C-h> <C-w>h
+nnoremap <C-j> <C-w>j
+nnoremap <C-k> <C-w>k
+nnoremap <C-l> <C-w>l
 
-    " text insert
-    nnoremap <Leader>go iif err != nil {}<ESC>
+" text insert
+nnoremap <Leader>go iif err != nil {}<ESC>
 
-    " file explore
-    nnoremap <Leader>ex :Explore<CR>
-    "#,
+" file explore
+nnoremap <Leader>ex :Explore<CR>
+"#,
                         )?;
         
                         if distribution.repository != Repository::RedHat {
@@ -439,25 +439,25 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                                 &config_file,
                                 "ale settings",
                                 r#"
-    """"""""""""""""""""""""""""""""""""""""
-    " ale settings
+""""""""""""""""""""""""""""""""""""""""
+" ale settings
 
-    let g:ale_fix_on_save = 1
-    let g:ale_completion_enabled = 1
-    let g:ale_linters = { "go": ["gopls"], "rust": ["analyzer"] }
-    let g:ale_fixers = { "*": ["remove_trailing_lines", "trim_whitespace"], "go": ["gofmt"], "rust": ["rustfmt"] }
+let g:ale_fix_on_save = 1
+let g:ale_completion_enabled = 1
+let g:ale_linters = { "go": ["gopls"], "rust": ["analyzer"] }
+let g:ale_fixers = { "*": ["remove_trailing_lines", "trim_whitespace"], "go": ["gofmt"], "rust": ["rustfmt"] }
 
-    nnoremap K :ALEHover<CR>
-    nnoremap gd :ALEGoToDefinition<CR>
-    nnoremap gn :ALERename<CR>
-    nnoremap gr :ALEFindReferences<CR>
+nnoremap K :ALEHover<CR>
+nnoremap gd :ALEGoToDefinition<CR>
+nnoremap gn :ALERename<CR>
+nnoremap gr :ALEFindReferences<CR>
 
-    """"""""""""""""""""""""""""""""""""""""
-    " insert mode remaps
+""""""""""""""""""""""""""""""""""""""""
+" insert mode remaps
 
-    inoremap <silent><expr> <Tab> pumvisible() ? "\<C-n>" : "\<TAB>"
-    inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-n>" : "\<S-TAB>"
-    "#,
+inoremap <silent><expr> <Tab> pumvisible() ? "\<C-n>" : "\<TAB>"
+inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-n>" : "\<S-TAB>"
+"#,
                                 false,
                             )?;
                         }
@@ -642,51 +642,51 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                         fs::write(
                             &config_file,
                             r#"""""""""""""""""""""""""""""""""""""""""
-    " vim settings
+" vim settings
 
-    set nocompatible
+set nocompatible
 
-    set encoding=utf-8
+set encoding=utf-8
 
-    set noswapfile
-    set nobackup
-    set nowritebackup
+set noswapfile
+set nobackup
+set nowritebackup
 
-    set mouse=a
-    set updatetime=300
-    set scrolloff=10
-    set number
-    set relativenumber
-    set ignorecase smartcase
-    set incsearch hlsearch
-    set foldmethod=indent
-    set foldlevel=99
+set mouse=a
+set updatetime=300
+set scrolloff=10
+set number
+set relativenumber
+set ignorecase smartcase
+set incsearch hlsearch
+set foldmethod=indent
+set foldlevel=99
 
-    syntax on
-    colorscheme desert
-    filetype plugin indent on
+syntax on
+colorscheme desert
+filetype plugin indent on
 
-    """"""""""""""""""""""""""""""""""""""""
-    " normal mode remaps
+""""""""""""""""""""""""""""""""""""""""
+" normal mode remaps
 
-    let mapleader = " "
+let mapleader = " "
 
-    " window split
-    nnoremap <Leader>vs <C-w>v
-    nnoremap <Leader>hs <C-w>s
+" window split
+nnoremap <Leader>vs <C-w>v
+nnoremap <Leader>hs <C-w>s
 
-    " window navigation
-    nnoremap <C-h> <C-w>h
-    nnoremap <C-j> <C-w>j
-    nnoremap <C-k> <C-w>k
-    nnoremap <C-l> <C-w>l
+" window navigation
+nnoremap <C-h> <C-w>h
+nnoremap <C-j> <C-w>j
+nnoremap <C-k> <C-w>k
+nnoremap <C-l> <C-w>l
 
-    " text insert
-    nnoremap <Leader>go iif err != nil {}<ESC>
+" text insert
+nnoremap <Leader>go iif err != nil {}<ESC>
 
-    " file explore
-    nnoremap <Leader>ex :Explore<CR>
-    "#,
+" file explore
+nnoremap <Leader>ex :Explore<CR>
+"#,
                         )?;
         
                         if distribution.repository != Repository::RedHat {
@@ -705,25 +705,25 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                                 &config_file,
                                 "ale settings",
                                 r#"
-    """"""""""""""""""""""""""""""""""""""""
-    " ale settings
+""""""""""""""""""""""""""""""""""""""""
+" ale settings
 
-    let g:ale_fix_on_save = 1
-    let g:ale_completion_enabled = 1
-    let g:ale_linters = { "go": ["gopls"], "rust": ["analyzer"] }
-    let g:ale_fixers = { "*": ["remove_trailing_lines", "trim_whitespace"], "go": ["gofmt"], "rust": ["rustfmt"] }
+let g:ale_fix_on_save = 1
+let g:ale_completion_enabled = 1
+let g:ale_linters = { "go": ["gopls"], "rust": ["analyzer"] }
+let g:ale_fixers = { "*": ["remove_trailing_lines", "trim_whitespace"], "go": ["gofmt"], "rust": ["rustfmt"] }
 
-    nnoremap K :ALEHover<CR>
-    nnoremap gd :ALEGoToDefinition<CR>
-    nnoremap gn :ALERename<CR>
-    nnoremap gr :ALEFindReferences<CR>
+nnoremap K :ALEHover<CR>
+nnoremap gd :ALEGoToDefinition<CR>
+nnoremap gn :ALERename<CR>
+nnoremap gr :ALEFindReferences<CR>
 
-    """"""""""""""""""""""""""""""""""""""""
-    " insert mode remaps
+""""""""""""""""""""""""""""""""""""""""
+" insert mode remaps
 
-    inoremap <silent><expr> <Tab> pumvisible() ? "\<C-n>" : "\<TAB>"
-    inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-n>" : "\<S-TAB>"
-    "#,
+inoremap <silent><expr> <Tab> pumvisible() ? "\<C-n>" : "\<TAB>"
+inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-n>" : "\<S-TAB>"
+"#,
                                 false,
                             )?;
                         }
@@ -2275,23 +2275,23 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                         fs::write(
                             format!("{}{}", &home_dir, "/.config/Code/User/settings.json"),
                             r#"{
-    "[css]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
-    "[html]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
-    "[javascript]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
-    "[json]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
-    "[jsonc]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
-    "[scss]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
-    "[typescript]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
-    "editor.formatOnSave": true,
-    "editor.rulers": [80, 160],
-    "extensions.ignoreRecommendations": true,
-    "git.openRepositoryInParentFolders": "always",
-    "telemetry.telemetryLevel": "off",
-    "vim.smartRelativeLine": true,
-    "vim.useCtrlKeys": false,
-    "workbench.startupEditor": "none"
-    }
-    "#,
+  "[css]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+  "[html]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+  "[javascript]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+  "[json]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+  "[jsonc]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+  "[scss]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+  "[typescript]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+  "editor.formatOnSave": true,
+  "editor.rulers": [80, 160],
+  "extensions.ignoreRecommendations": true,
+  "git.openRepositoryInParentFolders": "always",
+  "telemetry.telemetryLevel": "off",
+  "vim.smartRelativeLine": true,
+  "vim.useCtrlKeys": false,
+  "workbench.startupEditor": "none",
+}
+"#,
                         )?;
                     }
                     Ok(())
