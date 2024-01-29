@@ -73,8 +73,8 @@ pub struct Package {
     pub flatpak: Option<Flatpak>,
     pub snap: Option<Snap>,
     pub other: Option<OtherPackage>,
-    pub pre_install: Box<dyn Fn(&Distribution, &mut Info, &InstallMethod) -> Result<(), io::Error>>,
-    pub post_install: Box<dyn Fn(&Distribution, &InstallMethod) -> Result<(), io::Error>>,
+    pub pre_install: Option<Box<dyn Fn(&Distribution, &mut Info, &InstallMethod) -> Result<(), io::Error>>>,
+    pub post_install: Option<Box<dyn Fn(&Distribution, &InstallMethod) -> Result<(), io::Error>>>,
 }
 
 impl Package {
@@ -86,8 +86,8 @@ impl Package {
             flatpak: None,
             snap: None,
             other: None,
-            pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
-            post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
+            pre_install: None,
+            post_install: None,
         }
     }
 }
@@ -108,8 +108,8 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                 flatpak: None,
                 snap: None,
                 other: None,
-                pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
-                post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
+                pre_install: None,
+                post_install: None,
             },
             Package {
                 name: "cURL - Client URL",
@@ -124,8 +124,8 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                 flatpak: None,
                 snap: None,
                 other: None,
-                pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
-                post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
+                pre_install: None,
+                post_install: None,
             },
             Package {
                 name: "dotnet - C# runtime 8.0 LTS",
@@ -145,7 +145,7 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                     channel: "",
                 }),
                 other: None,
-                pre_install: Box::new(|distribution: &Distribution, info: &mut Info, method: &InstallMethod| {
+                pre_install: Some(Box::new(|distribution: &Distribution, info: &mut Info, method: &InstallMethod| {
                     if method == &InstallMethod::Repository {
                         if distribution.repository == Repository::Debian {
                             distribution.install_package("wget", info)?;
@@ -168,8 +168,8 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                         }
                     }
                     Ok(())
-                }),
-                post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
+                })),
+                post_install: None,
             },
             Package {
                 name: "dotnet - C# SDK 8.0 LTS",
@@ -189,7 +189,7 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                     channel: "8.0/stable",
                 }),
                 other: None,
-                pre_install: Box::new(|distribution: &Distribution, info: &mut Info, method: &InstallMethod| {
+                pre_install: Some(Box::new(|distribution: &Distribution, info: &mut Info, method: &InstallMethod| {
                     if method == &InstallMethod::Repository {
                         if distribution.repository == Repository::Debian {
                             distribution.install_package("wget", info)?;
@@ -212,8 +212,8 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                         }
                     }
                     Ok(())
-                }),
-                post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
+                })),
+                post_install: None,
             },
             Package {
                 name: "Flatpak",
@@ -228,8 +228,8 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                 flatpak: None,
                 snap: None,
                 other: None,
-                pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
-                post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
+                pre_install: None,
+                post_install: None,
             },
             Package {
                 name: "Flutter",
@@ -243,8 +243,8 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                     channel: "",
                 }),
                 other: None,
-                pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
-                post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
+                pre_install: None,
+                post_install: None,
             },
             Package {
                 name: "git - Version Control",
@@ -259,8 +259,8 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                 flatpak: None,
                 snap: None,
                 other: None,
-                pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
-                post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
+                pre_install: None,
+                post_install: None,
             },
             Package {
                 name: "Go Language",
@@ -280,7 +280,7 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                     channel: "",
                 }),
                 other: None,
-                pre_install: Box::new(|_: &Distribution, _: &mut Info, method: &InstallMethod| {
+                pre_install: Some(Box::new(|_: &Distribution, _: &mut Info, method: &InstallMethod| {
                     let home_dir: String = env::var("HOME").expect("HOME directory could not be determined");
                     if method == &InstallMethod::Uninstall {
                         Operation::new()
@@ -288,8 +288,8 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                             .run()?;
                     }
                     Ok(())
-                }),
-                post_install: Box::new(|distribution: &Distribution, method: &InstallMethod| {
+                })),
+                post_install: Some(Box::new(|distribution: &Distribution, method: &InstallMethod| {
                     let home_dir: String = env::var("HOME").expect("HOME directory could not be determined");
                     let bashrc: String = format!("{}{}", &home_dir, "/.bashrc");
                     if method != &InstallMethod::Uninstall {
@@ -301,9 +301,9 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                                 &bashrc,
                                 "export GOPATH",
                                 r#"
-    export GOPATH=$HOME/.go
-    export PATH=$PATH:$GOPATH/bin
-    "#,
+export GOPATH=$HOME/.go
+export PATH=$PATH:$GOPATH/bin
+"#,
                                 false,
                             )?;
 
@@ -314,7 +314,7 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                         }
                     }
                     Ok(())
-                }),
+                })),
             },
             Package {
                 name: "htop - Process Reviewer",
@@ -329,8 +329,8 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                 flatpak: None,
                 snap: None,
                 other: None,
-                pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
-                post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
+                pre_install: None,
+                post_install: None,
             },
             Package {
                 name: "MariaDB - Database",
@@ -345,8 +345,8 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                 flatpak: None,
                 snap: None,
                 other: None,
-                pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
-                post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
+                pre_install: None,
+                post_install: None,
             },
             Package {
                 name: "neovim - Text Editor",
@@ -360,7 +360,7 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                 flatpak: None,
                 snap: None,
                 other: None,
-                pre_install: Box::new(|_: &Distribution, _: &mut Info, method: &InstallMethod| {
+                pre_install: Some(Box::new(|_: &Distribution, _: &mut Info, method: &InstallMethod| {
                     if method == &InstallMethod::Uninstall {
                         let home_dir: String = env::var("HOME").expect("HOME directory could not be determined");
                         Operation::new()
@@ -368,8 +368,8 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                             .run()?;
                     }
                     Ok(())
-                }),
-                post_install: Box::new(|distribution: &Distribution, method: &InstallMethod| {
+                })),
+                post_install: Some(Box::new(|distribution: &Distribution, method: &InstallMethod| {
                     let home_dir: String = env::var("HOME").expect("HOME directory could not be determined");
                     if method != &InstallMethod::Uninstall {
                         let config_file: String = format!("{}{}", &home_dir, "/.config/nvim/init.vim");
@@ -381,46 +381,46 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                         fs::write(
                             &config_file,
                             r#"""""""""""""""""""""""""""""""""""""""""
-    " neovim settings
+" neovim settings
 
-    set noswapfile
-    set nobackup
-    set nowritebackup
+set noswapfile
+set nobackup
+set nowritebackup
 
-    set updatetime=300
-    set scrolloff=10
-    set number
-    set relativenumber
-    set ignorecase smartcase
-    set incsearch hlsearch
-    set foldmethod=indent
-    set foldlevel=99
+set updatetime=300
+set scrolloff=10
+set number
+set relativenumber
+set ignorecase smartcase
+set incsearch hlsearch
+set foldmethod=indent
+set foldlevel=99
 
-    syntax on
-    colorscheme desert
-    filetype plugin indent on
+syntax on
+colorscheme desert
+filetype plugin indent on
 
-    """"""""""""""""""""""""""""""""""""""""
-    " normal mode remaps
+""""""""""""""""""""""""""""""""""""""""
+" normal mode remaps
 
-    let mapleader = " "
+let mapleader = " "
 
-    " window split
-    nnoremap <Leader>vs <C-w>v
-    nnoremap <Leader>hs <C-w>s
+" window split
+nnoremap <Leader>vs <C-w>v
+nnoremap <Leader>hs <C-w>s
 
-    " window navigation
-    nnoremap <C-h> <C-w>h
-    nnoremap <C-j> <C-w>j
-    nnoremap <C-k> <C-w>k
-    nnoremap <C-l> <C-w>l
+" window navigation
+nnoremap <C-h> <C-w>h
+nnoremap <C-j> <C-w>j
+nnoremap <C-k> <C-w>k
+nnoremap <C-l> <C-w>l
 
-    " text insert
-    nnoremap <Leader>go iif err != nil {}<ESC>
+" text insert
+nnoremap <Leader>go iif err != nil {}<ESC>
 
-    " file explore
-    nnoremap <Leader>ex :Explore<CR>
-    "#,
+" file explore
+nnoremap <Leader>ex :Explore<CR>
+"#,
                         )?;
         
                         if distribution.repository != Repository::RedHat {
@@ -439,31 +439,31 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                                 &config_file,
                                 "ale settings",
                                 r#"
-    """"""""""""""""""""""""""""""""""""""""
-    " ale settings
+""""""""""""""""""""""""""""""""""""""""
+" ale settings
 
-    let g:ale_fix_on_save = 1
-    let g:ale_completion_enabled = 1
-    let g:ale_linters = { "go": ["gopls"], "rust": ["analyzer"] }
-    let g:ale_fixers = { "*": ["remove_trailing_lines", "trim_whitespace"], "go": ["gofmt"], "rust": ["rustfmt"] }
+let g:ale_fix_on_save = 1
+let g:ale_completion_enabled = 1
+let g:ale_linters = { "go": ["gopls"], "rust": ["analyzer"] }
+let g:ale_fixers = { "*": ["remove_trailing_lines", "trim_whitespace"], "go": ["gofmt"], "rust": ["rustfmt"] }
 
-    nnoremap K :ALEHover<CR>
-    nnoremap gd :ALEGoToDefinition<CR>
-    nnoremap gn :ALERename<CR>
-    nnoremap gr :ALEFindReferences<CR>
+nnoremap K :ALEHover<CR>
+nnoremap gd :ALEGoToDefinition<CR>
+nnoremap gn :ALERename<CR>
+nnoremap gr :ALEFindReferences<CR>
 
-    """"""""""""""""""""""""""""""""""""""""
-    " insert mode remaps
+""""""""""""""""""""""""""""""""""""""""
+" insert mode remaps
 
-    inoremap <silent><expr> <Tab> pumvisible() ? "\<C-n>" : "\<TAB>"
-    inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-n>" : "\<S-TAB>"
-    "#,
+inoremap <silent><expr> <Tab> pumvisible() ? "\<C-n>" : "\<TAB>"
+inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-n>" : "\<S-TAB>"
+"#,
                                 false,
                             )?;
                         }
                     }
                     Ok(())
-                }),
+                })),
             },
             Package {
                 name: "nano - Text Editor",
@@ -478,8 +478,8 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                 flatpak: None,
                 snap: None,
                 other: None,
-                pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
-                post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
+                pre_install: None,
+                post_install: None,
             },
             Package {
                 name: "Node.js - JavaScript RE",
@@ -499,7 +499,7 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                     channel: "18/stable",
                 }),
                 other: None,
-                pre_install: Box::new(|distribution: &Distribution, _: &mut Info, method: &InstallMethod| {
+                pre_install: Some(Box::new(|distribution: &Distribution, _: &mut Info, method: &InstallMethod| {
                     if method == &InstallMethod::Repository {
                         if distribution.repository == Repository::RedHat {
                             Operation::new()
@@ -508,8 +508,8 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                         }
                     }
                     Ok(())
-                }),
-                post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
+                })),
+                post_install: None,
             },
             Package {
                 name: "Podman - Containers",
@@ -524,8 +524,8 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                 flatpak: None,
                 snap: None,
                 other: None,
-                pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
-                post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
+                pre_install: None,
+                post_install: None,
             },
             Package {
                 name: "Rust Language",
@@ -540,7 +540,7 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                 flatpak: None,
                 snap: None,
                 other: Some(OtherPackage { name: "rust" }),
-                pre_install: Box::new(|distribution: &Distribution, info: &mut Info, method: &InstallMethod| {
+                pre_install: Some(Box::new(|distribution: &Distribution, info: &mut Info, method: &InstallMethod| {
                     if method != &InstallMethod::Other {
                         let home_dir: String = env::var("HOME").expect("HOME directory could not be determined");
                         Operation::new()
@@ -551,8 +551,8 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                         distribution.install_package("curl", info)?;
                     }
                     Ok(())
-                }),
-                post_install: Box::new(|_: &Distribution, method: &InstallMethod| {
+                })),
+                post_install: Some(Box::new(|_: &Distribution, method: &InstallMethod| {
                     let home_dir: String = env::var("HOME").expect("HOME directory could not be determined");
                     if method == &InstallMethod::Other {
                         Operation::new()
@@ -563,7 +563,7 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                             .run()?;
                     }
                     Ok(())
-                }),
+                })),
             },
             Package {
                 name: "Snap",
@@ -577,13 +577,13 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                 flatpak: None,
                 snap: None,
                 other: None,
-                pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
-                post_install: Box::new(|distribution: &Distribution, method: &InstallMethod| {
+                pre_install: None,
+                post_install: Some(Box::new(|distribution: &Distribution, method: &InstallMethod| {
                     if method != &InstallMethod::Uninstall {
                         distribution.setup_snap()?;
                     }
                     Ok(())
-                }),
+                })),
             },
             Package {
                 name: "SSH - Secure Shell Protocol",
@@ -598,8 +598,8 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                 flatpak: None,
                 snap: None,
                 other: None,
-                pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
-                post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
+                pre_install: None,
+                post_install: None,
             },
             Package {
                 name: "vim - Text Editor",
@@ -614,7 +614,7 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                 flatpak: None,
                 snap: None,
                 other: None,
-                pre_install: Box::new(|_: &Distribution, _: &mut Info, method: &InstallMethod| {
+                pre_install: Some(Box::new(|_: &Distribution, _: &mut Info, method: &InstallMethod| {
                     let home_dir: String = env::var("HOME").expect("HOME directory could not be determined");
                     if method == &InstallMethod::Uninstall {
                         Operation::new()
@@ -625,8 +625,8 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                             .run()?;
                     }
                     Ok(())
-                }),
-                post_install: Box::new(|distribution: &Distribution, method: &InstallMethod| {
+                })),
+                post_install: Some(Box::new(|distribution: &Distribution, method: &InstallMethod| {
                     let home_dir: String = env::var("HOME").expect("HOME directory could not be determined");
                     let bashrc: String = format!("{}{}", &home_dir, "/.bashrc");
                     if method != &InstallMethod::Uninstall {
@@ -642,51 +642,51 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                         fs::write(
                             &config_file,
                             r#"""""""""""""""""""""""""""""""""""""""""
-    " vim settings
+" vim settings
 
-    set nocompatible
+set nocompatible
 
-    set encoding=utf-8
+set encoding=utf-8
 
-    set noswapfile
-    set nobackup
-    set nowritebackup
+set noswapfile
+set nobackup
+set nowritebackup
 
-    set mouse=a
-    set updatetime=300
-    set scrolloff=10
-    set number
-    set relativenumber
-    set ignorecase smartcase
-    set incsearch hlsearch
-    set foldmethod=indent
-    set foldlevel=99
+set mouse=a
+set updatetime=300
+set scrolloff=10
+set number
+set relativenumber
+set ignorecase smartcase
+set incsearch hlsearch
+set foldmethod=indent
+set foldlevel=99
 
-    syntax on
-    colorscheme desert
-    filetype plugin indent on
+syntax on
+colorscheme desert
+filetype plugin indent on
 
-    """"""""""""""""""""""""""""""""""""""""
-    " normal mode remaps
+""""""""""""""""""""""""""""""""""""""""
+" normal mode remaps
 
-    let mapleader = " "
+let mapleader = " "
 
-    " window split
-    nnoremap <Leader>vs <C-w>v
-    nnoremap <Leader>hs <C-w>s
+" window split
+nnoremap <Leader>vs <C-w>v
+nnoremap <Leader>hs <C-w>s
 
-    " window navigation
-    nnoremap <C-h> <C-w>h
-    nnoremap <C-j> <C-w>j
-    nnoremap <C-k> <C-w>k
-    nnoremap <C-l> <C-w>l
+" window navigation
+nnoremap <C-h> <C-w>h
+nnoremap <C-j> <C-w>j
+nnoremap <C-k> <C-w>k
+nnoremap <C-l> <C-w>l
 
-    " text insert
-    nnoremap <Leader>go iif err != nil {}<ESC>
+" text insert
+nnoremap <Leader>go iif err != nil {}<ESC>
 
-    " file explore
-    nnoremap <Leader>ex :Explore<CR>
-    "#,
+" file explore
+nnoremap <Leader>ex :Explore<CR>
+"#,
                         )?;
         
                         if distribution.repository != Repository::RedHat {
@@ -705,31 +705,31 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                                 &config_file,
                                 "ale settings",
                                 r#"
-    """"""""""""""""""""""""""""""""""""""""
-    " ale settings
+""""""""""""""""""""""""""""""""""""""""
+" ale settings
 
-    let g:ale_fix_on_save = 1
-    let g:ale_completion_enabled = 1
-    let g:ale_linters = { "go": ["gopls"], "rust": ["analyzer"] }
-    let g:ale_fixers = { "*": ["remove_trailing_lines", "trim_whitespace"], "go": ["gofmt"], "rust": ["rustfmt"] }
+let g:ale_fix_on_save = 1
+let g:ale_completion_enabled = 1
+let g:ale_linters = { "go": ["gopls"], "rust": ["analyzer"] }
+let g:ale_fixers = { "*": ["remove_trailing_lines", "trim_whitespace"], "go": ["gofmt"], "rust": ["rustfmt"] }
 
-    nnoremap K :ALEHover<CR>
-    nnoremap gd :ALEGoToDefinition<CR>
-    nnoremap gn :ALERename<CR>
-    nnoremap gr :ALEFindReferences<CR>
+nnoremap K :ALEHover<CR>
+nnoremap gd :ALEGoToDefinition<CR>
+nnoremap gn :ALERename<CR>
+nnoremap gr :ALEFindReferences<CR>
 
-    """"""""""""""""""""""""""""""""""""""""
-    " insert mode remaps
+""""""""""""""""""""""""""""""""""""""""
+" insert mode remaps
 
-    inoremap <silent><expr> <Tab> pumvisible() ? "\<C-n>" : "\<TAB>"
-    inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-n>" : "\<S-TAB>"
-    "#,
+inoremap <silent><expr> <Tab> pumvisible() ? "\<C-n>" : "\<TAB>"
+inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-n>" : "\<S-TAB>"
+"#,
                                 false,
                             )?;
                         }
                     }
                     Ok(())
-                }),
+                })),
             },
         ]),
         Category::Desktop => Vec::from([
@@ -746,8 +746,8 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                 flatpak: None,
                 snap: None,
                 other: None,
-                pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
-                post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
+                pre_install: None,
+                post_install: None,
             },
             Package {
                 name: "ffmpeg - Media Codecs",
@@ -762,8 +762,8 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                 flatpak: None,
                 snap: None,
                 other: None,
-                pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
-                post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
+                pre_install: None,
+                post_install: None,
             },
             Package {
                 name: "imagemagick",
@@ -778,8 +778,8 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                 flatpak: None,
                 snap: None,
                 other: None,
-                pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
-                post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
+                pre_install: None,
+                post_install: None,
             },
             Package {
                 name: "LaTex - Compiler",
@@ -794,8 +794,8 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                 flatpak: None,
                 snap: None,
                 other: None,
-                pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
-                post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
+                pre_install: None,
+                post_install: None,
             },
             Package {
                 name: "MP3 Metadata Editor",
@@ -809,8 +809,8 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                 flatpak: None,
                 snap: None,
                 other: None,
-                pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
-                post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
+                pre_install: None,
+                post_install: None,
             },
             Package {
                 name: "qtile - Window Manager",
@@ -821,8 +821,8 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                 flatpak: None,
                 snap: None,
                 other: None,
-                pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
-                post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
+                pre_install: None,
+                post_install: None,
             },
             Package {
                 name: "Vietnamese Keyboard",
@@ -837,8 +837,8 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                 flatpak: None,
                 snap: None,
                 other: None,
-                pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
-                post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
+                pre_install: None,
+                post_install: None,
             },
             Package {
                 name: "yt-dlp - Download YouTube",
@@ -853,8 +853,8 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                 flatpak: None,
                 snap: None,
                 other: None,
-                pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
-                post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
+                pre_install: None,
+                post_install: None,
             },
         ]),
         Category::Applications => Vec::from([
@@ -874,8 +874,8 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                 }),
                 snap: None,
                 other: None,
-                pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
-                post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
+                pre_install: None,
+                post_install: None,
             },
             Package {
                 name: "Deja Dup - Backups",
@@ -892,8 +892,8 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                 }),
                 snap: None,
                 other: None,
-                pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
-                post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
+                pre_install: None,
+                post_install: None,
             },
             Package {
                 name: "Evince - Document Viewer",
@@ -911,8 +911,8 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                 }),
                 snap: None,
                 other: None,
-                pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
-                post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
+                pre_install: None,
+                post_install: None,
             },
             Package {
                 name: "Eye of Gnome - Image Viewer",
@@ -935,8 +935,8 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                     channel: "",
                 }),
                 other: None,
-                pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
-                post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
+                pre_install: None,
+                post_install: None,
             },
             Package {
                 name: "Gnome Boxes - VM Manager",
@@ -953,8 +953,8 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                 }),
                 snap: None,
                 other: None,
-                pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
-                post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
+                pre_install: None,
+                post_install: None,
             },
             Package {
                 name: "Gnome Calculator",
@@ -977,8 +977,8 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                     channel: "",
                 }),
                 other: None,
-                pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
-                post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
+                pre_install: None,
+                post_install: None,
             },
             Package {
                 name: "Gnome Calendar",
@@ -995,8 +995,8 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                 }),
                 snap: None,
                 other: None,
-                pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
-                post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
+                pre_install: None,
+                post_install: None,
             },
             Package {
                 name: "Gnome Clocks",
@@ -1018,8 +1018,8 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                     channel: "",
                 }),
                 other: None,
-                pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
-                post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
+                pre_install: None,
+                post_install: None,
             },
             Package {
                 name: "Gnome Connections",
@@ -1037,8 +1037,8 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                 }),
                 snap: None,
                 other: None,
-                pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
-                post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
+                pre_install: None,
+                post_install: None,
             },
             Package {
                 name: "Gnome Contacts",
@@ -1055,8 +1055,8 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                 }),
                 snap: None,
                 other: None,
-                pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
-                post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
+                pre_install: None,
+                post_install: None,
             },
             Package {
                 name: "Gnome Image Viewer",
@@ -1075,8 +1075,8 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                     channel: "",
                 }),
                 other: None,
-                pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
-                post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
+                pre_install: None,
+                post_install: None,
             },
             Package {
                 name: "Gnome Maps",
@@ -1093,8 +1093,8 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                 }),
                 snap: None,
                 other: None,
-                pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
-                post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
+                pre_install: None,
+                post_install: None,
             },
             Package {
                 name: "Gnome Password Safe",
@@ -1111,8 +1111,8 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                 }),
                 snap: None,
                 other: None,
-                pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
-                post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
+                pre_install: None,
+                post_install: None,
             },
             Package {
                 name: "Gnome Weather",
@@ -1129,8 +1129,8 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                 }),
                 snap: None,
                 other: None,
-                pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
-                post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
+                pre_install: None,
+                post_install: None,
             },
             Package {
                 name: "GNU Cash - Accounting",
@@ -1147,8 +1147,8 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                 }),
                 snap: None,
                 other: None,
-                pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
-                post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
+                pre_install: None,
+                post_install: None,
             },
             Package {
                 name: "Gwenview - Image Viewer",
@@ -1170,8 +1170,8 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                     channel: "",
                 }),
                 other: None,
-                pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
-                post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
+                pre_install: None,
+                post_install: None,
             },
             Package {
                 name: "KCalc - Calculator",
@@ -1194,8 +1194,8 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                     channel: "",
                 }),
                 other: None,
-                pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
-                post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
+                pre_install: None,
+                post_install: None,
             },
             Package {
                 name: "Okular - Document Viewer",
@@ -1217,8 +1217,8 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                     channel: "",
                 }),
                 other: None,
-                pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
-                post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
+                pre_install: None,
+                post_install: None,
             },
             Package {
                 name: "Transmission (GTK) - Torrent",
@@ -1235,8 +1235,8 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                 }),
                 snap: None,
                 other: None,
-                pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
-                post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
+                pre_install: None,
+                post_install: None,
             },
             Package {
                 name: "Transmission (QT) - Torrent",
@@ -1253,8 +1253,8 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                 }),
                 snap: None,
                 other: None,
-                pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
-                post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
+                pre_install: None,
+                post_install: None,
             },
             Package {
                 name: "Virt Manager",
@@ -1269,8 +1269,8 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                 flatpak: None,
                 snap: None,
                 other: None,
-                pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
-                post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
+                pre_install: None,
+                post_install: None,
             },
         ]),
         Category::Browsers => Vec::from([
@@ -1293,8 +1293,8 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                     channel: "",
                 }),
                 other: None,
-                pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
-                post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
+                pre_install: None,
+                post_install: None,
             },
             Package {
                 name: "Epiphany - Gnome Web",
@@ -1311,8 +1311,8 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                 }),
                 snap: None,
                 other: None,
-                pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
-                post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
+                pre_install: None,
+                post_install: None,
             },
             Package {
                 name: "Firefox",
@@ -1332,8 +1332,8 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                     channel: "",
                 }),
                 other: None,
-                pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
-                post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
+                pre_install: None,
+                post_install: None,
             },
             Package {
                 name: "Firefox ESR",
@@ -1350,8 +1350,8 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                     channel: "esr-stable",
                 }),
                 other: None,
-                pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
-                post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
+                pre_install: None,
+                post_install: None,
             },
             Package {
                 name: "IceCat - GNU Browser",
@@ -1362,8 +1362,8 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                 flatpak: None,
                 snap: None,
                 other: None,
-                pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
-                post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
+                pre_install: None,
+                post_install: None,
             },
             Package {
                 name: "TOR - The Onion Router",
@@ -1375,8 +1375,8 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                 }),
                 snap: None,
                 other: None,
-                pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
-                post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
+                pre_install: None,
+                post_install: None,
             },
         ]),
         Category::Communication => Vec::from([
@@ -1395,8 +1395,8 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                     channel: "",
                 }),
                 other: None,
-                pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
-                post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
+                pre_install: None,
+                post_install: None,
             },
             Package {
                 name: "Thunderbird",
@@ -1419,8 +1419,8 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                     channel: "",
                 }),
                 other: None,
-                pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
-                post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
+                pre_install: None,
+                post_install: None,
             },
         ]),
         Category::Games => Vec::from([
@@ -1444,8 +1444,8 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                     channel: "",
                 }),
                 other: None,
-                pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
-                post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
+                pre_install: None,
+                post_install: None,
             },
             Package {
                 name: "Gnome 2048",
@@ -1462,8 +1462,8 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                 }),
                 snap: None,
                 other: None,
-                pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
-                post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
+                pre_install: None,
+                post_install: None,
             },
             Package {
                 name: "Gnome Chess",
@@ -1480,8 +1480,8 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                 }),
                 snap: None,
                 other: None,
-                pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
-                post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
+                pre_install: None,
+                post_install: None,
             },
             Package {
                 name: "Gnome Mines",
@@ -1498,8 +1498,8 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                 }),
                 snap: None,
                 other: None,
-                pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
-                post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
+                pre_install: None,
+                post_install: None,
             },
             Package {
                 name: "Gnome Solitaire",
@@ -1516,8 +1516,8 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                 }),
                 snap: None,
                 other: None,
-                pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
-                post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
+                pre_install: None,
+                post_install: None,
             },
             Package {
                 name: "Gnome Sudoku",
@@ -1539,8 +1539,8 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                     channel: "",
                 }),
                 other: None,
-                pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
-                post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
+                pre_install: None,
+                post_install: None,
             },
             Package {
                 name: "Gnome Tetris",
@@ -1562,8 +1562,8 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                     channel: "",
                 }),
                 other: None,
-                pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
-                post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
+                pre_install: None,
+                post_install: None,
             },
             Package {
                 name: "KDE Chess",
@@ -1582,8 +1582,8 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                     channel: "",
                 }),
                 other: None,
-                pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
-                post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
+                pre_install: None,
+                post_install: None,
             },
             Package {
                 name: "KDE Mines",
@@ -1603,8 +1603,8 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                     channel: "",
                 }),
                 other: None,
-                pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
-                post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
+                pre_install: None,
+                post_install: None,
             },
             Package {
                 name: "KDE Sudoku",
@@ -1627,8 +1627,8 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                     channel: "",
                 }),
                 other: None,
-                pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
-                post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
+                pre_install: None,
+                post_install: None,
             },
             Package {
                 name: "Steam",
@@ -1647,8 +1647,8 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                     channel: "",
                 }),
                 other: None,
-                pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
-                post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
+                pre_install: None,
+                post_install: None,
             },
             Package {
                 name: "Super Tux Kart",
@@ -1670,8 +1670,8 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                     channel: "",
                 }),
                 other: None,
-                pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
-                post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
+                pre_install: None,
+                post_install: None,
             },
             Package {
                 name: "Xonotic",
@@ -1691,8 +1691,8 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                     channel: "",
                 }),
                 other: None,
-                pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
-                post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
+                pre_install: None,
+                post_install: None,
             },
         ]),
         Category::MultiMedia => Vec::from([
@@ -1716,8 +1716,8 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                     channel: "",
                 }),
                 other: None,
-                pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
-                post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
+                pre_install: None,
+                post_install: None,
             },
             Package {
                 name: "Elisa Music Player",
@@ -1734,8 +1734,8 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                 }),
                 snap: None,
                 other: None,
-                pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
-                post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
+                pre_install: None,
+                post_install: None,
             },
             Package {
                 name: "GIMP",
@@ -1758,8 +1758,8 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                     channel: "",
                 }),
                 other: None,
-                pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
-                post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
+                pre_install: None,
+                post_install: None,
             },
             Package {
                 name: "Gnome Music",
@@ -1776,8 +1776,8 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                 }),
                 snap: None,
                 other: None,
-                pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
-                post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
+                pre_install: None,
+                post_install: None,
             },
             Package {
                 name: "Gnome Photos",
@@ -1795,8 +1795,8 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                 }),
                 snap: None,
                 other: None,
-                pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
-                post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
+                pre_install: None,
+                post_install: None,
             },
             Package {
                 name: "Gnome Sound Recorder",
@@ -1813,8 +1813,8 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                 }),
                 snap: None,
                 other: None,
-                pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
-                post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
+                pre_install: None,
+                post_install: None,
             },
             Package {
                 name: "KdenLive Video Editor",
@@ -1836,8 +1836,8 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                     channel: "",
                 }),
                 other: None,
-                pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
-                post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
+                pre_install: None,
+                post_install: None,
             },
             Package {
                 name: "RhythmBox",
@@ -1854,8 +1854,8 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                 }),
                 snap: None,
                 other: None,
-                pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
-                post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
+                pre_install: None,
+                post_install: None,
             },
             Package {
                 name: "Shotwell",
@@ -1872,8 +1872,8 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                 }),
                 snap: None,
                 other: None,
-                pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
-                post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
+                pre_install: None,
+                post_install: None,
             },
             Package {
                 name: "Totem Video Player",
@@ -1891,8 +1891,8 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                 }),
                 snap: None,
                 other: None,
-                pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
-                post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
+                pre_install: None,
+                post_install: None,
             },
             Package {
                 name: "VLC",
@@ -1915,8 +1915,8 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                     channel: "",
                 }),
                 other: None,
-                pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
-                post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
+                pre_install: None,
+                post_install: None,
             },
         ]),
         Category::Editors => Vec::from([
@@ -1941,8 +1941,8 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                     channel: "",
                 }),
                 other: None,
-                pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
-                post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
+                pre_install: None,
+                post_install: None,
             },
             Package {
                 name: "Gnome Builder",
@@ -1959,8 +1959,8 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                 }),
                 snap: None,
                 other: None,
-                pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
-                post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
+                pre_install: None,
+                post_install: None,
             },
             Package {
                 name: "Gnome Text Editor",
@@ -1977,8 +1977,8 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                 }),
                 snap: None,
                 other: None,
-                pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
-                post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
+                pre_install: None,
+                post_install: None,
             },
             Package {
                 name: "Intellij",
@@ -1997,8 +1997,8 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                     channel: "",
                 }),
                 other: None,
-                pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
-                post_install: Box::new(|_: &Distribution, method: &InstallMethod| {
+                pre_install: None,
+                post_install: Some(Box::new(|_: &Distribution, method: &InstallMethod| {
                     let home_dir: String = env::var("HOME").expect("HOME directory could not be determined");
                     if method != &InstallMethod::Uninstall {
                         fs::write(
@@ -2007,7 +2007,7 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                         )?;
                     }
                     Ok(())
-                }),
+                })),
             },
             Package {
                 name: "Kate",
@@ -2027,8 +2027,8 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                     channel: "",
                 }),
                 other: None,
-                pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
-                post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
+                pre_install: None,
+                post_install: None,
             },
             Package {
                 name: "KDevelop",
@@ -2050,8 +2050,8 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                     channel: "",
                 }),
                 other: None,
-                pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
-                post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
+                pre_install: None,
+                post_install: None,
             },
             Package {
                 name: "Kile - LaTex Editor",
@@ -2065,8 +2065,8 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                 flatpak: None,
                 snap: None,
                 other: None,
-                pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
-                post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
+                pre_install: None,
+                post_install: None,
             },
             Package {
                 name: "KWrite",
@@ -2084,8 +2084,8 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                 }),
                 snap: None,
                 other: None,
-                pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
-                post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
+                pre_install: None,
+                post_install: None,
             },
             Package {
                 name: "LibreOffice",
@@ -2108,8 +2108,8 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                     channel: "",
                 }),
                 other: None,
-                pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
-                post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
+                pre_install: None,
+                post_install: None,
             },
             Package {
                 name: "Pycharm",
@@ -2129,7 +2129,7 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                     channel: "",
                 }),
                 other: None,
-                pre_install: Box::new(|distribution: &Distribution, _: &mut Info, method: &InstallMethod| {
+                pre_install: Some(Box::new(|distribution: &Distribution, _: &mut Info, method: &InstallMethod| {
                     if method != &InstallMethod::Repository {
                         if distribution.name == DistributionName::Fedora {
                             Operation::new()
@@ -2145,8 +2145,8 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                         }
                     }
                     Ok(())
-                }),
-                post_install: Box::new(|_: &Distribution, method: &InstallMethod| {
+                })),
+                post_install: Some(Box::new(|_: &Distribution, method: &InstallMethod| {
                     let home_dir: String = env::var("HOME").expect("HOME directory could not be determined");
                     if method != &InstallMethod::Uninstall {
                         fs::write(
@@ -2155,7 +2155,7 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                         )?;
                     }
                     Ok(())
-                }),
+                })),
             },
             Package {
                 name: "VS Code",
@@ -2177,7 +2177,7 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                     channel: "",
                 }),
                 other: None,
-                pre_install: Box::new(|distribution: &Distribution, info: &mut Info, method: &InstallMethod| {
+                pre_install: Some(Box::new(|distribution: &Distribution, info: &mut Info, method: &InstallMethod| {
                     let home_dir: String = env::var("HOME").expect("HOME directory could not be determined");
                     if method != &InstallMethod::Repository {
                         if distribution.package_manager == PackageManager::APT {
@@ -2261,8 +2261,8 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                         }
                     }
                     Ok(())
-                }),
-                post_install: Box::new(|_: &Distribution, method: &InstallMethod| {
+                })),
+                post_install: Some(Box::new(|_: &Distribution, method: &InstallMethod| {
                     let home_dir: String = env::var("HOME").expect("HOME directory could not be determined");
                     if method != &InstallMethod::Uninstall {
                         let extensions: Vec<&str> = Vec::from(["esbenp.prettier-vscode", "vscodevim.vim"]);
@@ -2275,27 +2275,27 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                         fs::write(
                             format!("{}{}", &home_dir, "/.config/Code/User/settings.json"),
                             r#"{
-    "[css]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
-    "[html]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
-    "[javascript]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
-    "[json]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
-    "[jsonc]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
-    "[scss]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
-    "[typescript]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
-    "editor.formatOnSave": true,
-    "editor.rulers": [80, 160],
-    "extensions.ignoreRecommendations": true,
-    "git.openRepositoryInParentFolders": "always",
-    "telemetry.telemetryLevel": "off",
-    "vim.smartRelativeLine": true,
-    "vim.useCtrlKeys": false,
-    "workbench.startupEditor": "none"
-    }
-    "#,
+  "[css]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+  "[html]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+  "[javascript]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+  "[json]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+  "[jsonc]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+  "[scss]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+  "[typescript]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+  "editor.formatOnSave": true,
+  "editor.rulers": [80, 160],
+  "extensions.ignoreRecommendations": true,
+  "git.openRepositoryInParentFolders": "always",
+  "telemetry.telemetryLevel": "off",
+  "vim.smartRelativeLine": true,
+  "vim.useCtrlKeys": false,
+  "workbench.startupEditor": "none",
+}
+"#,
                         )?;
                     }
                     Ok(())
-                }),
+                })),
             },
         ]),
         Category::Software => Vec::from([
@@ -2312,8 +2312,8 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                 flatpak: None,
                 snap: None,
                 other: None,
-                pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
-                post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
+                pre_install: None,
+                post_install: None,
             },
             Package {
                 name: "Plasma Discover",
@@ -2327,8 +2327,8 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                 flatpak: None,
                 snap: None,
                 other: None,
-                pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
-                post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
+                pre_install: None,
+                post_install: None,
             },
             Package {
                 name: "Snap Store",
@@ -2342,8 +2342,8 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                     channel: "",
                 }),
                 other: None,
-                pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
-                post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
+                pre_install: None,
+                post_install: None,
             },
         ]),
         Category::Utilities => Vec::from([
@@ -2368,8 +2368,8 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                     channel: "",
                 }),
                 other: None,
-                pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
-                post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
+                pre_install: None,
+                post_install: None,
             },
             Package {
                 name: "dconf Editor",
@@ -2387,8 +2387,8 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                 }),
                 snap: None,
                 other: None,
-                pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
-                post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
+                pre_install: None,
+                post_install: None,
             },
             Package {
                 name: "Fedora Media Writer",
@@ -2402,8 +2402,8 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                 }),
                 snap: None,
                 other: None,
-                pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
-                post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
+                pre_install: None,
+                post_install: None,
             },
             Package {
                 name: "FileLight Disk Usage",
@@ -2418,8 +2418,8 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                 flatpak: None,
                 snap: None,
                 other: None,
-                pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
-                post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
+                pre_install: None,
+                post_install: None,
             },
             Package {
                 name: "GParted",
@@ -2434,8 +2434,8 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                 flatpak: None,
                 snap: None,
                 other: None,
-                pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
-                post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
+                pre_install: None,
+                post_install: None,
             },
             Package {
                 name: "Gnome Disk Usage",
@@ -2453,8 +2453,8 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                 }),
                 snap: None,
                 other: None,
-                pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
-                post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
+                pre_install: None,
+                post_install: None,
             },
             Package {
                 name: "Gnome Disk Utility",
@@ -2469,8 +2469,8 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                 flatpak: None,
                 snap: None,
                 other: None,
-                pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
-                post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
+                pre_install: None,
+                post_install: None,
             },
             Package {
                 name: "Gnome Shell Extension",
@@ -2485,8 +2485,8 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                 flatpak: None,
                 snap: None,
                 other: None,
-                pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
-                post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
+                pre_install: None,
+                post_install: None,
             },
             Package {
                 name: "Gnome Shell Extension Manager",
@@ -2498,8 +2498,8 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                 flatpak: None,
                 snap: None,
                 other: None,
-                pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
-                post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
+                pre_install: None,
+                post_install: None,
             },
             Package {
                 name: "Gnome System Monitor",
@@ -2514,8 +2514,8 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                 flatpak: None,
                 snap: None,
                 other: None,
-                pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
-                post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
+                pre_install: None,
+                post_install: None,
             },
             Package {
                 name: "Gnome Tweaks",
@@ -2530,8 +2530,8 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                 flatpak: None,
                 snap: None,
                 other: None,
-                pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
-                post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
+                pre_install: None,
+                post_install: None,
             },
             Package {
                 name: "KSysGuard",
@@ -2546,8 +2546,8 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                 flatpak: None,
                 snap: None,
                 other: None,
-                pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
-                post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
+                pre_install: None,
+                post_install: None,
             },
             Package {
                 name: "Plasma System Monitor",
@@ -2562,8 +2562,8 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                 flatpak: None,
                 snap: None,
                 other: None,
-                pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
-                post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
+                pre_install: None,
+                post_install: None,
             },
             Package {
                 name: "Simple Scan",
@@ -2577,8 +2577,8 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                 flatpak: None,
                 snap: None,
                 other: None,
-                pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
-                post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
+                pre_install: None,
+                post_install: None,
             },
             Package {
                 name: "Spectacle Screenshot",
@@ -2593,8 +2593,8 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                 flatpak: None,
                 snap: None,
                 other: None,
-                pre_install: Box::new(|_: &Distribution, _: &mut Info, _: &InstallMethod| Ok(())),
-                post_install: Box::new(|_: &Distribution, _: &InstallMethod| Ok(())),
+                pre_install: None,
+                post_install: None,
             },
         ]),
     };
