@@ -3,7 +3,7 @@ extern crate rust_cli;
 use rust_cli::ansi::font;
 use rust_cli::ansi::Color;
 use rust_cli::ansi::Font;
-use rust_cli::prompts::Select;
+use rust_cli::prompts::select::Select;
 
 use std::cmp;
 use std::collections::HashMap;
@@ -204,18 +204,17 @@ fn select_directory(path: &String, sizes: HashMap<String, u64>) -> Result<(), io
         options_value.push(up_dir.to_string());
     }
 
-    let selection = Select::new()
+    if let Some(selection) = Select::new()
         .title("Select Directory to Scan")
         .options(&options_display)
-        .run_select_index()?;
-    if selection.is_none() {
-        return Ok(());
+        .run_select()?
+    {
+        if process_directory(&options_value[selection.0]).is_err() {
+            rust_cli::ansi::cursor::previous_lines(cmp::min(sizes.len(), 15) + 2);
+            select_directory(path, sizes)?;
+        }
     }
 
-    if process_directory(&options_value[selection.unwrap()]).is_err() {
-        rust_cli::ansi::cursor::previous_lines(cmp::min(sizes.len(), 15) + 2);
-        select_directory(path, sizes)?;
-    }
     Ok(())
 }
 
