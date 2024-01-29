@@ -3,7 +3,7 @@ extern crate rust_cli;
 use rust_cli::ansi::Color;
 use rust_cli::ansi::Font;
 use rust_cli::commands::Operation;
-use rust_cli::prompts::Select;
+use rust_cli::prompts::select::Select;
 
 use std::env;
 use std::env::VarError;
@@ -62,18 +62,20 @@ fn get_recursive_folders_files(orig_path: &String, path: &String) -> (Vec<String
 }
 
 fn get_image_dim(file: &String, dim: &str) -> Result<u32, io::Error> {
-    Ok(Operation::new()
-        .command(format!("identify -format %[{}] {}", dim, file))
-        .run_output()?
-        .parse::<u32>()
-        .unwrap_or(0))
+    Ok(
+        Operation::new(format!("identify -format %[{}] {}", dim, file))
+            .output()?
+            .parse::<u32>()
+            .unwrap_or(0),
+    )
 }
 
 fn convert_file(old_file: &String, new_file: &String) -> Result<bool, io::Error> {
-    Ok(Operation::new()
-        .command(format!("convert {} {} ", old_file, new_file))
-        .run()?
-        .success())
+    Ok(
+        Operation::new(format!("convert {} {} ", old_file, new_file))
+            .run()?
+            .success(),
+    )
 }
 
 fn main() -> Result<(), io::Error> {
@@ -87,10 +89,13 @@ fn main() -> Result<(), io::Error> {
     let folders_files: (Vec<String>, Vec<String>) =
         get_recursive_folders_files(&pictures_dir, &pictures_dir);
 
-    let make_small_folders = Select::new()
+    let make_small_folders: Vec<String> = Select::new()
         .title("Choose folders to make small")
         .options(&folders_files.0)
-        .run_multi_select_values()?;
+        .run_multi_select()?
+        .iter()
+        .map(|t| t.1.to_string())
+        .collect();
 
     for file_path in &folders_files.1 {
         let extension: Option<(&str, &str)> = file_path.rsplit_once(".");
@@ -114,9 +119,7 @@ fn main() -> Result<(), io::Error> {
                     Color::Green.as_str(),
                     Font::Reset.as_str()
                 );
-                Operation::new()
-                    .command(format!("rm -f {}", &file_path))
-                    .run()?;
+                Operation::new(format!("rm -f {}", &file_path)).run()?;
             } else {
                 println!(
                     "    {}Failed to Convert{}",
@@ -147,12 +150,11 @@ fn main() -> Result<(), io::Error> {
                             Font::Reset.as_str(),
                             height
                         );
-                        Operation::new()
-                            .command(format!(
-                                "convert {} -resize x{} {}",
-                                &file_name, MAX_SIZE, &file_name
-                            ))
-                            .run()?;
+                        Operation::new(format!(
+                            "convert {} -resize x{} {}",
+                            &file_name, MAX_SIZE, &file_name
+                        ))
+                        .run()?;
                     } else {
                         println!(
                             "    Image is {}too wide{} (width: {})",
@@ -165,12 +167,11 @@ fn main() -> Result<(), io::Error> {
                             Color::Red.as_str(),
                             Font::Reset.as_str()
                         );
-                        Operation::new()
-                            .command(format!(
-                                "convert {} -resize {} {}",
-                                &file_name, MAX_SIZE, &file_name
-                            ))
-                            .run()?;
+                        Operation::new(format!(
+                            "convert {} -resize {} {}",
+                            &file_name, MAX_SIZE, &file_name
+                        ))
+                        .run()?;
                     }
                 } else {
                     println!(
