@@ -66,10 +66,7 @@ pub fn uninstall(package: &Package, info: &mut Info) -> Result<(), io::Error> {
 
             match otr.name {
                 "rust" => {
-                    Operation::new()
-                        .command("rustup self uninstall")
-                        .show_output(true)
-                        .run()?;
+                    Operation::new("rustup self uninstall").run()?;
                 }
                 _ => (),
             }
@@ -85,14 +82,8 @@ pub fn update(info: &Info) -> Result<(), io::Error> {
         if info.other_installed.contains(&pkg.to_string()) {
             match pkg {
                 "rust" => {
-                    Operation::new()
-                        .command("rustup self update")
-                        .show_output(true)
-                        .run()?;
-                    Operation::new()
-                        .command("rustup update stable")
-                        .show_output(true)
-                        .run()?;
+                    Operation::new("rustup self update").run()?;
+                    Operation::new("rustup update stable").run()?;
                 }
                 _ => (),
             }
@@ -106,7 +97,7 @@ pub fn get_installed() -> Result<Vec<String>, io::Error> {
 
     for pkg in PACKAGES {
         match pkg {
-            "rust" => match Operation::new().command("rustup --version").run() {
+            "rust" => match Operation::new("rustup --version").hide_output(true).run() {
                 Ok(_) => packages.push(pkg.to_string()),
                 _ => (),
             },

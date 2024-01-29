@@ -15,16 +15,18 @@ pub struct Flatpak {
 pub fn setup(distribution: &Distribution) -> Result<(), io::Error> {
     println!("Setup flatpak...");
 
-    Operation::new().command(
+    Operation::new(
         "flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo",
-    ).run()?;
+    )
+    .hide_output(true)
+    .run()?;
 
     if distribution.package_manager == PackageManager::DNF {
-        Operation::new()
-            .command(
-                "flatpak remote-add --if-not-exists fedora oci+https://registry.fedoraproject.org",
-            )
-            .run()?;
+        Operation::new(
+            "flatpak remote-add --if-not-exists fedora oci+https://registry.fedoraproject.org",
+        )
+        .hide_output(true)
+        .run()?;
     }
     Ok(())
 }
@@ -43,12 +45,13 @@ pub fn is_installed(package: &Package, info: &Info) -> bool {
     false
 }
 
-pub fn install(
+pub fn install<S: Into<String>>(
     package: &Package,
-    remote: &str,
+    remote: S,
     distribution: &Distribution,
     info: &mut Info,
 ) -> Result<(), io::Error> {
+    let remote = remote.into();
     distribution.install_package("flatpak", info)?;
     setup(distribution)?;
 
@@ -59,10 +62,7 @@ pub fn install(
 
             println!("Installing flatpak {} from {}...", package, remote);
 
-            Operation::new()
-                .command(format!("flatpak install {} {} -y", remote, package))
-                .show_output(true)
-                .run()?;
+            Operation::new(format!("flatpak install {} {} -y", remote, package)).run()?;
         }
     }
     Ok(())
@@ -79,10 +79,7 @@ pub fn uninstall(package: &Package, info: &mut Info) -> Result<(), io::Error> {
 
             println!("Uninstalling flatpak {}...", package);
 
-            Operation::new()
-                .command(format!("flatpak remove {} -y", package))
-                .show_output(true)
-                .run()?;
+            Operation::new(format!("flatpak remove {} -y", package)).run()?;
         }
     }
     Ok(())
@@ -90,28 +87,20 @@ pub fn uninstall(package: &Package, info: &mut Info) -> Result<(), io::Error> {
 
 pub fn update() -> Result<(), io::Error> {
     println!("Update flatpak...");
-    Operation::new()
-        .command("flatpak update -y")
-        .show_output(true)
-        .run()?;
+    Operation::new("flatpak update -y").run()?;
     Ok(())
 }
 
 pub fn auto_remove() -> Result<(), io::Error> {
     println!("Auto removing flatpak...");
-    Operation::new()
-        .command("flatpak remove --unused -y")
-        .show_output(true)
-        .run()?;
+    Operation::new("flatpak remove --unused -y").run()?;
     Ok(())
 }
 
 pub fn get_installed() -> Result<Vec<String>, io::Error> {
     let mut packages: Vec<String> = vec![];
 
-    let output = Operation::new()
-        .command("flatpak list --app")
-        .run_output()?;
+    let output = Operation::new("flatpak list --app").output()?;
     for line in output.split("\n") {
         if line.is_empty() {
             continue;

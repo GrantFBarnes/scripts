@@ -1,6 +1,6 @@
 use rust_cli::ansi::Color;
 use rust_cli::commands::Operation;
-use rust_cli::prompts::Select;
+use rust_cli::prompts::select::Select;
 
 use std::io;
 
@@ -60,20 +60,19 @@ fn run_flatpak_remote_select(
     }
     options.push("Cancel");
 
-    let remote = Select::new()
+    if let Some(remote) = Select::new()
         .title(format!("Flatpak Remote: {}", package.name))
         .options(&options)
         .erase_after(true)
-        .run_select_value()?;
-    if remote.is_none() {
+        .run_select()?
+    {
+        if remote.1 == "Cancel" {
+            return Ok(());
+        }
+        flatpak::install(package, remote.1, distribution, info)
+    } else {
         return Ok(());
     }
-    let remote: String = remote.unwrap();
-    if remote == "Cancel" {
-        return Ok(());
-    }
-
-    flatpak::install(package, remote.as_str(), distribution, info)
 }
 
 fn get_install_method(package: &Package, distribution: &Distribution, info: &Info) -> String {
@@ -153,11 +152,11 @@ fn run_package_select(
         ))
         .options(&options_display)
         .erase_after(true)
-        .run_select_index()?;
+        .run_select()?;
     if selection.is_none() {
         return Ok(());
     }
-    let selection: usize = selection.unwrap();
+    let selection: usize = selection.unwrap().0;
     let method: &InstallMethod = &options_value[selection];
 
     if method == &InstallMethod::Cancel {
@@ -275,11 +274,11 @@ fn run_category_select(
         .options(&options_display)
         .default_index(start_idx)
         .erase_after(true)
-        .run_select_index()?;
+        .run_select()?;
     if selection.is_none() {
         return Ok(());
     }
-    let selection: usize = selection.unwrap();
+    let selection: usize = selection.unwrap().0;
 
     if missing_desktop_environment && selection == 0 {
         // toggle show all desktop environments
@@ -323,11 +322,11 @@ fn run_install_packages(
         .options(&options_display)
         .default_index(start_idx)
         .erase_after(true)
-        .run_select_index()?;
+        .run_select()?;
     if selection.is_none() {
         return Ok(());
     }
-    let selection = selection.unwrap();
+    let selection = selection.unwrap().0;
     match options_display[selection] {
         "Exit" => return Ok(()),
         _ => run_category_select(options_value[selection], 0, false, distribution, info)?,
@@ -358,11 +357,11 @@ fn run_menu(
         .options(&options)
         .default_index(start_idx)
         .erase_after(true)
-        .run_select_index()?;
+        .run_select()?;
     if selection.is_none() {
         return Ok(());
     }
-    let selection: usize = selection.unwrap();
+    let selection: usize = selection.unwrap().0;
 
     match options[selection] {
         "Repository Setup" => repository_setup(distribution, info)?,
@@ -393,26 +392,32 @@ fn run_menu(
 }
 
 fn main() -> Result<(), io::Error> {
-    let has_gnome: bool = Operation::new()
-        .command("gnome-shell --version")
+    let has_gnome: bool = Operation::new("gnome-shell --version")
+        .hide_output(true)
         .run()
         .is_ok();
 
-    let has_kde: bool = Operation::new()
-        .command("plasmashell --version")
+    let has_kde: bool = Operation::new("plasmashell --version")
+        .hide_output(true)
         .run()
         .is_ok();
 
     let distribution: Distribution = distribution::Distribution::new()?;
     let repository_installed: Vec<String> = distribution.get_installed()?;
 
-    let has_flatpak: bool = Operation::new().command("flatpak --version").run().is_ok();
+    let has_flatpak: bool = Operation::new("flatpak --version")
+        .hide_output(true)
+        .run()
+        .is_ok();
     let flatpak_installed: Vec<String> = match has_flatpak {
         true => flatpak::get_installed()?,
         false => vec![],
     };
 
-    let has_snap: bool = Operation::new().command("snap --version").run().is_ok();
+    let has_snap: bool = Operation::new("snap --version")
+        .hide_output(true)
+        .run()
+        .is_ok();
     let snap_installed: Vec<String> = match has_snap {
         true => snap::get_installed()?,
         false => vec![],

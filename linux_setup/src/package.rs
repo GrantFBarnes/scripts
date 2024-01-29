@@ -150,21 +150,10 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                         if distribution.repository == Repository::Debian {
                             distribution.install_package("wget", info)?;
         
-                            Operation::new()
-                                .command("wget https://packages.microsoft.com/config/debian/12/packages-microsoft-prod.deb -O packages-microsoft-prod.deb")
-                                .show_output(true)
-                                .run()?;
-                            Operation::new()
-                                .command("sudo dpkg -i packages-microsoft-prod.deb")
-                                .show_output(true)
-                                .run()?;
-                            Operation::new()
-                                .command("rm packages-microsoft-prod.deb")
-                                .run()?;
-                            Operation::new()
-                                .command("sudo apt update")
-                                .show_output(true)
-                                .run()?;
+                            Operation::new("wget https://packages.microsoft.com/config/debian/12/packages-microsoft-prod.deb -O packages-microsoft-prod.deb").run()?;
+                            Operation::new("sudo dpkg -i packages-microsoft-prod.deb").run()?;
+                            Operation::new("rm packages-microsoft-prod.deb").run()?;
+                            Operation::new("sudo apt update").run()?;
                         }
                     }
                     Ok(())
@@ -194,21 +183,10 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                         if distribution.repository == Repository::Debian {
                             distribution.install_package("wget", info)?;
         
-                            Operation::new()
-                                .command("wget https://packages.microsoft.com/config/debian/12/packages-microsoft-prod.deb -O packages-microsoft-prod.deb")
-                                .show_output(true)
-                                .run()?;
-                            Operation::new()
-                                .command("sudo dpkg -i packages-microsoft-prod.deb")
-                                .show_output(true)
-                                .run()?;
-                            Operation::new()
-                                .command("rm packages-microsoft-prod.deb")
-                                .run()?;
-                            Operation::new()
-                                .command("sudo apt update")
-                                .show_output(true)
-                                .run()?;
+                            Operation::new("wget https://packages.microsoft.com/config/debian/12/packages-microsoft-prod.deb -O packages-microsoft-prod.deb").run()?;
+                            Operation::new("sudo dpkg -i packages-microsoft-prod.deb").run()?;
+                            Operation::new("rm packages-microsoft-prod.deb").run()?;
+                            Operation::new("sudo apt update").run()?;
                         }
                     }
                     Ok(())
@@ -283,9 +261,7 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                 pre_install: Some(Box::new(|_: &Distribution, _: &mut Info, method: &InstallMethod| {
                     let home_dir: String = env::var("HOME").expect("HOME directory could not be determined");
                     if method == &InstallMethod::Uninstall {
-                        Operation::new()
-                            .command(format!("sudo rm -r {}{}", &home_dir, "/.go"))
-                            .run()?;
+                        Operation::new(format!("sudo rm -r {}{}", &home_dir, "/.go")).hide_output(true).run()?;
                     }
                     Ok(())
                 })),
@@ -293,9 +269,7 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                     let home_dir: String = env::var("HOME").expect("HOME directory could not be determined");
                     let bashrc: String = format!("{}{}", &home_dir, "/.bashrc");
                     if method != &InstallMethod::Uninstall {
-                        Operation::new()
-                            .command(format!("go env -w GOPATH={}/.go", &home_dir))
-                            .run()?;
+                        Operation::new(format!("go env -w GOPATH={}/.go", &home_dir)).hide_output(true).run()?;
                         if method == &InstallMethod::Snap || distribution.repository == Repository::RedHat {
                             helper::append_to_file_if_not_found(
                                 &bashrc,
@@ -307,10 +281,7 @@ export PATH=$PATH:$GOPATH/bin
                                 false,
                             )?;
 
-                            Operation::new()
-                                .command("go install golang.org/x/tools/gopls@latest")
-                                .show_output(true)
-                                .run()?;
+                            Operation::new("go install golang.org/x/tools/gopls@latest").run()?;
                         }
                     }
                     Ok(())
@@ -363,9 +334,7 @@ export PATH=$PATH:$GOPATH/bin
                 pre_install: Some(Box::new(|_: &Distribution, _: &mut Info, method: &InstallMethod| {
                     if method == &InstallMethod::Uninstall {
                         let home_dir: String = env::var("HOME").expect("HOME directory could not be determined");
-                        Operation::new()
-                            .command(format!("sudo rm -r {}{}", &home_dir, "/.config/nvim"))
-                            .run()?;
+                        Operation::new(format!("sudo rm -r {}{}", &home_dir, "/.config/nvim")).hide_output(true).run()?;
                     }
                     Ok(())
                 })),
@@ -374,9 +343,7 @@ export PATH=$PATH:$GOPATH/bin
                     if method != &InstallMethod::Uninstall {
                         let config_file: String = format!("{}{}", &home_dir, "/.config/nvim/init.vim");
 
-                        Operation::new()
-                            .command(format!("mkdir -p {}/.config/nvim", &home_dir))
-                            .run()?;
+                        Operation::new(format!("mkdir -p {}/.config/nvim", &home_dir)).hide_output(true).run()?;
         
                         fs::write(
                             &config_file,
@@ -502,9 +469,7 @@ inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-n>" : "\<S-TAB>"
                 pre_install: Some(Box::new(|distribution: &Distribution, _: &mut Info, method: &InstallMethod| {
                     if method == &InstallMethod::Repository {
                         if distribution.repository == Repository::RedHat {
-                            Operation::new()
-                                .command("sudo dnf module enable nodejs:20 -y")
-                                .run()?;
+                            Operation::new("sudo dnf module enable nodejs:20 -y").hide_output(true).run()?;
                         }
                     }
                     Ok(())
@@ -543,8 +508,8 @@ inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-n>" : "\<S-TAB>"
                 pre_install: Some(Box::new(|distribution: &Distribution, info: &mut Info, method: &InstallMethod| {
                     if method != &InstallMethod::Other {
                         let home_dir: String = env::var("HOME").expect("HOME directory could not be determined");
-                        Operation::new()
-                            .command(format!("sudo rm -r {}{}", &home_dir, "/.cargo/bin/rustup"))
+                        Operation::new(format!("sudo rm -r {}{}", &home_dir, "/.cargo/bin/rustup"))
+                            .hide_output(true)
                             .run()?;
                     }
                     if method == &InstallMethod::Other {
@@ -555,11 +520,8 @@ inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-n>" : "\<S-TAB>"
                 post_install: Some(Box::new(|_: &Distribution, method: &InstallMethod| {
                     let home_dir: String = env::var("HOME").expect("HOME directory could not be determined");
                     if method == &InstallMethod::Other {
-                        Operation::new()
-                            .command(format!(
-                                "{}{} component add rust-analyzer",
-                                &home_dir, "/.cargo/bin/rustup"
-                            ))
+                        Operation::new(format!("{}{} component add rust-analyzer", &home_dir, "/.cargo/bin/rustup"))
+                            .hide_output(true)
                             .run()?;
                     }
                     Ok(())
@@ -617,11 +579,8 @@ inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-n>" : "\<S-TAB>"
                 pre_install: Some(Box::new(|_: &Distribution, _: &mut Info, method: &InstallMethod| {
                     let home_dir: String = env::var("HOME").expect("HOME directory could not be determined");
                     if method == &InstallMethod::Uninstall {
-                        Operation::new()
-                            .command(format!(
-                                "sudo rm -r {}{} {}{} {}{}",
-                                &home_dir, "/.vim", &home_dir, "/.viminfo", &home_dir, "/.vimrc"
-                            ))
+                        Operation::new(format!("sudo rm -r {}{} {}{} {}{}", &home_dir, "/.vim", &home_dir, "/.viminfo", &home_dir, "/.vimrc"))
+                            .hide_output(true)
                             .run()?;
                     }
                     Ok(())
@@ -2132,15 +2091,15 @@ inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-n>" : "\<S-TAB>"
                 pre_install: Some(Box::new(|distribution: &Distribution, _: &mut Info, method: &InstallMethod| {
                     if method != &InstallMethod::Repository {
                         if distribution.name == DistributionName::Fedora {
-                            Operation::new()
-                                .command("sudo dnf config-manager --set-disabled phracek-PyCharm")
+                            Operation::new("sudo dnf config-manager --set-disabled phracek-PyCharm")
+                                .hide_output(true)
                                 .run()?;
                         }
                     }
                     if method == &InstallMethod::Repository {
                         if distribution.repository == Repository::Fedora {
-                            Operation::new()
-                                .command("sudo dnf config-manager --set-enabled phracek-PyCharm")
+                            Operation::new("sudo dnf config-manager --set-enabled phracek-PyCharm")
+                                .hide_output(true)
                                 .run()?;
                         }
                     }
@@ -2181,25 +2140,16 @@ inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-n>" : "\<S-TAB>"
                     let home_dir: String = env::var("HOME").expect("HOME directory could not be determined");
                     if method != &InstallMethod::Repository {
                         if distribution.package_manager == PackageManager::APT {
-                            Operation::new()
-                                .command("sudo rm /etc/apt/sources.list.d/vscode.list")
-                                .run()?;
+                            Operation::new("sudo rm /etc/apt/sources.list.d/vscode.list").hide_output(true).run()?;
                         }
                         if distribution.package_manager == PackageManager::DNF {
-                            Operation::new()
-                                .command("sudo dnf config-manager --set-disabled code")
-                                .run()?;
-                            Operation::new()
-                                .command("sudo rm /etc/yum.repos.d/vscode.repo")
-                                .run()?;
+                            Operation::new("sudo dnf config-manager --set-disabled code").hide_output(true).run()?;
+                            Operation::new("sudo rm /etc/yum.repos.d/vscode.repo").hide_output(true).run()?;
                         }
                     }
                     if method == &InstallMethod::Uninstall {
-                        Operation::new()
-                            .command(format!(
-                                "sudo rm -r {}{} {}{}",
-                                &home_dir, "/.vscode", &home_dir, "/.config/Code"
-                            ))
+                        Operation::new(format!("sudo rm -r {}{} {}{}", &home_dir, "/.vscode", &home_dir, "/.config/Code"))
+                            .hide_output(true)
                             .run()?;
                     }
                     if method == &InstallMethod::Repository {
@@ -2207,17 +2157,13 @@ inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-n>" : "\<S-TAB>"
                             distribution.install_package("wget", info)?;
                             distribution.install_package("gpg", info)?;
         
-                            let key: String = Operation::new()
-                                .command("wget -qO- https://packages.microsoft.com/keys/microsoft.asc")
-                                .run_output()?;
+                            let key: String = Operation::new("wget -qO- https://packages.microsoft.com/keys/microsoft.asc").output()?;
                             fs::write("packages.microsoft", key)?;
         
-                            Operation::new()
-                                .command("gpg --dearmor packages.microsoft")
-                                .run()?;
+                            Operation::new("gpg --dearmor packages.microsoft").hide_output(true).run()?;
         
-                            Operation::new()
-                                .command("sudo install -D -o root -g root -m 644 packages.microsoft.gpg /etc/apt/keyrings/packages.microsoft.gpg")
+                            Operation::new("sudo install -D -o root -g root -m 644 packages.microsoft.gpg /etc/apt/keyrings/packages.microsoft.gpg")
+                                .hide_output(true)
                                 .run()?;
         
                             fs::remove_file("packages.microsoft")?;
@@ -2236,13 +2182,11 @@ inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-n>" : "\<S-TAB>"
                                 .spawn()?
                                 .wait()?;
         
-                            Operation::new().command("sudo apt update").run()?;
+                            Operation::new("sudo apt update").run()?;
                         }
                         if distribution.package_manager == PackageManager::DNF {
-                            Operation::new()
-                                .command(
-                                    "sudo rpm --import https://packages.microsoft.com/keys/microsoft.asc",
-                                )
+                            Operation::new("sudo rpm --import https://packages.microsoft.com/keys/microsoft.asc")
+                                .hide_output(true)
                                 .run()?;
         
                             let echo_cmd = Command::new("echo")
@@ -2267,9 +2211,7 @@ inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-n>" : "\<S-TAB>"
                     if method != &InstallMethod::Uninstall {
                         let extensions: Vec<&str> = Vec::from(["esbenp.prettier-vscode", "vscodevim.vim"]);
                         for ext in extensions {
-                            Operation::new()
-                                .command(format!("code --install-extension {}", ext))
-                                .run()?;
+                            Operation::new(format!("code --install-extension {}", ext)).run()?;
                         }
 
                         fs::write(

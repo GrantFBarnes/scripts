@@ -71,10 +71,7 @@ pub fn uninstall(package: &Package, info: &mut Info) -> Result<(), io::Error> {
 
             println!("Uninstalling snap {}...", snp.name);
 
-            Operation::new()
-                .command(format!("sudo snap remove {}", snp.name).as_str())
-                .show_output(true)
-                .run()?;
+            Operation::new(format!("sudo snap remove {}", snp.name)).run()?;
         }
     }
     Ok(())
@@ -82,17 +79,14 @@ pub fn uninstall(package: &Package, info: &mut Info) -> Result<(), io::Error> {
 
 pub fn update() -> Result<(), io::Error> {
     println!("Update snap...");
-    Operation::new()
-        .command("sudo snap refresh")
-        .show_output(true)
-        .run()?;
+    Operation::new("sudo snap refresh").run()?;
     Ok(())
 }
 
 pub fn get_installed() -> Result<Vec<String>, io::Error> {
     let mut packages: Vec<String> = vec![];
 
-    let output = Operation::new().command("snap list").run_output()?;
+    let output = Operation::new("snap list").output()?;
     for line in output.split("\n") {
         if line.is_empty() {
             continue;
