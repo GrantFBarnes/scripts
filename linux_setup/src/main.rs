@@ -29,8 +29,6 @@ enum InstallMethod {
 }
 
 pub struct Info {
-    has_gnome: bool,
-    has_kde: bool,
     has_flatpak: bool,
     has_snap: bool,
 }
@@ -218,9 +216,7 @@ fn run_category_select(
         let mut missing_pkg_desktop_environment: bool = false;
 
         if let Some(de) = &package.desktop_environment {
-            if (de == &DesktopEnvironment::Gnome && !info.has_gnome)
-                || (de == &DesktopEnvironment::KDE && !info.has_kde)
-            {
+            if !distribution.desktop_environments.contains(de) {
                 missing_desktop_environment = true;
                 if !show_all_desktop_environments && !is_installed(&package, distribution) {
                     continue;
@@ -336,10 +332,16 @@ fn run_menu(
     info: &mut Info,
 ) -> Result<(), io::Error> {
     let mut options: Vec<&str> = vec!["Repository Setup"];
-    if info.has_gnome {
+    if distribution
+        .desktop_environments
+        .contains(&DesktopEnvironment::Gnome)
+    {
         options.push("GNOME Setup");
     }
-    if info.has_kde {
+    if distribution
+        .desktop_environments
+        .contains(&DesktopEnvironment::KDE)
+    {
         options.push("KDE Setup");
     }
     options.push("Update Packages");
@@ -387,16 +389,6 @@ fn run_menu(
 }
 
 fn main() -> Result<(), io::Error> {
-    let has_gnome: bool = Operation::new("gnome-shell --version")
-        .hide_output(true)
-        .run()
-        .is_ok();
-
-    let has_kde: bool = Operation::new("plasmashell --version")
-        .hide_output(true)
-        .run()
-        .is_ok();
-
     let mut distribution = distribution::Distribution::new()?;
 
     let has_flatpak: bool = Operation::new("flatpak --version")
@@ -410,8 +402,6 @@ fn main() -> Result<(), io::Error> {
         .is_ok();
 
     let mut info: Info = Info {
-        has_gnome,
-        has_kde,
         has_flatpak,
         has_snap,
     };

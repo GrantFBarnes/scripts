@@ -13,7 +13,7 @@ use crate::other;
 use crate::package::Package;
 use crate::snap;
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Eq, Hash)]
 pub enum DesktopEnvironment {
     Gnome,
     KDE,
@@ -39,6 +39,7 @@ pub enum PackageManager {
 pub struct Distribution {
     pub repository: Repository,
     pub package_manager: PackageManager,
+    pub desktop_environments: HashSet<DesktopEnvironment>,
     packages: HashSet<String>,
     pub flatpaks: HashSet<String>,
     pub snaps: HashSet<String>,
@@ -50,6 +51,7 @@ impl Distribution {
         let mut distribution = Distribution {
             repository: Repository::Arch,
             package_manager: PackageManager::PACMAN,
+            desktop_environments: HashSet::new(),
             packages: HashSet::new(),
             flatpaks: HashSet::new(),
             snaps: HashSet::new(),
@@ -98,6 +100,14 @@ impl Distribution {
     }
 
     fn get_all_installed(&mut self) -> Result<(), io::Error> {
+        if Operation::new("gnome-shell").exists()? {
+            self.desktop_environments.insert(DesktopEnvironment::Gnome);
+        }
+
+        if Operation::new("plasmashell").exists()? {
+            self.desktop_environments.insert(DesktopEnvironment::KDE);
+        }
+
         self.packages = self.get_installed()?;
         self.flatpaks = flatpak::get_installed()?;
         self.snaps = snap::get_installed()?;
