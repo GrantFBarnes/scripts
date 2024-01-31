@@ -96,17 +96,15 @@ pub fn auto_remove() -> Result<(), io::Error> {
 pub fn get_installed() -> Result<HashSet<String>, io::Error> {
     let mut packages: HashSet<String> = HashSet::new();
 
-    if Operation::new("flatpak").exists()? {
-        let output = Operation::new("flatpak list --app").output()?;
-        for line in output.split("\n") {
-            if line.is_empty() {
-                continue;
-            }
-            let columns: Split<&str> = line.split("\t");
-            let columns: Vec<&str> = columns.collect::<Vec<&str>>();
-            if columns.len() > 1 {
-                packages.insert(columns[1].to_owned());
-            }
+    let output = Operation::new("flatpak list --app").output()?;
+    for line in output.split("\n") {
+        if line.is_empty() {
+            continue;
+        }
+        let columns: Split<&str> = line.split("\t");
+        let columns: Vec<&str> = columns.collect::<Vec<&str>>();
+        if columns.len() > 1 {
+            packages.insert(columns[1].to_owned());
         }
     }
 

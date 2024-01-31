@@ -1,5 +1,4 @@
 use rust_cli::ansi::Color;
-use rust_cli::commands::Operation;
 use rust_cli::prompts::select::Select;
 
 use std::io;
@@ -28,14 +27,9 @@ enum InstallMethod {
     Cancel,
 }
 
-pub struct Info {
-    has_flatpak: bool,
-    has_snap: bool,
-}
-
-fn repository_setup(distribution: &mut Distribution, info: &mut Info) -> Result<(), io::Error> {
+fn repository_setup(distribution: &mut Distribution) -> Result<(), io::Error> {
     distribution.setup()?;
-    if info.has_flatpak {
+    if distribution.packages.contains("flatpak") {
         flatpak::setup(distribution)?;
     }
     Ok(())
@@ -91,11 +85,7 @@ fn is_installed(package: &Package, distribution: &Distribution) -> bool {
         || other::is_installed(package, distribution)
 }
 
-fn run_package_select(
-    package: &Package,
-    distribution: &mut Distribution,
-    info: &mut Info,
-) -> Result<(), io::Error> {
+fn run_package_select(package: &Package, distribution: &mut Distribution) -> Result<(), io::Error> {
     let mut options_display: Vec<String> = vec![];
     let mut options_value: Vec<InstallMethod> = vec![];
 
@@ -161,13 +151,13 @@ fn run_package_select(
     }
 
     if method != &InstallMethod::Flatpak {
-        if info.has_flatpak {
+        if distribution.packages.contains("flatpak") {
             flatpak::uninstall(package, distribution)?;
         }
     }
 
     if method != &InstallMethod::Snap {
-        if info.has_snap {
+        if distribution.packages.contains("snapd") {
             snap::uninstall(package, distribution)?;
         }
     }
@@ -197,7 +187,6 @@ fn run_category_select(
     start_idx: usize,
     show_all_desktop_environments: bool,
     distribution: &mut Distribution,
-    info: &mut Info,
 ) -> Result<(), io::Error> {
     let mut options_display: Vec<String> = vec![];
     let mut options_value: Vec<Package> = vec![];
@@ -278,17 +267,15 @@ fn run_category_select(
             selection,
             !show_all_desktop_environments,
             distribution,
-            info,
         )?;
     } else if selection < options_value.len() - 1 {
         // not exit
-        run_package_select(&options_value[selection], distribution, info)?;
+        run_package_select(&options_value[selection], distribution)?;
         run_category_select(
             category,
             selection + 1,
             show_all_desktop_environments,
             distribution,
-            info,
         )?;
     }
 
@@ -298,7 +285,6 @@ fn run_category_select(
 fn run_install_packages(
     start_idx: usize,
     distribution: &mut Distribution,
-    info: &mut Info,
 ) -> Result<(), io::Error> {
     let mut options_display: Vec<&str> = vec![];
     let mut options_value: Vec<&Category> = vec![];
@@ -320,17 +306,13 @@ fn run_install_packages(
     let selection = selection.unwrap().0;
     match options_display[selection] {
         "Exit" => return Ok(()),
-        _ => run_category_select(options_value[selection], 0, false, distribution, info)?,
+        _ => run_category_select(options_value[selection], 0, false, distribution)?,
     }
 
-    run_install_packages(selection + 1, distribution, info)
+    run_install_packages(selection + 1, distribution)
 }
 
-fn run_menu(
-    start_idx: usize,
-    distribution: &mut Distribution,
-    info: &mut Info,
-) -> Result<(), io::Error> {
+fn run_menu(start_idx: usize, distribution: &mut Distribution) -> Result<(), io::Error> {
     let mut options: Vec<&str> = vec!["Repository Setup"];
     if distribution
         .desktop_environments
@@ -361,49 +343,34 @@ fn run_menu(
     let selection: usize = selection.unwrap().0;
 
     match options[selection] {
-        "Repository Setup" => repository_setup(distribution, info)?,
+        "Repository Setup" => repository_setup(distribution)?,
         "GNOME Setup" => gnome::setup(distribution)?,
         "KDE Setup" => kde::setup()?,
         "Update Packages" => {
             distribution.update()?;
-            if info.has_flatpak {
+            if distribution.packages.contains("flatpak") {
                 flatpak::update()?;
             }
-            if info.has_snap {
+            if distribution.packages.contains("snapd") {
                 snap::update()?;
             }
             other::update(distribution)?;
         }
         "Auto Remove Packages" => {
             distribution.auto_remove()?;
-            if info.has_flatpak {
+            if distribution.packages.contains("flatpak") {
                 flatpak::auto_remove()?;
             }
         }
-        "Install Packages" => run_install_packages(0, distribution, info)?,
+        "Install Packages" => run_install_packages(0, distribution)?,
         "Exit" => return Ok(()),
         _ => (),
     }
 
-    run_menu(selection + 1, distribution, info)
+    run_menu(selection + 1, distribution)
 }
 
 fn main() -> Result<(), io::Error> {
     let mut distribution = distribution::Distribution::new()?;
-
-    let has_flatpak: bool = Operation::new("flatpak --version")
-        .hide_output(true)
-        .run()
-        .is_ok();
-
-    let has_snap: bool = Operation::new("snap --version")
-        .hide_output(true)
-        .run()
-        .is_ok();
-
-    let mut info: Info = Info {
-        has_flatpak,
-        has_snap,
-    };
-    run_menu(0, &mut distribution, &mut info)
+    run_menu(0, &mut distribution)
 }

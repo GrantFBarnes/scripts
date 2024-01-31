@@ -40,7 +40,7 @@ pub struct Distribution {
     pub repository: Repository,
     pub package_manager: PackageManager,
     pub desktop_environments: HashSet<DesktopEnvironment>,
-    packages: HashSet<String>,
+    pub packages: HashSet<String>,
     pub flatpaks: HashSet<String>,
     pub snaps: HashSet<String>,
     pub others: HashSet<String>,
@@ -109,9 +109,17 @@ impl Distribution {
         }
 
         self.packages = self.get_installed()?;
-        self.flatpaks = flatpak::get_installed()?;
-        self.snaps = snap::get_installed()?;
+
+        if self.packages.contains("flatpak") {
+            self.flatpaks = flatpak::get_installed()?;
+        }
+
+        if self.packages.contains("snapd") {
+            self.snaps = snap::get_installed()?;
+        }
+
         self.others = other::get_installed()?;
+
         Ok(())
     }
 

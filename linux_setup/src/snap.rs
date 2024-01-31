@@ -79,17 +79,15 @@ pub fn update() -> Result<(), io::Error> {
 pub fn get_installed() -> Result<HashSet<String>, io::Error> {
     let mut packages: HashSet<String> = HashSet::new();
 
-    if Operation::new("snap").exists()? {
-        let output = Operation::new("snap list").output()?;
-        for line in output.split("\n") {
-            if line.is_empty() {
-                continue;
-            }
-            let columns: SplitWhitespace = line.split_whitespace();
-            let columns: Vec<&str> = columns.collect::<Vec<&str>>();
-            if !columns.is_empty() {
-                packages.insert(columns[0].to_owned());
-            }
+    let output = Operation::new("snap list").output()?;
+    for line in output.split("\n") {
+        if line.is_empty() {
+            continue;
+        }
+        let columns: SplitWhitespace = line.split_whitespace();
+        let columns: Vec<&str> = columns.collect::<Vec<&str>>();
+        if !columns.is_empty() {
+            packages.insert(columns[0].to_owned());
         }
     }
 
