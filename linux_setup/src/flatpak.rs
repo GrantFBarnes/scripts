@@ -6,7 +6,6 @@ use std::str::Split;
 
 use crate::distribution::{Distribution, PackageManager};
 use crate::package::Package;
-use crate::Info;
 
 pub struct Flatpak {
     pub name: &'static str,
@@ -36,10 +35,10 @@ pub fn is_available(package: &Package) -> bool {
     package.flatpak.is_some()
 }
 
-pub fn is_installed(package: &Package, info: &Info) -> bool {
+pub fn is_installed(package: &Package, distribution: &Distribution) -> bool {
     if let Some(fp) = &package.flatpak {
         let package: &str = fp.name;
-        if info.flatpak_installed.contains(&package.to_owned()) {
+        if distribution.flatpaks.contains(&package.to_owned()) {
             return true;
         }
     }
@@ -50,7 +49,6 @@ pub fn install<S: Into<String>>(
     package: &Package,
     remote: S,
     distribution: &mut Distribution,
-    info: &mut Info,
 ) -> Result<(), io::Error> {
     let remote = remote.into();
     distribution.install_package("flatpak")?;
@@ -58,8 +56,8 @@ pub fn install<S: Into<String>>(
 
     if let Some(fp) = &package.flatpak {
         let package = fp.name;
-        if !info.flatpak_installed.contains(&package.to_owned()) {
-            info.flatpak_installed.insert(package.to_owned());
+        if !distribution.flatpaks.contains(&package.to_owned()) {
+            distribution.flatpaks.insert(package.to_owned());
 
             println!("Installing flatpak {} from {}...", package, remote);
 
@@ -69,11 +67,11 @@ pub fn install<S: Into<String>>(
     Ok(())
 }
 
-pub fn uninstall(package: &Package, info: &mut Info) -> Result<(), io::Error> {
+pub fn uninstall(package: &Package, distribution: &mut Distribution) -> Result<(), io::Error> {
     if let Some(fp) = &package.flatpak {
         let package = fp.name;
-        if info.flatpak_installed.contains(&package.to_owned()) {
-            info.flatpak_installed.remove(&package.to_owned());
+        if distribution.flatpaks.contains(&package.to_owned()) {
+            distribution.flatpaks.remove(&package.to_owned());
 
             println!("Uninstalling flatpak {}...", package);
 
@@ -98,15 +96,17 @@ pub fn auto_remove() -> Result<(), io::Error> {
 pub fn get_installed() -> Result<HashSet<String>, io::Error> {
     let mut packages: HashSet<String> = HashSet::new();
 
-    let output = Operation::new("flatpak list --app").output()?;
-    for line in output.split("\n") {
-        if line.is_empty() {
-            continue;
-        }
-        let columns: Split<&str> = line.split("\t");
-        let columns: Vec<&str> = columns.collect::<Vec<&str>>();
-        if columns.len() > 1 {
-            packages.insert(columns[1].to_owned());
+    if Operation::new("flatpak").exists()? {
+        let output = Operation::new("flatpak list --app").output()?;
+        for line in output.split("\n") {
+            if line.is_empty() {
+                continue;
+            }
+            let columns: Split<&str> = line.split("\t");
+            let columns: Vec<&str> = columns.collect::<Vec<&str>>();
+            if columns.len() > 1 {
+                packages.insert(columns[1].to_owned());
+            }
         }
     }
 

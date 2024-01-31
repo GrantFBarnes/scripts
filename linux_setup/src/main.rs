@@ -2,7 +2,6 @@ use rust_cli::ansi::Color;
 use rust_cli::commands::Operation;
 use rust_cli::prompts::select::Select;
 
-use std::collections::HashSet;
 use std::io;
 
 extern crate rust_cli;
@@ -34,9 +33,6 @@ pub struct Info {
     has_kde: bool,
     has_flatpak: bool,
     has_snap: bool,
-    flatpak_installed: HashSet<String>,
-    snap_installed: HashSet<String>,
-    other_installed: HashSet<String>,
 }
 
 fn repository_setup(distribution: &mut Distribution, info: &mut Info) -> Result<(), io::Error> {
@@ -50,7 +46,6 @@ fn repository_setup(distribution: &mut Distribution, info: &mut Info) -> Result<
 fn run_flatpak_remote_select(
     package: &Package,
     distribution: &mut Distribution,
-    info: &mut Info,
 ) -> Result<(), io::Error> {
     let mut options: Vec<&str> = vec![];
     if let Some(fp) = &package.flatpak {
@@ -69,33 +64,33 @@ fn run_flatpak_remote_select(
         if remote.1 == "Cancel" {
             return Ok(());
         }
-        flatpak::install(package, remote.1, distribution, info)
+        flatpak::install(package, remote.1, distribution)
     } else {
         return Ok(());
     }
 }
 
-fn get_install_method(package: &Package, distribution: &Distribution, info: &Info) -> String {
+fn get_install_method(package: &Package, distribution: &Distribution) -> String {
     if distribution.is_installed(package) {
         return helper::get_colored_string("Repository", Color::Green);
     }
-    if flatpak::is_installed(package, info) {
+    if flatpak::is_installed(package, distribution) {
         return helper::get_colored_string("Flatpak", Color::Blue);
     }
-    if snap::is_installed(package, info) {
+    if snap::is_installed(package, distribution) {
         return helper::get_colored_string("Snap", Color::Magenta);
     }
-    if other::is_installed(package, info) {
+    if other::is_installed(package, distribution) {
         return helper::get_colored_string("Other", Color::Yellow);
     }
     return helper::get_colored_string("Uninstalled", Color::Red);
 }
 
-fn is_installed(package: &Package, distribution: &Distribution, info: &Info) -> bool {
+fn is_installed(package: &Package, distribution: &Distribution) -> bool {
     distribution.is_installed(package)
-        || flatpak::is_installed(package, info)
-        || snap::is_installed(package, info)
-        || other::is_installed(package, info)
+        || flatpak::is_installed(package, distribution)
+        || snap::is_installed(package, distribution)
+        || other::is_installed(package, distribution)
 }
 
 fn run_package_select(
@@ -148,7 +143,7 @@ fn run_package_select(
         .title(format!(
             "Package: {} ({})",
             package.name,
-            get_install_method(package, distribution, &info)
+            get_install_method(package, distribution)
         ))
         .options(&options_display)
         .erase_after(true)
@@ -169,18 +164,18 @@ fn run_package_select(
 
     if method != &InstallMethod::Flatpak {
         if info.has_flatpak {
-            flatpak::uninstall(package, info)?;
+            flatpak::uninstall(package, distribution)?;
         }
     }
 
     if method != &InstallMethod::Snap {
         if info.has_snap {
-            snap::uninstall(package, info)?;
+            snap::uninstall(package, distribution)?;
         }
     }
 
     if method != &InstallMethod::Other {
-        other::uninstall(package, info)?;
+        other::uninstall(package, distribution)?;
     }
 
     if let Some(pre_install) = &package.pre_install {
@@ -188,9 +183,9 @@ fn run_package_select(
     }
     match method {
         InstallMethod::Repository => distribution.install(package)?,
-        InstallMethod::Flatpak => run_flatpak_remote_select(package, distribution, info)?,
-        InstallMethod::Snap => snap::install(package, distribution, info)?,
-        InstallMethod::Other => other::install(package, info)?,
+        InstallMethod::Flatpak => run_flatpak_remote_select(package, distribution)?,
+        InstallMethod::Snap => snap::install(package, distribution)?,
+        InstallMethod::Other => other::install(package, distribution)?,
         _ => (),
     };
     if let Some(post_install) = &package.post_install {
@@ -227,7 +222,7 @@ fn run_category_select(
                 || (de == &DesktopEnvironment::KDE && !info.has_kde)
             {
                 missing_desktop_environment = true;
-                if !show_all_desktop_environments && !is_installed(&package, distribution, info) {
+                if !show_all_desktop_environments && !is_installed(&package, distribution) {
                     continue;
                 }
                 missing_pkg_desktop_environment = true;
@@ -244,7 +239,7 @@ fn run_category_select(
                     Color::White
                 }
             ),
-            get_install_method(&package, distribution, info)
+            get_install_method(&package, distribution)
         ));
         options_value.push(package);
     }
@@ -375,7 +370,7 @@ fn run_menu(
             if info.has_snap {
                 snap::update()?;
             }
-            other::update(info)?;
+            other::update(distribution)?;
         }
         "Auto Remove Packages" => {
             distribution.auto_remove()?;
@@ -408,30 +403,17 @@ fn main() -> Result<(), io::Error> {
         .hide_output(true)
         .run()
         .is_ok();
-    let flatpak_installed = match has_flatpak {
-        true => flatpak::get_installed()?,
-        false => HashSet::new(),
-    };
 
     let has_snap: bool = Operation::new("snap --version")
         .hide_output(true)
         .run()
         .is_ok();
-    let snap_installed = match has_snap {
-        true => snap::get_installed()?,
-        false => HashSet::new(),
-    };
-
-    let other_installed = other::get_installed()?;
 
     let mut info: Info = Info {
         has_gnome,
         has_kde,
         has_flatpak,
         has_snap,
-        flatpak_installed,
-        snap_installed,
-        other_installed,
     };
     run_menu(0, &mut distribution, &mut info)
 }

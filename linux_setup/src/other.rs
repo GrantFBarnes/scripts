@@ -4,8 +4,8 @@ use std::collections::HashSet;
 use std::io;
 use std::process::{Command, Stdio};
 
+use crate::distribution::Distribution;
 use crate::package::Package;
-use crate::Info;
 
 const PACKAGES: [&str; 1] = ["rust"];
 pub struct OtherPackage {
@@ -16,19 +16,19 @@ pub fn is_available(package: &Package) -> bool {
     package.other.is_some()
 }
 
-pub fn is_installed(package: &Package, info: &Info) -> bool {
+pub fn is_installed(package: &Package, distribution: &Distribution) -> bool {
     if let Some(otr) = &package.other {
-        if info.other_installed.contains(&otr.name.to_string()) {
+        if distribution.others.contains(&otr.name.to_string()) {
             return true;
         }
     }
     false
 }
 
-pub fn install(package: &Package, info: &mut Info) -> Result<(), io::Error> {
+pub fn install(package: &Package, distribution: &mut Distribution) -> Result<(), io::Error> {
     if let Some(otr) = &package.other {
-        if !info.other_installed.contains(&otr.name.to_string()) {
-            info.other_installed.insert(otr.name.to_owned());
+        if !distribution.others.contains(&otr.name.to_string()) {
+            distribution.others.insert(otr.name.to_owned());
 
             println!("Installing other {}...", otr.name);
 
@@ -55,10 +55,10 @@ pub fn install(package: &Package, info: &mut Info) -> Result<(), io::Error> {
     Ok(())
 }
 
-pub fn uninstall(package: &Package, info: &mut Info) -> Result<(), io::Error> {
+pub fn uninstall(package: &Package, distribution: &mut Distribution) -> Result<(), io::Error> {
     if let Some(otr) = &package.other {
-        if info.other_installed.contains(&otr.name.to_string()) {
-            info.other_installed.remove(&otr.name.to_string());
+        if distribution.others.contains(&otr.name.to_string()) {
+            distribution.others.remove(&otr.name.to_string());
 
             println!("Uninstalling other {}...", otr.name);
 
@@ -73,11 +73,11 @@ pub fn uninstall(package: &Package, info: &mut Info) -> Result<(), io::Error> {
     Ok(())
 }
 
-pub fn update(info: &Info) -> Result<(), io::Error> {
+pub fn update(distribution: &Distribution) -> Result<(), io::Error> {
     println!("Update other...");
 
     for pkg in PACKAGES {
-        if info.other_installed.contains(&pkg.to_string()) {
+        if distribution.others.contains(&pkg.to_string()) {
             match pkg {
                 "rust" => {
                     Operation::new("rustup self update").run()?;

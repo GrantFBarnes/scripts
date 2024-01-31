@@ -7,8 +7,11 @@ use std::io;
 use std::process::{Command, Stdio};
 use std::str::{Split, SplitWhitespace};
 
+use crate::flatpak;
 use crate::helper;
+use crate::other;
 use crate::package::Package;
+use crate::snap;
 
 #[derive(PartialEq)]
 pub enum DesktopEnvironment {
@@ -37,6 +40,9 @@ pub struct Distribution {
     pub repository: Repository,
     pub package_manager: PackageManager,
     packages: HashSet<String>,
+    pub flatpaks: HashSet<String>,
+    pub snaps: HashSet<String>,
+    pub others: HashSet<String>,
 }
 
 impl Distribution {
@@ -45,6 +51,9 @@ impl Distribution {
             repository: Repository::Arch,
             package_manager: PackageManager::PACMAN,
             packages: HashSet::new(),
+            flatpaks: HashSet::new(),
+            snaps: HashSet::new(),
+            others: HashSet::new(),
         };
 
         match fs::read_to_string("/etc/os-release")? {
@@ -83,9 +92,17 @@ impl Distribution {
             _ => return Err(io::Error::other("distribution not found")),
         };
 
-        distribution.packages = distribution.get_installed()?;
+        distribution.get_all_installed()?;
 
         Ok(distribution)
+    }
+
+    fn get_all_installed(&mut self) -> Result<(), io::Error> {
+        self.packages = self.get_installed()?;
+        self.flatpaks = flatpak::get_installed()?;
+        self.snaps = snap::get_installed()?;
+        self.others = other::get_installed()?;
+        Ok(())
     }
 
     fn get_installed(&self) -> Result<HashSet<String>, io::Error> {
