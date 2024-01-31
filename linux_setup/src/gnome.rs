@@ -1,7 +1,7 @@
 use std::io;
 use std::process::Command;
 
-use crate::distribution::{Distribution, DistributionName};
+use crate::distribution::{Distribution, Repository};
 
 fn settings_set(path: &str, key: &str, value: &str) -> Result<(), io::Error> {
     Command::new("gsettings")
@@ -90,7 +90,7 @@ pub fn setup(distribution: &Distribution) -> Result<(), io::Error> {
     )?;
 
     // Set Ubuntu Settings
-    if distribution.name == DistributionName::Ubuntu {
+    if distribution.repository == Repository::Ubuntu {
         settings_set(
             "org.gnome.shell.extensions.ding",
             "show-home",

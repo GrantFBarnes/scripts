@@ -8,9 +8,7 @@ use std::slice::Iter;
 
 use rust_cli::commands::Operation;
 
-use crate::distribution::{
-    DesktopEnvironment, Distribution, DistributionName, PackageManager, Repository,
-};
+use crate::distribution::{DesktopEnvironment, Distribution, PackageManager, Repository};
 use crate::flatpak::Flatpak;
 use crate::helper;
 use crate::other::OtherPackage;
@@ -73,7 +71,8 @@ pub struct Package {
     pub flatpak: Option<Flatpak>,
     pub snap: Option<Snap>,
     pub other: Option<OtherPackage>,
-    pub pre_install: Option<Box<dyn Fn(&Distribution, &mut Info, &InstallMethod) -> Result<(), io::Error>>>,
+    pub pre_install:
+        Option<Box<dyn Fn(&Distribution, &mut Info, &InstallMethod) -> Result<(), io::Error>>>,
     pub post_install: Option<Box<dyn Fn(&Distribution, &InstallMethod) -> Result<(), io::Error>>>,
 }
 
@@ -149,7 +148,7 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                     if method == &InstallMethod::Repository {
                         if distribution.repository == Repository::Debian {
                             distribution.install_package("wget", info)?;
-        
+
                             Operation::new("wget https://packages.microsoft.com/config/debian/12/packages-microsoft-prod.deb -O packages-microsoft-prod.deb").run()?;
                             Operation::new("sudo dpkg -i packages-microsoft-prod.deb").run()?;
                             Operation::new("rm packages-microsoft-prod.deb").run()?;
@@ -182,7 +181,7 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                     if method == &InstallMethod::Repository {
                         if distribution.repository == Repository::Debian {
                             distribution.install_package("wget", info)?;
-        
+
                             Operation::new("wget https://packages.microsoft.com/config/debian/12/packages-microsoft-prod.deb -O packages-microsoft-prod.deb").run()?;
                             Operation::new("sudo dpkg -i packages-microsoft-prod.deb").run()?;
                             Operation::new("rm packages-microsoft-prod.deb").run()?;
@@ -344,7 +343,7 @@ export PATH=$PATH:$GOPATH/bin
                         let config_file: String = format!("{}{}", &home_dir, "/.config/nvim/init.vim");
 
                         Operation::new(format!("mkdir -p {}/.config/nvim", &home_dir)).hide_output(true).run()?;
-        
+
                         fs::write(
                             &config_file,
                             r#"""""""""""""""""""""""""""""""""""""""""
@@ -389,7 +388,7 @@ nnoremap <Leader>go iif err != nil {}<ESC>
 nnoremap <Leader>ex :Explore<CR>
 "#,
                         )?;
-        
+
                         if distribution.repository != Repository::RedHat {
                             if distribution.repository == Repository::Arch
                                 || distribution.repository == Repository::Fedora
@@ -401,7 +400,7 @@ nnoremap <Leader>ex :Explore<CR>
                                     false,
                                 )?;
                             }
-        
+
                             helper::append_to_file_if_not_found(
                                 &config_file,
                                 "ale settings",
@@ -595,9 +594,9 @@ inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-n>" : "\<S-TAB>"
                             "export EDITOR=\"/usr/bin/vim\"\n",
                             false,
                         )?;
-        
+
                         let config_file: String = format!("{}{}", &home_dir, "/.vimrc");
-        
+
                         fs::write(
                             &config_file,
                             r#"""""""""""""""""""""""""""""""""""""""""
@@ -647,7 +646,7 @@ nnoremap <Leader>go iif err != nil {}<ESC>
 nnoremap <Leader>ex :Explore<CR>
 "#,
                         )?;
-        
+
                         if distribution.repository != Repository::RedHat {
                             if distribution.repository == Repository::Arch
                                 || distribution.repository == Repository::Fedora
@@ -659,7 +658,7 @@ nnoremap <Leader>ex :Explore<CR>
                                     false,
                                 )?;
                             }
-        
+
                             helper::append_to_file_if_not_found(
                                 &config_file,
                                 "ale settings",
@@ -2090,7 +2089,7 @@ inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-n>" : "\<S-TAB>"
                 other: None,
                 pre_install: Some(Box::new(|distribution: &Distribution, _: &mut Info, method: &InstallMethod| {
                     if method != &InstallMethod::Repository {
-                        if distribution.name == DistributionName::Fedora {
+                        if distribution.repository == Repository::Fedora {
                             Operation::new("sudo dnf config-manager --set-disabled phracek-PyCharm")
                                 .hide_output(true)
                                 .run()?;
@@ -2156,19 +2155,19 @@ inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-n>" : "\<S-TAB>"
                         if distribution.package_manager == PackageManager::APT {
                             distribution.install_package("wget", info)?;
                             distribution.install_package("gpg", info)?;
-        
+
                             let key: String = Operation::new("wget -qO- https://packages.microsoft.com/keys/microsoft.asc").output()?;
                             fs::write("packages.microsoft", key)?;
-        
+
                             Operation::new("gpg --dearmor packages.microsoft").hide_output(true).run()?;
-        
+
                             Operation::new("sudo install -D -o root -g root -m 644 packages.microsoft.gpg /etc/apt/keyrings/packages.microsoft.gpg")
                                 .hide_output(true)
                                 .run()?;
-        
+
                             fs::remove_file("packages.microsoft")?;
                             fs::remove_file("packages.microsoft.gpg")?;
-        
+
                             let echo_cmd = Command::new("echo")
                                 .arg("deb [arch=amd64,arm64,armhf signed-by=/etc/apt/keyrings/packages.microsoft.gpg] https://packages.microsoft.com/repos/code stable main")
                                 .stdout(Stdio::piped())
@@ -2181,14 +2180,14 @@ inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-n>" : "\<S-TAB>"
                                 .stderr(Stdio::inherit())
                                 .spawn()?
                                 .wait()?;
-        
+
                             Operation::new("sudo apt update").run()?;
                         }
                         if distribution.package_manager == PackageManager::DNF {
                             Operation::new("sudo rpm --import https://packages.microsoft.com/keys/microsoft.asc")
                                 .hide_output(true)
                                 .run()?;
-        
+
                             let echo_cmd = Command::new("echo")
                                 .arg("-e")
                                 .arg("[code]\nname=Visual Studio Code\nbaseurl=https://packages.microsoft.com/yumrepos/vscode\nenabled=1\ngpgcheck=1\ngpgkey=https://packages.microsoft.com/keys/microsoft.asc")

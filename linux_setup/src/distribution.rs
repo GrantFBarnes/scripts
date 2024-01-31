@@ -16,18 +16,6 @@ pub enum DesktopEnvironment {
     KDE,
 }
 
-#[derive(Debug, PartialEq, Eq)]
-pub enum DistributionName {
-    Alma,
-    Arch,
-    CentOS,
-    Debian,
-    Fedora,
-    Mint,
-    SilverBlue,
-    Ubuntu,
-}
-
 #[derive(Debug, PartialEq, Eq, Hash)]
 pub enum Repository {
     Arch,
@@ -46,7 +34,6 @@ pub enum PackageManager {
 }
 
 pub struct Distribution {
-    pub name: DistributionName,
     pub repository: Repository,
     pub package_manager: PackageManager,
 }
@@ -55,42 +42,34 @@ impl Distribution {
     pub fn new() -> Result<Self, io::Error> {
         match fs::read_to_string("/etc/os-release")? {
             x if x.contains("Arch") => Ok(Distribution {
-                name: DistributionName::Arch,
                 repository: Repository::Arch,
                 package_manager: PackageManager::PACMAN,
             }),
             x if x.contains("Alma") => Ok(Distribution {
-                name: DistributionName::Alma,
                 repository: Repository::RedHat,
                 package_manager: PackageManager::DNF,
             }),
             x if x.contains("CentOS") => Ok(Distribution {
-                name: DistributionName::CentOS,
                 repository: Repository::RedHat,
                 package_manager: PackageManager::DNF,
             }),
             x if x.contains("Debian") => Ok(Distribution {
-                name: DistributionName::Debian,
                 repository: Repository::Debian,
                 package_manager: PackageManager::APT,
             }),
             x if x.contains("Silverblue") => Ok(Distribution {
-                name: DistributionName::SilverBlue,
                 repository: Repository::Fedora,
                 package_manager: PackageManager::RPMOSTree,
             }),
             x if x.contains("Fedora") => Ok(Distribution {
-                name: DistributionName::Fedora,
                 repository: Repository::Fedora,
                 package_manager: PackageManager::DNF,
             }),
             x if x.contains("Mint") => Ok(Distribution {
-                name: DistributionName::Mint,
                 repository: Repository::Ubuntu,
                 package_manager: PackageManager::APT,
             }),
             x if x.contains("Ubuntu") => Ok(Distribution {
-                name: DistributionName::Ubuntu,
                 repository: Repository::Ubuntu,
                 package_manager: PackageManager::APT,
             }),
