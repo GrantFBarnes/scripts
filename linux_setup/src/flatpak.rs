@@ -49,11 +49,11 @@ pub fn is_installed(package: &Package, info: &Info) -> bool {
 pub fn install<S: Into<String>>(
     package: &Package,
     remote: S,
-    distribution: &Distribution,
+    distribution: &mut Distribution,
     info: &mut Info,
 ) -> Result<(), io::Error> {
     let remote = remote.into();
-    distribution.install_package("flatpak", info)?;
+    distribution.install_package("flatpak")?;
     setup(distribution)?;
 
     if let Some(fp) = &package.flatpak {

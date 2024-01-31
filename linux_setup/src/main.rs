@@ -34,14 +34,13 @@ pub struct Info {
     has_kde: bool,
     has_flatpak: bool,
     has_snap: bool,
-    repository_installed: HashSet<String>,
     flatpak_installed: HashSet<String>,
     snap_installed: HashSet<String>,
     other_installed: HashSet<String>,
 }
 
-fn repository_setup(distribution: &Distribution, info: &mut Info) -> Result<(), io::Error> {
-    distribution.setup(info)?;
+fn repository_setup(distribution: &mut Distribution, info: &mut Info) -> Result<(), io::Error> {
+    distribution.setup()?;
     if info.has_flatpak {
         flatpak::setup(distribution)?;
     }
@@ -50,7 +49,7 @@ fn repository_setup(distribution: &Distribution, info: &mut Info) -> Result<(), 
 
 fn run_flatpak_remote_select(
     package: &Package,
-    distribution: &Distribution,
+    distribution: &mut Distribution,
     info: &mut Info,
 ) -> Result<(), io::Error> {
     let mut options: Vec<&str> = vec![];
@@ -77,7 +76,7 @@ fn run_flatpak_remote_select(
 }
 
 fn get_install_method(package: &Package, distribution: &Distribution, info: &Info) -> String {
-    if distribution.is_installed(package, info) {
+    if distribution.is_installed(package) {
         return helper::get_colored_string("Repository", Color::Green);
     }
     if flatpak::is_installed(package, info) {
@@ -93,7 +92,7 @@ fn get_install_method(package: &Package, distribution: &Distribution, info: &Inf
 }
 
 fn is_installed(package: &Package, distribution: &Distribution, info: &Info) -> bool {
-    distribution.is_installed(package, info)
+    distribution.is_installed(package)
         || flatpak::is_installed(package, info)
         || snap::is_installed(package, info)
         || other::is_installed(package, info)
@@ -101,7 +100,7 @@ fn is_installed(package: &Package, distribution: &Distribution, info: &Info) -> 
 
 fn run_package_select(
     package: &Package,
-    distribution: &Distribution,
+    distribution: &mut Distribution,
     info: &mut Info,
 ) -> Result<(), io::Error> {
     let mut options_display: Vec<String> = vec![];
@@ -165,7 +164,7 @@ fn run_package_select(
     }
 
     if method != &InstallMethod::Repository {
-        distribution.uninstall(package, info)?;
+        distribution.uninstall(package)?;
     }
 
     if method != &InstallMethod::Flatpak {
@@ -185,15 +184,15 @@ fn run_package_select(
     }
 
     if let Some(pre_install) = &package.pre_install {
-        (pre_install)(distribution, info, &method)?;
+        (pre_install)(distribution, &method)?;
     }
     match method {
-        InstallMethod::Repository => distribution.install(package, info)?,
+        InstallMethod::Repository => distribution.install(package)?,
         InstallMethod::Flatpak => run_flatpak_remote_select(package, distribution, info)?,
         InstallMethod::Snap => snap::install(package, distribution, info)?,
         InstallMethod::Other => other::install(package, info)?,
         _ => (),
-    }
+    };
     if let Some(post_install) = &package.post_install {
         (post_install)(distribution, &method)?;
     }
@@ -204,7 +203,7 @@ fn run_category_select(
     category: &Category,
     start_idx: usize,
     show_all_desktop_environments: bool,
-    distribution: &Distribution,
+    distribution: &mut Distribution,
     info: &mut Info,
 ) -> Result<(), io::Error> {
     let mut options_display: Vec<String> = vec![];
@@ -307,7 +306,7 @@ fn run_category_select(
 
 fn run_install_packages(
     start_idx: usize,
-    distribution: &Distribution,
+    distribution: &mut Distribution,
     info: &mut Info,
 ) -> Result<(), io::Error> {
     let mut options_display: Vec<&str> = vec![];
@@ -338,7 +337,7 @@ fn run_install_packages(
 
 fn run_menu(
     start_idx: usize,
-    distribution: &Distribution,
+    distribution: &mut Distribution,
     info: &mut Info,
 ) -> Result<(), io::Error> {
     let mut options: Vec<&str> = vec!["Repository Setup"];
@@ -403,8 +402,7 @@ fn main() -> Result<(), io::Error> {
         .run()
         .is_ok();
 
-    let distribution = distribution::Distribution::new()?;
-    let repository_installed = distribution.get_installed()?;
+    let mut distribution = distribution::Distribution::new()?;
 
     let has_flatpak: bool = Operation::new("flatpak --version")
         .hide_output(true)
@@ -431,10 +429,9 @@ fn main() -> Result<(), io::Error> {
         has_kde,
         has_flatpak,
         has_snap,
-        repository_installed,
         flatpak_installed,
         snap_installed,
         other_installed,
     };
-    run_menu(0, &distribution, &mut info)
+    run_menu(0, &mut distribution, &mut info)
 }

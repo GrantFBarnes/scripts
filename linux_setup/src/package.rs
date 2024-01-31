@@ -14,7 +14,6 @@ use crate::helper;
 use crate::other::OtherPackage;
 use crate::snap::Snap;
 
-use crate::Info;
 use crate::InstallMethod;
 
 #[derive(PartialEq)]
@@ -72,8 +71,9 @@ pub struct Package {
     pub snap: Option<Snap>,
     pub other: Option<OtherPackage>,
     pub pre_install:
-        Option<Box<dyn Fn(&Distribution, &mut Info, &InstallMethod) -> Result<(), io::Error>>>,
-    pub post_install: Option<Box<dyn Fn(&Distribution, &InstallMethod) -> Result<(), io::Error>>>,
+        Option<Box<dyn Fn(&mut Distribution, &InstallMethod) -> Result<(), io::Error>>>,
+    pub post_install:
+        Option<Box<dyn Fn(&mut Distribution, &InstallMethod) -> Result<(), io::Error>>>,
 }
 
 impl Package {
@@ -144,10 +144,10 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                     channel: "",
                 }),
                 other: None,
-                pre_install: Some(Box::new(|distribution: &Distribution, info: &mut Info, method: &InstallMethod| {
+                pre_install: Some(Box::new(|distribution: &mut Distribution, method: &InstallMethod| {
                     if method == &InstallMethod::Repository {
                         if distribution.repository == Repository::Debian {
-                            distribution.install_package("wget", info)?;
+                            distribution.install_package("wget")?;
 
                             Operation::new("wget https://packages.microsoft.com/config/debian/12/packages-microsoft-prod.deb -O packages-microsoft-prod.deb").run()?;
                             Operation::new("sudo dpkg -i packages-microsoft-prod.deb").run()?;
@@ -177,10 +177,10 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                     channel: "8.0/stable",
                 }),
                 other: None,
-                pre_install: Some(Box::new(|distribution: &Distribution, info: &mut Info, method: &InstallMethod| {
+                pre_install: Some(Box::new(|distribution: &mut Distribution, method: &InstallMethod| {
                     if method == &InstallMethod::Repository {
                         if distribution.repository == Repository::Debian {
-                            distribution.install_package("wget", info)?;
+                            distribution.install_package("wget")?;
 
                             Operation::new("wget https://packages.microsoft.com/config/debian/12/packages-microsoft-prod.deb -O packages-microsoft-prod.deb").run()?;
                             Operation::new("sudo dpkg -i packages-microsoft-prod.deb").run()?;
@@ -257,14 +257,14 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                     channel: "",
                 }),
                 other: None,
-                pre_install: Some(Box::new(|_: &Distribution, _: &mut Info, method: &InstallMethod| {
+                pre_install: Some(Box::new(|_: &mut Distribution, method: &InstallMethod| {
                     let home_dir: String = env::var("HOME").expect("HOME directory could not be determined");
                     if method == &InstallMethod::Uninstall {
                         Operation::new(format!("sudo rm -r {}{}", &home_dir, "/.go")).hide_output(true).run()?;
                     }
                     Ok(())
                 })),
-                post_install: Some(Box::new(|distribution: &Distribution, method: &InstallMethod| {
+                post_install: Some(Box::new(|distribution: &mut Distribution, method: &InstallMethod| {
                     let home_dir: String = env::var("HOME").expect("HOME directory could not be determined");
                     let bashrc: String = format!("{}{}", &home_dir, "/.bashrc");
                     if method != &InstallMethod::Uninstall {
@@ -330,14 +330,14 @@ export PATH=$PATH:$GOPATH/bin
                 flatpak: None,
                 snap: None,
                 other: None,
-                pre_install: Some(Box::new(|_: &Distribution, _: &mut Info, method: &InstallMethod| {
+                pre_install: Some(Box::new(|_: &mut Distribution, method: &InstallMethod| {
                     if method == &InstallMethod::Uninstall {
                         let home_dir: String = env::var("HOME").expect("HOME directory could not be determined");
                         Operation::new(format!("sudo rm -r {}{}", &home_dir, "/.config/nvim")).hide_output(true).run()?;
                     }
                     Ok(())
                 })),
-                post_install: Some(Box::new(|distribution: &Distribution, method: &InstallMethod| {
+                post_install: Some(Box::new(|distribution: &mut Distribution, method: &InstallMethod| {
                     let home_dir: String = env::var("HOME").expect("HOME directory could not be determined");
                     if method != &InstallMethod::Uninstall {
                         let config_file: String = format!("{}{}", &home_dir, "/.config/nvim/init.vim");
@@ -465,7 +465,7 @@ inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-n>" : "\<S-TAB>"
                     channel: "18/stable",
                 }),
                 other: None,
-                pre_install: Some(Box::new(|distribution: &Distribution, _: &mut Info, method: &InstallMethod| {
+                pre_install: Some(Box::new(|distribution: &mut Distribution, method: &InstallMethod| {
                     if method == &InstallMethod::Repository {
                         if distribution.repository == Repository::RedHat {
                             Operation::new("sudo dnf module enable nodejs:20 -y").hide_output(true).run()?;
@@ -504,7 +504,7 @@ inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-n>" : "\<S-TAB>"
                 flatpak: None,
                 snap: None,
                 other: Some(OtherPackage { name: "rust" }),
-                pre_install: Some(Box::new(|distribution: &Distribution, info: &mut Info, method: &InstallMethod| {
+                pre_install: Some(Box::new(|distribution: &mut Distribution, method: &InstallMethod| {
                     if method != &InstallMethod::Other {
                         let home_dir: String = env::var("HOME").expect("HOME directory could not be determined");
                         Operation::new(format!("sudo rm -r {}{}", &home_dir, "/.cargo/bin/rustup"))
@@ -512,11 +512,11 @@ inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-n>" : "\<S-TAB>"
                             .run()?;
                     }
                     if method == &InstallMethod::Other {
-                        distribution.install_package("curl", info)?;
+                        distribution.install_package("curl")?;
                     }
                     Ok(())
                 })),
-                post_install: Some(Box::new(|_: &Distribution, method: &InstallMethod| {
+                post_install: Some(Box::new(|_: &mut Distribution, method: &InstallMethod| {
                     let home_dir: String = env::var("HOME").expect("HOME directory could not be determined");
                     if method == &InstallMethod::Other {
                         Operation::new(format!("{}{} component add rust-analyzer", &home_dir, "/.cargo/bin/rustup"))
@@ -539,7 +539,7 @@ inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-n>" : "\<S-TAB>"
                 snap: None,
                 other: None,
                 pre_install: None,
-                post_install: Some(Box::new(|distribution: &Distribution, method: &InstallMethod| {
+                post_install: Some(Box::new(|distribution: &mut Distribution, method: &InstallMethod| {
                     if method != &InstallMethod::Uninstall {
                         distribution.setup_snap()?;
                     }
@@ -575,7 +575,7 @@ inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-n>" : "\<S-TAB>"
                 flatpak: None,
                 snap: None,
                 other: None,
-                pre_install: Some(Box::new(|_: &Distribution, _: &mut Info, method: &InstallMethod| {
+                pre_install: Some(Box::new(|_: &mut Distribution, method: &InstallMethod| {
                     let home_dir: String = env::var("HOME").expect("HOME directory could not be determined");
                     if method == &InstallMethod::Uninstall {
                         Operation::new(format!("sudo rm -r {}{} {}{} {}{}", &home_dir, "/.vim", &home_dir, "/.viminfo", &home_dir, "/.vimrc"))
@@ -584,7 +584,7 @@ inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-n>" : "\<S-TAB>"
                     }
                     Ok(())
                 })),
-                post_install: Some(Box::new(|distribution: &Distribution, method: &InstallMethod| {
+                post_install: Some(Box::new(|distribution: &mut Distribution, method: &InstallMethod| {
                     let home_dir: String = env::var("HOME").expect("HOME directory could not be determined");
                     let bashrc: String = format!("{}{}", &home_dir, "/.bashrc");
                     if method != &InstallMethod::Uninstall {
@@ -1956,7 +1956,7 @@ inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-n>" : "\<S-TAB>"
                 }),
                 other: None,
                 pre_install: None,
-                post_install: Some(Box::new(|_: &Distribution, method: &InstallMethod| {
+                post_install: Some(Box::new(|_: &mut Distribution, method: &InstallMethod| {
                     let home_dir: String = env::var("HOME").expect("HOME directory could not be determined");
                     if method != &InstallMethod::Uninstall {
                         fs::write(
@@ -2087,7 +2087,7 @@ inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-n>" : "\<S-TAB>"
                     channel: "",
                 }),
                 other: None,
-                pre_install: Some(Box::new(|distribution: &Distribution, _: &mut Info, method: &InstallMethod| {
+                pre_install: Some(Box::new(|distribution: &mut Distribution, method: &InstallMethod| {
                     if method != &InstallMethod::Repository {
                         if distribution.repository == Repository::Fedora {
                             Operation::new("sudo dnf config-manager --set-disabled phracek-PyCharm")
@@ -2104,7 +2104,7 @@ inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-n>" : "\<S-TAB>"
                     }
                     Ok(())
                 })),
-                post_install: Some(Box::new(|_: &Distribution, method: &InstallMethod| {
+                post_install: Some(Box::new(|_: &mut Distribution, method: &InstallMethod| {
                     let home_dir: String = env::var("HOME").expect("HOME directory could not be determined");
                     if method != &InstallMethod::Uninstall {
                         fs::write(
@@ -2135,7 +2135,7 @@ inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-n>" : "\<S-TAB>"
                     channel: "",
                 }),
                 other: None,
-                pre_install: Some(Box::new(|distribution: &Distribution, info: &mut Info, method: &InstallMethod| {
+                pre_install: Some(Box::new(|distribution: &mut Distribution, method: &InstallMethod| {
                     let home_dir: String = env::var("HOME").expect("HOME directory could not be determined");
                     if method != &InstallMethod::Repository {
                         if distribution.package_manager == PackageManager::APT {
@@ -2153,8 +2153,8 @@ inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-n>" : "\<S-TAB>"
                     }
                     if method == &InstallMethod::Repository {
                         if distribution.package_manager == PackageManager::APT {
-                            distribution.install_package("wget", info)?;
-                            distribution.install_package("gpg", info)?;
+                            distribution.install_package("wget")?;
+                            distribution.install_package("gpg")?;
 
                             let key: String = Operation::new("wget -qO- https://packages.microsoft.com/keys/microsoft.asc").output()?;
                             fs::write("packages.microsoft", key)?;
@@ -2205,7 +2205,7 @@ inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-n>" : "\<S-TAB>"
                     }
                     Ok(())
                 })),
-                post_install: Some(Box::new(|_: &Distribution, method: &InstallMethod| {
+                post_install: Some(Box::new(|_: &mut Distribution, method: &InstallMethod| {
                     let home_dir: String = env::var("HOME").expect("HOME directory could not be determined");
                     if method != &InstallMethod::Uninstall {
                         let extensions: Vec<&str> = Vec::from(["esbenp.prettier-vscode", "vscodevim.vim"]);

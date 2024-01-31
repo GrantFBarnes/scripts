@@ -31,10 +31,10 @@ pub fn is_installed(package: &Package, info: &Info) -> bool {
 
 pub fn install(
     package: &Package,
-    distribution: &Distribution,
+    distribution: &mut Distribution,
     info: &mut Info,
 ) -> Result<(), io::Error> {
-    distribution.install_package("snapd", info)?;
+    distribution.install_package("snapd")?;
 
     if let Some(snp) = &package.snap {
         if !info.snap_installed.contains(&snp.name.to_owned()) {
