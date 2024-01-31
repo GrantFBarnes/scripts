@@ -1,5 +1,6 @@
 use rust_cli::commands::Operation;
 
+use std::collections::HashSet;
 use std::io;
 use std::process::{Command, Stdio};
 use std::str::SplitWhitespace;
@@ -37,7 +38,7 @@ pub fn install(
 
     if let Some(snp) = &package.snap {
         if !info.snap_installed.contains(&snp.name.to_owned()) {
-            info.snap_installed.push(snp.name.to_owned());
+            info.snap_installed.insert(snp.name.to_owned());
 
             println!("Installing snap {}...", snp.name);
 
@@ -64,10 +65,7 @@ pub fn install(
 pub fn uninstall(package: &Package, info: &mut Info) -> Result<(), io::Error> {
     if let Some(snp) = &package.snap {
         if info.snap_installed.contains(&snp.name.to_owned()) {
-            let index: Option<usize> = info.snap_installed.iter().position(|x| *x == snp.name);
-            if index.is_some() {
-                info.snap_installed.remove(index.unwrap());
-            }
+            info.snap_installed.remove(&snp.name.to_owned());
 
             println!("Uninstalling snap {}...", snp.name);
 
@@ -83,8 +81,8 @@ pub fn update() -> Result<(), io::Error> {
     Ok(())
 }
 
-pub fn get_installed() -> Result<Vec<String>, io::Error> {
-    let mut packages: Vec<String> = vec![];
+pub fn get_installed() -> Result<HashSet<String>, io::Error> {
+    let mut packages: HashSet<String> = HashSet::new();
 
     let output = Operation::new("snap list").output()?;
     for line in output.split("\n") {
@@ -94,7 +92,7 @@ pub fn get_installed() -> Result<Vec<String>, io::Error> {
         let columns: SplitWhitespace = line.split_whitespace();
         let columns: Vec<&str> = columns.collect::<Vec<&str>>();
         if !columns.is_empty() {
-            packages.push(columns[0].to_owned());
+            packages.insert(columns[0].to_owned());
         }
     }
 

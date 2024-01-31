@@ -1,6 +1,7 @@
 use rust_cli::commands::Operation;
 use rust_cli::prompts::confirm::Confirm;
 
+use std::collections::HashSet;
 use std::fs;
 use std::io;
 use std::process::{Command, Stdio};
@@ -153,7 +154,7 @@ impl Distribution {
 
     pub fn install_package(&self, package: &str, info: &mut Info) -> Result<(), io::Error> {
         if !info.repository_installed.contains(&package.to_string()) {
-            info.repository_installed.push(package.to_string());
+            info.repository_installed.insert(package.to_string());
 
             println!("Installing repository {}...", package);
 
@@ -182,13 +183,7 @@ impl Distribution {
                 if !info.repository_installed.contains(&pkg.to_string()) {
                     continue;
                 }
-                let index: Option<usize> = info
-                    .repository_installed
-                    .iter()
-                    .position(|x| *x == pkg.to_string());
-                if index.is_some() {
-                    info.repository_installed.remove(index.unwrap());
-                }
+                info.repository_installed.remove(&pkg.to_string());
 
                 println!("Uninstalling repository {}...", pkg);
 
@@ -275,8 +270,8 @@ impl Distribution {
         Ok(())
     }
 
-    pub fn get_installed(&self) -> Result<Vec<String>, io::Error> {
-        let mut packages: Vec<String> = vec![];
+    pub fn get_installed(&self) -> Result<HashSet<String>, io::Error> {
+        let mut packages: HashSet<String> = HashSet::new();
 
         let output: String = match self.package_manager {
             PackageManager::APT => Operation::new("apt list --installed").output()?,
@@ -326,7 +321,7 @@ impl Distribution {
                 }
             }
             if !package.is_empty() {
-                packages.push(package);
+                packages.insert(package);
             }
         }
 

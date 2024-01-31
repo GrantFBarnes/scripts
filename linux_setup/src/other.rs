@@ -1,5 +1,6 @@
 use rust_cli::commands::Operation;
 
+use std::collections::HashSet;
 use std::io;
 use std::process::{Command, Stdio};
 
@@ -27,7 +28,7 @@ pub fn is_installed(package: &Package, info: &Info) -> bool {
 pub fn install(package: &Package, info: &mut Info) -> Result<(), io::Error> {
     if let Some(otr) = &package.other {
         if !info.other_installed.contains(&otr.name.to_string()) {
-            info.other_installed.push(otr.name.to_owned());
+            info.other_installed.insert(otr.name.to_owned());
 
             println!("Installing other {}...", otr.name);
 
@@ -57,10 +58,7 @@ pub fn install(package: &Package, info: &mut Info) -> Result<(), io::Error> {
 pub fn uninstall(package: &Package, info: &mut Info) -> Result<(), io::Error> {
     if let Some(otr) = &package.other {
         if info.other_installed.contains(&otr.name.to_string()) {
-            let index: Option<usize> = info.other_installed.iter().position(|x| *x == otr.name);
-            if index.is_some() {
-                info.other_installed.remove(index.unwrap());
-            }
+            info.other_installed.remove(&otr.name.to_string());
 
             println!("Uninstalling other {}...", otr.name);
 
@@ -92,13 +90,15 @@ pub fn update(info: &Info) -> Result<(), io::Error> {
     Ok(())
 }
 
-pub fn get_installed() -> Result<Vec<String>, io::Error> {
-    let mut packages: Vec<String> = vec![];
+pub fn get_installed() -> Result<HashSet<String>, io::Error> {
+    let mut packages: HashSet<String> = HashSet::new();
 
     for pkg in PACKAGES {
         match pkg {
             "rust" => match Operation::new("rustup --version").hide_output(true).run() {
-                Ok(_) => packages.push(pkg.to_string()),
+                Ok(_) => {
+                    packages.insert(pkg.to_string());
+                }
                 _ => (),
             },
             _ => (),

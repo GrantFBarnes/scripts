@@ -1,5 +1,6 @@
 use rust_cli::commands::Operation;
 
+use std::collections::HashSet;
 use std::io;
 use std::str::Split;
 
@@ -58,7 +59,7 @@ pub fn install<S: Into<String>>(
     if let Some(fp) = &package.flatpak {
         let package = fp.name;
         if !info.flatpak_installed.contains(&package.to_owned()) {
-            info.flatpak_installed.push(package.to_owned());
+            info.flatpak_installed.insert(package.to_owned());
 
             println!("Installing flatpak {} from {}...", package, remote);
 
@@ -72,10 +73,7 @@ pub fn uninstall(package: &Package, info: &mut Info) -> Result<(), io::Error> {
     if let Some(fp) = &package.flatpak {
         let package = fp.name;
         if info.flatpak_installed.contains(&package.to_owned()) {
-            let index: Option<usize> = info.flatpak_installed.iter().position(|x| *x == package);
-            if index.is_some() {
-                info.flatpak_installed.remove(index.unwrap());
-            }
+            info.flatpak_installed.remove(&package.to_owned());
 
             println!("Uninstalling flatpak {}...", package);
 
@@ -97,8 +95,8 @@ pub fn auto_remove() -> Result<(), io::Error> {
     Ok(())
 }
 
-pub fn get_installed() -> Result<Vec<String>, io::Error> {
-    let mut packages: Vec<String> = vec![];
+pub fn get_installed() -> Result<HashSet<String>, io::Error> {
+    let mut packages: HashSet<String> = HashSet::new();
 
     let output = Operation::new("flatpak list --app").output()?;
     for line in output.split("\n") {
@@ -108,7 +106,7 @@ pub fn get_installed() -> Result<Vec<String>, io::Error> {
         let columns: Split<&str> = line.split("\t");
         let columns: Vec<&str> = columns.collect::<Vec<&str>>();
         if columns.len() > 1 {
-            packages.push(columns[1].to_owned());
+            packages.insert(columns[1].to_owned());
         }
     }
 

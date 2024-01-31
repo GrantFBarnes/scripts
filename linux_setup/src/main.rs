@@ -2,6 +2,7 @@ use rust_cli::ansi::Color;
 use rust_cli::commands::Operation;
 use rust_cli::prompts::select::Select;
 
+use std::collections::HashSet;
 use std::io;
 
 extern crate rust_cli;
@@ -33,10 +34,10 @@ pub struct Info {
     has_kde: bool,
     has_flatpak: bool,
     has_snap: bool,
-    repository_installed: Vec<String>,
-    flatpak_installed: Vec<String>,
-    snap_installed: Vec<String>,
-    other_installed: Vec<String>,
+    repository_installed: HashSet<String>,
+    flatpak_installed: HashSet<String>,
+    snap_installed: HashSet<String>,
+    other_installed: HashSet<String>,
 }
 
 fn repository_setup(distribution: &Distribution, info: &mut Info) -> Result<(), io::Error> {
@@ -402,28 +403,28 @@ fn main() -> Result<(), io::Error> {
         .run()
         .is_ok();
 
-    let distribution: Distribution = distribution::Distribution::new()?;
-    let repository_installed: Vec<String> = distribution.get_installed()?;
+    let distribution = distribution::Distribution::new()?;
+    let repository_installed = distribution.get_installed()?;
 
     let has_flatpak: bool = Operation::new("flatpak --version")
         .hide_output(true)
         .run()
         .is_ok();
-    let flatpak_installed: Vec<String> = match has_flatpak {
+    let flatpak_installed = match has_flatpak {
         true => flatpak::get_installed()?,
-        false => vec![],
+        false => HashSet::new(),
     };
 
     let has_snap: bool = Operation::new("snap --version")
         .hide_output(true)
         .run()
         .is_ok();
-    let snap_installed: Vec<String> = match has_snap {
+    let snap_installed = match has_snap {
         true => snap::get_installed()?,
-        false => vec![],
+        false => HashSet::new(),
     };
 
-    let other_installed: Vec<String> = other::get_installed()?;
+    let other_installed = other::get_installed()?;
 
     let mut info: Info = Info {
         has_gnome,
