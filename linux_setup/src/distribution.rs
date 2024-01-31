@@ -94,33 +94,31 @@ impl Distribution {
             _ => return Err(io::Error::other("distribution not found")),
         };
 
-        distribution.get_all_installed()?;
-
-        Ok(distribution)
-    }
-
-    fn get_all_installed(&mut self) -> Result<(), io::Error> {
         if Operation::new("gnome-shell").exists()? {
-            self.desktop_environments.insert(DesktopEnvironment::Gnome);
+            distribution
+                .desktop_environments
+                .insert(DesktopEnvironment::Gnome);
         }
 
         if Operation::new("plasmashell").exists()? {
-            self.desktop_environments.insert(DesktopEnvironment::KDE);
+            distribution
+                .desktop_environments
+                .insert(DesktopEnvironment::KDE);
         }
 
-        self.packages = self.get_installed()?;
+        distribution.packages = distribution.get_installed()?;
 
-        if self.packages.contains("flatpak") {
-            self.flatpaks = flatpak::get_installed()?;
+        if distribution.packages.contains("flatpak") {
+            distribution.flatpaks = flatpak::get_installed()?;
         }
 
-        if self.packages.contains("snapd") {
-            self.snaps = snap::get_installed()?;
+        if distribution.packages.contains("snapd") {
+            distribution.snaps = snap::get_installed()?;
         }
 
-        self.others = other::get_installed()?;
+        distribution.others = other::get_installed()?;
 
-        Ok(())
+        Ok(distribution)
     }
 
     fn get_installed(&self) -> Result<HashSet<String>, io::Error> {
