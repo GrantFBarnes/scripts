@@ -1593,6 +1593,7 @@ inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-n>" : "\<S-TAB>"
                 desktop_environment: None,
                 repository: HashMap::from([
                     (Repository::Arch, vec!["steam"]),
+                    (Repository::Fedora, vec!["steam"]),
                 ]),
                 flatpak: Some(Flatpak {
                     name: "com.valvesoftware.Steam",
@@ -1605,7 +1606,23 @@ inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-n>" : "\<S-TAB>"
                     channel: "",
                 }),
                 other: None,
-                pre_install: None,
+                pre_install: Some(Box::new(|distribution: &mut Distribution, method: &InstallMethod| {
+                    if method != &InstallMethod::Repository {
+                        if distribution.repository == Repository::Fedora {
+                            Operation::new("sudo dnf config-manager --set-disabled rpmfusion-nonfree-steam")
+                                .hide_output(true)
+                                .run()?;
+                        }
+                    }
+                    if method == &InstallMethod::Repository {
+                        if distribution.repository == Repository::Fedora {
+                            Operation::new("sudo dnf config-manager --set-enabled rpmfusion-nonfree-steam")
+                                .hide_output(true)
+                                .run()?;
+                        }
+                    }
+                    Ok(())
+                })),
                 post_install: None,
             },
             Package {
