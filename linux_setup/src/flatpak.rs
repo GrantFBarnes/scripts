@@ -9,6 +9,7 @@ use crate::package::Package;
 
 pub struct Flatpak {
     pub name: &'static str,
+    pub is_verified: bool,
     pub remotes: Vec<&'static str>,
 }
 

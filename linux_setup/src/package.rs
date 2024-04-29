@@ -828,6 +828,7 @@ inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-n>" : "\<S-TAB>"
                 ]),
                 flatpak: Some(Flatpak {
                     name: "org.gnome.Cheese",
+                    is_verified: true,
                     remotes: vec!["fedora", "flathub"],
                 }),
                 snap: None,
@@ -846,6 +847,7 @@ inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-n>" : "\<S-TAB>"
                 ]),
                 flatpak: Some(Flatpak {
                     name: "org.gnome.DejaDup",
+                    is_verified: true,
                     remotes: vec!["flathub"],
                 }),
                 snap: None,
@@ -865,6 +867,7 @@ inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-n>" : "\<S-TAB>"
                 ]),
                 flatpak: Some(Flatpak {
                     name: "org.gnome.Evince",
+                    is_verified: true,
                     remotes: vec!["fedora", "flathub"],
                 }),
                 snap: None,
@@ -884,6 +887,7 @@ inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-n>" : "\<S-TAB>"
                 ]),
                 flatpak: Some(Flatpak {
                     name: "org.gnome.eog",
+                    is_verified: true,
                     remotes: vec!["fedora", "flathub"],
                 }),
                 snap: Some(Snap {
@@ -907,6 +911,7 @@ inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-n>" : "\<S-TAB>"
                 ]),
                 flatpak: Some(Flatpak {
                     name: "org.gnome.Boxes",
+                    is_verified: true,
                     remotes: vec!["flathub"],
                 }),
                 snap: None,
@@ -926,6 +931,7 @@ inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-n>" : "\<S-TAB>"
                 ]),
                 flatpak: Some(Flatpak {
                     name: "org.gnome.Calculator",
+                    is_verified: true,
                     remotes: vec!["fedora", "flathub"],
                 }),
                 snap: Some(Snap {
@@ -949,6 +955,7 @@ inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-n>" : "\<S-TAB>"
                 ]),
                 flatpak: Some(Flatpak {
                     name: "org.gnome.Calendar",
+                    is_verified: true,
                     remotes: vec!["fedora", "flathub"],
                 }),
                 snap: None,
@@ -967,6 +974,7 @@ inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-n>" : "\<S-TAB>"
                 ]),
                 flatpak: Some(Flatpak {
                     name: "org.gnome.clocks",
+                    is_verified: true,
                     remotes: vec!["fedora", "flathub"],
                 }),
                 snap: Some(Snap {
@@ -991,6 +999,7 @@ inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-n>" : "\<S-TAB>"
                 ]),
                 flatpak: Some(Flatpak {
                     name: "org.gnome.Connections",
+                    is_verified: true,
                     remotes: vec!["fedora", "flathub"],
                 }),
                 snap: None,
@@ -1009,6 +1018,7 @@ inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-n>" : "\<S-TAB>"
                 ]),
                 flatpak: Some(Flatpak {
                     name: "org.gnome.Contacts",
+                    is_verified: true,
                     remotes: vec!["fedora", "flathub"],
                 }),
                 snap: None,
@@ -1024,6 +1034,7 @@ inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-n>" : "\<S-TAB>"
                 ]),
                 flatpak: Some(Flatpak {
                     name: "org.gnome.Loupe",
+                    is_verified: true,
                     remotes: vec!["fedora", "flathub"],
                 }),
                 snap: Some(Snap {
@@ -1047,6 +1058,7 @@ inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-n>" : "\<S-TAB>"
                 ]),
                 flatpak: Some(Flatpak {
                     name: "org.gnome.Maps",
+                    is_verified: true,
                     remotes: vec!["fedora", "flathub"],
                 }),
                 snap: None,
@@ -1065,6 +1077,7 @@ inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-n>" : "\<S-TAB>"
                 ]),
                 flatpak: Some(Flatpak {
                     name: "org.gnome.World.Secrets",
+                    is_verified: true,
                     remotes: vec!["fedora", "flathub"],
                 }),
                 snap: None,
@@ -1083,6 +1096,7 @@ inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-n>" : "\<S-TAB>"
                 ]),
                 flatpak: Some(Flatpak {
                     name: "org.gnome.Weather",
+                    is_verified: true,
                     remotes: vec!["fedora", "flathub"],
                 }),
                 snap: None,
@@ -1101,6 +1115,7 @@ inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-n>" : "\<S-TAB>"
                 ]),
                 flatpak: Some(Flatpak {
                     name: "org.gnucash.GnuCash",
+                    is_verified: true,
                     remotes: vec!["fedora", "flathub"],
                 }),
                 snap: None,
@@ -1119,6 +1134,7 @@ inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-n>" : "\<S-TAB>"
                 ]),
                 flatpak: Some(Flatpak {
                     name: "org.kde.gwenview",
+                    is_verified: true,
                     remotes: vec!["fedora", "flathub"],
                 }),
                 snap: Some(Snap {
@@ -1143,6 +1159,7 @@ inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-n>" : "\<S-TAB>"
                 ]),
                 flatpak: Some(Flatpak {
                     name: "org.kde.kcalc",
+                    is_verified: true,
                     remotes: vec!["fedora", "flathub"],
                 }),
                 snap: Some(Snap {
@@ -1166,6 +1183,7 @@ inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-n>" : "\<S-TAB>"
                 ]),
                 flatpak: Some(Flatpak {
                     name: "org.kde.okular",
+                    is_verified: true,
                     remotes: vec!["fedora", "flathub"],
                 }),
                 snap: Some(Snap {
@@ -1189,6 +1207,7 @@ inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-n>" : "\<S-TAB>"
                 ]),
                 flatpak: Some(Flatpak {
                     name: "com.transmissionbt.Transmission",
+                    is_verified: false,
                     remotes: vec!["fedora", "flathub"],
                 }),
                 snap: None,
@@ -1207,6 +1226,7 @@ inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-n>" : "\<S-TAB>"
                 ]),
                 flatpak: Some(Flatpak {
                     name: "com.transmissionbt.Transmission",
+                    is_verified: false,
                     remotes: vec!["fedora", "flathub"],
                 }),
                 snap: None,
@@ -1242,6 +1262,7 @@ inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-n>" : "\<S-TAB>"
                 ]),
                 flatpak: Some(Flatpak {
                     name: "org.chromium.Chromium",
+                    is_verified: false,
                     remotes: vec!["flathub"],
                 }),
                 snap: Some(Snap {
@@ -1265,6 +1286,7 @@ inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-n>" : "\<S-TAB>"
                 ]),
                 flatpak: Some(Flatpak {
                     name: "org.gnome.Epiphany",
+                    is_verified: true,
                     remotes: vec!["fedora", "flathub"],
                 }),
                 snap: None,
@@ -1281,6 +1303,7 @@ inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-n>" : "\<S-TAB>"
                 ]),
                 flatpak: Some(Flatpak {
                     name: "org.mozilla.firefox",
+                    is_verified: true,
                     remotes: vec!["flathub"],
                 }),
                 snap: Some(Snap {
@@ -1329,6 +1352,7 @@ inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-n>" : "\<S-TAB>"
                 repository: HashMap::new(),
                 flatpak: Some(Flatpak {
                     name: "com.github.micahflee.torbrowser-launcher",
+                    is_verified: false,
                     remotes: vec!["flathub"],
                 }),
                 snap: None,
@@ -1344,6 +1368,7 @@ inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-n>" : "\<S-TAB>"
                 repository: HashMap::from([(Repository::Arch, vec!["discord"])]),
                 flatpak: Some(Flatpak {
                     name: "com.discordapp.Discord",
+                    is_verified: true,
                     remotes: vec!["flathub"],
                 }),
                 snap: Some(Snap {
@@ -1368,6 +1393,7 @@ inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-n>" : "\<S-TAB>"
                 ]),
                 flatpak: Some(Flatpak {
                     name: "org.mozilla.Thunderbird",
+                    is_verified: true,
                     remotes: vec!["fedora", "flathub"],
                 }),
                 snap: Some(Snap {
@@ -1393,6 +1419,7 @@ inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-n>" : "\<S-TAB>"
                 ]),
                 flatpak: Some(Flatpak {
                     name: "com.play0ad.zeroad",
+                    is_verified: false,
                     remotes: vec!["fedora", "flathub"],
                 }),
                 snap: Some(Snap {
@@ -1416,6 +1443,7 @@ inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-n>" : "\<S-TAB>"
                 ]),
                 flatpak: Some(Flatpak {
                     name: "org.gnome.TwentyFortyEight",
+                    is_verified: true,
                     remotes: vec!["fedora", "flathub"],
                 }),
                 snap: None,
@@ -1434,6 +1462,7 @@ inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-n>" : "\<S-TAB>"
                 ]),
                 flatpak: Some(Flatpak {
                     name: "org.gnome.Chess",
+                    is_verified: true,
                     remotes: vec!["fedora", "flathub"],
                 }),
                 snap: None,
@@ -1452,6 +1481,7 @@ inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-n>" : "\<S-TAB>"
                 ]),
                 flatpak: Some(Flatpak {
                     name: "org.gnome.Mines",
+                    is_verified: true,
                     remotes: vec!["fedora", "flathub"],
                 }),
                 snap: None,
@@ -1470,6 +1500,7 @@ inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-n>" : "\<S-TAB>"
                 ]),
                 flatpak: Some(Flatpak {
                     name: "org.gnome.Aisleriot",
+                    is_verified: false,
                     remotes: vec!["fedora", "flathub"],
                 }),
                 snap: None,
@@ -1488,6 +1519,7 @@ inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-n>" : "\<S-TAB>"
                 ]),
                 flatpak: Some(Flatpak {
                     name: "org.gnome.Sudoku",
+                    is_verified: true,
                     remotes: vec!["fedora", "flathub"],
                 }),
                 snap: Some(Snap {
@@ -1511,6 +1543,7 @@ inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-n>" : "\<S-TAB>"
                 ]),
                 flatpak: Some(Flatpak {
                     name: "org.gnome.Quadrapassel",
+                    is_verified: false,
                     remotes: vec!["fedora", "flathub"],
                 }),
                 snap: Some(Snap {
@@ -1576,6 +1609,7 @@ inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-n>" : "\<S-TAB>"
                 ]),
                 flatpak: Some(Flatpak {
                     name: "org.kde.ksudoku",
+                    is_verified: true,
                     remotes: vec!["fedora", "flathub"],
                 }),
                 snap: Some(Snap {
@@ -1597,6 +1631,7 @@ inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-n>" : "\<S-TAB>"
                 ]),
                 flatpak: Some(Flatpak {
                     name: "com.valvesoftware.Steam",
+                    is_verified: false,
                     remotes: vec!["flathub"],
                 }),
                 snap: Some(Snap {
@@ -1636,6 +1671,7 @@ inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-n>" : "\<S-TAB>"
                 ]),
                 flatpak: Some(Flatpak {
                     name: "net.supertuxkart.SuperTuxKart",
+                    is_verified: false,
                     remotes: vec!["fedora", "flathub"],
                 }),
                 snap: Some(Snap {
@@ -1657,6 +1693,7 @@ inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-n>" : "\<S-TAB>"
                 ]),
                 flatpak: Some(Flatpak {
                     name: "org.xonotic.Xonotic",
+                    is_verified: false,
                     remotes: vec!["flathub"],
                 }),
                 snap: Some(Snap {
@@ -1682,6 +1719,7 @@ inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-n>" : "\<S-TAB>"
                 ]),
                 flatpak: Some(Flatpak {
                     name: "org.blender.Blender",
+                    is_verified: false,
                     remotes: vec!["flathub"],
                 }),
                 snap: Some(Snap {
@@ -1705,6 +1743,7 @@ inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-n>" : "\<S-TAB>"
                 ]),
                 flatpak: Some(Flatpak {
                     name: "org.kde.elisa",
+                    is_verified: true,
                     remotes: vec!["fedora", "flathub"],
                 }),
                 snap: None,
@@ -1724,6 +1763,7 @@ inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-n>" : "\<S-TAB>"
                 ]),
                 flatpak: Some(Flatpak {
                     name: "org.gimp.GIMP",
+                    is_verified: true,
                     remotes: vec!["fedora", "flathub"],
                 }),
                 snap: Some(Snap {
@@ -1747,6 +1787,7 @@ inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-n>" : "\<S-TAB>"
                 ]),
                 flatpak: Some(Flatpak {
                     name: "org.gnome.Music",
+                    is_verified: true,
                     remotes: vec!["fedora", "flathub"],
                 }),
                 snap: None,
@@ -1766,6 +1807,7 @@ inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-n>" : "\<S-TAB>"
                 ]),
                 flatpak: Some(Flatpak {
                     name: "org.gnome.Photos",
+                    is_verified: false,
                     remotes: vec!["fedora", "flathub"],
                 }),
                 snap: None,
@@ -1784,6 +1826,7 @@ inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-n>" : "\<S-TAB>"
                 ]),
                 flatpak: Some(Flatpak {
                     name: "org.gnome.SoundRecorder",
+                    is_verified: false,
                     remotes: vec!["fedora", "flathub"],
                 }),
                 snap: None,
@@ -1802,6 +1845,7 @@ inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-n>" : "\<S-TAB>"
                 ]),
                 flatpak: Some(Flatpak {
                     name: "org.kde.kdenlive",
+                    is_verified: true,
                     remotes: vec!["flathub"],
                 }),
                 snap: Some(Snap {
@@ -1825,6 +1869,7 @@ inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-n>" : "\<S-TAB>"
                 ]),
                 flatpak: Some(Flatpak {
                     name: "org.gnome.Rhythmbox3",
+                    is_verified: false,
                     remotes: vec!["fedora", "flathub"],
                 }),
                 snap: None,
@@ -1843,6 +1888,7 @@ inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-n>" : "\<S-TAB>"
                 ]),
                 flatpak: Some(Flatpak {
                     name: "org.gnome.Shotwell",
+                    is_verified: true,
                     remotes: vec!["fedora", "flathub"],
                 }),
                 snap: None,
@@ -1862,6 +1908,7 @@ inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-n>" : "\<S-TAB>"
                 ]),
                 flatpak: Some(Flatpak {
                     name: "org.gnome.Totem",
+                    is_verified: true,
                     remotes: vec!["fedora", "flathub"],
                 }),
                 snap: None,
@@ -1881,6 +1928,7 @@ inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-n>" : "\<S-TAB>"
                 ]),
                 flatpak: Some(Flatpak {
                     name: "org.videolan.VLC",
+                    is_verified: false,
                     remotes: vec!["flathub"],
                 }),
                 snap: Some(Snap {
@@ -1907,6 +1955,7 @@ inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-n>" : "\<S-TAB>"
                 ]),
                 flatpak: Some(Flatpak {
                     name: "org.gnome.gedit",
+                    is_verified: false,
                     remotes: vec!["fedora", "flathub"],
                 }),
                 snap: Some(Snap {
@@ -1930,6 +1979,7 @@ inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-n>" : "\<S-TAB>"
                 ]),
                 flatpak: Some(Flatpak {
                     name: "org.gnome.Builder",
+                    is_verified: true,
                     remotes: vec!["flathub"],
                 }),
                 snap: None,
@@ -1948,6 +1998,7 @@ inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-n>" : "\<S-TAB>"
                 ]),
                 flatpak: Some(Flatpak {
                     name: "org.gnome.TextEditor",
+                    is_verified: true,
                     remotes: vec!["fedora", "flathub"],
                 }),
                 snap: None,
@@ -1963,6 +2014,7 @@ inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-n>" : "\<S-TAB>"
                 ]),
                 flatpak: Some(Flatpak {
                     name: "com.jetbrains.IntelliJ-IDEA-Community",
+                    is_verified: false,
                     remotes: vec!["flathub"],
                 }),
                 snap: Some(Snap {
@@ -2016,6 +2068,7 @@ inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-n>" : "\<S-TAB>"
                 ]),
                 flatpak: Some(Flatpak {
                     name: "org.kde.kdevelop",
+                    is_verified: true,
                     remotes: vec!["flathub"],
                 }),
                 snap: Some(Snap {
@@ -2055,6 +2108,7 @@ inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-n>" : "\<S-TAB>"
                 ]),
                 flatpak: Some(Flatpak {
                     name: "org.kde.kwrite",
+                    is_verified: true,
                     remotes: vec!["fedora", "flathub"],
                 }),
                 snap: None,
@@ -2074,6 +2128,7 @@ inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-n>" : "\<S-TAB>"
                 ]),
                 flatpak: Some(Flatpak {
                     name: "org.libreoffice.LibreOffice",
+                    is_verified: true,
                     remotes: vec!["fedora", "flathub"],
                 }),
                 snap: Some(Snap {
@@ -2095,6 +2150,7 @@ inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-n>" : "\<S-TAB>"
                 ]),
                 flatpak: Some(Flatpak {
                     name: "com.jetbrains.PyCharm-Community",
+                    is_verified: false,
                     remotes: vec!["flathub"],
                 }),
                 snap: Some(Snap {
@@ -2143,6 +2199,7 @@ inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-n>" : "\<S-TAB>"
                 ]),
                 flatpak: Some(Flatpak {
                     name: "com.visualstudio.code",
+                    is_verified: false,
                     remotes: vec!["flathub"],
                 }),
                 snap: Some(Snap {
@@ -2317,6 +2374,7 @@ inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-n>" : "\<S-TAB>"
                 ]),
                 flatpak: Some(Flatpak {
                     name: "org.kde.ark",
+                    is_verified: true,
                     remotes: vec!["fedora", "flathub"],
                 }),
                 snap: Some(Snap {
@@ -2341,6 +2399,7 @@ inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-n>" : "\<S-TAB>"
                 ]),
                 flatpak: Some(Flatpak {
                     name: "ca.desrt.dconf-editor",
+                    is_verified: true,
                     remotes: vec!["fedora", "flathub"],
                 }),
                 snap: None,
@@ -2356,6 +2415,7 @@ inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-n>" : "\<S-TAB>"
                 ]),
                 flatpak: Some(Flatpak {
                     name: "org.fedoraproject.MediaWriter",
+                    is_verified: true,
                     remotes: vec!["fedora", "flathub"],
                 }),
                 snap: None,
@@ -2407,6 +2467,7 @@ inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-n>" : "\<S-TAB>"
                 ]),
                 flatpak: Some(Flatpak {
                     name: "org.gnome.baobab",
+                    is_verified: true,
                     remotes: vec!["fedora", "flathub"],
                 }),
                 snap: None,

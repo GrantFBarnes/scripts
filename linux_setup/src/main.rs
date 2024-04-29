@@ -236,21 +236,31 @@ fn run_menu_package_select(
     }
 
     if flatpak::is_available(package) {
-        options_display.push(helper::get_colored_string("Install Flatpak", Color::Blue));
+        let mut display: String = helper::get_colored_string("Install Flatpak", Color::Blue);
+        if let Some(ftpk) = &package.flatpak {
+            if ftpk.is_verified {
+                display.push_str(helper::get_colored_string(" (Verified)", Color::Cyan).as_str());
+            } else {
+                display.push_str(helper::get_colored_string(" (Unverified)", Color::Red).as_str());
+            }
+        }
+        options_display.push(display);
         options_value.push(InstallMethod::Flatpak);
     }
 
     if snap::is_available(package) {
-        let mut display: String = String::from("Install Snap");
+        let mut display: String = helper::get_colored_string("Install Snap", Color::Magenta);
         if let Some(snp) = &package.snap {
             if snp.is_official {
-                display.push_str(" (Official)");
+                display.push_str(helper::get_colored_string(" (Official)", Color::Cyan).as_str());
+            } else {
+                display.push_str(helper::get_colored_string(" (Unofficial)", Color::Red).as_str());
             }
             if snp.is_classic {
                 display.push_str(" (classic)");
             }
         }
-        options_display.push(helper::get_colored_string(display, Color::Magenta));
+        options_display.push(display);
         options_value.push(InstallMethod::Snap);
     }
 
