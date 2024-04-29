@@ -169,6 +169,7 @@ pub fn setup(distribution: &Distribution) -> Result<(), io::Error> {
             'org.gnome.Boxes.desktop',
             'virt-manager.desktop',
             'org.gnome.Cheese.desktop',
+            'org.gnome.Snapshot.desktop',
             'org.gnome.Todo.desktop',
             'usb-creator-gtk.desktop',
             'org.fedoraproject.MediaWriter.desktop'
@@ -357,6 +358,7 @@ pub fn setup(distribution: &Distribution) -> Result<(), io::Error> {
             'org.gnome.Terminal.desktop',
             'org.gnome.Console.desktop',
             'org.kde.konsole.desktop',
+            'org.gnome.SystemMonitor.desktop',
             'gnome-system-monitor.desktop',
             'org.gnome.baobab.desktop',
             'org.gnome.DiskUtility.desktop',
@@ -435,6 +437,7 @@ pub fn setup(distribution: &Distribution) -> Result<(), io::Error> {
             'org.gnome.font-viewer.desktop',
             'org.gnome.Characters.desktop',
             'org.gnome.Firmware.desktop',
+            'firmware-updater_firmware-updater.desktop',
             'org.gnome.Shotwell-Profile-Browser.desktop',
             'remote-viewer.desktop',
             'org.kde.kwalletmanager5.desktop',

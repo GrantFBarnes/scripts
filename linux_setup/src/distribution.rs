@@ -184,7 +184,7 @@ impl Distribution {
 
         if self.package_manager == PackageManager::DNF {
             helper::append_to_file_if_not_found(
-                &"/etc/dnf/dnf.conf".to_owned(),
+                "/etc/dnf/dnf.conf",
                 "max_parallel_downloads",
                 "max_parallel_downloads=10",
                 true,
@@ -224,6 +224,19 @@ impl Distribution {
 
                 self.update()?;
             }
+        } else if self.package_manager == PackageManager::PACMAN {
+            helper::replace_in_file(
+                "/etc/pacman.conf",
+                "#VerbosePkgLists",
+                "VerbosePkgLists",
+                true,
+            )?;
+            helper::replace_in_file(
+                "/etc/pacman.conf",
+                "#ParallelDownloads",
+                "ParallelDownloads",
+                true,
+            )?;
         }
 
         Ok(())

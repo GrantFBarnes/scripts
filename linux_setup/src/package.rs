@@ -271,7 +271,7 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                         Operation::new(format!("go env -w GOPATH={}/.go", &home_dir)).hide_output(true).run()?;
                         if method == &InstallMethod::Snap || distribution.repository == Repository::RedHat {
                             helper::append_to_file_if_not_found(
-                                &bashrc,
+                                bashrc.as_str(),
                                 "export GOPATH",
                                 r#"
 export GOPATH=$HOME/.go
@@ -394,7 +394,7 @@ nnoremap <Leader>ex :Explore<CR>
                                 || distribution.repository == Repository::Fedora
                             {
                                 helper::append_to_file_if_not_found(
-                                    &config_file,
+                                    config_file.as_str(),
                                     "NERDTree",
                                     "nnoremap <C-n> :NERDTreeToggle<CR>",
                                     false,
@@ -402,7 +402,7 @@ nnoremap <Leader>ex :Explore<CR>
                             }
 
                             helper::append_to_file_if_not_found(
-                                &config_file,
+                                config_file.as_str(),
                                 "ale settings",
                                 r#"
 """"""""""""""""""""""""""""""""""""""""
@@ -589,7 +589,7 @@ inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-n>" : "\<S-TAB>"
                     let bashrc: String = format!("{}{}", &home_dir, "/.bashrc");
                     if method != &InstallMethod::Uninstall {
                         helper::append_to_file_if_not_found(
-                            &bashrc,
+                            bashrc.as_str(),
                             "export EDITOR",
                             "export EDITOR=\"/usr/bin/vim\"\n",
                             false,
@@ -652,7 +652,7 @@ nnoremap <Leader>ex :Explore<CR>
                                 || distribution.repository == Repository::Fedora
                             {
                                 helper::append_to_file_if_not_found(
-                                    &config_file,
+                                    config_file.as_str(),
                                     "NERDTree",
                                     "nnoremap <C-n> :NERDTreeToggle<CR>",
                                     false,
@@ -660,7 +660,7 @@ nnoremap <Leader>ex :Explore<CR>
                             }
 
                             helper::append_to_file_if_not_found(
-                                &config_file,
+                                config_file.as_str(),
                                 "ale settings",
                                 r#"
 """"""""""""""""""""""""""""""""""""""""
@@ -983,6 +983,24 @@ inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-n>" : "\<S-TAB>"
                     is_classic: false,
                     channel: "",
                 }),
+                other: None,
+                pre_install: None,
+                post_install: None,
+            },
+            Package {
+                name: "Gnome Camera",
+                desktop_environment: Some(DesktopEnvironment::Gnome),
+                repository: HashMap::from([
+                    (Repository::Arch, vec!["snapshot"]),
+                    (Repository::Fedora, vec!["snapshot"]),
+                    (Repository::Ubuntu, vec!["gnome-snapshot"]),
+                ]),
+                flatpak: Some(Flatpak {
+                    name: "org.gnome.Snapshot",
+                    is_verified: true,
+                    remotes: vec!["fedora", "flathub"],
+                }),
+                snap: None,
                 other: None,
                 pre_install: None,
                 post_install: None,
