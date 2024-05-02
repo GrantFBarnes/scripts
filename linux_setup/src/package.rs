@@ -188,6 +188,12 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                             Operation::new("sudo apt update").run()?;
                         }
                     }
+                    let home_dir: String = env::var("HOME").expect("HOME directory could not be determined");
+                    if method == &InstallMethod::Uninstall {
+                        Operation::new(format!("rm -r {}{} {}{}", &home_dir, "/.dotnet", &home_dir, "/.nuget"))
+                            .hide_output(true)
+                            .run()?;
+                    }
                     Ok(())
                 })),
                 post_install: None,
