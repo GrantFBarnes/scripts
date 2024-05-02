@@ -7,7 +7,7 @@ use std::process::{Command, Stdio};
 use crate::distribution::Distribution;
 use crate::package::Package;
 
-const PACKAGES: [&str; 1] = ["rust"];
+const PACKAGES: [&str; 1] = ["rustup"];
 pub struct OtherPackage {
     pub name: &'static str,
 }
@@ -33,7 +33,7 @@ pub fn install(package: &Package, distribution: &mut Distribution) -> Result<(),
             println!("Installing other {}...", otr.name);
 
             match otr.name {
-                "rust" => {
+                "rustup" => {
                     let curl_cmd = Command::new("curl")
                         .arg("'=https'")
                         .arg("--tlsv1.2")
@@ -63,7 +63,7 @@ pub fn uninstall(package: &Package, distribution: &mut Distribution) -> Result<(
             println!("Uninstalling other {}...", otr.name);
 
             match otr.name {
-                "rust" => {
+                "rustup" => {
                     Operation::new("rustup self uninstall").run()?;
                 }
                 _ => (),
@@ -79,7 +79,7 @@ pub fn update(distribution: &Distribution) -> Result<(), io::Error> {
     for pkg in PACKAGES {
         if distribution.others.contains(&pkg.to_string()) {
             match pkg {
-                "rust" => {
+                "rustup" => {
                     Operation::new("rustup self update").run()?;
                     Operation::new("rustup update stable").run()?;
                 }
@@ -95,7 +95,7 @@ pub fn get_installed() -> Result<HashSet<String>, io::Error> {
 
     for pkg in PACKAGES {
         match pkg {
-            "rust" => match Operation::new("rustup --version").hide_output(true).run() {
+            "rustup" => match Operation::new("rustup --version").hide_output(true).run() {
                 Ok(_) => {
                     packages.insert(pkg.to_string());
                 }

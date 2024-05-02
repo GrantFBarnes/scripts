@@ -495,7 +495,7 @@ inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-n>" : "\<S-TAB>"
                 name: "Rust Language",
                 desktop_environment: None,
                 repository: HashMap::from([
-                    (Repository::Arch, vec!["rustup"]),
+                    (Repository::Arch, vec!["rust"]),
                     (Repository::Debian, vec!["rustc", "rustfmt", "cargo"]),
                     (Repository::Fedora, vec!["rust", "rustfmt", "cargo"]),
                     (Repository::RedHat, vec!["rust", "rustfmt", "cargo"]),
@@ -503,11 +503,38 @@ inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-n>" : "\<S-TAB>"
                 ]),
                 flatpak: None,
                 snap: None,
-                other: Some(OtherPackage { name: "rust" }),
+                other: None,
+                pre_install: Some(Box::new(|_: &mut Distribution, method: &InstallMethod| {
+                    let home_dir: String = env::var("HOME").expect("HOME directory could not be determined");
+                    if method == &InstallMethod::Uninstall {
+                        Operation::new(format!("rm -r {}{}", &home_dir, "/.cargo"))
+                            .hide_output(true)
+                            .run()?;
+                    }
+                    Ok(())
+                })),
+                post_install: None,
+            },
+            Package {
+                name: "rustup",
+                desktop_environment: None,
+                repository: HashMap::from([
+                    (Repository::Arch, vec!["rustup"]),
+                    (Repository::Fedora, vec!["rustup"]),
+                    (Repository::Ubuntu, vec!["rustup"]),
+                ]),
+                flatpak: None,
+                snap: Some(Snap {
+                    name: "rustup",
+                    is_official: true,
+                    is_classic: true,
+                    channel: "",
+                }),
+                other: Some(OtherPackage { name: "rustup" }),
                 pre_install: Some(Box::new(|distribution: &mut Distribution, method: &InstallMethod| {
-                    if method != &InstallMethod::Other {
-                        let home_dir: String = env::var("HOME").expect("HOME directory could not be determined");
-                        Operation::new(format!("sudo rm -r {}{}", &home_dir, "/.cargo/bin/rustup"))
+                    let home_dir: String = env::var("HOME").expect("HOME directory could not be determined");
+                    if method == &InstallMethod::Uninstall {
+                        Operation::new(format!("rm -r {}{}", &home_dir, "/.cargo"))
                             .hide_output(true)
                             .run()?;
                     }
@@ -520,6 +547,10 @@ inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-n>" : "\<S-TAB>"
                     let home_dir: String = env::var("HOME").expect("HOME directory could not be determined");
                     if method == &InstallMethod::Other {
                         Operation::new(format!("{}{} component add rust-analyzer", &home_dir, "/.cargo/bin/rustup"))
+                            .hide_output(true)
+                            .run()?;
+                    } else {
+                        Operation::new("rustup component add rust-analyzer")
                             .hide_output(true)
                             .run()?;
                     }
