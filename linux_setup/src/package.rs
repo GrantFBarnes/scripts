@@ -1415,7 +1415,11 @@ inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-n>" : "\<S-TAB>"
             Package {
                 name: "TOR - The Onion Router",
                 desktop_environment: None,
-                repository: HashMap::new(),
+                repository: HashMap::from([
+                    (Repository::Arch, vec!["torbrowser-launcher"]),
+                    (Repository::Fedora, vec!["torbrowser-launcher"]),
+                    (Repository::Ubuntu, vec!["torbrowser-launcher"]),
+                ]),
                 flatpak: Some(Flatpak {
                     name: "com.github.micahflee.torbrowser-launcher",
                     is_verified: false,
