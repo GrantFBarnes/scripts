@@ -194,6 +194,17 @@ pub fn get_category_packages(category: &Category) -> Vec<Package> {
                             .hide_output(true)
                             .run()?;
                     }
+                    let bashrc: String = format!("{}{}", &home_dir, "/.bashrc");
+                    if method != &InstallMethod::Uninstall {
+                        helper::append_to_file_if_not_found(
+                            bashrc.as_str(),
+                            "export DOTNET_CLI_TELEMETRY_OPTOUT",
+                            r#"
+export DOTNET_CLI_TELEMETRY_OPTOUT=true
+"#,
+                            false,
+                        )?;
+                    }
                     Ok(())
                 })),
                 post_install: None,
