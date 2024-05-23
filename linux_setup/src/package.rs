@@ -354,99 +354,7 @@ export PATH=$PATH:$GOPATH/bin
                     }
                     Ok(())
                 })),
-                post_install: Some(Box::new(|distribution: &mut Distribution, method: &InstallMethod| {
-                    let home_dir: String = env::var("HOME").expect("HOME directory could not be determined");
-                    if method != &InstallMethod::Uninstall {
-                        let config_file: String = format!("{}{}", &home_dir, "/.config/nvim/init.vim");
-
-                        Operation::new(format!("mkdir -p {}/.config/nvim", &home_dir)).hide_output(true).run()?;
-
-                        fs::write(
-                            &config_file,
-                            r#"""""""""""""""""""""""""""""""""""""""""
-" neovim settings
-
-set noswapfile
-set nobackup
-set nowritebackup
-
-set updatetime=300
-set scrolloff=10
-set number
-set relativenumber
-set ignorecase smartcase
-set incsearch hlsearch
-set foldmethod=indent
-set foldlevel=99
-
-syntax on
-colorscheme desert
-filetype plugin indent on
-
-""""""""""""""""""""""""""""""""""""""""
-" normal mode remaps
-
-let mapleader = " "
-
-" window split
-nnoremap <Leader>vs <C-w>v
-nnoremap <Leader>hs <C-w>s
-
-" window navigation
-nnoremap <C-h> <C-w>h
-nnoremap <C-j> <C-w>j
-nnoremap <C-k> <C-w>k
-nnoremap <C-l> <C-w>l
-
-" text insert
-nnoremap <Leader>go iif err != nil {}<ESC>
-
-" file explore
-nnoremap <Leader>ex :Explore<CR>
-"#,
-                        )?;
-
-                        if distribution.repository != Repository::RedHat {
-                            if distribution.repository == Repository::Arch
-                                || distribution.repository == Repository::Fedora
-                            {
-                                helper::append_to_file_if_not_found(
-                                    config_file.as_str(),
-                                    "NERDTree",
-                                    "nnoremap <C-n> :NERDTreeToggle<CR>",
-                                    false,
-                                )?;
-                            }
-
-                            helper::append_to_file_if_not_found(
-                                config_file.as_str(),
-                                "ale settings",
-                                r#"
-""""""""""""""""""""""""""""""""""""""""
-" ale settings
-
-let g:ale_fix_on_save = 1
-let g:ale_completion_enabled = 1
-let g:ale_linters = { "go": ["gopls"], "rust": ["analyzer"] }
-let g:ale_fixers = { "*": ["remove_trailing_lines", "trim_whitespace"], "go": ["gofmt"], "rust": ["rustfmt"] }
-
-nnoremap K :ALEHover<CR>
-nnoremap gd :ALEGoToDefinition<CR>
-nnoremap gn :ALERename<CR>
-nnoremap gr :ALEFindReferences<CR>
-
-""""""""""""""""""""""""""""""""""""""""
-" insert mode remaps
-
-inoremap <silent><expr> <Tab> pumvisible() ? "\<C-n>" : "\<TAB>"
-inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-n>" : "\<S-TAB>"
-"#,
-                                false,
-                            )?;
-                        }
-                    }
-                    Ok(())
-                })),
+                post_install: None,
             },
             Package {
                 name: "nano - Text Editor",
@@ -632,110 +540,7 @@ inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-n>" : "\<S-TAB>"
                     }
                     Ok(())
                 })),
-                post_install: Some(Box::new(|distribution: &mut Distribution, method: &InstallMethod| {
-                    let home_dir: String = env::var("HOME").expect("HOME directory could not be determined");
-                    let bashrc: String = format!("{}{}", &home_dir, "/.bashrc");
-                    if method != &InstallMethod::Uninstall {
-                        helper::append_to_file_if_not_found(
-                            bashrc.as_str(),
-                            "export EDITOR",
-                            "export EDITOR=\"/usr/bin/vim\"\n",
-                            false,
-                        )?;
-
-                        let config_file: String = format!("{}{}", &home_dir, "/.vimrc");
-
-                        fs::write(
-                            &config_file,
-                            r#"""""""""""""""""""""""""""""""""""""""""
-" vim settings
-
-set nocompatible
-
-set encoding=utf-8
-
-set noswapfile
-set nobackup
-set nowritebackup
-
-set mouse=a
-set updatetime=300
-set scrolloff=10
-set number
-set relativenumber
-set ignorecase smartcase
-set incsearch hlsearch
-set foldmethod=indent
-set foldlevel=99
-
-syntax on
-colorscheme desert
-filetype plugin indent on
-
-""""""""""""""""""""""""""""""""""""""""
-" normal mode remaps
-
-let mapleader = " "
-
-" window split
-nnoremap <Leader>vs <C-w>v
-nnoremap <Leader>hs <C-w>s
-
-" window navigation
-nnoremap <C-h> <C-w>h
-nnoremap <C-j> <C-w>j
-nnoremap <C-k> <C-w>k
-nnoremap <C-l> <C-w>l
-
-" text insert
-nnoremap <Leader>go iif err != nil {}<ESC>
-
-" file explore
-nnoremap <Leader>ex :Explore<CR>
-"#,
-                        )?;
-
-                        if distribution.repository != Repository::RedHat {
-                            if distribution.repository == Repository::Arch
-                                || distribution.repository == Repository::Fedora
-                            {
-                                helper::append_to_file_if_not_found(
-                                    config_file.as_str(),
-                                    "NERDTree",
-                                    "nnoremap <C-n> :NERDTreeToggle<CR>",
-                                    false,
-                                )?;
-                            }
-
-                            helper::append_to_file_if_not_found(
-                                config_file.as_str(),
-                                "ale settings",
-                                r#"
-""""""""""""""""""""""""""""""""""""""""
-" ale settings
-
-let g:ale_fix_on_save = 1
-let g:ale_completion_enabled = 1
-let g:ale_linters = { "go": ["gopls"], "rust": ["analyzer"] }
-let g:ale_fixers = { "*": ["remove_trailing_lines", "trim_whitespace"], "go": ["gofmt"], "rust": ["rustfmt"] }
-
-nnoremap K :ALEHover<CR>
-nnoremap gd :ALEGoToDefinition<CR>
-nnoremap gn :ALERename<CR>
-nnoremap gr :ALEFindReferences<CR>
-
-""""""""""""""""""""""""""""""""""""""""
-" insert mode remaps
-
-inoremap <silent><expr> <Tab> pumvisible() ? "\<C-n>" : "\<TAB>"
-inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-n>" : "\<S-TAB>"
-"#,
-                                false,
-                            )?;
-                        }
-                    }
-                    Ok(())
-                })),
+                post_install: None,
             },
         ]),
         Category::Desktop => Vec::from([
@@ -2095,16 +1900,7 @@ inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-n>" : "\<S-TAB>"
                 }),
                 other: None,
                 pre_install: None,
-                post_install: Some(Box::new(|_: &mut Distribution, method: &InstallMethod| {
-                    let home_dir: String = env::var("HOME").expect("HOME directory could not be determined");
-                    if method != &InstallMethod::Uninstall {
-                        fs::write(
-                            format!("{}{}", &home_dir, "/.ideavimrc"),
-                            "sethandler a:ide",
-                        )?;
-                    }
-                    Ok(())
-                })),
+                post_install: None,
             },
             Package {
                 name: "Kate",
@@ -2247,16 +2043,7 @@ inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-n>" : "\<S-TAB>"
                     }
                     Ok(())
                 })),
-                post_install: Some(Box::new(|_: &mut Distribution, method: &InstallMethod| {
-                    let home_dir: String = env::var("HOME").expect("HOME directory could not be determined");
-                    if method != &InstallMethod::Uninstall {
-                        fs::write(
-                            format!("{}{}", &home_dir, "/.ideavimrc"),
-                            "sethandler a:ide",
-                        )?;
-                    }
-                    Ok(())
-                })),
+                post_install: None,
             },
             Package {
                 name: "VS Code",
@@ -2350,34 +2137,11 @@ inoremap <silent><expr> <S-Tab> pumvisible() ? "\<C-n>" : "\<S-TAB>"
                     Ok(())
                 })),
                 post_install: Some(Box::new(|_: &mut Distribution, method: &InstallMethod| {
-                    let home_dir: String = env::var("HOME").expect("HOME directory could not be determined");
                     if method != &InstallMethod::Uninstall {
                         let extensions: Vec<&str> = Vec::from(["esbenp.prettier-vscode", "vscodevim.vim"]);
                         for ext in extensions {
                             Operation::new(format!("code --install-extension {}", ext)).run()?;
                         }
-
-                        fs::write(
-                            format!("{}{}", &home_dir, "/.config/Code/User/settings.json"),
-                            r#"{
-  "[css]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
-  "[html]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
-  "[javascript]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
-  "[json]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
-  "[jsonc]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
-  "[scss]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
-  "[typescript]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
-  "editor.formatOnSave": true,
-  "editor.rulers": [80, 160],
-  "extensions.ignoreRecommendations": true,
-  "git.openRepositoryInParentFolders": "always",
-  "telemetry.telemetryLevel": "off",
-  "vim.smartRelativeLine": true,
-  "vim.useCtrlKeys": false,
-  "workbench.startupEditor": "none",
-}
-"#,
-                        )?;
                     }
                     Ok(())
                 })),
