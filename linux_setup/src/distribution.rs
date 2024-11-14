@@ -126,7 +126,7 @@ impl Distribution {
 
         let output: String = match self.package_manager {
             PackageManager::APT => Operation::new("apt list --installed").output()?,
-            PackageManager::DNF => Operation::new("dnf list installed").output()?,
+            PackageManager::DNF => Operation::new("dnf list --installed").output()?,
             PackageManager::PACMAN => Operation::new("pacman -Q").output()?,
             PackageManager::RPMOSTree => Operation::new("rpm -qa").output()?,
         };
@@ -196,14 +196,14 @@ impl Distribution {
             {
                 match self.repository {
                     Repository::Fedora => {
-                        self.install_package("https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-38.noarch.rpm")?;
-                    }
-                    Repository::RedHat => {
-                        self.install_package("https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm")?;
-                        self.install_package("https://download1.rpmfusion.org/free/el/rpmfusion-free-release-9.noarch.rpm")?;
-                        Operation::new("sudo dnf config-manager --set-enabled crb")
+                        self.install_package("https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm")?;
+                        Operation::new("sudo dnf config-manager setopt fedora-cisco-openh264.enabled=1")
                             .hide_output(true)
                             .run()?;
+                    }
+                    Repository::RedHat => {
+                        self.install_package("https://dl.fedoraproject.org/pub/epel/epel-release-latest-$(rpm -E %rhel).noarch.rpm")?;
+                        self.install_package("https://mirrors.rpmfusion.org/free/el/rpmfusion-free-release-$(rpm -E %rhel).noarch.rpm")?;
                     }
                     _ => (),
                 }
@@ -213,10 +213,10 @@ impl Distribution {
                 {
                     match self.repository {
                         Repository::Fedora => {
-                            self.install_package("https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-38.noarch.rpm")?;
+                            self.install_package("https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm")?;
                         }
                         Repository::RedHat => {
-                            self.install_package("https://download1.rpmfusion.org/nonfree/el/rpmfusion-nonfree-release-9.noarch.rpm")?;
+                            self.install_package("https://mirrors.rpmfusion.org/nonfree/el/rpmfusion-nonfree-release-$(rpm -E %rhel).noarch.rpm")?;
                         }
                         _ => (),
                     }
