@@ -5,7 +5,9 @@ use std::io;
 use std::process::Command;
 use std::str::Split;
 
-pub fn setup() -> Result<(), io::Error> {
+use crate::distribution::Distribution;
+
+pub fn setup(distribution: &Distribution) -> Result<(), io::Error> {
     const APPLET_PATH: &str = "plasma-org.kde.plasma.desktop-appletsrc";
 
     // Configure Clock
@@ -16,13 +18,26 @@ pub fn setup() -> Result<(), io::Error> {
         groups.push("Configuration");
         groups.push("Appearance");
         set_config(
+            distribution,
             APPLET_PATH,
             &groups,
             "dateDisplayFormat",
             "BesideTime".to_string(),
         )?;
-        set_config(APPLET_PATH, &groups, "dateFormat", "isoDate".to_string())?;
-        set_config(APPLET_PATH, &groups, "showSeconds", true.to_string())?;
+        set_config(
+            distribution,
+            APPLET_PATH,
+            &groups,
+            "dateFormat",
+            "isoDate".to_string(),
+        )?;
+        set_config(
+            distribution,
+            APPLET_PATH,
+            &groups,
+            "showSeconds",
+            true.to_string(),
+        )?;
     }
 
     // Show Battery Percentage
@@ -32,20 +47,39 @@ pub fn setup() -> Result<(), io::Error> {
         let mut groups: Vec<&str> = convert_group_to_groups(&group);
         groups.push("Configuration");
         groups.push("General");
-        set_config(APPLET_PATH, &groups, "showPercentage", true.to_string())?;
+        set_config(
+            distribution,
+            APPLET_PATH,
+            &groups,
+            "showPercentage",
+            true.to_string(),
+        )?;
     }
 
     // Set NumLock
     let groups: Vec<&str> = vec!["Keyboard"];
-    set_config("kcminputrc", &groups, "NumLock", "0".to_string())?;
+    set_config(
+        distribution,
+        "kcminputrc",
+        &groups,
+        "NumLock",
+        "0".to_string(),
+    )?;
 
     // Set File Click to Double
     let groups: Vec<&str> = vec!["KDE"];
-    set_config("kdeglobals", &groups, "SingleClick", false.to_string())?;
+    set_config(
+        distribution,
+        "kdeglobals",
+        &groups,
+        "SingleClick",
+        false.to_string(),
+    )?;
 
     // Set Dolphin to always open home
     let groups: Vec<&str> = vec!["General"];
     set_config(
+        distribution,
         "dolphinrc",
         &groups,
         "RememberOpenedTabs",
@@ -54,11 +88,18 @@ pub fn setup() -> Result<(), io::Error> {
 
     // Set Screen Lock Timeout
     let groups: Vec<&str> = vec!["Daemon"];
-    set_config("kscreenlockerrc", &groups, "Timeout", "15".to_string())?;
+    set_config(
+        distribution,
+        "kscreenlockerrc",
+        &groups,
+        "Timeout",
+        "15".to_string(),
+    )?;
 
     // Start Empty Session on Login
     let groups: Vec<&str> = vec!["General"];
     set_config(
+        distribution,
         "ksmserverrc",
         &groups,
         "loginMode",
@@ -68,35 +109,87 @@ pub fn setup() -> Result<(), io::Error> {
     // Set Kate
     let groups: Vec<&str> = vec!["General"];
     set_config(
+        distribution,
         "katerc",
         &groups,
         "Show Full Path in Title",
         true.to_string(),
     )?;
-    set_config("katerc", &groups, "Show Menu Bar", true.to_string())?;
+    set_config(
+        distribution,
+        "katerc",
+        &groups,
+        "Show Menu Bar",
+        true.to_string(),
+    )?;
     let groups: Vec<&str> = vec!["KTextEditor Renderer"];
     set_config(
+        distribution,
         "katerc",
         &groups,
         "Show Indentation Lines",
         true.to_string(),
     )?;
     set_config(
+        distribution,
         "katerc",
         &groups,
         "Show Whole Bracket Expression",
         true.to_string(),
     )?;
     let groups: Vec<&str> = vec!["KTextEditor Document"];
-    set_config("katerc", &groups, "Show Spaces", "1".to_string())?;
-    let groups: Vec<&str> = vec!["KTextEditor View"];
-    set_config("katerc", &groups, "Scroll Past End", true.to_string())?;
-    set_config("katerc", &groups, "Show Line Count", true.to_string())?;
-    set_config("katerc", &groups, "Show Word Count", true.to_string())?;
-    set_config("katerc", &groups, "Line Numbers", true.to_string())?;
-    set_config("katerc", &groups, "Smart Copy Cut", true.to_string())?;
-    set_config("katerc", &groups, "Input Mode", "1".to_string())?;
     set_config(
+        distribution,
+        "katerc",
+        &groups,
+        "Show Spaces",
+        "1".to_string(),
+    )?;
+    let groups: Vec<&str> = vec!["KTextEditor View"];
+    set_config(
+        distribution,
+        "katerc",
+        &groups,
+        "Scroll Past End",
+        true.to_string(),
+    )?;
+    set_config(
+        distribution,
+        "katerc",
+        &groups,
+        "Show Line Count",
+        true.to_string(),
+    )?;
+    set_config(
+        distribution,
+        "katerc",
+        &groups,
+        "Show Word Count",
+        true.to_string(),
+    )?;
+    set_config(
+        distribution,
+        "katerc",
+        &groups,
+        "Line Numbers",
+        true.to_string(),
+    )?;
+    set_config(
+        distribution,
+        "katerc",
+        &groups,
+        "Smart Copy Cut",
+        true.to_string(),
+    )?;
+    set_config(
+        distribution,
+        "katerc",
+        &groups,
+        "Input Mode",
+        "1".to_string(),
+    )?;
+    set_config(
+        distribution,
         "katerc",
         &groups,
         "Vi Input Mode Steal Keys",
@@ -135,8 +228,24 @@ fn convert_group_to_groups(group: &String) -> Vec<&str> {
     groups.collect::<Vec<&str>>()
 }
 
-fn set_config(file: &str, groups: &Vec<&str>, key: &str, value: String) -> Result<(), io::Error> {
-    let mut cmd: Command = Command::new("kwriteconfig5");
+fn set_config(
+    distribution: &Distribution,
+    file: &str,
+    groups: &Vec<&str>,
+    key: &str,
+    value: String,
+) -> Result<(), io::Error> {
+    let cmd: Option<Command> = if distribution.packages.contains("kwriteconfig5") {
+        Some(Command::new("kwriteconfig5"))
+    } else if distribution.packages.contains("kwriteconfig6") {
+        Some(Command::new("kwriteconfig6"))
+    } else {
+        None
+    };
+    if cmd.is_none() {
+        return Err(io::Error::other("kwriteconfig not found"));
+    }
+    let mut cmd: Command = cmd.unwrap();
     cmd.arg("--file");
     cmd.arg(file);
     for group in groups {

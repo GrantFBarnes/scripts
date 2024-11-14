@@ -200,10 +200,12 @@ pub fn setup(distribution: &Distribution) -> Result<(), io::Error> {
             'org.gnome.Epiphany.desktop',
             'thunderbird.desktop',
             'thunderbird_thunderbird.desktop',
+            'org.mozilla.thunderbird.desktop',
             'mozilla-thunderbird.desktop',
             'org.mozilla.Thunderbird.desktop',
             'discord.desktop',
             'discord_discord.desktop',
+            'com.discordapp.Discord.desktop',
             'com.transmissionbt.Transmission.desktop',
             'transmission-gtk.desktop',
             'transmission-qt.desktop'
