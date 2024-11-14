@@ -387,17 +387,10 @@ export PATH=$PATH:$GOPATH/bin
                     name: "node",
                     is_official: true,
                     is_classic: true,
-                    channel: "18/stable",
+                    channel: "",
                 }),
                 other: None,
-                pre_install: Some(Box::new(|distribution: &mut Distribution, method: &InstallMethod| {
-                    if method == &InstallMethod::Repository {
-                        if distribution.repository == Repository::RedHat {
-                            Operation::new("sudo dnf module enable nodejs:20 -y").hide_output(true).run()?;
-                        }
-                    }
-                    Ok(())
-                })),
+                pre_install: None,
                 post_install: None,
             },
             Package {
@@ -474,7 +467,7 @@ export PATH=$PATH:$GOPATH/bin
                         Operation::new(format!("{}{} component add rust-analyzer", &home_dir, "/.cargo/bin/rustup"))
                             .hide_output(true)
                             .run()?;
-                    } else {
+                    } else if method != &InstallMethod::Uninstall {
                         Operation::new("rustup component add rust-analyzer")
                             .hide_output(true)
                             .run()?;
