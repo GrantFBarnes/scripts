@@ -33,7 +33,7 @@ pub fn setup() -> Result<(), io::Error> {
             APPLET_PATH,
             &groups,
             "dateDisplayFormat",
-            "BesideTime".to_string(),
+            "BelowTime".to_string(),
         )?;
         set_config(
             plasma_version,
@@ -47,7 +47,7 @@ pub fn setup() -> Result<(), io::Error> {
             APPLET_PATH,
             &groups,
             "showSeconds",
-            true.to_string(),
+            "Always".to_string(),
         )?;
     }
 
@@ -75,16 +75,6 @@ pub fn setup() -> Result<(), io::Error> {
         &groups,
         "NumLock",
         "0".to_string(),
-    )?;
-
-    // Set File Click to Double
-    let groups: Vec<&str> = vec!["KDE"];
-    set_config(
-        plasma_version,
-        "kdeglobals",
-        &groups,
-        "SingleClick",
-        false.to_string(),
     )?;
 
     // Set Dolphin to always open home
@@ -126,13 +116,6 @@ pub fn setup() -> Result<(), io::Error> {
         "Show Full Path in Title",
         true.to_string(),
     )?;
-    set_config(
-        plasma_version,
-        "katerc",
-        &groups,
-        "Show Menu Bar",
-        true.to_string(),
-    )?;
     let groups: Vec<&str> = vec!["KTextEditor Renderer"];
     set_config(
         plasma_version,
@@ -145,7 +128,14 @@ pub fn setup() -> Result<(), io::Error> {
         plasma_version,
         "katerc",
         &groups,
-        "Show Whole Bracket Expression",
+        "Animate Bracket Matching",
+        true.to_string(),
+    )?;
+    set_config(
+        plasma_version,
+        "katerc",
+        &groups,
+        "Word Wrap Marker",
         true.to_string(),
     )?;
     let groups: Vec<&str> = vec!["KTextEditor Document"];
@@ -154,7 +144,7 @@ pub fn setup() -> Result<(), io::Error> {
         "katerc",
         &groups,
         "Show Spaces",
-        "1".to_string(),
+        "2".to_string(),
     )?;
     let groups: Vec<&str> = vec!["KTextEditor View"];
     set_config(
@@ -168,34 +158,6 @@ pub fn setup() -> Result<(), io::Error> {
         plasma_version,
         "katerc",
         &groups,
-        "Show Line Count",
-        true.to_string(),
-    )?;
-    set_config(
-        plasma_version,
-        "katerc",
-        &groups,
-        "Show Word Count",
-        true.to_string(),
-    )?;
-    set_config(
-        plasma_version,
-        "katerc",
-        &groups,
-        "Line Numbers",
-        true.to_string(),
-    )?;
-    set_config(
-        plasma_version,
-        "katerc",
-        &groups,
-        "Smart Copy Cut",
-        true.to_string(),
-    )?;
-    set_config(
-        plasma_version,
-        "katerc",
-        &groups,
         "Input Mode",
         "1".to_string(),
     )?;
@@ -203,8 +165,16 @@ pub fn setup() -> Result<(), io::Error> {
         plasma_version,
         "katerc",
         &groups,
-        "Vi Input Mode Steal Keys",
-        false.to_string(),
+        "Vi Relative Line Numbers",
+        true.to_string(),
+    )?;
+    let groups: Vec<&str> = vec!["lspclient"];
+    set_config(
+        plasma_version,
+        "katerc",
+        &groups,
+        "FormatOnSave",
+        true.to_string(),
     )?;
     Ok(())
 }
