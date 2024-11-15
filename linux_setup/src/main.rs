@@ -65,7 +65,7 @@ fn run_menu(start_idx: usize, distribution: &mut Distribution) -> Result<(), io:
     match options[selection] {
         "Repository Setup" => repository_setup(distribution)?,
         "GNOME Setup" => gnome::setup(distribution)?,
-        "KDE Setup" => kde::setup(distribution)?,
+        "KDE Setup" => kde::setup()?,
         "Update Packages" => {
             distribution.update()?;
             if distribution.packages.contains("flatpak") {
